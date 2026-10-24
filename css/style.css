@@ -1175,6 +1175,181 @@ code {
   white-space: nowrap;
 }
 
+.projects-archive-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.projects-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--blue);
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+  transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+}
+
+.projects-more:hover {
+  border-color: var(--blue);
+  background: rgba(88, 166, 255, 0.08);
+  transform: translateX(3px);
+}
+
+/* ---------- 9.5 全部项目页 ---------- */
+.archive {
+  padding-top: 144px;
+}
+
+.archive-head {
+  max-width: 840px;
+  margin-bottom: 44px;
+}
+
+.archive-head h1 {
+  margin: 18px 0 18px;
+  color: var(--text);
+  font-size: clamp(2.5rem, 5.4vw, 4.4rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+}
+
+.archive-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.project-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.member-group {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+
+.member-group[open] {
+  border-color: var(--border-strong);
+}
+
+.member-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 19px 22px;
+  cursor: pointer;
+  list-style: none;
+  transition: background 0.25s ease;
+}
+
+.member-summary::-webkit-details-marker {
+  display: none;
+}
+
+.member-summary:hover {
+  background: rgba(88, 166, 255, 0.05);
+}
+
+.member-group[open] .member-summary {
+  border-bottom: 1px solid var(--border);
+  background: rgba(88, 166, 255, 0.045);
+}
+
+.member-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.member-prompt {
+  color: var(--green);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+}
+
+.member-name {
+  overflow: hidden;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.member-meta {
+  flex-shrink: 0;
+  padding: 2px 7px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 0.63rem;
+}
+
+.member-toggle {
+  flex-shrink: 0;
+  color: var(--blue);
+  font-family: var(--mono);
+  font-size: 1.15rem;
+  line-height: 1;
+  transition: transform 0.25s ease;
+}
+
+.member-group[open] .member-toggle {
+  transform: rotate(45deg);
+}
+
+.member-body {
+  padding: 20px;
+}
+
+.member-hint {
+  padding: 26px 16px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.archive-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  margin-top: 34px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.archive-foot p {
+  color: var(--dim);
+  font-size: 0.82rem;
+}
+
+.archive-foot a {
+  flex-shrink: 0;
+  color: var(--blue);
+  font-family: var(--mono);
+  font-size: 0.74rem;
+}
+
 .noscript-note {
   padding: 16px;
   border: 1px solid rgba(210, 153, 34, 0.35);
@@ -1767,7 +1942,8 @@ code {
   }
 
   .project-toolbar,
-  .projects-foot {
+  .projects-foot,
+  .archive-foot {
     align-items: flex-start;
     flex-direction: column;
   }
@@ -1789,6 +1965,18 @@ code {
 
   .faq-item summary {
     font-size: 0.92rem;
+  }
+
+  .archive {
+    padding-top: 112px;
+  }
+
+  .member-summary {
+    padding: 16px;
+  }
+
+  .member-body {
+    padding: 14px;
   }
 }
 
@@ -1852,6 +2040,22 @@ code {
 
   .project-stats {
     gap: 10px;
+  }
+
+  .archive-head h1 {
+    font-size: clamp(2.2rem, 11vw, 3rem);
+  }
+
+  .archive-actions .button {
+    width: 100%;
+  }
+
+  .member-identity {
+    gap: 8px;
+  }
+
+  .member-meta {
+    display: none;
   }
 
   .wall-card {

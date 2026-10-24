@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="HNYZ · 衡南一中编程社的全部项目。按成员折叠展示，支持很多同学和很多仓库。">
+  <meta name="theme-color" content="#0d1117">
+  <meta property="og:title" content="全部项目｜HNYZ · 衡南一中编程社">
+  <meta property="og:description" content="按成员折叠的完整项目列表。">
+  <meta property="og:type" content="website">
+
+  <title>全部项目｜HNYZ · 衡南一中编程社</title>
+
+  <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+  <noscript><style>.loading-state { display: none; }</style></noscript>
+
+  <script src="js/main.js" defer></script>
+</head>
+<body id="top">
+  <a class="skip-link" href="#main">跳到主要内容</a>
+
+  <header class="site-header" data-header>
+    <div class="container header-inner">
+      <a class="brand" href="index.html" aria-label="衡南一中编程社首页">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="m9 6-5 6 5 6M15 6l5 6-5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="brand-copy">
+          <strong>HNYZ</strong>
+          <span>衡南一中编程社</span>
+        </span>
+      </a>
+
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="打开导航菜单" data-nav-toggle>
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav class="site-nav" id="site-nav" aria-label="主导航" data-nav>
+        <ul class="nav-list">
+          <li><a href="index.html#about">关于</a></li>
+          <li><a href="index.html#what-we-do">我们做什么</a></li>
+          <li><a href="index.html#projects">项目</a></li>
+          <li><a href="projects.html" aria-current="page">全部项目</a></li>
+          <li><a href="index.html#schedule">活动</a></li>
+          <li><a href="index.html#wall">资源墙</a></li>
+          <li><a href="index.html#faq">FAQ</a></li>
+        </ul>
+        <a class="nav-cta" href="index.html#join">
+          加入我们
+          <span aria-hidden="true">↗</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <section class="section archive" aria-labelledby="archive-title">
+      <div class="container">
+        <div class="archive-head">
+          <p class="eyebrow">
+            <span class="eyebrow-dot" aria-hidden="true"></span>
+            PROJECT_ARCHIVE // ALL_MEMBERS
+          </p>
+          <h1 id="archive-title">全部项目，<br><span class="accent-text">按人折叠。</span></h1>
+          <p class="section-intro">
+            这里不会限制卡片数量。每个成员是一组折叠面板，点开才加载该组的仓库卡片；
+            即使以后写进很多人的很多项目，页面也不会一次铺满。
+          </p>
+          <div class="archive-actions">
+            <a class="button button--secondary" href="index.html#projects">
+              <span aria-hidden="true">←</span>
+              返回首页项目区
+            </a>
+            <a class="button button--primary" href="https://github.com/ghxiaochi" target="_blank" rel="noopener noreferrer">
+              GitHub 主页
+              <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="project-toolbar">
+          <p class="code-line"><span class="prompt">$</span> gh repo list --all-members</p>
+          <p class="project-count" id="project-count" role="status" aria-live="polite">SYNCING…</p>
+        </div>
+
+        <p class="render-note" id="render-note" role="status" hidden></p>
+
+        <div class="project-groups" id="project-groups" aria-busy="true">
+          <p class="loading-state"><span class="loading-dot" aria-hidden="true"></span> 正在读取成员列表…</p>
+        </div>
+
+        <noscript>
+          <p class="noscript-note">
+            折叠项目列表需要 JavaScript 才能展开。请启用 JavaScript，或直接查看
+            <a href="https://github.com/ghxiaochi">我们的 GitHub 主页</a>。
+          </p>
+        </noscript>
+
+        <div class="archive-foot">
+          <p>想把自己的仓库放进列表？在群里发 GitHub 链接，或者直接改 <code>js/main.js</code> 里的 <code>members</code>。</p>
+          <a href="index.html#join">加入我们 <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <a class="brand" href="index.html" aria-label="回到首页">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="m9 6-5 6 5 6M15 6l5 6-5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="brand-copy">
+            <strong>HNYZ</strong>
+            <span>衡南一中编程社</span>
+          </span>
+        </a>
+        <p>把想法，写成代码。</p>
+      </div>
+
+      <nav class="footer-nav" aria-label="页脚导航">
+        <a href="index.html#about">关于</a>
+        <a href="projects.html">全部项目</a>
+        <a href="index.html#schedule">活动</a>
+        <a href="index.html#wall">资源墙</a>
+        <a href="index.html#join">加入</a>
+        <a href="https://github.com/ghxiaochi" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+        <a href="#top">回到顶部 ↑</a>
+      </nav>
+
+      <p class="footer-meta">
+        © <span data-year>2026</span> 衡南一中编程社<br>
+        用 HTML / CSS / JavaScript 手工搭建
+      </p>
+    </div>
+  </footer>
+
+  <p class="sr-only" id="copy-status" role="status" aria-live="polite"></p>
+</body>
+</html>

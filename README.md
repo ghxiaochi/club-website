@@ -2,7 +2,7 @@
 
 一个纯静态的社团官网：**HTML + CSS + 原生 JavaScript**，没有后端、没有数据库、没有构建步骤。
 
-整体是 GitHub Dark 风格的赛博 / 极客科技风。项目卡片通过 **GitHub API** 读取仓库信息，遇到 403 限流、404 或网络异常会自动切换到本地兜底数据。
+整体是 GitHub Dark 风格的赛博 / 极客科技风。项目卡片通过 **GitHub API** 读取仓库信息；首页展示前 6 个，完整列表在单独的「全部项目」页按成员折叠。遇到 403 限流、404 或网络异常会自动切换到本地兜底数据。
 
 - **线上地址**：<https://ghxiaochi.github.io/club-website/>
 - **仓库地址**：<https://github.com/ghxiaochi/club-website>
@@ -13,12 +13,12 @@
 
 ## 1. 页面内容
 
-- **首屏**：HNYZ 品牌、`把想法，写成代码。`、每周两次活动、QQ 群 / 邮箱快捷复制
+- **首屏**：HNYZ 品牌、`把想法，写成代码。`、每周两次 / 每次一小时、QQ 群 / 邮箱快捷复制
 - **关于社团**：社团介绍、基本信息、活动频率
 - **我们做什么**：编程入门、项目实战、算法与竞赛、分享与协作
-- **项目展示**：通过 GitHub API 读取 `members` 数组中的仓库，渲染 16:9 封面卡片
-- **活动节奏**：每周两次活动、一次活动的流程
-- **资源墙**：C++ 菜鸟教程、ESP32 Arduino 官方文档
+- **项目展示**：首页展示 `members` 前 6 个仓库，渲染 16:9 封面卡片；更多项目跳转到 `projects.html`
+- **活动节奏**：每周两次、每次 60 分钟，以及一次活动的流程
+- **资源墙**：C++ 菜鸟教程、微雪 ESP32 Wiki
 - **常见问题**：原生 `<details>` FAQ
 - **加入我们**：QQ 群、邮箱、三步加入流程
 
@@ -40,11 +40,12 @@
 
 ```text
 club-website/
-├── index.html              # 页面结构
+├── index.html              # 首页
+├── projects.html           # 全部项目页（按成员折叠）
 ├── css/
 │   └── style.css           # 全站样式（暗黑赛博风）
 ├── js/
-│   └── main.js             # GitHub API、卡片渲染、交互
+│   └── main.js             # GitHub API、卡片渲染、折叠、交互
 ├── images/
 │   ├── favicon.svg
 │   ├── project-website.svg # 社团官网封面
@@ -116,6 +117,14 @@ const members = [
 
 新增项目时，在数组里追加一项即可，卡片会按数组顺序渲染。
 
+### 首页 6 个上限与「全部项目」页
+
+- `members` **没有数量上限**，可以写很多人的很多仓库。
+- 首页最多请求并展示前 6 个，避免一次消耗太多 GitHub API 配额；第 7 个开始会自动出现「查看全部 N 个项目」入口。
+- `projects.html` 会按 `user`（GitHub 用户名）自动分组，每个成员是一个原生 `<details>` 折叠面板。
+- 折叠面板**展开时才请求该组仓库**，不会一进页面就把 API 配额打满；第一组默认展开。
+- 想调整首页数量，改 `js/main.js` 顶部的 `const HOME_LIMIT = 6;`。
+
 ### 封面图
 
 - 推荐 16:9，例如 1600×900
@@ -127,10 +136,17 @@ const members = [
 
 ## 5. 数据与异常兜底
 
-`js/main.js` 使用 `Promise.all` 并发请求：
+首页使用 `Promise.all` 并发请求前 6 个仓库：
 
 ```js
-const projects = await Promise.all(members.map((member) => fetchRepo(member)));
+const shown = members.slice(0, HOME_LIMIT);
+const projects = await Promise.all(shown.map((member) => fetchRepo(member)));
+```
+
+全部项目页按成员分组，点开某一组时才请求该组：
+
+```js
+const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 ```
 
 本地 `desc` 优先于 GitHub 仓库自带的简介；只有两者都为空时，卡片才会显示「这个仓库还没有填写简介」。
@@ -144,7 +160,7 @@ const projects = await Promise.all(members.map((member) => fetchRepo(member)));
 | `404` | 仓库不存在、改名或私有，显示 404 提示卡片 |
 | 网络错误 | 显示本地兜底数据 |
 
-右下角 `REPOS // GITHUB_API` 表示实时数据；出现 `DEGRADED` 表示用了兜底数据，页面顶部会出现黄色提示条。
+项目区右侧的 `REPOS // GITHUB_API` 表示实时数据；出现 `DEGRADED` 表示用了兜底数据，页面顶部会出现黄色提示条。
 
 > 想减少限流影响，可以给 `fetch` 增加 GitHub Token，或把常用数据缓存到 `localStorage`。当前版本保持简单，不引入 Token。
 
@@ -161,9 +177,9 @@ const projects = await Promise.all(members.map((member) => fetchRepo(member)));
 | `483677268@qq.com` | `index.html` 的 `mailto:` 和 `data-copy-value` |
 | `ghxiaochi` | `index.html` 的 GitHub 链接、`js/main.js` 的 `members` |
 
-活动频率在 `index.html` 里搜索 `每周 2 次` / `每周两次`，涉及首屏数据、社团信息、活动节奏和 FAQ。
+活动频率和每次 60 分钟在 `index.html` 里搜索 `每周 2 次` / `每周两次` / `60 MIN`，涉及首屏数据、社团信息、活动节奏和 FAQ。
 
-资源墙链接在 `index.html` 的 `#wall` 区块中，直接改 `href` 即可。
+资源墙链接在 `index.html` 的 `#wall` 区块中，直接改 `href` 即可。ESP32 目前指向微雪 ESP32-S3-DEV-KIT-N8R8 Wiki。
 
 ---
 
@@ -224,12 +240,13 @@ Pages 会自动重新构建。如果页面还是旧版本，先强制刷新（`C
 ## 9. 验收清单
 
 - [ ] 本地打开 `index.html` 能看到完整首页
-- [ ] 项目卡片由 GitHub API 渲染，至少 3 张
+- [ ] 首页项目卡片由 GitHub API 渲染，最多 6 张
+- [ ] 「查看全部项目」能跳转到 `projects.html`，成员折叠面板可展开 / 收起
 - [ ] 封面图正常显示；`coverImg` 为空时显示科技网格占位
 - [ ] 卡片 Hover 有蓝色边框、发光和上浮
 - [ ] 手机宽度下卡片单列、导航可展开
 - [ ] QQ 群号 / 邮箱可以一键复制
-- [ ] 资源墙的 C++ 和 ESP32 链接可跳转
+- [ ] 资源墙的 C++ 和微雪 ESP32 链接可跳转
 - [ ] 断网或 403 时页面仍能显示兜底卡片
 - [ ] 不依赖任何后端
 
@@ -247,4 +264,4 @@ A：先强制刷新；确认改的是 `js/main.js` 顶部的 `members`，不是�
 A：数据来自 GitHub API 实时请求，可能有几分钟缓存。确认仓库是公开的，且没有触发 403 限流。
 
 **Q：可以加更多仓库吗？**  
-A：可以，在 `members` 里继续追加。建议 3–6 个，页面最整洁。
+A：可以，`members` 没有数量上限。首页只展示前 6 个；更多项目会自动进入 `projects.html`，按成员折叠展示。

@@ -51,6 +51,9 @@
 
   const API_BASE = "https://api.github.com/repos";
 
+  /* 首页最多展示 6 张卡片；完整的项目列表在 projects.html 按成员折叠 */
+  const HOME_LIMIT = 6;
+
   /* 语言圆点颜色，尽量贴近 GitHub 的语言配色 */
   const LANGUAGE_COLORS = {
     "C++": "#f34b7d",
@@ -100,8 +103,10 @@
      二、DOM 引用与状态
      ======================================================= */
   const grid = document.querySelector("#project-grid");
+  const groupsRoot = document.querySelector("#project-groups");
   const count = document.querySelector("#project-count");
   const renderNote = document.querySelector("#render-note");
+  const moreLabel = document.querySelector("[data-more-label]");
 
   /* 记录这次加载中出现了哪些降级原因，最后合并成一条提示 */
   const notices = new Set();
@@ -404,7 +409,14 @@
 
     if (count) {
       const mode = notices.size ? "DEGRADED" : "GITHUB_API";
-      count.textContent = `${projects.length} REPOS // ${mode}`;
+      const scope = members.length > HOME_LIMIT
+        ? `${projects.length} / ${members.length}`
+        : `${projects.length}`;
+      count.textContent = `${scope} REPOS // ${mode}`;
+    }
+
+    if (moreLabel) {
+      moreLabel.textContent = `查看全部 ${members.length} 个项目`;
     }
 
     updateNotice();
@@ -460,14 +472,155 @@
     notices.clear();
 
     try {
-      /* 并发请求，顺序与 members 数组一致 */
-      const projects = await Promise.all(members.map((member) => fetchRepo(member)));
+      /* 首页只请求前 6 个仓库，避免一次消耗太多 GitHub API 配额 */
+      const shown = members.slice(0, HOME_LIMIT);
+      const projects = await Promise.all(shown.map((member) => fetchRepo(member)));
       renderProjects(projects);
     } catch (error) {
       /* fetchRepo 已经做过兜底，这里只防御意料之外的渲染异常 */
       notices.add("error");
       renderProjects(members.map((member) => createFallback(member, "error")));
     }
+  }
+
+  /* =======================================================
+     七点五、全部项目页：按成员折叠，展开时才加载
+     -------------------------------------------------------
+     members 数组可以放很多人的很多仓库。全部项目页先按
+     GitHub 用户名分组，每组是一个原生 <details> 折叠面板；
+     点开某组时才请求该组仓库，不会一进页面就把 API 配额打满。
+     ======================================================= */
+
+  function groupMembers() {
+    const grouped = new Map();
+
+    members.forEach((member) => {
+      if (!grouped.has(member.user)) grouped.set(member.user, []);
+      grouped.get(member.user).push(member);
+    });
+
+    return Array.from(grouped.entries());
+  }
+
+  function updateArchiveCount() {
+    if (!count) return;
+
+    const mode = notices.size ? "DEGRADED" : "GITHUB_API";
+    count.textContent = `${groupMembers().length} MEMBERS // ${members.length} REPOS // ${mode}`;
+  }
+
+  function createMemberGroup(user, list, index) {
+    const details = document.createElement("details");
+    details.className = "member-group";
+    details.dataset.user = user;
+    details.dataset.loaded = "false";
+    if (index === 0) details.open = true;
+
+    const summary = document.createElement("summary");
+    summary.className = "member-summary";
+
+    const identity = document.createElement("span");
+    identity.className = "member-identity";
+
+    const prompt = document.createElement("span");
+    prompt.className = "member-prompt";
+    prompt.setAttribute("aria-hidden", "true");
+    prompt.textContent = ">_";
+
+    const name = document.createElement("strong");
+    name.className = "member-name";
+    name.textContent = `@${user}`;
+
+    const meta = document.createElement("span");
+    meta.className = "member-meta";
+    meta.textContent = `${list.length} 个项目`;
+
+    identity.append(prompt, name, meta);
+
+    const marker = document.createElement("span");
+    marker.className = "member-toggle";
+    marker.setAttribute("aria-hidden", "true");
+    marker.textContent = "+";
+
+    summary.append(identity, marker);
+
+    const body = document.createElement("div");
+    body.className = "member-body";
+
+    const grid = document.createElement("div");
+    grid.className = "project-grid member-projects";
+    grid.setAttribute("aria-busy", "false");
+
+    const hint = document.createElement("p");
+    hint.className = "member-hint";
+    hint.textContent = "展开后加载这一组项目…";
+
+    body.append(hint, grid);
+    details.append(summary, body);
+
+    details.addEventListener("toggle", () => {
+      if (details.open) loadMemberGroup(details, list, grid, hint);
+    });
+
+    return details;
+  }
+
+  async function loadMemberGroup(details, list, grid, hint) {
+    if (details.dataset.loaded === "true" || details.dataset.loading === "true") return;
+
+    details.dataset.loading = "true";
+    if (hint) hint.textContent = "正在连接 GitHub API…";
+
+    try {
+      const projects = await Promise.all(list.map((member) => fetchRepo(member)));
+
+      grid.replaceChildren();
+      projects.forEach((project) => grid.appendChild(createProjectCard(project)));
+
+      if (hint) hint.remove();
+      details.dataset.loaded = "true";
+      updateArchiveCount();
+      updateNotice();
+    } catch (error) {
+      notices.add("error");
+      grid.replaceChildren();
+      list.forEach((member) => grid.appendChild(createProjectCard(createFallback(member, "error"))));
+      if (hint) hint.remove();
+      details.dataset.loaded = "true";
+      updateArchiveCount();
+      updateNotice();
+    } finally {
+      details.dataset.loading = "false";
+    }
+  }
+
+  function initProjectArchive() {
+    if (!groupsRoot) return;
+
+    const grouped = groupMembers();
+    groupsRoot.replaceChildren();
+
+    if (!grouped.length) {
+      const empty = document.createElement("p");
+      empty.className = "project-empty";
+      empty.textContent = "members 数组还是空的，先填入一个 GitHub 仓库吧。";
+      groupsRoot.appendChild(empty);
+      groupsRoot.setAttribute("aria-busy", "false");
+      if (count) count.textContent = "0 MEMBERS // 0 REPOS";
+      return;
+    }
+
+    const fragment = document.createDocumentFragment();
+    grouped.forEach(([user, list], index) => {
+      fragment.appendChild(createMemberGroup(user, list, index));
+    });
+    groupsRoot.appendChild(fragment);
+    groupsRoot.setAttribute("aria-busy", "false");
+    updateArchiveCount();
+
+    /* 第一组默认展开，立即加载；其余组等用户点开再请求 */
+    const firstOpen = groupsRoot.querySelector(".member-group[open]");
+    if (firstOpen) firstOpen.dispatchEvent(new Event("toggle"));
   }
 
   /* =======================================================
@@ -603,5 +756,6 @@
   initCopyButtons();
   initHeaderState();
   initYear();
+  initProjectArchive();
   loadProjects();
 })();

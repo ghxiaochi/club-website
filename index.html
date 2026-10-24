@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="HNYZ · 衡南一中编程社是一个面向全校学生的极客编程社团。我们通过 GitHub 开源项目、每周两次活动和资源墙，一起把想法写成代码。">
+  <meta name="description" content="HNYZ · 衡南一中编程社是一个面向全校学生的极客编程社团。我们通过 GitHub 开源项目、每周两次、每次一小时的活动和资源墙，一起把想法写成代码。">
   <meta name="theme-color" content="#0d1117">
   <meta property="og:title" content="HNYZ｜衡南一中编程社">
   <meta property="og:description" content="把想法，写成代码。">
@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="css/style.css">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
-  <!-- 项目卡片、标签筛选和复制按钮由 js/main.js 驱动 -->
+  <!-- 项目卡片、全部项目折叠页和复制按钮由 js/main.js 驱动 -->
   <script src="js/main.js" defer></script>
 </head>
 <body>
@@ -46,6 +46,7 @@
           <li><a href="#about">关于</a></li>
           <li><a href="#what-we-do">我们做什么</a></li>
           <li><a href="#projects">项目</a></li>
+          <li><a href="projects.html">全部项目</a></li>
           <li><a href="#schedule">活动</a></li>
           <li><a href="#wall">资源墙</a></li>
           <li><a href="#faq">FAQ</a></li>
@@ -88,7 +89,7 @@
 
           <dl class="hero-stats" aria-label="社团概况">
             <div class="hero-stat">
-              <dt>2<small>次 / 周</small></dt>
+              <dt>2<small>次 / 周 · 1h</small></dt>
               <dd>常规活动</dd>
             </div>
             <div class="hero-stat">
@@ -176,7 +177,7 @@
             </div>
             <div>
               <dt>活动频率</dt>
-              <dd>每周 2 次，具体以群通知为准</dd>
+              <dd>每周 2 次，每次 1 小时</dd>
             </div>
             <div>
               <dt>加入方式</dt>
@@ -222,7 +223,7 @@
           <article class="do-card">
             <span class="do-num">04</span>
             <h3>分享与协作</h3>
-            <p>每周两次活动里安排主题分享，把踩过的坑写成文档。代码、设计、文案全部开放，互相 review，也互相兜底。</p>
+            <p>每周两次、每次一小时的活动里安排主题分享，把踩过的坑写成文档。代码、设计、文案全部开放，互相 review，也互相兜底。</p>
           </article>
         </div>
       </div>
@@ -238,6 +239,7 @@
             项目卡片通过 GitHub API 实时读取。想换项目，只要修改
             <code>js/main.js</code> 里的 <code>members</code> 数组；
             想换封面，就填 <code>coverImg</code>，留空会自动生成科技网格占位图。
+            首页展示前 6 个，更多项目在「全部项目」页按成员折叠展示。
           </p>
         </div>
 
@@ -251,6 +253,13 @@
 
         <div class="project-grid" id="project-grid" aria-busy="true">
           <p class="loading-state"><span class="loading-dot" aria-hidden="true"></span> 正在连接 GitHub API…</p>
+        </div>
+
+        <div class="projects-archive-row">
+          <a class="projects-more" id="projects-more" href="projects.html">
+            <span data-more-label>查看全部项目</span>
+            <span aria-hidden="true">→</span>
+          </a>
         </div>
 
         <noscript>
@@ -275,34 +284,34 @@
       <div class="container">
         <div class="section-head">
           <p class="section-label">04 / ACTIVITY_RHYTHM</p>
-          <h2 id="schedule-title">每周两次，<br>每次往前走一点。</h2>
+          <h2 id="schedule-title">每周两次，<br>每次一小时。</h2>
           <p class="section-intro">
-            社团常规活动一般一周两次：一次偏分享和结对，一次偏自由开发和问题排查。
-            具体时间、地点以 QQ 群公告为准。
+            社团常规活动一周两次，每次 60 分钟：一次偏分享和结对，一次偏自由开发和问题排查。
+            时间紧凑，但每次都能带走一个能跑的小进展。具体时间、地点以 QQ 群公告为准。
           </p>
         </div>
 
         <div class="schedule-layout">
           <div class="schedule-list">
             <article class="schedule-item">
-              <p class="schedule-when">每周 · 第一次</p>
+              <p class="schedule-when">每周 · 第一次 · 60 MIN</p>
               <div>
                 <h3>主题分享 + 结对开发</h3>
-                <p>从一个具体的小主题开始，讲完就动手。新手可以和学长学姐结对，把环境跑通、把第一个功能写出来。</p>
+                <p>用一小时从一个具体的小主题开始，讲完就动手。新手可以和学长学姐结对，把环境跑通、把第一个功能写出来。</p>
               </div>
             </article>
             <article class="schedule-item">
-              <p class="schedule-when">每周 · 第二次</p>
+              <p class="schedule-when">每周 · 第二次 · 60 MIN</p>
               <div>
                 <h3>自由开发 + 问题排查</h3>
-                <p>带来你正在做的项目，或者从零开始一个。遇到报错、卡住思路，就在这次活动里集中解决。</p>
+                <p>带来你正在做的项目，或者从零开始一个。遇到报错、卡住思路，就在这一小时里集中解决。</p>
               </div>
             </article>
             <article class="schedule-item">
-              <p class="schedule-when">每月</p>
+              <p class="schedule-when">每月 · 60 MIN</p>
               <div>
                 <h3>小型 Demo Day</h3>
-                <p>用几分钟展示这个月做出来的东西，接受提问，也接受不完美。做完比完美更重要。</p>
+                <p>用一小时展示这个月做出来的东西，接受提问，也接受不完美。做完比完美更重要。</p>
               </div>
             </article>
           </div>
@@ -311,12 +320,12 @@
             <p class="card-label">// ONE_SESSION</p>
             <h3 id="agenda-title">一次活动，通常这样过</h3>
             <ol class="agenda-list">
-              <li><span>主题分享</span><span class="agenda-time">20 min</span></li>
-              <li><span>自由开发</span><span class="agenda-time">60 min</span></li>
-              <li><span>进度同步</span><span class="agenda-time">10 min</span></li>
-              <li><span>随时提问 / 结对</span><span class="agenda-time">全程</span></li>
+              <li><span>主题分享</span><span class="agenda-time">10 min</span></li>
+              <li><span>自由开发</span><span class="agenda-time">25 min</span></li>
+              <li><span>进度同步</span><span class="agenda-time">15 min</span></li>
+              <li><span>提问 / 结对</span><span class="agenda-time">10 min</span></li>
             </ol>
-            <p class="agenda-note">每周两次，具体时间、地点以 QQ 群通知为准；考试周会适当减少活动。</p>
+            <p class="agenda-note">每次活动固定 60 分钟；每周两次，具体时间、地点以 QQ 群通知为准，考试周会适当减少。</p>
           </aside>
         </div>
       </div>
@@ -330,7 +339,7 @@
           <h2 id="wall-title">墙上的<br>学习入口。</h2>
           <p class="section-intro">
             不知道从哪里开始的时候，先从资源墙上的链接点进去。
-            C++ 和 ESP32 是社团最常用的两套工具，也是项目里最常被问到的问题。
+            C++ 和 ESP32 是社团最常用的两套工具，也是项目里最常被问到的问题；ESP32 部分统一看微雪的 Wiki。
           </p>
         </div>
 
@@ -345,12 +354,12 @@
             <span class="wall-arrow" aria-hidden="true">↗</span>
           </a>
 
-          <a class="wall-card" href="https://docs.espressif.com/projects/arduino-esp32/en/latest/" target="_blank" rel="noopener noreferrer">
+          <a class="wall-card" href="https://www.waveshare.net/wiki/ESP32-S3-DEV-KIT-N8R8" target="_blank" rel="noopener noreferrer">
             <span class="wall-index">[ 02 ]</span>
             <div class="wall-body">
-              <p class="wall-kicker">ESP32 / DOCS</p>
-              <h3>ESP32 Arduino 文档</h3>
-              <p>乐鑫官方 Arduino-ESP32 文档：环境安装、GPIO、Wi-Fi、蓝牙和示例代码都能在这里查。</p>
+              <p class="wall-kicker">WAVESHARE / ESP32</p>
+              <h3>微雪 ESP32 教程</h3>
+              <p>微雪电子 ESP32-S3 开发板 Wiki：环境搭建、GPIO、Wi-Fi、蓝牙、屏幕和示例代码都在这里。</p>
             </div>
             <span class="wall-arrow" aria-hidden="true">↗</span>
           </a>
@@ -405,7 +414,7 @@
               <span class="faq-icon" aria-hidden="true"></span>
             </summary>
             <div class="faq-answer">
-              <p>常规活动一般每周两次：一次主题分享 + 结对开发，一次自由开发 + 问题排查。具体时间和地点会在 QQ 群公告里通知，考试周会适当调整。</p>
+              <p>常规活动每周两次，每次一小时：一次主题分享 + 结对开发，一次自由开发 + 问题排查。具体时间和地点会在 QQ 群公告里通知，考试周会适当调整。</p>
             </div>
           </details>
 
@@ -415,7 +424,7 @@
               <span class="faq-icon" aria-hidden="true"></span>
             </summary>
             <div class="faq-answer">
-              <p>由 <code>js/main.js</code> 通过 GitHub API 实时读取 <code>members</code> 数组里的仓库信息。遇到 403 限流、404 或网络异常时，会自动切换到本地兜底数据，页面不会空白。</p>
+              <p>由 <code>js/main.js</code> 通过 GitHub API 实时读取 <code>members</code> 数组里的仓库信息。首页最多展示前 6 个，完整列表在「全部项目」页按成员折叠。遇到 403 限流、404 或网络异常时，会自动切换到本地兜底数据，页面不会空白。</p>
             </div>
           </details>
         </div>
@@ -503,6 +512,7 @@
       <nav class="footer-nav" aria-label="页脚导航">
         <a href="#about">关于</a>
         <a href="#projects">项目</a>
+        <a href="projects.html">全部项目</a>
         <a href="#schedule">活动</a>
         <a href="#wall">资源墙</a>
         <a href="#join">加入</a>
