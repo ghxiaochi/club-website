@@ -1,8 +1,11 @@
 /* =========================================================
    衡南一中编程社 HN1Z CODE — 页面交互
-   - 读取 projects.json 并渲染项目卡片
-   - 图片缺失 / 加载失败时显示占位色块
-   - 移动端菜单、页头滚动状态、复制邮箱
+   功能：
+   1. 读取 projects.json 并渲染项目卡片
+   2. 按技术标签筛选项目
+   3. QQ 群号 / 邮箱一键复制
+   4. 移动端导航
+   5. 图片缺失时显示占位块
    无任何第三方依赖，直接由浏览器运行。
    ========================================================= */
 
@@ -11,13 +14,8 @@
 
   const PROJECTS_ENDPOINT = "projects.json";
 
-  /**
-   * 内置示例数据。
-   * 使用 file:// 直接双击打开 index.html 时，浏览器出于安全限制
-   * 不允许 fetch 本地 JSON，因此退回这份数据，保证首页可以完整预览。
-   * 修改 projects.json 时，建议同时更新这里，或使用本地 HTTP 服务器预览。
-   * （README 的「本地预览」一节有说明。）
-   */
+  /* 直接双击 index.html（file://）时浏览器禁止 fetch 本地 JSON，
+     这里保留一份与 projects.json 同步的预览数据。 */
   const FALLBACK_PROJECTS = [
     {
       name: "Zaco 猜数字",
@@ -28,7 +26,7 @@
       cover: "images/project-zaco.svg"
     },
     {
-      name: "社团官网 HN1Z Code",
+      name: "社团官网 HN1Z CODE",
       desc: "你现在看到的这个页面：纯 HTML、CSS、JavaScript 手写的社团官网，部署在 GitHub Pages。",
       tags: ["HTML", "CSS", "JavaScript"],
       repo: "https://github.com/ghxiaochi/club-website",
@@ -45,106 +43,118 @@
     }
   ];
 
-  /* ---------- 工具函数 ---------- */
+  const grid = document.querySelector("#project-grid");
+  const filters = document.querySelector("#project-filters");
+  const count = document.querySelector("#project-count");
+  const renderNote = document.querySelector("#render-note");
 
-  /**
-   * 只接受 http / https 链接，避免 projects.json 中出现不安全协议。
-   * 返回规范化后的绝对地址，无效时返回空字符串。
-   */
+  let allProjects = [];
+  let activeTag = "全部";
+
+  /* ---------- 数据清洗 ---------- */
+
   function normalizeHttpUrl(value) {
     if (typeof value !== "string" || !value.trim()) return "";
 
     try {
       const url = new URL(value.trim(), window.location.href);
       return url.protocol === "http:" || url.protocol === "https:" ? url.href : "";
-    } catch {
+    } catch (error) {
       return "";
     }
   }
 
-  /**
-   * 清洗单条项目数据，防止缺字段导致渲染中断。
-   * 返回 null 表示该项目无效，会被跳过。
-   */
-  function normalizeProject(item) {
-    if (!item || typeof item !== "object") return null;
+  function normalizeCover(value) {
+    if (typeof value !== "string") return "";
+    const path = value.trim();
+    if (!path || path.length > 300) return "";
+    return /^(?:https?:\/\/|\/|\.{1,2}\/)?[^\s"'<>]+$/i.test(path) ? path : "";
+  }
 
-    const name = typeof item.name === "string" ? item.name.trim() : "";
-    const desc = typeof item.desc === "string" ? item.desc.trim() : "";
-    if (!name || !desc) return null;
+  function normalizeProject(project, index) {
+    const source = project && typeof project === "object" ? project : {};
+    const name =
+      typeof source.name === "string" && source.name.trim()
+        ? source.name.trim()
+        : `未命名项目 ${index + 1}`;
+    const desc =
+      typeof source.desc === "string" && source.desc.trim()
+        ? source.desc.trim()
+        : "暂无项目描述。";
+
+    const tags = [];
+    const seenTags = new Set();
+    if (Array.isArray(source.tags)) {
+      source.tags.forEach((tag) => {
+        if (typeof tag !== "string") return;
+        const clean = tag.trim();
+        if (!clean || seenTags.has(clean) || tags.length >= 5) return;
+        seenTags.add(clean);
+        tags.push(clean);
+      });
+    }
 
     return {
+      index,
       name,
       desc,
-      tags: Array.isArray(item.tags)
-        ? item.tags.filter((tag) => typeof tag === "string" && tag.trim()).map((tag) => tag.trim())
-        : [],
-      repo: normalizeHttpUrl(item.repo),
-      demo: normalizeHttpUrl(item.demo),
-      cover: typeof item.cover === "string" ? item.cover.trim() : ""
+      tags,
+      repo: normalizeHttpUrl(source.repo),
+      demo: normalizeHttpUrl(source.demo),
+      cover: normalizeCover(source.cover)
     };
-  }
-
-  function padNumber(number) {
-    return String(number).padStart(2, "0");
-  }
-
-  function createExternalLink(url, label, className = "") {
-    const link = document.createElement("a");
-    link.href = url;
-    link.className = className;
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    link.textContent = label;
-    return link;
   }
 
   /* ---------- 项目卡片 ---------- */
 
-  function createCoverPlaceholder(project, index) {
+  function padNumber(value) {
+    return String(value).padStart(2, "0");
+  }
+
+  function createCoverPlaceholder(project) {
     const placeholder = document.createElement("div");
     placeholder.className = "cover-placeholder";
 
-    const cap = document.createElement("span");
-    cap.className = "cover-cap";
-    cap.textContent = `COVER / ${padNumber(index + 1)}`;
+    const index = document.createElement("span");
+    index.className = "cover-index";
+    index.textContent = `PROJECT / ${padNumber(project.index + 1)}`;
 
-    const monogram = document.createElement("span");
-    monogram.className = "cover-monogram";
-    monogram.setAttribute("aria-hidden", "true");
-    monogram.textContent = Array.from(project.name)[0] || "N";
+    const mark = document.createElement("strong");
+    mark.textContent = Array.from(project.name).slice(0, 2).join("");
 
-    const caption = document.createElement("span");
-    caption.className = "cover-caption";
-    caption.textContent = project.tags[0] ? `OPEN SOURCE · ${project.tags[0]}` : "OPEN SOURCE PROJECT";
+    const note = document.createElement("span");
+    note.className = "cover-note";
+    note.textContent = project.tags[0] || "IDEA";
 
-    placeholder.append(cap, monogram, caption);
+    placeholder.append(index, mark, note);
     return placeholder;
   }
 
-  function createCover(project, index) {
-    const cover = document.createElement("div");
-    cover.className = "project-cover";
-
-    const showPlaceholder = () => {
-      cover.replaceChildren(createCoverPlaceholder(project, index));
-    };
+  function createCover(project) {
+    const wrap = document.createElement("div");
+    wrap.className = "project-cover";
 
     if (!project.cover) {
-      showPlaceholder();
-      return cover;
+      wrap.appendChild(createCoverPlaceholder(project));
+      return wrap;
     }
 
     const image = document.createElement("img");
     image.src = project.cover;
-    image.alt = "";
+    image.alt = `${project.name} 项目封面`;
     image.loading = "lazy";
     image.decoding = "async";
-    image.width = 1200;
-    image.height = 750;
-    image.addEventListener("error", showPlaceholder, { once: true });
-    cover.append(image);
-    return cover;
+    image.addEventListener(
+      "error",
+      () => {
+        image.remove();
+        wrap.appendChild(createCoverPlaceholder(project));
+      },
+      { once: true }
+    );
+
+    wrap.appendChild(image);
+    return wrap;
   }
 
   function createTagList(tags) {
@@ -154,41 +164,43 @@
 
     tags.forEach((tag) => {
       const item = document.createElement("li");
-      const pill = document.createElement("span");
-      pill.className = "tag";
-      pill.textContent = tag;
-      item.append(pill);
-      list.append(item);
+      item.className = "tag";
+      item.textContent = tag;
+      list.appendChild(item);
     });
 
     return list;
   }
 
-  function createProjectCard(project, index) {
+  function createProjectLink(href, label) {
+    const link = document.createElement("a");
+    link.className = "project-link";
+    link.href = href;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = label;
+    return link;
+  }
+
+  function createProjectCard(project) {
     const card = document.createElement("article");
     card.className = "project-card";
-    card.dataset.tone = String((index % 3) + 1);
 
     const body = document.createElement("div");
     body.className = "project-body";
 
-    const kicker = document.createElement("p");
-    kicker.className = "project-kicker";
-    const projectNumber = document.createElement("span");
-    projectNumber.textContent = `PROJECT ${padNumber(index + 1)}`;
-    const projectType = document.createElement("span");
-    projectType.textContent = project.repo ? "OPEN SOURCE" : "LAB PROJECT";
-    kicker.append(projectNumber, projectType);
+    const top = document.createElement("div");
+    top.className = "project-top";
 
     const title = document.createElement("h3");
-    title.className = "project-title";
-    if (project.repo) {
-      const titleLink = createExternalLink(project.repo, project.name);
-      titleLink.setAttribute("aria-label", `${project.name} GitHub 仓库（新窗口打开）`);
-      title.append(titleLink);
-    } else {
-      title.textContent = project.name;
-    }
+    title.textContent = project.name;
+
+    const status = document.createElement("span");
+    status.className = "project-status";
+    status.textContent = project.repo ? "OPEN SOURCE" : project.demo ? "LIVE DEMO" : "IDEA";
+    if (project.repo) status.classList.add("project-status--open");
+
+    top.append(title, status);
 
     const desc = document.createElement("p");
     desc.className = "project-desc";
@@ -198,224 +210,257 @@
     links.className = "project-links";
 
     if (project.repo) {
-      const repoLink = createExternalLink(project.repo, "GitHub 仓库", "project-link");
-      const repoArrow = document.createElement("span");
-      repoArrow.className = "link-arrow";
-      repoArrow.setAttribute("aria-hidden", "true");
-      repoArrow.textContent = "↗";
-      repoLink.append(repoArrow);
-      links.append(repoLink);
+      links.appendChild(createProjectLink(project.repo, "查看仓库 ↗"));
     }
 
     if (project.demo) {
-      const demoLink = createExternalLink(project.demo, "在线演示", "project-link project-link--demo");
-      const demoArrow = document.createElement("span");
-      demoArrow.className = "link-arrow";
-      demoArrow.setAttribute("aria-hidden", "true");
-      demoArrow.textContent = "↗";
-      demoLink.append(demoArrow);
-      links.append(demoLink);
+      links.appendChild(createProjectLink(project.demo, "在线演示 ↗"));
     }
 
     if (!project.repo && !project.demo) {
       const pending = document.createElement("span");
-      pending.className = "project-link project-link--demo";
-      pending.textContent = "仓库整理中";
-      links.append(pending);
+      pending.className = "project-link project-link--muted";
+      pending.textContent = "筹备中";
+      links.appendChild(pending);
     }
 
-    body.append(kicker, title, desc);
-    if (project.tags.length) body.append(createTagList(project.tags));
-    body.append(links);
-    card.append(createCover(project, index), body);
+    body.append(top, desc, createTagList(project.tags), links);
+    card.append(createCover(project), body);
     return card;
   }
 
-  /* ---------- 数据读取与渲染 ---------- */
+  /* ---------- 筛选与渲染 ---------- */
 
-  const grid = document.querySelector("#project-grid");
-  const renderNote = document.querySelector("#render-note");
+  function updateFilterState(tag) {
+    activeTag = tag;
 
-  function showRenderNote(message) {
+    if (!filters) return;
+    filters.querySelectorAll(".filter-button").forEach((button) => {
+      button.setAttribute("aria-pressed", String(button.dataset.tag === tag));
+    });
+  }
+
+  function renderProjects() {
+    if (!grid) return;
+
+    const visible =
+      activeTag === "全部"
+        ? allProjects
+        : allProjects.filter((project) => project.tags.includes(activeTag));
+
+    grid.replaceChildren();
+    grid.setAttribute("aria-busy", "false");
+
+    if (!visible.length) {
+      const empty = document.createElement("p");
+      empty.className = "project-empty";
+      empty.textContent = "这个标签下还没有项目，换个标签看看。";
+      grid.appendChild(empty);
+    } else {
+      const fragment = document.createDocumentFragment();
+      visible.forEach((project) => fragment.appendChild(createProjectCard(project)));
+      grid.appendChild(fragment);
+    }
+
+    if (count) {
+      count.textContent =
+        activeTag === "全部"
+          ? `${allProjects.length} 个项目`
+          : `${visible.length} / ${allProjects.length} 个项目`;
+    }
+  }
+
+  function renderFilters() {
+    if (!filters) return;
+
+    const tags = [];
+    allProjects.forEach((project) => {
+      project.tags.forEach((tag) => {
+        if (!tags.includes(tag)) tags.push(tag);
+      });
+    });
+
+    filters.replaceChildren();
+
+    if (!tags.length) {
+      filters.hidden = true;
+      return;
+    }
+
+    filters.hidden = false;
+    const values = ["全部", ...tags];
+    const fragment = document.createDocumentFragment();
+
+    values.forEach((tag) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "filter-button";
+      button.dataset.tag = tag;
+      button.textContent = tag;
+      button.setAttribute("aria-pressed", String(tag === activeTag));
+      button.addEventListener("click", () => {
+        if (tag === activeTag) return;
+        updateFilterState(tag);
+        renderProjects();
+      });
+      fragment.appendChild(button);
+    });
+
+    filters.appendChild(fragment);
+  }
+
+  function showNote(message) {
     if (!renderNote) return;
     renderNote.textContent = message;
     renderNote.hidden = false;
   }
 
-  function getFallbackProjects() {
-    return FALLBACK_PROJECTS.map(normalizeProject).filter(Boolean);
+  function renderAll() {
+    updateFilterState("全部");
+    renderFilters();
+    renderProjects();
   }
 
   async function loadProjects() {
-    // 直接双击 HTML 时 fetch 会被浏览器拦截，直接使用内置数据。
-    if (window.location.protocol === "file:") {
-      showRenderNote("本地文件预览：当前显示内置示例数据。运行本地服务器即可读取最新的 projects.json。");
-      return getFallbackProjects();
-    }
-
-    try {
-      const response = await fetch(PROJECTS_ENDPOINT, { cache: "no-store" });
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
-      if (!Array.isArray(data)) {
-        throw new Error("projects.json 的顶层必须是数组");
-      }
-
-      const projects = data.map(normalizeProject).filter(Boolean);
-      if (!projects.length) {
-        throw new Error("projects.json 中没有有效项目");
-      }
-
-      return projects;
-    } catch (error) {
-      console.warn("[HN1Z CODE] 读取 projects.json 失败，已回退到内置示例数据。", error);
-      showRenderNote("项目清单读取失败，当前显示内置示例数据。请检查 projects.json 或改用本地服务器预览。");
-      return getFallbackProjects();
-    }
-  }
-
-  async function renderProjects() {
     if (!grid) return;
 
     try {
-      const projects = await loadProjects();
-      if (!projects.length) {
-        throw new Error("没有可显示的项目");
+      const response = await fetch(PROJECTS_ENDPOINT, { cache: "no-store" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const data = await response.json();
+      if (!Array.isArray(data) || !data.length) {
+        throw new Error("项目列表为空或格式不正确");
       }
-      grid.replaceChildren(...projects.map(createProjectCard));
+
+      allProjects = data.map(normalizeProject);
+      renderAll();
     } catch (error) {
-      console.warn("[HN1Z CODE] 项目渲染失败。", error);
-      const message = document.createElement("p");
-      message.className = "error-state";
-      message.textContent = "项目暂时无法加载，请稍后刷新，或直接访问我们的 GitHub。";
-      grid.replaceChildren(message);
-    } finally {
-      grid.setAttribute("aria-busy", "false");
+      allProjects = FALLBACK_PROJECTS.map(normalizeProject);
+
+      showNote(
+        window.location.protocol === "file:"
+          ? "当前使用内置预览数据。通过本地服务器打开，可读取最新的 projects.json。"
+          : "项目数据读取失败，当前显示内置示例。请检查 projects.json 是否存在或格式是否正确。"
+      );
+
+      renderAll();
     }
   }
 
-  /* ---------- 页头与移动端导航 ---------- */
+  /* ---------- 复制群号 / 邮箱 ---------- */
 
-  const header = document.querySelector("[data-header]");
-  const navToggle = document.querySelector("[data-nav-toggle]");
-  const nav = document.querySelector("[data-nav]");
+  async function writeClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch (error) {
+        // 继续尝试下方兼容方案
+      }
+    }
 
-  function setMenu(open) {
-    if (!navToggle || !nav) return;
-    navToggle.setAttribute("aria-expanded", String(open));
-    navToggle.setAttribute("aria-label", open ? "关闭导航菜单" : "打开导航菜单");
-    nav.classList.toggle("is-open", open);
-    if (header) header.classList.toggle("is-menu-open", open);
+    const area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.top = "-9999px";
+    area.style.opacity = "0";
+    document.body.appendChild(area);
+    area.select();
+    area.setSelectionRange(0, area.value.length);
+
+    let copied = false;
+    try {
+      copied = document.execCommand("copy");
+    } catch (error) {
+      copied = false;
+    }
+
+    area.remove();
+    return copied;
   }
+
+  function initCopyButtons() {
+    const status = document.querySelector("#copy-status");
+
+    document.querySelectorAll("[data-copy-value]").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const value = button.getAttribute("data-copy-value") || "";
+        if (!value) return;
+
+        const label = button.querySelector("[data-copy-label]") || button;
+        const original = label.textContent;
+        const copied = await writeClipboard(value);
+
+        if (copied) {
+          label.textContent = "已复制";
+          button.classList.add("is-copied");
+          if (status) status.textContent = `已复制：${value}`;
+        } else {
+          label.textContent = "复制失败";
+          if (status) status.textContent = "自动复制失败，请手动选择并复制。";
+        }
+
+        window.setTimeout(() => {
+          label.textContent = original;
+          button.classList.remove("is-copied");
+        }, 1800);
+      });
+    });
+  }
+
+  /* ---------- 移动端导航 ---------- */
 
   function initNavigation() {
-    if (navToggle && nav) {
-      navToggle.addEventListener("click", () => {
-        setMenu(navToggle.getAttribute("aria-expanded") !== "true");
-      });
+    const toggle = document.querySelector("[data-nav-toggle]");
+    const nav = document.querySelector("[data-nav]");
+    if (!toggle || !nav) return;
 
-      nav.addEventListener("click", (event) => {
-        if (event.target.closest("a")) setMenu(false);
-      });
+    const closeMenu = () => {
+      nav.classList.remove("is-open");
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.setAttribute("aria-label", "打开导航菜单");
+    };
 
-      document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && nav.classList.contains("is-open")) {
-          setMenu(false);
-          navToggle.focus();
-        }
-      });
+    toggle.addEventListener("click", () => {
+      const open = nav.classList.toggle("is-open");
+      toggle.setAttribute("aria-expanded", String(open));
+      toggle.setAttribute("aria-label", open ? "关闭导航菜单" : "打开导航菜单");
+    });
 
-      document.addEventListener("click", (event) => {
-        if (!nav.classList.contains("is-open")) return;
-        if (event.target.closest("[data-nav]") || event.target.closest("[data-nav-toggle]")) return;
-        setMenu(false);
-      });
+    nav.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", closeMenu);
+    });
 
-      const desktopQuery = window.matchMedia("(min-width: 761px)");
-      const closeOnDesktop = (event) => {
-        if (event.matches) setMenu(false);
-      };
-      if (typeof desktopQuery.addEventListener === "function") {
-        desktopQuery.addEventListener("change", closeOnDesktop);
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && nav.classList.contains("is-open")) {
+        closeMenu();
+        toggle.focus();
       }
-    }
+    });
 
-    if (header) {
-      const updateHeader = () => {
-        header.classList.toggle("is-scrolled", window.scrollY > 6);
-      };
-      updateHeader();
-      window.addEventListener("scroll", updateHeader, { passive: true });
-    }
-  }
+    document.addEventListener("click", (event) => {
+      if (!nav.classList.contains("is-open")) return;
+      if (nav.contains(event.target) || toggle.contains(event.target)) return;
+      closeMenu();
+    });
 
-  /* ---------- 复制邮箱 ---------- */
-
-  async function copyText(text) {
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(text);
-      return;
-    }
-
-    // file:// 或旧浏览器上的兼容方案
-    const textarea = document.createElement("textarea");
-    textarea.value = text;
-    textarea.setAttribute("readonly", "");
-    textarea.style.position = "fixed";
-    textarea.style.top = "-1000px";
-    textarea.style.opacity = "0";
-    document.body.append(textarea);
-    textarea.select();
-
-    const copied = document.execCommand("copy");
-    textarea.remove();
-    if (!copied) throw new Error("浏览器拒绝了复制操作");
-  }
-
-  function initCopyEmail() {
-    const button = document.querySelector("[data-copy-email]");
-    const label = document.querySelector("[data-copy-label]");
-    const status = document.querySelector("#copy-status");
-    if (!button || !label) return;
-
-    let resetTimer = 0;
-
-    button.addEventListener("click", async () => {
-      const email = button.dataset.copyEmail || "";
-      if (!email) return;
-
-      try {
-        await copyText(email);
-        label.textContent = "已复制 ✓";
-        if (status) status.textContent = `邮箱 ${email} 已复制到剪贴板`;
-      } catch (error) {
-        console.warn("[HN1Z CODE] 复制邮箱失败。", error);
-        label.textContent = "请手动复制";
-        if (status) status.textContent = "复制失败，请手动选择页面上的邮箱地址。";
-      }
-
-      window.clearTimeout(resetTimer);
-      resetTimer = window.setTimeout(() => {
-        label.textContent = "复制邮箱";
-        if (status) status.textContent = "";
-      }, 2400);
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 900) closeMenu();
     });
   }
 
-  /* ---------- 初始化 ---------- */
+  /* ---------- 年份 ---------- */
 
-  function init() {
-    initNavigation();
-    initCopyEmail();
-    renderProjects();
-
-    document.querySelectorAll("[data-year]").forEach((node) => {
-      node.textContent = String(new Date().getFullYear());
+  function initYear() {
+    document.querySelectorAll("[data-year]").forEach((element) => {
+      element.textContent = String(new Date().getFullYear());
     });
   }
 
-  init();
+  initNavigation();
+  initCopyButtons();
+  initYear();
+  loadProjects();
 })();
