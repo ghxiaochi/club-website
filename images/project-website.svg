@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750" role="img" aria-labelledby="coverTitle coverDesc">
+  <title id="coverTitle">衡南一中编程社官网项目封面</title>
+  <desc id="coverDesc">橙色背景上的 CLUB 网站大字、浏览器窗口和代码行装饰。</desc>
+  <defs>
+    <pattern id="webGrid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M36 0H0V36" fill="none" stroke="#171813" stroke-width="1" opacity=".16"/>
+    </pattern>
+    <linearGradient id="webCard" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fffdf8"/>
+      <stop offset="1" stop-color="#f1eadc"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="750" fill="#ff5a36"/>
+  <rect width="1200" height="750" fill="url(#webGrid)"/>
+  <circle cx="1086" cy="96" r="236" fill="#d9ff62"/>
+  <circle cx="1008" cy="706" r="176" fill="#b83316" opacity=".28"/>
+
+  <text x="72" y="92" fill="#171813" font-family="'Courier New', monospace" font-size="19" font-weight="700" letter-spacing="4">PROJECT / 02</text>
+  <text x="70" y="333" fill="#171813" font-family="Arial, Helvetica, sans-serif" font-size="168" font-weight="800" letter-spacing="-9">CLUB</text>
+  <text x="70" y="483" fill="#171813" font-family="Arial, Helvetica, sans-serif" font-size="168" font-weight="800" letter-spacing="-9">SITE</text>
+  <rect x="73" y="528" width="548" height="2" fill="#171813" opacity=".35"/>
+  <text x="73" y="566" fill="#171813" font-family="'Courier New', monospace" font-size="18" font-weight="700" letter-spacing="2.4">HTML · CSS · JAVASCRIPT</text>
+  <text x="73" y="596" fill="#171813" font-family="'Courier New', monospace" font-size="18" letter-spacing="2.4" opacity=".7">STATIC · RESPONSIVE · GITHUB PAGES</text>
+
+  <g transform="translate(822 174) rotate(5)">
+    <rect width="306" height="392" rx="26" fill="url(#webCard)" stroke="#171813" stroke-width="2.5"/>
+    <path d="M0 58h306" fill="none" stroke="#171813" stroke-width="2"/>
+    <circle cx="31" cy="30" r="6" fill="#ff5a36"/>
+    <circle cx="51" cy="30" r="6" fill="#171813" opacity=".22"/>
+    <circle cx="71" cy="30" r="6" fill="#171813" opacity=".22"/>
+    <rect x="200" y="21" width="82" height="18" rx="9" fill="#171813" opacity=".1"/>
+
+    <text x="34" y="113" fill="#171813" font-family="Arial, Helvetica, sans-serif" font-size="44" font-weight="800">HN1Z</text>
+    <text x="34" y="141" fill="#171813" font-family="'Courier New', monospace" font-size="13" font-weight="700" letter-spacing="2">CODE CLUB</text>
+    <rect x="34" y="174" width="182" height="44" rx="22" fill="#d9ff62" stroke="#171813" stroke-width="2"/>
+    <text x="125" y="201" fill="#171813" text-anchor="middle" font-family="'Courier New', monospace" font-size="13" font-weight="700">JOIN US ↗</text>
+
+    <g transform="translate(34 252)" fill="none" stroke="#171813" stroke-width="1.6" opacity=".55">
+      <rect width="238" height="52" rx="8"/>
+      <path d="M16 18h88M16 35h142"/>
+    </g>
+    <g transform="translate(34 318)" fill="none" stroke="#171813" stroke-width="1.6" opacity=".55">
+      <rect width="238" height="52" rx="8"/>
+      <path d="M16 18h116M16 35h76"/>
+    </g>
+  </g>
+
+  <g transform="translate(1004 615) rotate(-4)">
+    <rect x="-134" y="-22" width="268" height="44" rx="22" fill="#171813"/>
+    <text x="0" y="6" fill="#fffdf8" text-anchor="middle" font-family="'Courier New', monospace" font-size="14" letter-spacing="2">PAGES READY</text>
+  </g>
+</svg>
