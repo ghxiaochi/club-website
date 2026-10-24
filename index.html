@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="HNYZ · 衡南一中编程社是一个面向全校学生的极客编程社团。我们通过 GitHub 开源项目、每周两次、每次一小时的活动和资源墙，一起把想法写成代码。">
-  <meta name="theme-color" content="#0d1117">
+  <meta name="theme-color" content="#f5f9ff">
   <meta property="og:title" content="HNYZ｜衡南一中编程社">
   <meta property="og:description" content="把想法，写成代码。">
   <meta property="og:type" content="website">
@@ -14,10 +14,12 @@
   <!-- 站点图标与样式。全部使用本地文件，无外部依赖。 -->
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/pet.css">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <!-- 项目卡片、全部项目折叠页和复制按钮由 js/main.js 驱动 -->
   <script src="js/main.js" defer></script>
+  <script src="js/pet.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">跳到主要内容</a>
@@ -526,5 +528,19 @@
       </p>
     </div>
   </footer>
+
+  <!-- 站内桌宠：原创形象，不标注名字；校徽随页面滚动旋转 -->
+  <div class="hnyz-pet" data-hnyz-pet>
+    <div class="hnyz-pet__board" aria-hidden="true"></div>
+    <button class="hnyz-pet__stage" type="button" data-hnyz-pet-trigger aria-label="和编程社吉祥物打个招呼">
+      <span class="hnyz-pet__badge-wrap" data-hnyz-pet-badge aria-hidden="true">
+        <img class="hnyz-pet__badge" src="images/pet/badge.svg" alt="">
+      </span>
+      <span class="hnyz-pet__figure-wrap" aria-hidden="true">
+        <img class="hnyz-pet__figure" src="images/pet/figure.svg" alt="">
+      </span>
+    </button>
+    <p class="hnyz-pet__speech" data-hnyz-pet-speech role="status" aria-live="polite"></p>
+  </div>
 </body>
 </html>

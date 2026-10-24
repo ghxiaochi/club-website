@@ -2,7 +2,7 @@
 
 一个纯静态的社团官网：**HTML + CSS + 原生 JavaScript**，没有后端、没有数据库、没有构建步骤。
 
-整体是 GitHub Dark 风格的赛博 / 极客科技风。项目卡片通过 **GitHub API** 读取仓库信息；首页展示前 6 个，完整列表在单独的「全部项目」页按成员折叠。遇到 403 限流、404 或网络异常会自动切换到本地兜底数据。
+整体是蓝白科技风：浅蓝底、白色卡片、深海军蓝文字。右下角有一个不署名的原创蓝白机器人桌宠，徽章随页面滚动旋转，点击会说一句社团台词。项目卡片通过 **GitHub API** 读取仓库信息；首页展示前 6 个，完整列表在单独的「全部项目」页按成员折叠。遇到 403 限流、404 或网络异常会自动切换到本地兜底数据。
 
 - **线上地址**：<https://ghxiaochi.github.io/club-website/>
 - **仓库地址**：<https://github.com/ghxiaochi/club-website>
@@ -32,7 +32,7 @@
 4. **底部数据栏**：等宽字体展示 `LANG / 🌟 Stars / 🍴 Forks`
 5. **查看源码**：带边框的科技风按钮
 
-卡片 Hover 时边框变科技蓝，出现 `0 0 10px rgba(88,166,255,.3)` 的微弱发光，并轻微上浮。
+卡片 Hover 时边框变科技蓝，出现柔和的蓝色投影，并轻微上浮。
 
 ---
 
@@ -43,13 +43,18 @@ club-website/
 ├── index.html              # 首页
 ├── projects.html           # 全部项目页（按成员折叠）
 ├── css/
-│   └── style.css           # 全站样式（暗黑赛博风）
+│   ├── style.css           # 全站样式（蓝白科技风）
+│   └── pet.css             # 右下角桌宠样式
 ├── js/
-│   └── main.js             # GitHub API、卡片渲染、折叠、交互
+│   ├── main.js             # GitHub API、卡片渲染、折叠、交互
+│   └── pet.js              # 桌宠滚动旋转、点击说话
 ├── images/
 │   ├── favicon.svg
 │   ├── project-website.svg # 社团官网封面
-│   └── project-zaco.svg    # Zaco 猜数字封面
+│   ├── project-zaco.svg    # Zaco 猜数字封面
+│   └── pet/
+│       ├── figure.svg      # 原创蓝白机器人
+│       └── badge.svg       # 自绘 HNYZ 徽章
 └── README.md
 ```
 
@@ -189,17 +194,19 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 ```css
 :root {
-  --bg: #0d1117;          /* 页面背景 */
-  --panel: #161b22;       /* 卡片背景 */
-  --border: #30363d;      /* 边框 */
-  --text: #e6edf3;        /* 主文字 */
-  --muted: #8b949e;       /* 次要文字 */
-  --blue: #58a6ff;        /* 科技蓝 */
-  --green: #3fb950;       /* 荧光绿 */
+  --bg: #f5f9ff;          /* 页面背景 */
+  --panel: #ffffff;       /* 卡片背景 */
+  --border: #d7e3f4;      /* 边框 */
+  --text: #0f2744;        /* 主文字 */
+  --muted: #5b7594;       /* 次要文字 */
+  --blue: #2563eb;        /* 主蓝 */
+  --green: #0369a1;       /* 深天蓝辅助色 */
 }
 ```
 
 改这几个变量即可整体换色，不需要逐个改选择器。
+
+桌宠位于 `index.html` 的 `.hnyz-pet`，样式在 `css/pet.css`，交互在 `js/pet.js`。它使用原创机器人形象和自绘 HNYZ 徽章，不使用真实人物照片或学校官方校徽；如需停用，删除 `index.html` 中的 `.hnyz-pet` 结构即可。
 
 ---
 

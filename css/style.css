@@ -1,11 +1,11 @@
 /* =========================================================
-   HNYZ · 衡南一中编程社 — 赛博 / 极客科技风样式
+   HNYZ · 衡南一中编程社 — 蓝白科技风样式
    ---------------------------------------------------------
    设计要点：
-   1. GitHub Dark 配色：#0d1117 背景 + #161b22 卡片
-   2. 科技蓝 #58a6ff / 荧光绿 #3fb950 作为强调色
+   1. 蓝白配色：浅蓝背景 + 白色卡片 + 深海军蓝文字
+   2. 主色 #2563eb，辅助深天蓝 #0369a1
    3. 项目卡片：16:9 封面、3 行简介、等宽字体数据栏
-   4. Hover：边框高亮 + 微弱发光 + 轻微上浮
+   4. Hover：边框高亮 + 柔和蓝色投影 + 轻微上浮
    5. 移动端：900px 切换菜单，1020 / 720px 调整网格
 
    所有颜色集中在 :root，想换主题只改变量即可。
@@ -13,30 +13,30 @@
 
 /* ---------- 1. 设计变量 ---------- */
 :root {
-  --bg: #0d1117;
-  --bg-deep: #010409;
-  --panel: #161b22;
-  --panel-2: #1c2128;
-  --panel-3: #21262d;
+  --bg: #f5f9ff;
+  --bg-deep: #eaf2ff;
+  --panel: #ffffff;
+  --panel-2: #f2f7ff;
+  --panel-3: #e8f1ff;
 
-  --border: #30363d;
-  --border-strong: #3d444d;
+  --border: #d7e3f4;
+  --border-strong: #b9cde8;
 
-  --text: #e6edf3;
-  --text-soft: #c9d1d9;
-  --muted: #8b949e;
-  --dim: #6e7681;
+  --text: #0f2744;
+  --text-soft: #29486b;
+  --muted: #526b89;
+  --dim: #58718f;
 
-  --blue: #58a6ff;
-  --blue-bright: #79c0ff;
-  --green: #3fb950;
-  --green-bright: #56d364;
-  --orange: #d29922;
-  --red: #f85149;
-  --purple: #bc8cff;
+  --blue: #2563eb;
+  --blue-bright: #1d4ed8;
+  --green: #0369a1;
+  --green-bright: #075985;
+  --orange: #b45309;
+  --red: #dc2626;
+  --purple: #7c3aed;
 
-  --blue-soft: rgba(88, 166, 255, 0.12);
-  --green-soft: rgba(63, 185, 80, 0.12);
+  --blue-soft: rgba(37, 99, 235, 0.08);
+  --green-soft: rgba(3, 105, 161, 0.1);
 
   --radius-sm: 6px;
   --radius: 8px;
@@ -47,9 +47,10 @@
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC",
     "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
 
-  --glow-blue: 0 0 10px rgba(88, 166, 255, 0.3);
-  --glow-green: 0 0 10px rgba(63, 185, 80, 0.25);
-  --shadow-card: 0 18px 48px rgba(0, 0, 0, 0.38);
+  --glow-blue: 0 10px 28px rgba(37, 99, 235, 0.14);
+  --glow-green: 0 10px 26px rgba(14, 165, 233, 0.13);
+  --shadow-card: 0 18px 48px rgba(30, 64, 175, 0.1);
+  color-scheme: light;
 }
 
 /* ---------- 2. 基础重置 ---------- */
@@ -72,9 +73,9 @@ body {
   background-color: var(--bg);
   /* 顶部蓝色光晕 + 极淡的工程网格 */
   background-image:
-    radial-gradient(ellipse 70% 42% at 50% -12%, rgba(88, 166, 255, 0.16), transparent 65%),
-    linear-gradient(rgba(88, 166, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(88, 166, 255, 0.035) 1px, transparent 1px);
+    radial-gradient(ellipse 70% 42% at 50% -12%, rgba(37, 99, 235, 0.12), transparent 65%),
+    linear-gradient(rgba(37, 99, 235, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 99, 235, 0.035) 1px, transparent 1px);
   background-size: auto, 56px 56px, 56px 56px;
   background-attachment: fixed;
   font-family: var(--sans);
@@ -85,7 +86,7 @@ body {
 }
 
 ::selection {
-  color: #04111f;
+  color: #ffffff;
   background: var(--blue);
 }
 
@@ -184,7 +185,7 @@ code {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(13, 17, 23, 0.72);
+  background: rgba(255, 255, 255, 0.78);
   border-bottom: 1px solid transparent;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -192,7 +193,7 @@ code {
 }
 
 .site-header.is-scrolled {
-  background: rgba(13, 17, 23, 0.94);
+  background: rgba(255, 255, 255, 0.94);
   border-bottom-color: var(--border);
 }
 
@@ -225,7 +226,7 @@ code {
   border-radius: var(--radius);
   background: var(--panel);
   color: var(--blue);
-  box-shadow: inset 0 0 16px rgba(88, 166, 255, 0.08);
+  box-shadow: inset 0 0 16px rgba(37, 99, 235, 0.08);
 }
 
 .brand-mark svg {
@@ -281,9 +282,9 @@ code {
   align-items: center;
   gap: 8px;
   padding: 9px 16px;
-  border: 1px solid rgba(63, 185, 80, 0.45);
+  border: 1px solid rgba(14, 165, 233, 0.45);
   border-radius: var(--radius-sm);
-  background: rgba(63, 185, 80, 0.08);
+  background: rgba(14, 165, 233, 0.08);
   color: var(--green-bright);
   font-family: var(--mono);
   font-size: 0.78rem;
@@ -293,8 +294,8 @@ code {
 
 .nav-cta:hover {
   border-color: var(--green);
-  background: rgba(63, 185, 80, 0.16);
-  color: #d2f8d8;
+  background: rgba(14, 165, 233, 0.16);
+  color: var(--green-bright);
   box-shadow: var(--glow-green);
 }
 
@@ -344,7 +345,7 @@ code {
   width: 620px;
   height: 620px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(88, 166, 255, 0.1), transparent 66%);
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.1), transparent 66%);
   pointer-events: none;
 }
 
@@ -373,7 +374,7 @@ code {
   height: 7px;
   border-radius: 50%;
   background: var(--green);
-  box-shadow: 0 0 12px rgba(63, 185, 80, 0.85);
+  box-shadow: 0 0 12px rgba(14, 165, 233, 0.85);
   animation: blink 2.4s ease-in-out infinite;
 }
 
@@ -395,7 +396,7 @@ code {
 
 .accent-text {
   color: var(--blue);
-  text-shadow: 0 0 40px rgba(88, 166, 255, 0.3);
+  text-shadow: 0 0 40px rgba(37, 99, 235, 0.18);
 }
 
 .hero-lead {
@@ -431,21 +432,21 @@ code {
 .button--primary {
   border-color: var(--blue);
   background: var(--blue);
-  color: #04111f;
-  box-shadow: 0 0 20px rgba(88, 166, 255, 0.18);
+  color: #ffffff;
+  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.2);
 }
 
 .button--primary:hover {
   background: var(--blue-bright);
   border-color: var(--blue-bright);
-  color: #04111f;
-  box-shadow: 0 0 24px rgba(88, 166, 255, 0.4);
+  color: #ffffff;
+  box-shadow: 0 10px 28px rgba(37, 99, 235, 0.32);
   transform: translateY(-2px);
 }
 
 .button--secondary {
   border-color: var(--border-strong);
-  background: rgba(22, 27, 34, 0.6);
+  background: rgba(255, 255, 255, 0.72);
   color: var(--text-soft);
 }
 
@@ -507,7 +508,7 @@ code {
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  background: linear-gradient(180deg, #171d25 0%, #10151c 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #f4f9ff 100%);
   box-shadow: var(--shadow-card);
 }
 
@@ -526,7 +527,7 @@ code {
   gap: 8px;
   padding: 11px 16px;
   border-bottom: 1px solid var(--border);
-  background: rgba(1, 4, 9, 0.5);
+  background: rgba(234, 242, 255, 0.72);
   color: var(--dim);
   font-family: var(--mono);
   font-size: 0.68rem;
@@ -647,7 +648,7 @@ code {
 }
 
 .section--soft {
-  background: rgba(22, 27, 34, 0.45);
+  background: rgba(234, 242, 255, 0.58);
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
 }
@@ -715,7 +716,7 @@ code {
   font-family: var(--mono);
   font-size: 0.92rem;
   line-height: 1.8;
-  background: linear-gradient(90deg, rgba(88, 166, 255, 0.06), transparent);
+  background: linear-gradient(90deg, rgba(37, 99, 235, 0.08), transparent);
 }
 
 .fact-list {
@@ -755,7 +756,7 @@ code {
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: linear-gradient(180deg, rgba(28, 33, 40, 0.8), rgba(22, 27, 34, 0.9));
+  background: linear-gradient(180deg, #ffffff 0%, #f4f9ff 100%);
   transition: all 0.3s ease;
 }
 
@@ -827,7 +828,7 @@ code {
   border-left: 2px solid var(--orange);
   border-radius: var(--radius-sm);
   background: rgba(210, 153, 34, 0.07);
-  color: #d7b76a;
+  color: var(--orange);
   font-size: 0.8rem;
   line-height: 1.75;
 }
@@ -856,7 +857,7 @@ code {
   margin-right: 8px;
   border-radius: 50%;
   background: var(--green);
-  box-shadow: 0 0 10px rgba(63, 185, 80, 0.8);
+  box-shadow: 0 0 10px rgba(14, 165, 233, 0.8);
   animation: blink 1.4s ease-in-out infinite;
 }
 
@@ -886,7 +887,7 @@ code {
 .project-card:hover,
 .project-card:focus-within {
   border-color: var(--blue);
-  box-shadow: var(--glow-blue), 0 18px 40px rgba(0, 0, 0, 0.32);
+  box-shadow: var(--glow-blue), 0 18px 40px rgba(30, 64, 175, 0.12);
   transform: translateY(-4px);
 }
 
@@ -915,7 +916,7 @@ code {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 58%, rgba(1, 4, 9, 0.45));
+  background: linear-gradient(180deg, transparent 58%, rgba(15, 39, 68, 0.42));
   pointer-events: none;
 }
 
@@ -930,9 +931,9 @@ code {
   padding: 22px;
   overflow: hidden;
   background:
-    radial-gradient(circle at 78% 24%, rgba(88, 166, 255, 0.2), transparent 42%),
-    radial-gradient(circle at 12% 88%, rgba(63, 185, 80, 0.12), transparent 42%),
-    linear-gradient(135deg, #0b1220 0%, #101722 50%, #090d13 100%);
+    radial-gradient(circle at 78% 24%, rgba(37, 99, 235, 0.2), transparent 42%),
+    radial-gradient(circle at 12% 88%, rgba(14, 165, 233, 0.14), transparent 42%),
+    linear-gradient(135deg, #eaf3ff 0%, #dbeafe 52%, #eff6ff 100%);
 }
 
 .cover-placeholder::before {
@@ -940,8 +941,8 @@ code {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(88, 166, 255, 0.13) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(88, 166, 255, 0.13) 1px, transparent 1px);
+    linear-gradient(rgba(37, 99, 235, 0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 99, 235, 0.13) 1px, transparent 1px);
   background-size: 24px 24px;
   -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 20%, transparent 78%);
   mask-image: radial-gradient(circle at 50% 50%, #000 20%, transparent 78%);
@@ -956,7 +957,7 @@ code {
   right: 0;
   top: 20%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(88, 166, 255, 0.55), transparent);
+  background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.5), transparent);
   animation: scan 6s linear infinite;
 }
 
@@ -978,13 +979,13 @@ code {
 
 .cover-tag {
   padding: 3px 7px;
-  border: 1px solid rgba(88, 166, 255, 0.35);
+  border: 1px solid rgba(37, 99, 235, 0.3);
   border-radius: 3px;
   color: var(--blue);
   font-family: var(--mono);
   font-size: 0.58rem;
   letter-spacing: 0.09em;
-  background: rgba(1, 4, 9, 0.45);
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .cover-mark {
@@ -994,7 +995,7 @@ code {
   font-size: 2.3rem;
   font-weight: 700;
   letter-spacing: -0.05em;
-  text-shadow: 0 0 26px rgba(88, 166, 255, 0.35);
+  text-shadow: 0 0 26px rgba(37, 99, 235, 0.22);
 }
 
 .cover-repo {
@@ -1009,9 +1010,9 @@ code {
   right: 12px;
   z-index: 2;
   padding: 4px 7px;
-  border: 1px solid rgba(63, 185, 80, 0.4);
+  border: 1px solid rgba(14, 165, 233, 0.4);
   border-radius: 3px;
-  background: rgba(1, 4, 9, 0.72);
+  background: rgba(255, 255, 255, 0.82);
   color: var(--green);
   font-family: var(--mono);
   font-size: 0.56rem;
@@ -1023,7 +1024,7 @@ code {
 .cover-badge[data-state="network"],
 .cover-badge[data-state="error"] {
   border-color: rgba(210, 153, 34, 0.45);
-  color: #d7b76a;
+  color: var(--orange);
 }
 
 .cover-badge[data-state="not-found"] {
@@ -1197,7 +1198,7 @@ code {
 
 .projects-more:hover {
   border-color: var(--blue);
-  background: rgba(88, 166, 255, 0.08);
+  background: rgba(37, 99, 235, 0.08);
   transform: translateX(3px);
 }
 
@@ -1260,12 +1261,12 @@ code {
 }
 
 .member-summary:hover {
-  background: rgba(88, 166, 255, 0.05);
+  background: rgba(37, 99, 235, 0.05);
 }
 
 .member-group[open] .member-summary {
   border-bottom: 1px solid var(--border);
-  background: rgba(88, 166, 255, 0.045);
+  background: rgba(37, 99, 235, 0.045);
 }
 
 .member-identity {
@@ -1355,7 +1356,7 @@ code {
   border: 1px solid rgba(210, 153, 34, 0.35);
   border-radius: var(--radius-sm);
   background: rgba(210, 153, 34, 0.07);
-  color: #d7b76a;
+  color: var(--orange);
   font-size: 0.85rem;
 }
 
@@ -1402,7 +1403,7 @@ code {
   padding: 26px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: linear-gradient(180deg, rgba(28, 33, 40, 0.85), rgba(13, 17, 23, 0.9));
+  background: linear-gradient(180deg, #ffffff 0%, #f4f9ff 100%);
 }
 
 .agenda-card h3 {
@@ -1454,7 +1455,7 @@ code {
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: linear-gradient(180deg, rgba(28, 33, 40, 0.8), rgba(22, 27, 34, 0.92));
+  background: linear-gradient(180deg, #ffffff 0%, #f4f9ff 100%);
   color: var(--text);
   transition: all 0.3s ease;
 }
@@ -1471,7 +1472,7 @@ code {
 
 .wall-card:hover {
   border-color: var(--green);
-  box-shadow: var(--glow-green), 0 16px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--glow-green), 0 16px 40px rgba(2, 132, 199, 0.12);
   color: var(--text);
   transform: translateY(-4px);
 }
@@ -1609,12 +1610,12 @@ code {
   gap: 48px;
   padding: 52px;
   overflow: hidden;
-  border: 1px solid rgba(88, 166, 255, 0.28);
+  border: 1px solid rgba(37, 99, 235, 0.2);
   border-radius: var(--radius-lg);
   background:
-    radial-gradient(circle at 92% 8%, rgba(88, 166, 255, 0.14), transparent 38%),
-    linear-gradient(135deg, #0b1220 0%, #101722 52%, #090d13 100%);
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.4);
+    radial-gradient(circle at 92% 8%, rgba(37, 99, 235, 0.12), transparent 38%),
+    linear-gradient(135deg, #ffffff 0%, #eef6ff 52%, #e0efff 100%);
+  box-shadow: 0 28px 70px rgba(30, 64, 175, 0.14);
 }
 
 .join-panel::before {
@@ -1622,8 +1623,8 @@ code {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(88, 166, 255, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(88, 166, 255, 0.06) 1px, transparent 1px);
+    linear-gradient(rgba(37, 99, 235, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 99, 235, 0.07) 1px, transparent 1px);
   background-size: 32px 32px;
   -webkit-mask-image: linear-gradient(115deg, #000, transparent 62%);
   mask-image: linear-gradient(115deg, #000, transparent 62%);
@@ -1692,7 +1693,7 @@ code {
   padding: 24px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: rgba(1, 4, 9, 0.55);
+  background: rgba(255, 255, 255, 0.66);
   backdrop-filter: blur(8px);
 }
 
@@ -1742,7 +1743,7 @@ code {
 .site-footer {
   padding: 46px 0 32px;
   border-top: 1px solid var(--border);
-  background: rgba(1, 4, 9, 0.45);
+  background: rgba(234, 242, 255, 0.62);
 }
 
 .footer-inner {
@@ -1840,8 +1841,8 @@ code {
     padding: 20px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    background: rgba(13, 17, 23, 0.98);
-    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+    background: #ffffff;
+    box-shadow: 0 24px 48px rgba(30, 64, 175, 0.16);
     backdrop-filter: blur(18px);
   }
 

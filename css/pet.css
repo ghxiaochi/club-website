@@ -1,0 +1,288 @@
+/* =========================================================
+   HNYZ 站内桌宠
+   ---------------------------------------------------------
+   轻量版：入场、漂浮、点击说话、随页面滚动转动徽章。
+   没有拖拽、滚轮缩放、键盘缩放。
+   形象为原创蓝白机器人，不使用真实人物照片或学校官方校徽。
+   ========================================================= */
+
+.hnyz-pet {
+  --hnyz-pet-spin: 0deg;
+  position: fixed;
+  right: clamp(10px, 2vw, 26px);
+  bottom: clamp(10px, 2.2vh, 22px);
+  z-index: 35;
+  width: clamp(104px, 10.5vw, 154px);
+  aspect-ratio: 1;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: hnyz-pet-in 0.55s 0.35s ease-out forwards;
+}
+
+/* 桌宠背后的浅蓝“背景板”，让它在白底页面上仍是独立的一层 */
+.hnyz-pet__board {
+  position: absolute;
+  inset: 2% -2% -6% 2%;
+  overflow: hidden;
+  border: 1px solid rgba(147, 197, 253, 0.6);
+  border-radius: 46% 54% 30% 30% / 52% 48% 24% 24%;
+  background:
+    radial-gradient(circle at 50% 36%, #ffffff 0%, #f5faff 38%, #dbeafe 72%, rgba(219, 234, 254, 0.18) 100%);
+  box-shadow:
+    0 16px 38px rgba(37, 99, 235, 0.16),
+    inset 0 0 26px rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0.94;
+}
+
+.hnyz-pet__board::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(37, 99, 235, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 99, 235, 0.07) 1px, transparent 1px);
+  background-size: 18px 18px;
+  -webkit-mask-image: radial-gradient(circle at 50% 44%, #000 18%, transparent 72%);
+  mask-image: radial-gradient(circle at 50% 44%, #000 18%, transparent 72%);
+  pointer-events: none;
+}
+
+.hnyz-pet__stage {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hnyz-pet__stage:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 6px;
+}
+
+.hnyz-pet__badge-wrap {
+  position: absolute;
+  top: 34%;
+  right: -1%;
+  z-index: 1;
+  width: 37%;
+  transform: rotate(var(--hnyz-pet-spin));
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+.hnyz-pet__badge {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 5px 9px rgba(30, 64, 175, 0.2));
+  animation: hnyz-pet-badge-in 0.95s 0.85s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+.hnyz-pet__figure-wrap {
+  position: absolute;
+  inset: 1% 7% 0 0;
+  z-index: 2;
+  animation: hnyz-pet-float 4.4s 1.8s ease-in-out infinite;
+}
+
+.hnyz-pet__figure {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 10px 16px rgba(37, 99, 235, 0.16));
+}
+
+.hnyz-pet__stage:hover .hnyz-pet__figure-wrap {
+  transform: translateY(-2px);
+}
+
+/* 点击后的小弹跳；动画结束后回到漂浮 */
+.hnyz-pet.is-poked .hnyz-pet__figure-wrap {
+  animation: hnyz-pet-hop 0.55s ease;
+}
+
+.hnyz-pet.is-poked .hnyz-pet__badge {
+  animation: hnyz-pet-badge-poke 0.55s ease;
+}
+
+/* 台词气泡：没有名字牌，只说话 */
+.hnyz-pet__speech {
+  position: absolute;
+  right: 2%;
+  bottom: calc(100% - 2px);
+  z-index: 5;
+  width: max-content;
+  max-width: 220px;
+  margin: 0;
+  padding: 9px 13px;
+  border: 1px solid rgba(147, 197, 253, 0.8);
+  border-radius: 12px 12px 4px 12px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.16);
+  color: var(--text-soft);
+  font-size: 0.75rem;
+  line-height: 1.65;
+  text-align: left;
+  opacity: 0;
+  transform: translateY(6px) scale(0.98);
+  transform-origin: 100% 100%;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+
+.hnyz-pet__speech::after {
+  content: "";
+  position: absolute;
+  right: 14px;
+  bottom: -7px;
+  width: 11px;
+  height: 11px;
+  border-right: 1px solid rgba(147, 197, 253, 0.8);
+  border-bottom: 1px solid rgba(147, 197, 253, 0.8);
+  background: rgba(255, 255, 255, 0.97);
+  transform: rotate(45deg);
+}
+
+.hnyz-pet.is-speaking .hnyz-pet__speech {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+@keyframes hnyz-pet-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hnyz-pet-badge-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.2) rotate(-18deg);
+  }
+  62% {
+    opacity: 1;
+    transform: scale(1.12) rotate(5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+@keyframes hnyz-pet-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes hnyz-pet-hop {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  35% {
+    transform: translateY(-9px) rotate(-1.5deg);
+  }
+  65% {
+    transform: translateY(1px) rotate(1deg);
+  }
+}
+
+@keyframes hnyz-pet-badge-poke {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.14) rotate(-6deg);
+  }
+  70% {
+    transform: scale(0.97) rotate(3deg);
+  }
+}
+
+@media (max-width: 720px) {
+  .hnyz-pet {
+    right: 8px;
+    bottom: 8px;
+    width: 94px;
+  }
+
+  .hnyz-pet__speech {
+    right: 0;
+    max-width: 182px;
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .hnyz-pet {
+    width: 66px;
+  }
+
+  .hnyz-pet__speech {
+    max-width: 150px;
+  }
+}
+
+@media (max-width: 340px) {
+  .hnyz-pet {
+    width: 58px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hnyz-pet {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+
+  .hnyz-pet__badge,
+  .hnyz-pet__figure-wrap,
+  .hnyz-pet.is-poked .hnyz-pet__figure-wrap,
+  .hnyz-pet.is-poked .hnyz-pet__badge {
+    animation: none;
+  }
+
+  .hnyz-pet__badge-wrap {
+    transform: none;
+  }
+}
+
+/* 系统开启“减少动态效果”时，保留桌宠本身，但停掉漂浮与弹跳 */
+@media (prefers-reduced-motion: reduce) {
+  .hnyz-pet {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+
+  .hnyz-pet__badge,
+  .hnyz-pet__figure-wrap,
+  .hnyz-pet.is-poked .hnyz-pet__figure-wrap,
+  .hnyz-pet.is-poked .hnyz-pet__badge {
+    animation: none;
+  }
+
+  .hnyz-pet__speech {
+    transition: none;
+  }
+}

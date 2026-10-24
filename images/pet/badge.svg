@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="">
+  <defs>
+    <linearGradient id="badgeRing" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#60a5fa"/>
+      <stop offset="0.5" stop-color="#2563eb"/>
+      <stop offset="1" stop-color="#1e40af"/>
+    </linearGradient>
+    <linearGradient id="badgeFace" x1="0" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#eff6ff"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="80" cy="80" r="75" fill="#ffffff" opacity="0.92"/>
+  <circle cx="80" cy="80" r="71" fill="none" stroke="url(#badgeRing)" stroke-width="6"/>
+  <circle cx="80" cy="80" r="59" fill="url(#badgeFace)" stroke="#bfdbfe" stroke-width="3"/>
+
+  <g fill="#93c5fd">
+    <circle cx="80" cy="15" r="3.2"/>
+    <circle cx="80" cy="145" r="3.2"/>
+    <circle cx="15" cy="80" r="3.2"/>
+    <circle cx="145" cy="80" r="3.2"/>
+  </g>
+
+  <text x="80" y="72" fill="#1e3a8a" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="27" font-weight="800" letter-spacing="1" text-anchor="middle">HNYZ</text>
+  <text x="80" y="90" fill="#2563eb" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8.4" font-weight="700" letter-spacing="1.6" text-anchor="middle">CODE CLUB</text>
+  <text x="80" y="115" fill="#2563eb" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" font-weight="800" text-anchor="middle">&lt;/&gt;</text>
+
+  <path d="M48 48q18-13 36-16" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" opacity="0.9"/>
+</svg>
