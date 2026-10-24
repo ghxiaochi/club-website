@@ -2,7 +2,7 @@
 
 一个纯静态的社团官网：**HTML + CSS + 原生 JavaScript**，没有后端、没有数据库、没有构建步骤。
 
-整体是蓝白科技风：浅蓝底、白色卡片、深海军蓝文字。右下角有一个不署名的原创蓝白机器人桌宠，徽章随页面滚动旋转，点击会说一句社团台词。项目卡片通过 **GitHub API** 读取仓库信息；首页展示前 6 个，完整列表在单独的「全部项目」页按成员折叠。遇到 403 限流、404 或网络异常会自动切换到本地兜底数据。
+整体是蓝白科技风：浅蓝底、白色卡片、深海军蓝文字。教学内容以 **Arduino 硬件编程**为主线。左下角有一个不署名的校徽，随页面滚动旋转，点击会说一句社团台词。项目卡片通过 **GitHub API** 读取仓库信息；首页展示前 6 个，完整列表在单独的「全部项目」页按成员折叠。遇到 403 限流、404 或网络异常会自动切换到本地兜底数据。
 
 - **线上地址**：<https://ghxiaochi.github.io/club-website/>
 - **仓库地址**：<https://github.com/ghxiaochi/club-website>
@@ -15,10 +15,10 @@
 
 - **首屏**：HNYZ 品牌、`把想法，写成代码。`、每周两次 / 每次一小时、QQ 群 / 邮箱快捷复制
 - **关于社团**：社团介绍、基本信息、活动频率
-- **我们做什么**：编程入门、项目实战、算法与竞赛、分享与协作
+- **我们做什么**：Arduino 入门、硬件项目实战、程序与调试、分享与协作
 - **项目展示**：首页展示 `members` 前 6 个仓库，渲染 16:9 封面卡片；更多项目跳转到 `projects.html`
 - **活动节奏**：每周两次、每次 60 分钟，以及一次活动的流程
-- **资源墙**：C++ 菜鸟教程、微雪 ESP32 Wiki
+- **资源墙**：Arduino 官方教程、微雪 ESP32 Wiki
 - **常见问题**：原生 `<details>` FAQ
 - **加入我们**：QQ 群、邮箱、三步加入流程
 
@@ -44,17 +44,16 @@ club-website/
 ├── projects.html           # 全部项目页（按成员折叠）
 ├── css/
 │   ├── style.css           # 全站样式（蓝白科技风）
-│   └── pet.css             # 右下角桌宠样式
+│   └── pet.css             # 左下角校徽背景板样式
 ├── js/
 │   ├── main.js             # GitHub API、卡片渲染、折叠、交互
-│   └── pet.js              # 桌宠滚动旋转、点击说话
+│   └── pet.js              # 校徽滚动旋转、点击说话
 ├── images/
 │   ├── favicon.svg
 │   ├── project-website.svg # 社团官网封面
 │   ├── project-zaco.svg    # Zaco 猜数字封面
 │   └── pet/
-│       ├── figure.svg      # 原创蓝白机器人
-│       └── badge.svg       # 自绘 HNYZ 徽章
+│       └── badge-school.webp # 原版校徽图片
 └── README.md
 ```
 
@@ -198,7 +197,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
   --panel: #ffffff;       /* 卡片背景 */
   --border: #d7e3f4;      /* 边框 */
   --text: #0f2744;        /* 主文字 */
-  --muted: #5b7594;       /* 次要文字 */
+  --muted: #526b89;       /* 次要文字 */
   --blue: #2563eb;        /* 主蓝 */
   --green: #0369a1;       /* 深天蓝辅助色 */
 }
@@ -206,7 +205,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 改这几个变量即可整体换色，不需要逐个改选择器。
 
-桌宠位于 `index.html` 的 `.hnyz-pet`，样式在 `css/pet.css`，交互在 `js/pet.js`。它使用原创机器人形象和自绘 HNYZ 徽章，不使用真实人物照片或学校官方校徽；如需停用，删除 `index.html` 中的 `.hnyz-pet` 结构即可。
+校徽位于 `index.html` 的 `.hnyz-pet`，样式在 `css/pet.css`，交互在 `js/pet.js`。图片为 `images/pet/badge-school.webp`，放在左下角的浅蓝背景板里；如需停用，删除 `index.html` 中的 `.hnyz-pet` 结构即可。
 
 ---
 

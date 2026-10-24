@@ -1,18 +1,18 @@
 /* =========================================================
-   HNYZ 站内桌宠
+   HNYZ 站内校徽
    ---------------------------------------------------------
-   轻量版：入场、漂浮、点击说话、随页面滚动转动徽章。
-   没有拖拽、滚轮缩放、键盘缩放。
-   形象为原创蓝白机器人，不使用真实人物照片或学校官方校徽。
+   轻量版：入场、点击说话、随页面滚动转动校徽。
+   没有拖拽、滚轮缩放、键盘缩放，也没有机器人形象。
+   校徽使用学校提供的原版图片，放在左下角的浅蓝背景板里。
    ========================================================= */
 
 .hnyz-pet {
   --hnyz-pet-spin: 0deg;
   position: fixed;
-  right: clamp(10px, 2vw, 26px);
+  left: clamp(8px, 1.6vw, 20px);
   bottom: clamp(10px, 2.2vh, 22px);
   z-index: 35;
-  width: clamp(104px, 10.5vw, 154px);
+  width: clamp(84px, 8vw, 112px);
   aspect-ratio: 1;
   pointer-events: none;
   opacity: 0;
@@ -20,21 +20,21 @@
   animation: hnyz-pet-in 0.55s 0.35s ease-out forwards;
 }
 
-/* 桌宠背后的浅蓝“背景板”，让它在白底页面上仍是独立的一层 */
+/* 校徽背后的浅蓝“背景板” */
 .hnyz-pet__board {
   position: absolute;
-  inset: 2% -2% -6% 2%;
+  inset: -5%;
   overflow: hidden;
-  border: 1px solid rgba(147, 197, 253, 0.6);
-  border-radius: 46% 54% 30% 30% / 52% 48% 24% 24%;
+  border: 1px solid rgba(147, 197, 253, 0.65);
+  border-radius: 50%;
   background:
-    radial-gradient(circle at 50% 36%, #ffffff 0%, #f5faff 38%, #dbeafe 72%, rgba(219, 234, 254, 0.18) 100%);
+    radial-gradient(circle at 50% 38%, #ffffff 0%, #f7fbff 52%, #dbeafe 100%);
   box-shadow:
     0 16px 38px rgba(37, 99, 235, 0.16),
-    inset 0 0 26px rgba(255, 255, 255, 0.9);
+    inset 0 0 24px rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  opacity: 0.94;
+  opacity: 0.96;
 }
 
 .hnyz-pet__board::before {
@@ -47,6 +47,15 @@
   background-size: 18px 18px;
   -webkit-mask-image: radial-gradient(circle at 50% 44%, #000 18%, transparent 72%);
   mask-image: radial-gradient(circle at 50% 44%, #000 18%, transparent 72%);
+  pointer-events: none;
+}
+
+.hnyz-pet__board::after {
+  content: "";
+  position: absolute;
+  inset: 5%;
+  border: 1px dashed rgba(37, 99, 235, 0.2);
+  border-radius: 50%;
   pointer-events: none;
 }
 
@@ -68,15 +77,13 @@
 
 .hnyz-pet__stage:focus-visible {
   outline: 2px solid var(--blue);
-  outline-offset: 6px;
+  outline-offset: 8px;
 }
 
 .hnyz-pet__badge-wrap {
   position: absolute;
-  top: 34%;
-  right: -1%;
+  inset: 9%;
   z-index: 1;
-  width: 37%;
   transform: rotate(var(--hnyz-pet-spin));
   transform-origin: 50% 50%;
   will-change: transform;
@@ -85,42 +92,21 @@
 .hnyz-pet__badge {
   display: block;
   width: 100%;
-  height: auto;
-  filter: drop-shadow(0 5px 9px rgba(30, 64, 175, 0.2));
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 11px rgba(30, 64, 175, 0.22));
   animation: hnyz-pet-badge-in 0.95s 0.85s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
 }
 
-.hnyz-pet__figure-wrap {
-  position: absolute;
-  inset: 1% 7% 0 0;
-  z-index: 2;
-  animation: hnyz-pet-float 4.4s 1.8s ease-in-out infinite;
-}
-
-.hnyz-pet__figure {
-  display: block;
-  width: 100%;
-  height: auto;
-  filter: drop-shadow(0 10px 16px rgba(37, 99, 235, 0.16));
-}
-
-.hnyz-pet__stage:hover .hnyz-pet__figure-wrap {
-  transform: translateY(-2px);
-}
-
-/* 点击后的小弹跳；动画结束后回到漂浮 */
-.hnyz-pet.is-poked .hnyz-pet__figure-wrap {
-  animation: hnyz-pet-hop 0.55s ease;
-}
-
+/* 点击后的小弹跳 */
 .hnyz-pet.is-poked .hnyz-pet__badge {
   animation: hnyz-pet-badge-poke 0.55s ease;
 }
 
-/* 台词气泡：没有名字牌，只说话 */
+/* 台词气泡：左下方弹出，不遮挡校徽本身 */
 .hnyz-pet__speech {
   position: absolute;
-  right: 2%;
+  left: 2%;
   bottom: calc(100% - 2px);
   z-index: 5;
   width: max-content;
@@ -128,7 +114,7 @@
   margin: 0;
   padding: 9px 13px;
   border: 1px solid rgba(147, 197, 253, 0.8);
-  border-radius: 12px 12px 4px 12px;
+  border-radius: 12px 12px 12px 4px;
   background: rgba(255, 255, 255, 0.97);
   box-shadow: 0 12px 28px rgba(37, 99, 235, 0.16);
   color: var(--text-soft);
@@ -137,7 +123,7 @@
   text-align: left;
   opacity: 0;
   transform: translateY(6px) scale(0.98);
-  transform-origin: 100% 100%;
+  transform-origin: 0 100%;
   transition: opacity 0.2s ease, transform 0.2s ease;
   pointer-events: none;
 }
@@ -145,11 +131,11 @@
 .hnyz-pet__speech::after {
   content: "";
   position: absolute;
-  right: 14px;
+  left: 14px;
   bottom: -7px;
   width: 11px;
   height: 11px;
-  border-right: 1px solid rgba(147, 197, 253, 0.8);
+  border-left: 1px solid rgba(147, 197, 253, 0.8);
   border-bottom: 1px solid rgba(147, 197, 253, 0.8);
   background: rgba(255, 255, 255, 0.97);
   transform: rotate(45deg);
@@ -182,29 +168,6 @@
   }
 }
 
-@keyframes hnyz-pet-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
-  }
-}
-
-@keyframes hnyz-pet-hop {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  35% {
-    transform: translateY(-9px) rotate(-1.5deg);
-  }
-  65% {
-    transform: translateY(1px) rotate(1deg);
-  }
-}
-
 @keyframes hnyz-pet-badge-poke {
   0%,
   100% {
@@ -220,13 +183,13 @@
 
 @media (max-width: 720px) {
   .hnyz-pet {
-    right: 8px;
+    left: 8px;
     bottom: 8px;
-    width: 94px;
+    width: 76px;
   }
 
   .hnyz-pet__speech {
-    right: 0;
+    left: 0;
     max-width: 182px;
     font-size: 0.7rem;
   }
@@ -234,7 +197,7 @@
 
 @media (max-width: 400px) {
   .hnyz-pet {
-    width: 66px;
+    width: 64px;
   }
 
   .hnyz-pet__speech {
@@ -244,10 +207,11 @@
 
 @media (max-width: 340px) {
   .hnyz-pet {
-    width: 58px;
+    width: 56px;
   }
 }
 
+/* 系统开启“减少动态效果”时，保留校徽，但停掉弹入与弹跳 */
 @media (prefers-reduced-motion: reduce) {
   .hnyz-pet {
     opacity: 1;
@@ -256,28 +220,6 @@
   }
 
   .hnyz-pet__badge,
-  .hnyz-pet__figure-wrap,
-  .hnyz-pet.is-poked .hnyz-pet__figure-wrap,
-  .hnyz-pet.is-poked .hnyz-pet__badge {
-    animation: none;
-  }
-
-  .hnyz-pet__badge-wrap {
-    transform: none;
-  }
-}
-
-/* 系统开启“减少动态效果”时，保留桌宠本身，但停掉漂浮与弹跳 */
-@media (prefers-reduced-motion: reduce) {
-  .hnyz-pet {
-    opacity: 1;
-    transform: none;
-    animation: none;
-  }
-
-  .hnyz-pet__badge,
-  .hnyz-pet__figure-wrap,
-  .hnyz-pet.is-poked .hnyz-pet__figure-wrap,
   .hnyz-pet.is-poked .hnyz-pet__badge {
     animation: none;
   }
