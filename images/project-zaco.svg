@@ -1,47 +1,88 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750" role="img" aria-labelledby="coverTitle coverDesc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="coverTitle coverDesc">
   <title id="coverTitle">Zaco 猜数字项目封面</title>
-  <desc id="coverDesc">浅色背景上的 ZACO 标题、电路板图形和 Arduino 标签。</desc>
+  <desc id="coverDesc">深色赛博风格封面：电路板线条、ZACO 标题、问号芯片和 Arduino 串口数据。</desc>
 
-  <rect width="1200" height="750" fill="#f1f2ed"/>
-  <path d="M72 96h1056" stroke="#d8dad2" stroke-width="1"/>
-  <path d="M72 654h1056" stroke="#d8dad2" stroke-width="1"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#081019"/>
+      <stop offset="0.55" stop-color="#0d1117"/>
+      <stop offset="1" stop-color="#02060b"/>
+    </linearGradient>
+    <radialGradient id="glowGreen" cx="0.15" cy="0.2" r="0.7">
+      <stop offset="0" stop-color="#3fb950" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#3fb950" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowBlue" cx="0.85" cy="0.85" r="0.6">
+      <stop offset="0" stop-color="#58a6ff" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#58a6ff" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#3fb950" stroke-opacity="0.09" stroke-width="1"/>
+    </pattern>
+    <filter id="glow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="16" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
 
-  <text x="72" y="78" fill="#6b7069" font-family="'Courier New', monospace" font-size="18" letter-spacing="3">PROJECT / 01</text>
-  <text x="70" y="300" fill="#111310" font-family="Arial, Helvetica, sans-serif" font-size="160" font-weight="700" letter-spacing="-10">ZACO</text>
-  <text x="70" y="434" fill="#111310" font-family="Arial, Helvetica, sans-serif" font-size="92" font-weight="400" letter-spacing="-2">GUESS THE NUMBER</text>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect width="1600" height="900" fill="url(#glowGreen)"/>
+  <rect width="1600" height="900" fill="url(#glowBlue)"/>
+  <rect width="1600" height="900" fill="url(#grid)" opacity="0.8"/>
 
-  <rect x="72" y="512" width="548" height="2" fill="#c9ccc4"/>
-  <text x="72" y="555" fill="#4c514b" font-family="'Courier New', monospace" font-size="18" letter-spacing="2">ARDUINO · C++ · SERIAL</text>
-  <text x="72" y="586" fill="#7a7f77" font-family="'Courier New', monospace" font-size="16" letter-spacing="2">A SMALL GAME, A FIRST LOOP</text>
+  <!-- 电路走线 -->
+  <g fill="none" stroke="#3fb950" stroke-opacity="0.28" stroke-width="2">
+    <path d="M0 742H260V800H520"/>
+    <path d="M0 690H180V626H350"/>
+    <path d="M1600 160H1400V100H1180"/>
+    <path d="M1600 210H1460V270H1300"/>
+    <path d="M980 900V812H1180V760"/>
+  </g>
+  <g fill="#58a6ff" fill-opacity="0.8">
+    <circle cx="520" cy="800" r="5"/>
+    <circle cx="350" cy="626" r="5"/>
+    <circle cx="1180" cy="100" r="5"/>
+    <circle cx="1300" cy="270" r="5"/>
+    <circle cx="1180" cy="760" r="5"/>
+  </g>
 
-  <g transform="translate(812 142)">
-    <rect width="296" height="432" rx="18" fill="#ffffff" stroke="#111310" stroke-width="2"/>
-    <rect x="32" y="40" width="232" height="118" rx="8" fill="#f1f2ed" stroke="#d8dad2"/>
-    <text x="52" y="78" fill="#111310" font-family="'Courier New', monospace" font-size="14" letter-spacing="1.5">ARDUINO UNO</text>
-    <text x="52" y="107" fill="#7a7f77" font-family="'Courier New', monospace" font-size="12">DIGITAL / ANALOG</text>
-    <text x="52" y="132" fill="#7a7f77" font-family="'Courier New', monospace" font-size="12">SERIAL 9600</text>
+  <g font-family="'Courier New', monospace">
+    <text x="92" y="104" fill="#3fb950" font-size="24" letter-spacing="6">PROJECT_01 // ARDUINO</text>
+    <text x="88" y="282" fill="#e6edf3" font-family="Arial, Helvetica, sans-serif" font-size="190" font-weight="700" letter-spacing="-10">ZACO</text>
+    <text x="96" y="360" fill="#58a6ff" font-size="34" letter-spacing="6">GUESS THE NUMBER</text>
+    <text x="96" y="424" fill="#8b949e" font-size="22" letter-spacing="2">RANDOM · LOOP · SERIAL · C++</text>
 
-    <g fill="#111310">
-      <circle cx="42" cy="194" r="5"/>
-      <circle cx="72" cy="194" r="5"/>
-      <circle cx="102" cy="194" r="5"/>
-      <circle cx="132" cy="194" r="5"/>
-      <circle cx="162" cy="194" r="5"/>
-      <circle cx="192" cy="194" r="5"/>
-      <circle cx="222" cy="194" r="5"/>
-      <circle cx="252" cy="194" r="5"/>
-    </g>
-
-    <text x="148" y="322" fill="#111310" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="116" font-weight="700">?</text>
-    <rect x="66" y="352" width="164" height="42" rx="21" fill="#1f5eff"/>
-    <text x="148" y="379" fill="#ffffff" text-anchor="middle" font-family="'Courier New', monospace" font-size="13" letter-spacing="1.5">GUESS 0—99</text>
-
-    <g fill="#c9ccc4">
-      <circle cx="112" cy="424" r="7"/>
-      <circle cx="148" cy="424" r="7"/>
-      <circle cx="184" cy="424" r="7"/>
+    <g transform="translate(96 504)">
+      <rect width="620" height="196" rx="8" fill="#0d1117" stroke="#30363d" stroke-width="2"/>
+      <circle cx="28" cy="28" r="5" fill="#3fb950"/>
+      <text x="48" y="34" fill="#6e7681" font-size="15">serial_monitor // 9600 baud</text>
+      <text x="28" y="82" fill="#3fb950" font-size="20">&gt; guess 0-99</text>
+      <text x="28" y="120" fill="#e6edf3" font-size="20">42</text>
+      <text x="28" y="158" fill="#58a6ff" font-size="20">&gt; too high, try again</text>
     </g>
   </g>
 
-  <circle cx="1104" cy="90" r="10" fill="#1f5eff"/>
+  <!-- 芯片 / 问号主体 -->
+  <g transform="translate(1010 170)">
+    <rect width="420" height="420" rx="18" fill="#0d1117" stroke="#3fb950" stroke-width="2"/>
+    <rect x="34" y="34" width="352" height="352" rx="10" fill="#161b22" stroke="#30363d"/>
+
+    <!-- 芯片引脚 -->
+    <g stroke="#3fb950" stroke-width="4" stroke-linecap="round">
+      <path d="M-30 100H0M-30 160H0M-30 220H0M-30 280H0M-30 340H0"/>
+      <path d="M420 100H450M420 160H450M420 220H450M420 280H450M420 340H450"/>
+    </g>
+
+    <text x="210" y="260" text-anchor="middle" fill="#58a6ff" font-family="Arial, Helvetica, sans-serif" font-size="210" font-weight="700" filter="url(#glow)">?</text>
+    <text x="210" y="324" text-anchor="middle" fill="#8b949e" font-family="'Courier New', monospace" font-size="18" letter-spacing="4">RANDOM / 0—99</text>
+  </g>
+
+  <g transform="translate(1036 668)" font-family="'Courier New', monospace">
+    <rect width="368" height="74" rx="6" fill="#0d1117" stroke="#30363d"/>
+    <circle cx="26" cy="37" r="5" fill="#3fb950"/>
+    <text x="48" y="43" fill="#8b949e" font-size="17" letter-spacing="1">STATUS: ONLINE</text>
+  </g>
 </svg>

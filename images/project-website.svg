@@ -1,42 +1,89 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750" role="img" aria-labelledby="coverTitle coverDesc">
-  <title id="coverTitle">衡南一中编程社官网项目封面</title>
-  <desc id="coverDesc">浅蓝色背景上的 CLUB SITE 标题和简洁的浏览器窗口图形。</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="coverTitle coverDesc">
+  <title id="coverTitle">HNYZ 社团官网项目封面</title>
+  <desc id="coverDesc">深色赛博风格封面：网格背景、终端窗口、HNYZ 标题和蓝色代码光效。</desc>
 
-  <rect width="1200" height="750" fill="#edf1fb"/>
-  <path d="M72 96h1056" stroke="#d5ddef" stroke-width="1"/>
-  <path d="M72 654h1056" stroke="#d5ddef" stroke-width="1"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1220"/>
+      <stop offset="0.55" stop-color="#0d1117"/>
+      <stop offset="1" stop-color="#070b11"/>
+    </linearGradient>
+    <radialGradient id="glowBlue" cx="0.8" cy="0.15" r="0.65">
+      <stop offset="0" stop-color="#58a6ff" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#58a6ff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowGreen" cx="0.12" cy="0.9" r="0.5">
+      <stop offset="0" stop-color="#3fb950" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#3fb950" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" fill="none" stroke="#58a6ff" stroke-opacity="0.1" stroke-width="1"/>
+    </pattern>
+    <filter id="softGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="14" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
 
-  <text x="72" y="78" fill="#5f6a82" font-family="'Courier New', monospace" font-size="18" letter-spacing="3">PROJECT / 02</text>
-  <text x="70" y="300" fill="#111310" font-family="Arial, Helvetica, sans-serif" font-size="160" font-weight="700" letter-spacing="-10">CLUB</text>
-  <text x="70" y="434" fill="#111310" font-family="Arial, Helvetica, sans-serif" font-size="160" font-weight="700" letter-spacing="-10">SITE</text>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect width="1600" height="900" fill="url(#glowBlue)"/>
+  <rect width="1600" height="900" fill="url(#glowGreen)"/>
+  <rect width="1600" height="900" fill="url(#grid)" opacity="0.7"/>
 
-  <rect x="72" y="512" width="548" height="2" fill="#b9c5de"/>
-  <text x="72" y="555" fill="#3f4a60" font-family="'Courier New', monospace" font-size="18" letter-spacing="2">HTML · CSS · JAVASCRIPT</text>
-  <text x="72" y="586" fill="#6d7890" font-family="'Courier New', monospace" font-size="16" letter-spacing="2">STATIC · RESPONSIVE · GITHUB PAGES</text>
+  <path d="M0 690H1600" stroke="#58a6ff" stroke-opacity="0.18" stroke-width="1"/>
+  <path d="M0 750H1600" stroke="#58a6ff" stroke-opacity="0.08" stroke-width="1"/>
 
-  <g transform="translate(782 142)">
-    <rect width="326" height="430" rx="16" fill="#ffffff" stroke="#111310" stroke-width="2"/>
-    <path d="M0 54h326" fill="none" stroke="#111310" stroke-width="2"/>
-    <circle cx="28" cy="28" r="5" fill="#1f5eff"/>
-    <circle cx="48" cy="28" r="5" fill="#d8dad2"/>
-    <circle cx="68" cy="28" r="5" fill="#d8dad2"/>
-    <rect x="218" y="19" width="84" height="18" rx="9" fill="#f1f2ed"/>
+  <g font-family="'Courier New', monospace">
+    <text x="92" y="104" fill="#58a6ff" font-size="24" letter-spacing="6">HNYZ // OPEN_SOURCE</text>
+    <text x="92" y="264" fill="#e6edf3" font-family="Arial, Helvetica, sans-serif" font-size="168" font-weight="700" letter-spacing="-8">HNYZ</text>
+    <text x="96" y="346" fill="#3fb950" font-size="26" letter-spacing="4">CLUB_WEBSITE // 2026</text>
+    <text x="96" y="410" fill="#8b949e" font-size="22" letter-spacing="2">HTML · CSS · JAVASCRIPT · GITHUB PAGES</text>
 
-    <text x="32" y="118" fill="#111310" font-family="Arial, Helvetica, sans-serif" font-size="48" font-weight="700" letter-spacing="-2">HN1Z</text>
-    <text x="32" y="146" fill="#6b7069" font-family="'Courier New', monospace" font-size="13" letter-spacing="2">CODE CLUB</text>
-
-    <rect x="32" y="178" width="174" height="42" rx="21" fill="#111310"/>
-    <text x="119" y="204" fill="#ffffff" text-anchor="middle" font-family="'Courier New', monospace" font-size="12" letter-spacing="1.5">JOIN US →</text>
-
-    <g transform="translate(32 256)" fill="none" stroke="#c9ccc4" stroke-width="1.5">
-      <rect width="262" height="52" rx="6"/>
-      <path d="M16 18h92M16 35h160"/>
-    </g>
-    <g transform="translate(32 322)" fill="none" stroke="#c9ccc4" stroke-width="1.5">
-      <rect width="262" height="52" rx="6"/>
-      <path d="M16 18h120M16 35h78"/>
+    <g transform="translate(96 486)">
+      <rect width="640" height="2" fill="#30363d"/>
+      <text x="0" y="48" fill="#8b949e" font-size="20" letter-spacing="1">$ git push origin main</text>
+      <text x="0" y="88" fill="#3fb950" font-size="20" letter-spacing="1">→ deployed to ghxiaochi.github.io/club-website</text>
     </g>
   </g>
 
-  <circle cx="1104" cy="90" r="10" fill="#1f5eff"/>
+  <g transform="translate(880 132)">
+    <rect width="596" height="420" rx="12" fill="#0d1117" stroke="#30363d" stroke-width="2"/>
+    <path d="M0 58H596" stroke="#30363d" stroke-width="2"/>
+    <circle cx="28" cy="29" r="6" fill="#ff5f56"/>
+    <circle cx="50" cy="29" r="6" fill="#ffbd2e"/>
+    <circle cx="72" cy="29" r="6" fill="#27c93f"/>
+    <text x="100" y="35" fill="#6e7681" font-family="'Courier New', monospace" font-size="16">~/hnyz/index.html</text>
+
+    <g font-family="'Courier New', monospace" font-size="20">
+      <text x="34" y="112" fill="#6e7681">01</text>
+      <text x="76" y="112" fill="#ff7b72">&lt;section</text>
+      <text x="188" y="112" fill="#79c0ff">class</text>
+      <text x="246" y="112" fill="#a5d6ff">="hero"</text>
+      <text x="332" y="112" fill="#ff7b72">&gt;</text>
+
+      <text x="34" y="154" fill="#6e7681">02</text>
+      <text x="76" y="154" fill="#ff7b72">&lt;h1&gt;</text>
+      <text x="164" y="154" fill="#e6edf3">BUILD SOMETHING REAL</text>
+      <text x="432" y="154" fill="#ff7b72">&lt;/h1&gt;</text>
+
+      <text x="34" y="196" fill="#6e7681">03</text>
+      <text x="76" y="196" fill="#3fb950">// build something real</text>
+
+      <text x="34" y="238" fill="#6e7681">04</text>
+      <text x="76" y="238" fill="#ff7b72">&lt;/section&gt;</text>
+    </g>
+
+    <rect x="34" y="286" width="528" height="92" rx="8" fill="#161b22" stroke="#30363d"/>
+    <circle cx="62" cy="320" r="5" fill="#3fb950"/>
+    <text x="82" y="326" fill="#8b949e" font-family="'Courier New', monospace" font-size="16">SYSTEM ONLINE / 2 SESSIONS PER WEEK</text>
+    <text x="62" y="356" fill="#58a6ff" font-family="'Courier New', monospace" font-size="16">QQ_GROUP: 1098931492</text>
+  </g>
+
+  <g filter="url(#softGlow)">
+    <path d="M1436 96L1476 136L1436 176" fill="none" stroke="#58a6ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M1320 96L1280 136L1320 176" fill="none" stroke="#3fb950" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
 </svg>

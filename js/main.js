@@ -1,58 +1,116 @@
 /* =========================================================
-   衡南一中编程社 HN1Z CODE — 页面交互
-   功能：
-   1. 读取 projects.json 并渲染项目卡片
-   2. 按技术标签筛选项目
-   3. QQ 群号 / 邮箱一键复制
-   4. 移动端导航
-   5. 图片缺失时显示占位块
-   无任何第三方依赖，直接由浏览器运行。
+   HNYZ · 衡南一中编程社 — 页面交互
+   ---------------------------------------------------------
+   这份脚本负责：
+   1. 读取 members 数组，用 Promise.all 并发请求 GitHub API
+   2. 渲染赛博风项目卡片（封面、简介、语言、Stars、Forks）
+   3. 处理 403 限流 / 404 仓库不存在 / 网络异常，自动降级
+   4. QQ 群号、邮箱一键复制
+   5. 移动端导航、页头滚动状态、页脚年份
+
+   想换展示的项目，只改下面的 members 数组即可。
+   不需要后端，也不需要构建工具。
    ========================================================= */
 
 (() => {
   "use strict";
 
-  const PROJECTS_ENDPOINT = "projects.json";
-
-  /* 直接双击 index.html（file://）时浏览器禁止 fetch 本地 JSON，
-     这里保留一份与 projects.json 同步的预览数据。 */
-  const FALLBACK_PROJECTS = [
+  /* =======================================================
+     一、仓库清单（唯一需要手动维护的数据）
+     -------------------------------------------------------
+     user     : GitHub 用户名 / 组织名
+     repo     : 仓库名
+     coverImg : 封面图 URL；可以填 https 远程图，也可以填本地
+                images/xxx.svg。留空则自动显示科技网格占位图。
+     title    : 可选，卡片上显示的中文项目名；不填就用仓库名。
+     desc     : 可选，本地简介。GitHub 仓库没写简介时用它兜底。
+     ======================================================= */
+  const members = [
     {
-      name: "Zaco 猜数字",
-      desc: "运行在 Arduino 上的猜数字小游戏，练习随机数、循环和串口交互。",
-      tags: ["Arduino", "C++", "嵌入式"],
-      repo: "https://github.com/ghxiaochi/zaco-guess-number",
-      demo: "",
-      cover: "images/project-zaco.svg"
+      user: "ghxiaochi",
+      repo: "club-website",
+      coverImg: "images/project-website.svg",
+      title: "社团官网 HNYZ",
+      desc: "HNYZ 社团官网：纯手写 HTML / CSS / JavaScript，部署在 GitHub Pages，用 GitHub API 实时展示社团仓库。"
     },
     {
-      name: "社团官网 HN1Z CODE",
-      desc: "你现在看到的这个页面：纯 HTML、CSS、JavaScript 手写的社团官网，部署在 GitHub Pages。",
-      tags: ["HTML", "CSS", "JavaScript"],
-      repo: "https://github.com/ghxiaochi/club-website",
-      demo: "",
-      cover: "images/project-website.svg"
+      user: "ghxiaochi",
+      repo: "zaco-guess-number",
+      coverImg: "images/project-zaco.svg",
+      title: "Zaco 猜数字",
+      desc: "运行在 Arduino 上的猜数字小游戏，练习随机数、循环、串口交互和 C++ 基础语法。"
     },
     {
-      name: "下一个社团项目",
-      desc: "这里留给你们的下一件作品。修改 projects.json，把名字、描述和仓库链接换成真实项目即可。",
-      tags: ["Idea", "Build", "Share"],
-      repo: "",
-      demo: "",
-      cover: ""
+      user: "ghxiaochi",
+      repo: "led",
+      coverImg: "",
+      title: "LED 硬件实验",
+      desc: "从点亮第一颗 LED 开始，练习 GPIO、基础电路和嵌入式程序结构。"
     }
   ];
 
+  const API_BASE = "https://api.github.com/repos";
+
+  /* 语言圆点颜色，尽量贴近 GitHub 的语言配色 */
+  const LANGUAGE_COLORS = {
+    "C++": "#f34b7d",
+    C: "#555555",
+    CSS: "#663399",
+    HTML: "#e34c26",
+    JavaScript: "#f1e05a",
+    Python: "#3572A5",
+    TypeScript: "#3178c6",
+    Arduino: "#bd79d1",
+    Shell: "#89e051"
+  };
+
+  /* -------------------------------------------------------
+     API 不可用时的本地兜底数据
+     说明：403（限流）、404、网络断开时，用这里的数据把卡片
+     正常渲染出来，避免页面出现空白或一堆报错。
+     ------------------------------------------------------- */
+  const FALLBACK_REPOS = {
+    "ghxiaochi/club-website": {
+      name: "club-website",
+      description:
+        "你现在看到的社团官网：纯 HTML、CSS、JavaScript 手写，部署在 GitHub Pages，卡片通过 GitHub API 实时读取。",
+      language: "CSS",
+      stars: 0,
+      forks: 0
+    },
+    "ghxiaochi/zaco-guess-number": {
+      name: "zaco-guess-number",
+      description:
+        "运行在 Arduino 上的猜数字小游戏，练习随机数、循环、串口交互和 C++ 基础语法。",
+      language: "C++",
+      stars: 1,
+      forks: 0
+    },
+    "ghxiaochi/led": {
+      name: "led",
+      description:
+        "C++ 硬件实验仓库：从点亮一盏 LED 开始，练习 GPIO、基础电路和嵌入式程序结构。",
+      language: "C++",
+      stars: 1,
+      forks: 0
+    }
+  };
+
+  /* =======================================================
+     二、DOM 引用与状态
+     ======================================================= */
   const grid = document.querySelector("#project-grid");
-  const filters = document.querySelector("#project-filters");
   const count = document.querySelector("#project-count");
   const renderNote = document.querySelector("#render-note");
 
-  let allProjects = [];
-  let activeTag = "全部";
+  /* 记录这次加载中出现了哪些降级原因，最后合并成一条提示 */
+  const notices = new Set();
 
-  /* ---------- 数据清洗 ---------- */
+  /* =======================================================
+     三、工具函数
+     ======================================================= */
 
+  /* 只允许 http(s) 和站内相对路径，避免把 javascript: 之类的东西塞进 href */
   function normalizeHttpUrl(value) {
     if (typeof value !== "string" || !value.trim()) return "";
 
@@ -64,69 +122,101 @@
     }
   }
 
+  /* 封面地址校验：允许 https、绝对路径、./ 相对路径和 images/xxx 这种写法 */
   function normalizeCover(value) {
     if (typeof value !== "string") return "";
     const path = value.trim();
-    if (!path || path.length > 300) return "";
-    return /^(?:https?:\/\/|\/|\.{1,2}\/)?[^\s"'<>]+$/i.test(path) ? path : "";
+    if (!path || path.length > 500) return "";
+    return /^(?:https?:\/\/|\/|\.{1,2}\/|[\w.-]+\/)/i.test(path) ? path : "";
   }
 
-  function normalizeProject(project, index) {
-    const source = project && typeof project === "object" ? project : {};
-    const name =
-      typeof source.name === "string" && source.name.trim()
-        ? source.name.trim()
-        : `未命名项目 ${index + 1}`;
-    const desc =
-      typeof source.desc === "string" && source.desc.trim()
-        ? source.desc.trim()
-        : "暂无项目描述。";
+  /* 数字缩写：1200 -> 1.2k，避免数据栏被大数字撑开 */
+  function formatNumber(value) {
+    const number = Number(value);
+    if (!Number.isFinite(number) || number <= 0) return "0";
+    if (number < 1000) return String(number);
+    return `${(number / 1000).toFixed(number >= 10000 ? 0 : 1)}k`;
+  }
 
-    const tags = [];
-    const seenTags = new Set();
-    if (Array.isArray(source.tags)) {
-      source.tags.forEach((tag) => {
-        if (typeof tag !== "string") return;
-        const clean = tag.trim();
-        if (!clean || seenTags.has(clean) || tags.length >= 5) return;
-        seenTags.add(clean);
-        tags.push(clean);
-      });
-    }
-
+  /* 用 GitHub API 返回的数据组装卡片需要的字段 */
+  function normalizeRepo(data, member) {
     return {
-      index,
-      name,
-      desc,
-      tags,
-      repo: normalizeHttpUrl(source.repo),
-      demo: normalizeHttpUrl(source.demo),
-      cover: normalizeCover(source.cover)
+      key: `${member.user}/${member.repo}`,
+      user: member.user,
+      repo: member.repo,
+      name:
+        (typeof member.title === "string" && member.title.trim()) ||
+        data.name ||
+        member.repo,
+      owner: data.owner?.login || member.user,
+      description:
+        (typeof member.desc === "string" && member.desc.trim()) ||
+        (typeof data.description === "string" && data.description.trim()) ||
+        "这个仓库还没有填写简介，点开源码看看吧。",
+      language: data.language || "TEXT",
+      stars: Number(data.stargazers_count) || 0,
+      forks: Number(data.forks_count) || 0,
+      url: data.html_url || `https://github.com/${member.user}/${member.repo}`,
+      coverImg: normalizeCover(member.coverImg),
+      status: "ok"
     };
   }
 
-  /* ---------- 项目卡片 ---------- */
+  /* 生成一张“降级卡片”的数据。status 会显示在封面角标上。 */
+  function createFallback(member, status) {
+    const key = `${member.user}/${member.repo}`;
+    const snapshot = FALLBACK_REPOS[key] || {};
 
-  function padNumber(value) {
-    return String(value).padStart(2, "0");
+    let description =
+      (typeof member.desc === "string" && member.desc.trim()) ||
+      snapshot.description ||
+      "GitHub API 暂时不可用，点开源码直接查看仓库。";
+    if (status === "not-found") {
+      description = "这个仓库返回了 404：可能已被删除、改名，或设置成了私有仓库。";
+    }
+
+    return {
+      key,
+      user: member.user,
+      repo: member.repo,
+      name:
+        (typeof member.title === "string" && member.title.trim()) ||
+        snapshot.name ||
+        member.repo,
+      owner: member.user,
+      description,
+      language: snapshot.language || "TEXT",
+      stars: Number(snapshot.stars) || 0,
+      forks: Number(snapshot.forks) || 0,
+      url: `https://github.com/${member.user}/${member.repo}`,
+      coverImg: normalizeCover(member.coverImg),
+      status
+    };
   }
+
+  /* =======================================================
+     四、封面：真实图片 / 科技网格占位
+     ======================================================= */
 
   function createCoverPlaceholder(project) {
     const placeholder = document.createElement("div");
     placeholder.className = "cover-placeholder";
+    placeholder.setAttribute("role", "img");
+    placeholder.setAttribute("aria-label", `${project.name} 的默认科技风封面`);
 
-    const index = document.createElement("span");
-    index.className = "cover-index";
-    index.textContent = `PROJECT / ${padNumber(project.index + 1)}`;
+    const tag = document.createElement("span");
+    tag.className = "cover-tag";
+    tag.textContent = "NO_COVER // AUTO_GEN";
 
     const mark = document.createElement("strong");
-    mark.textContent = Array.from(project.name).slice(0, 2).join("");
+    mark.className = "cover-mark";
+    mark.textContent = "</>";
 
-    const note = document.createElement("span");
-    note.className = "cover-note";
-    note.textContent = project.tags[0] || "IDEA";
+    const repo = document.createElement("span");
+    repo.className = "cover-repo";
+    repo.textContent = `${project.user}/${project.repo}`;
 
-    placeholder.append(index, mark, note);
+    placeholder.append(tag, mark, repo);
     return placeholder;
   }
 
@@ -134,52 +224,63 @@
     const wrap = document.createElement("div");
     wrap.className = "project-cover";
 
-    if (!project.cover) {
+    /* coverImg 为空：直接使用渐变 + 网格线占位 */
+    if (!project.coverImg) {
       wrap.appendChild(createCoverPlaceholder(project));
-      return wrap;
+    } else {
+      const image = document.createElement("img");
+      image.src = project.coverImg;
+      image.alt = `${project.name} 项目封面`;
+      image.loading = "lazy";
+      image.decoding = "async";
+
+      /* 图片加载失败（URL 失效、外链被墙）时，无缝替换成占位图 */
+      image.addEventListener(
+        "error",
+        () => {
+          image.remove();
+          wrap.appendChild(createCoverPlaceholder(project));
+        },
+        { once: true }
+      );
+
+      wrap.appendChild(image);
     }
 
-    const image = document.createElement("img");
-    image.src = project.cover;
-    image.alt = `${project.name} 项目封面`;
-    image.loading = "lazy";
-    image.decoding = "async";
-    image.addEventListener(
-      "error",
-      () => {
-        image.remove();
-        wrap.appendChild(createCoverPlaceholder(project));
-      },
-      { once: true }
-    );
+    /* 右上角状态角标：正常数据 / 本地快照 / 404 */
+    const badge = document.createElement("span");
+    badge.className = "cover-badge";
+    badge.dataset.state = project.status;
+    badge.textContent =
+      project.status === "ok"
+        ? "OPEN_SOURCE"
+        : project.status === "not-found"
+          ? "404_NOT_FOUND"
+          : "LOCAL_FALLBACK";
+    wrap.appendChild(badge);
 
-    wrap.appendChild(image);
     return wrap;
   }
 
-  function createTagList(tags) {
-    const list = document.createElement("ul");
-    list.className = "tag-list";
-    list.setAttribute("aria-label", "技术标签");
+  /* =======================================================
+     五、项目卡片
+     ======================================================= */
 
-    tags.forEach((tag) => {
-      const item = document.createElement("li");
-      item.className = "tag";
-      item.textContent = tag;
-      list.appendChild(item);
-    });
+  function createStat(label, value, extra) {
+    const stat = document.createElement("span");
+    stat.className = "project-stat";
 
-    return list;
-  }
+    const key = document.createElement("span");
+    key.className = "stat-label";
+    key.textContent = label;
 
-  function createProjectLink(href, label) {
-    const link = document.createElement("a");
-    link.className = "project-link";
-    link.href = href;
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    link.textContent = label;
-    return link;
+    const val = document.createElement("span");
+    val.className = "stat-value";
+    if (extra) val.appendChild(extra);
+    val.append(document.createTextNode(value));
+
+    stat.append(key, val);
+    return stat;
   }
 
   function createProjectCard(project) {
@@ -189,166 +290,189 @@
     const body = document.createElement("div");
     body.className = "project-body";
 
-    const top = document.createElement("div");
-    top.className = "project-top";
+    /* 标题 + 所有者 */
+    const heading = document.createElement("div");
+    heading.className = "project-heading";
 
     const title = document.createElement("h3");
+    title.className = "project-title";
     title.textContent = project.name;
 
-    const status = document.createElement("span");
-    status.className = "project-status";
-    status.textContent = project.repo ? "OPEN SOURCE" : project.demo ? "LIVE DEMO" : "IDEA";
-    if (project.repo) status.classList.add("project-status--open");
+    const owner = document.createElement("p");
+    owner.className = "project-owner";
+    owner.textContent = `@${project.owner}`;
 
-    top.append(title, status);
+    heading.append(title, owner);
 
-    const desc = document.createElement("p");
-    desc.className = "project-desc";
-    desc.textContent = project.desc;
+    /* 简介：CSS 里限制 3 行，超出显示省略号 */
+    const description = document.createElement("p");
+    description.className = "project-desc";
+    description.textContent = project.description;
 
-    const links = document.createElement("div");
-    links.className = "project-links";
+    /* 底部数据栏：语言 / Stars / Forks */
+    const footer = document.createElement("div");
+    footer.className = "project-footer";
 
-    if (project.repo) {
-      links.appendChild(createProjectLink(project.repo, "查看仓库 ↗"));
-    }
+    const stats = document.createElement("div");
+    stats.className = "project-stats";
 
-    if (project.demo) {
-      links.appendChild(createProjectLink(project.demo, "在线演示 ↗"));
-    }
+    const languageDot = document.createElement("span");
+    languageDot.className = "lang-dot";
+    languageDot.style.backgroundColor = LANGUAGE_COLORS[project.language] || "#8b949e";
+    languageDot.setAttribute("aria-hidden", "true");
 
-    if (!project.repo && !project.demo) {
-      const pending = document.createElement("span");
-      pending.className = "project-link project-link--muted";
-      pending.textContent = "筹备中";
-      links.appendChild(pending);
-    }
+    stats.append(
+      createStat("LANG", project.language, languageDot),
+      createStat("🌟", formatNumber(project.stars)),
+      createStat("🍴", formatNumber(project.forks))
+    );
 
-    body.append(top, desc, createTagList(project.tags), links);
+    /* 科技风边框按钮 */
+    const source = document.createElement("a");
+    source.className = "project-source";
+    source.href = project.url;
+    source.target = "_blank";
+    source.rel = "noopener noreferrer";
+    source.setAttribute("aria-label", `查看 ${project.name} 的源码`);
+
+    const sourceText = document.createElement("span");
+    sourceText.textContent = "查看源码";
+
+    const arrow = document.createElement("span");
+    arrow.className = "source-arrow";
+    arrow.setAttribute("aria-hidden", "true");
+    arrow.textContent = "↗";
+
+    source.append(sourceText, arrow);
+    footer.append(stats, source);
+
+    body.append(heading, description, footer);
     card.append(createCover(project), body);
     return card;
   }
 
-  /* ---------- 筛选与渲染 ---------- */
+  /* =======================================================
+     六、渲染与降级提示
+     ======================================================= */
 
-  function updateFilterState(tag) {
-    activeTag = tag;
+  function updateNotice() {
+    if (!renderNote) return;
 
-    if (!filters) return;
-    filters.querySelectorAll(".filter-button").forEach((button) => {
-      button.setAttribute("aria-pressed", String(button.dataset.tag === tag));
-    });
+    const messages = [];
+
+    if (notices.has("403")) {
+      messages.push(
+        "GitHub API 返回 403：当前 IP 的未登录请求次数可能已用尽，已自动显示本地兜底数据，稍后刷新即可恢复实时数据。"
+      );
+    }
+    if (notices.has("404")) {
+      messages.push("有仓库返回 404：可能已被删除、改名或设为私有，卡片仍保留入口。");
+    }
+    if (notices.has("network")) {
+      messages.push("GitHub API 暂时无法连接，已显示本地兜底数据。");
+    }
+    if (notices.has("error")) {
+      messages.push("部分仓库请求失败，已使用本地兜底数据。");
+    }
+
+    if (!messages.length) {
+      renderNote.textContent = "";
+      renderNote.hidden = true;
+      return;
+    }
+
+    renderNote.textContent = messages.join(" ");
+    renderNote.hidden = false;
   }
 
-  function renderProjects() {
+  function renderProjects(projects) {
     if (!grid) return;
-
-    const visible =
-      activeTag === "全部"
-        ? allProjects
-        : allProjects.filter((project) => project.tags.includes(activeTag));
 
     grid.replaceChildren();
     grid.setAttribute("aria-busy", "false");
 
-    if (!visible.length) {
+    if (!projects.length) {
       const empty = document.createElement("p");
       empty.className = "project-empty";
-      empty.textContent = "这个标签下还没有项目，换个标签看看。";
+      empty.textContent = "members 数组还是空的，先填入一个 GitHub 仓库吧。";
       grid.appendChild(empty);
     } else {
       const fragment = document.createDocumentFragment();
-      visible.forEach((project) => fragment.appendChild(createProjectCard(project)));
+      projects.forEach((project) => fragment.appendChild(createProjectCard(project)));
       grid.appendChild(fragment);
     }
 
     if (count) {
-      count.textContent =
-        activeTag === "全部"
-          ? `${allProjects.length} 个项目`
-          : `${visible.length} / ${allProjects.length} 个项目`;
-    }
-  }
-
-  function renderFilters() {
-    if (!filters) return;
-
-    const tags = [];
-    allProjects.forEach((project) => {
-      project.tags.forEach((tag) => {
-        if (!tags.includes(tag)) tags.push(tag);
-      });
-    });
-
-    filters.replaceChildren();
-
-    if (!tags.length) {
-      filters.hidden = true;
-      return;
+      const mode = notices.size ? "DEGRADED" : "GITHUB_API";
+      count.textContent = `${projects.length} REPOS // ${mode}`;
     }
 
-    filters.hidden = false;
-    const values = ["全部", ...tags];
-    const fragment = document.createDocumentFragment();
+    updateNotice();
+  }
 
-    values.forEach((tag) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "filter-button";
-      button.dataset.tag = tag;
-      button.textContent = tag;
-      button.setAttribute("aria-pressed", String(tag === activeTag));
-      button.addEventListener("click", () => {
-        if (tag === activeTag) return;
-        updateFilterState(tag);
-        renderProjects();
+  /* =======================================================
+     七、GitHub API 请求
+     -------------------------------------------------------
+     关键点：
+     - Promise.all 并发请求所有仓库，而不是一个接一个等
+     - 每个请求内部消化 403 / 404 / 网络错误，返回兜底数据
+     - Promise.all 不会因为单个仓库失败而整体崩掉
+     ======================================================= */
+
+  async function fetchRepo(member) {
+    const apiUrl = `${API_BASE}/${encodeURIComponent(member.user)}/${encodeURIComponent(member.repo)}`;
+
+    try {
+      const response = await fetch(apiUrl, {
+        headers: { Accept: "application/vnd.github+json" },
+        cache: "no-store"
       });
-      fragment.appendChild(button);
-    });
 
-    filters.appendChild(fragment);
-  }
+      /* 403：通常是未登录 API 限流（60 次 / 小时 / IP） */
+      if (response.status === 403) {
+        notices.add("403");
+        return createFallback(member, "rate-limit");
+      }
 
-  function showNote(message) {
-    if (!renderNote) return;
-    renderNote.textContent = message;
-    renderNote.hidden = false;
-  }
+      /* 404：仓库不存在、改名或私有 */
+      if (response.status === 404) {
+        notices.add("404");
+        return createFallback(member, "not-found");
+      }
 
-  function renderAll() {
-    updateFilterState("全部");
-    renderFilters();
-    renderProjects();
+      if (!response.ok) {
+        notices.add("error");
+        return createFallback(member, "error");
+      }
+
+      const data = await response.json();
+      return normalizeRepo(data, member);
+    } catch (error) {
+      /* 断网、DNS 失败、CORS 等 */
+      notices.add("network");
+      return createFallback(member, "network");
+    }
   }
 
   async function loadProjects() {
     if (!grid) return;
 
+    notices.clear();
+
     try {
-      const response = await fetch(PROJECTS_ENDPOINT, { cache: "no-store" });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-      const data = await response.json();
-      if (!Array.isArray(data) || !data.length) {
-        throw new Error("项目列表为空或格式不正确");
-      }
-
-      allProjects = data.map(normalizeProject);
-      renderAll();
+      /* 并发请求，顺序与 members 数组一致 */
+      const projects = await Promise.all(members.map((member) => fetchRepo(member)));
+      renderProjects(projects);
     } catch (error) {
-      allProjects = FALLBACK_PROJECTS.map(normalizeProject);
-
-      showNote(
-        window.location.protocol === "file:"
-          ? "当前使用内置预览数据。通过本地服务器打开，可读取最新的 projects.json。"
-          : "项目数据读取失败，当前显示内置示例。请检查 projects.json 是否存在或格式是否正确。"
-      );
-
-      renderAll();
+      /* fetchRepo 已经做过兜底，这里只防御意料之外的渲染异常 */
+      notices.add("error");
+      renderProjects(members.map((member) => createFallback(member, "error")));
     }
   }
 
-  /* ---------- 复制群号 / 邮箱 ---------- */
+  /* =======================================================
+     八、复制 QQ 群号 / 邮箱
+     ======================================================= */
 
   async function writeClipboard(text) {
     if (navigator.clipboard && window.isSecureContext) {
@@ -356,7 +480,7 @@
         await navigator.clipboard.writeText(text);
         return true;
       } catch (error) {
-        // 继续尝试下方兼容方案
+        /* 继续尝试下面的兼容方案 */
       }
     }
 
@@ -410,7 +534,9 @@
     });
   }
 
-  /* ---------- 移动端导航 ---------- */
+  /* =======================================================
+     九、移动端导航
+     ======================================================= */
 
   function initNavigation() {
     const toggle = document.querySelector("[data-nav-toggle]");
@@ -451,7 +577,21 @@
     });
   }
 
-  /* ---------- 年份 ---------- */
+  /* =======================================================
+     十、页头滚动状态与年份
+     ======================================================= */
+
+  function initHeaderState() {
+    const header = document.querySelector("[data-header]");
+    if (!header) return;
+
+    const update = () => {
+      header.classList.toggle("is-scrolled", window.scrollY > 8);
+    };
+
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+  }
 
   function initYear() {
     document.querySelectorAll("[data-year]").forEach((element) => {
@@ -461,6 +601,7 @@
 
   initNavigation();
   initCopyButtons();
+  initHeaderState();
   initYear();
   loadProjects();
 })();
