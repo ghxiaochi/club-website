@@ -3,32 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="衡南一中编程社 HN1Z CODE 是一个面向全校的编程社团。我们写代码、做项目、参加比赛，把好奇心做成真东西。">
-  <meta name="theme-color" content="#f4f1e9">
+  <meta name="description" content="衡南一中编程社 HN1Z CODE 是一个面向全校学生的编程社团。我们写代码、做项目、一起学习，把想法做成真正能运行的作品。">
+  <meta name="theme-color" content="#fbfbf9">
   <meta property="og:title" content="衡南一中编程社 HN1Z CODE">
-  <meta property="og:description" content="把好奇心，做成真东西。">
+  <meta property="og:description" content="把想法，写成代码。">
   <meta property="og:type" content="website">
 
-  <title>衡南一中编程社 HN1Z CODE｜把好奇心做成真东西</title>
+  <title>衡南一中编程社 HN1Z CODE｜把想法，写成代码</title>
 
-  <!-- 站点图标与样式。所有资源均为本地文件，无外部依赖。 -->
+  <!-- 站点图标与样式。全部使用本地文件，无外部依赖。 -->
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css">
-  <!-- 禁用 JavaScript 时隐藏“正在加载”，由页面底部的 noscript 提示接管 -->
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
-  <!-- 项目卡片由 js/main.js 读取 projects.json 后渲染 -->
+  <!-- 项目卡片、标签筛选和复制按钮由 js/main.js 驱动 -->
   <script src="js/main.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">跳到主要内容</a>
 
-  <header class="site-header" data-header>
+  <header class="site-header">
     <div class="container header-inner">
       <a class="brand" href="#top" aria-label="衡南一中编程社首页">
         <span class="brand-mark" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none">
-            <path d="M12 2v20M2 12h20M4.9 4.9l14.2 14.2M19.1 4.9 4.9 19.1" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="m9 6-5 6 5 6M15 6l5 6-5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </span>
         <span class="brand-copy">
@@ -44,11 +43,16 @@
 
       <nav class="site-nav" id="site-nav" aria-label="主导航" data-nav>
         <ul class="nav-list">
-          <li><a href="#about">关于我们</a></li>
+          <li><a href="#about">关于</a></li>
+          <li><a href="#what-we-do">我们做什么</a></li>
           <li><a href="#projects">项目</a></li>
-          <li><a href="#join">加入我们</a></li>
+          <li><a href="#schedule">活动</a></li>
+          <li><a href="#faq">FAQ</a></li>
         </ul>
-        <a class="nav-link-cta" href="#join">招新中 <span aria-hidden="true">↗</span></a>
+        <a class="nav-cta" href="#join">
+          加入我们
+          <span aria-hidden="true">↗</span>
+        </a>
       </nav>
     </div>
   </header>
@@ -59,57 +63,72 @@
       <div class="container hero-grid">
         <div class="hero-copy">
           <p class="eyebrow">
-            <span class="status-dot" aria-hidden="true"></span>
-            2026 秋季招新进行中
+            <span class="eyebrow-dot" aria-hidden="true"></span>
+            衡南一中 · 学生编程社团
           </p>
+
           <h1 id="hero-title">
-            <span class="hero-line">把好奇心</span>
-            <span class="hero-line">做成<span class="accent">真东西</span><span class="period">。</span></span>
+            把想法，<br>
+            <span class="accent-text">写成代码。</span>
           </h1>
+
           <p class="hero-lead">
-            衡南一中编程社是一个面向全校的编程社团。写代码、做项目、参加比赛，
-            也一起研究新工具，把脑子里的点子变成真正能运行的作品。
+            衡南一中编程社（HN1Z CODE）是一个面向全校学生的技术社团。
+            我们从一行代码开始，组队做项目、一起学习，把脑子里的点子变成真正能运行的作品。
           </p>
+
           <div class="hero-actions">
-            <a class="button button--primary" href="#projects">
-              看看我们在做什么
-              <span class="button-arrow" aria-hidden="true">↓</span>
+            <a class="button button--primary" href="#join">
+              加入我们
+              <span aria-hidden="true">→</span>
             </a>
-            <a class="button button--secondary" href="#join">加入我们</a>
+            <a class="button button--secondary" href="#projects">看看我们的项目</a>
           </div>
-          <ul class="hero-meta" aria-label="社团特点">
-            <li>开放协作</li>
-            <li>每周 Build Night</li>
-            <li>零基础友好</li>
-          </ul>
+
+          <dl class="hero-stats" aria-label="社团概况">
+            <div class="hero-stat">
+              <dt>1<small>次 / 周</small></dt>
+              <dd>常规活动</dd>
+            </div>
+            <div class="hero-stat">
+              <dt>0</dt>
+              <dd>基础门槛</dd>
+            </div>
+            <div class="hero-stat">
+              <dt>4</dt>
+              <dd>实践方向</dd>
+            </div>
+            <div class="hero-stat">
+              <dt>∞</dt>
+              <dd>想法空间</dd>
+            </div>
+          </dl>
         </div>
 
-        <!-- 纯装饰性视觉，不承载关键信息 -->
-        <div class="hero-stage" aria-hidden="true">
-          <div class="stage-shape"></div>
-          <div class="stage-card">
-            <div class="stage-bar">
-              <span>build-log.md</span>
-              <span class="stage-dots"><i></i><i></i><i></i></span>
+        <aside class="quick-card" aria-labelledby="quick-title">
+          <p class="card-label">QUICK CONTACT</p>
+          <h2 id="quick-title">先加群，<br>再一起做点东西。</h2>
+
+          <div class="quick-lines">
+            <div class="quick-line">
+              <span class="quick-label">QQ 群</span>
+              <strong class="quick-value">1098931492</strong>
+              <button class="mini-button" type="button" data-copy-value="1098931492" aria-label="复制 QQ 群号 1098931492">
+                <span data-copy-label>复制</span>
+              </button>
             </div>
-            <div class="stage-body">
-              <p><span class="c-comment"># 本周 Build Night</span></p>
-              <p><span class="c-key">idea</span> = <span class="c-str">"校园工具箱"</span></p>
-              <p><span class="c-key">status</span> = <span class="c-str">"进行中"</span></p>
-              <p><span class="c-fn">ship</span>(<span class="c-str">"make it real."</span>)</p>
-            </div>
-            <div class="stage-foot">
-              <span class="live-dot"></span>
-              members building...
+
+            <div class="quick-line">
+              <span class="quick-label">邮箱</span>
+              <a class="quick-value quick-value--link" href="mailto:483677268@qq.com">483677268@qq.com</a>
+              <button class="mini-button" type="button" data-copy-value="483677268@qq.com" aria-label="复制邮箱 483677268@qq.com">
+                <span data-copy-label>复制</span>
+              </button>
             </div>
           </div>
-          <div class="stage-sticker">
-            MAKE<br>SOMETHING<br>REAL.
-            <em>HN1Z · CODE CLUB</em>
-          </div>
-          <div class="stage-chip chip-a">&lt;hello world /&gt;</div>
-          <div class="stage-chip chip-b"># build together</div>
-        </div>
+
+          <p class="quick-note">加群请备注「班级 + 姓名」。零基础、非技术方向的同学都欢迎。</p>
+        </aside>
       </div>
     </section>
 
@@ -117,148 +136,294 @@
     <section class="section" id="about" aria-labelledby="about-title">
       <div class="container">
         <div class="section-head">
-          <div>
-            <p class="section-label"><span>01</span> ABOUT US</p>
-            <h2 id="about-title">不只聊想法，<br>更在意把它做出来。</h2>
-          </div>
+          <p class="section-label">01 / 关于社团</p>
+          <h2 id="about-title">一个把好奇心<br>变成作品的地方。</h2>
           <p class="section-intro">
-            从一行代码到一场工作坊，我们相信最好的学习方式，
-            是和一个具体的问题待在一起，然后动手解决它。
+            我们不只是讨论技术，也会把东西真正做出来。可能是一个校园小工具，一段硬件程序，
+            或者一个只是觉得好玩的网页。
           </p>
         </div>
 
-        <div class="about-grid">
-          <div class="about-story">
+        <div class="about-layout">
+          <div class="about-text">
             <p>
-              衡南一中编程社是一个面向全校的编程社团。
+              衡南一中编程社（HN1Z CODE）是一个面向全校学生的技术类社团。
               成员里有写代码的、做设计的、研究硬件的，也有刚学会第一行
               <code>console.log</code> 的新朋友。
             </p>
             <p>
-              我们不设门槛，只保留一个共同习惯：每周留一点时间，
-              把手上的项目往前推一步。做坏了没关系，复盘之后再试一次。
+              我们不要求你先会写代码，也不要求你一开始就有完整的项目。
+              比起“准备好了再来”，我们更相信在做的过程中学会。
+              每周留一点时间，把手上的东西往前推一步，有问题就在群里问。
             </p>
+            <blockquote class="about-quote">
+              先做一个能跑起来的小东西，再慢慢把它做得更好。
+            </blockquote>
           </div>
 
-          <dl class="about-stats" aria-label="社团数据">
-            <div class="about-stat">
-              <dt>1<span class="stat-unit">/周</span></dt>
-              <dd>社团活动</dd>
+          <dl class="fact-list" aria-label="社团基本信息">
+            <div>
+              <dt>社团名称</dt>
+              <dd>衡南一中编程社 · HN1Z CODE</dd>
             </div>
-            <div class="about-stat">
-              <dt>0</dt>
-              <dd>基础门槛</dd>
+            <div>
+              <dt>面向对象</dt>
+              <dd>衡南一中全体学生</dd>
             </div>
-            <div class="about-stat">
-              <dt>100<span class="stat-unit">%</span></dt>
-              <dd>动手实践</dd>
+            <div>
+              <dt>活动频率</dt>
+              <dd>每周一次，具体以群通知为准</dd>
             </div>
-            <div class="about-stat">
-              <dt>∞</dt>
-              <dd>想法空间</dd>
+            <div>
+              <dt>加入方式</dt>
+              <dd>QQ 群 1098931492</dd>
+            </div>
+            <div>
+              <dt>联系邮箱</dt>
+              <dd><a href="mailto:483677268@qq.com">483677268@qq.com</a></dd>
             </div>
           </dl>
         </div>
+      </div>
+    </section>
 
-        <div class="values">
-          <article class="value">
-            <span class="value-number">01</span>
-            <h3>先做出来</h3>
-            <p>一个能运行的 48 小时 Demo，比一份完美的 PPT 更接近答案。</p>
+    <!-- ========== 我们做什么 ========== -->
+    <section class="section section--soft" id="what-we-do" aria-labelledby="doing-title">
+      <div class="container">
+        <div class="section-head">
+          <p class="section-label">02 / 我们做什么</p>
+          <h2 id="doing-title">从第一行代码，<br>到第一个作品。</h2>
+          <p class="section-intro">
+            不管你现在会多少，都可以从适合自己的位置开始。技术不是唯一入口，
+            把一件事做好需要不同的角色。
+          </p>
+        </div>
+
+        <div class="do-grid">
+          <article class="do-card">
+            <span class="do-num">01</span>
+            <h3>编程入门</h3>
+            <p>从 HTML、CSS、JavaScript 到 Python，按项目需要学习。先跑通，再理解，最后试着改。</p>
           </article>
-          <article class="value">
-            <span class="value-number">02</span>
-            <h3>一起变强</h3>
-            <p>代码、设计、文案全部开放，互相 review，也互相兜底。</p>
+          <article class="do-card">
+            <span class="do-num">02</span>
+            <h3>项目实战</h3>
+            <p>组队做校园小工具、网页、脚本和硬件小作品。有人写代码，也有人做设计、测试和文档。</p>
           </article>
-          <article class="value">
-            <span class="value-number">03</span>
-            <h3>持续分享</h3>
-            <p>把踩过的坑写成文档，让下一位成员少走一点弯路。</p>
+          <article class="do-card">
+            <span class="do-num">03</span>
+            <h3>算法与竞赛</h3>
+            <p>一起刷题、讨论思路，按自己的节奏准备比赛。不追求一开始就做难题，先把基础打牢。</p>
+          </article>
+          <article class="do-card">
+            <span class="do-num">04</span>
+            <h3>分享与协作</h3>
+            <p>每周主题分享，把踩过的坑写成文档。代码、设计、文案全部开放，互相 review，也互相兜底。</p>
           </article>
         </div>
       </div>
     </section>
 
     <!-- ========== 项目 ========== -->
-    <section class="section section-projects" id="projects" aria-labelledby="projects-title">
+    <section class="section" id="projects" aria-labelledby="projects-title">
       <div class="container">
-        <div class="section-head section-head--projects">
-          <div>
-            <p class="section-label"><span>02</span> PROJECTS</p>
-            <h2 id="projects-title">最近在做的事</h2>
-          </div>
-          <div class="projects-aside">
-            <p class="section-intro">
-              项目清单维护在 <code>projects.json</code> 中，改数据即可更新卡片。
-              把示例项目替换成社团自己的仓库吧。
-            </p>
-            <a class="text-link" href="https://github.com/ghxiaochi" target="_blank" rel="noopener noreferrer">
-              全部仓库 <span aria-hidden="true">↗</span>
-            </a>
-          </div>
+        <div class="section-head">
+          <p class="section-label">03 / 项目</p>
+          <h2 id="projects-title">最近在做的事</h2>
+          <p class="section-intro">
+            项目清单维护在 <code>projects.json</code> 中，改数据即可更新卡片。
+            点击标签可以筛选当前项目。
+          </p>
         </div>
 
-        <!-- 本地 file:// 打开时，JS 会使用内置示例数据，并显示提示 -->
+        <div class="project-toolbar">
+          <div class="filter-list" id="project-filters" aria-label="按技术标签筛选项目"></div>
+          <p class="project-count" id="project-count" role="status" aria-live="polite">正在加载…</p>
+        </div>
+
+        <!-- 本地 file:// 打开时，JS 会使用内置示例数据，并在这里显示提示 -->
         <p class="render-note" id="render-note" role="status" hidden></p>
 
-        <div class="project-grid" id="project-grid" aria-live="polite" aria-busy="true">
+        <div class="project-grid" id="project-grid" aria-busy="true">
           <p class="loading-state">正在加载项目…</p>
         </div>
 
         <noscript>
           <p class="noscript-note">
             项目卡片需要 JavaScript 才能渲染。请启用 JavaScript，或直接查看
-            <a href="https://github.com/ghxiaochi">我们的 GitHub 仓库</a>。
+            <a href="https://github.com/ghxiaochi">我们的 GitHub 主页</a>。
           </p>
         </noscript>
+
+        <div class="projects-foot">
+          <p>有想法？欢迎在群里提出，或者直接开一个自己的仓库。</p>
+          <a href="https://github.com/ghxiaochi" target="_blank" rel="noopener noreferrer">
+            GitHub 主页
+            <span aria-hidden="true">↗</span>
+          </a>
+        </div>
       </div>
     </section>
 
-    <!-- ========== 招新 / 联系 ========== -->
-    <section class="section" id="join" aria-labelledby="join-title">
+    <!-- ========== 活动节奏 ========== -->
+    <section class="section section--soft" id="schedule" aria-labelledby="schedule-title">
+      <div class="container">
+        <div class="section-head">
+          <p class="section-label">04 / 活动节奏</p>
+          <h2 id="schedule-title">每周见一次，<br>每次往前走一点。</h2>
+          <p class="section-intro">
+            活动不追求形式感，重点是让每个人都有事情可以做、有问题可以问。
+          </p>
+        </div>
+
+        <div class="schedule-layout">
+          <div class="schedule-list">
+            <article class="schedule-item">
+              <p class="schedule-when">每周</p>
+              <div>
+                <h3>常规活动</h3>
+                <p>主题分享 + 自由开发。带来你正在做的项目，或者从零开始一个。遇到问题当场讨论。</p>
+              </div>
+            </article>
+            <article class="schedule-item">
+              <p class="schedule-when">每月</p>
+              <div>
+                <h3>小型 Demo Day</h3>
+                <p>用几分钟展示这个月做出来的东西，接受提问，也接受不完美。做完比完美更重要。</p>
+              </div>
+            </article>
+            <article class="schedule-item">
+              <p class="schedule-when">每学期</p>
+              <div>
+                <h3>招新与复盘</h3>
+                <p>开放新成员加入，回顾做过的项目，整理文档，再一起决定下一阶段做什么。</p>
+              </div>
+            </article>
+          </div>
+
+          <aside class="agenda-card" aria-labelledby="agenda-title">
+            <p class="card-label">ONE MEETING</p>
+            <h3 id="agenda-title">一次活动，通常这样过</h3>
+            <ol class="agenda-list">
+              <li><span>主题分享</span><span class="agenda-time">20 min</span></li>
+              <li><span>自由开发</span><span class="agenda-time">60 min</span></li>
+              <li><span>进度同步</span><span class="agenda-time">10 min</span></li>
+              <li><span>随时提问 / 结对</span><span class="agenda-time">全程</span></li>
+            </ol>
+            <p class="agenda-note">具体时间、地点以 QQ 群通知为准；考试周会适当减少活动。</p>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 常见问题 ========== -->
+    <section class="section" id="faq" aria-labelledby="faq-title">
+      <div class="container">
+        <div class="section-head faq-head">
+          <p class="section-label">05 / 常见问题</p>
+          <h2 id="faq-title">加入之前，<br>你可能想知道。</h2>
+        </div>
+
+        <div class="faq-list">
+          <details class="faq-item">
+            <summary>
+              <span>零基础可以加入吗？</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </summary>
+            <div class="faq-answer">
+              <p>可以。社团里有很多人也是从零开始的。你不需要先学完某门课再来，带着问题和兴趣来就够了。</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>
+              <span>需要自己带电脑吗？</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </summary>
+            <div class="faq-answer">
+              <p>有电脑会更方便，但不是硬性要求。没有电脑也可以先来听分享、参与讨论和设计，之后再决定怎么参与项目。</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>
+              <span>不是技术方向也能加入吗？</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </summary>
+            <div class="faq-answer">
+              <p>可以。一个项目除了写代码，还需要设计、文案、测试和活动组织。你可以先认领一件小事，再慢慢找到自己擅长的部分。</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>
+              <span>活动时间是什么时候？</span>
+              <span class="faq-icon" aria-hidden="true"></span>
+            </summary>
+            <div class="faq-answer">
+              <p>常规活动每周一次，具体时间和地点会在 QQ 群公告里通知。遇到考试周或学校安排冲突时会调整。</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 加入 ========== -->
+    <section class="section section--join" id="join" aria-labelledby="join-title">
       <div class="container">
         <div class="join-panel">
           <div class="join-copy">
-            <p class="section-label section-label--light"><span>03</span> JOIN US</p>
-            <h2 id="join-title">下一次 Build Night，<br>一起做点好玩的。</h2>
+            <p class="section-label section-label--light">06 / 加入我们</p>
+            <h2 id="join-title">下一次活动，<br>来坐坐。</h2>
             <p class="join-lead">
-              不限年级与班级，零基础也欢迎。带上你的好奇心，
-              剩下的我们边做边学。
+              不限年级与班级，零基础也欢迎。先进群看看大家在做什么，
+              再决定要不要一起做点什么。
             </p>
 
-            <div class="join-actions">
-              <a class="button button--accent" href="mailto:hn1z-codeclub@example.com?subject=我想加入衡南一中编程社">
-                写信加入
-                <span class="button-arrow" aria-hidden="true">↗</span>
-              </a>
-              <button class="button button--ghost-light" type="button" data-copy-email="hn1z-codeclub@example.com">
-                <span data-copy-label>复制邮箱</span>
-              </button>
-            </div>
-
-            <p class="join-email">
-              或直接联系：<a href="mailto:hn1z-codeclub@example.com">hn1z-codeclub@example.com</a>
-            </p>
-            <p class="join-note">邮件请简单介绍你自己，以及一个想做的小项目。</p>
+            <ol class="join-steps">
+              <li>
+                <span class="join-step-num" aria-hidden="true">01</span>
+                <div>
+                  <strong>加 QQ 群</strong>
+                  <p>群号 1098931492，备注「班级 + 姓名」。</p>
+                </div>
+              </li>
+              <li>
+                <span class="join-step-num" aria-hidden="true">02</span>
+                <div>
+                  <strong>来一次活动</strong>
+                  <p>先听、先看，找到你感兴趣的项目或方向。</p>
+                </div>
+              </li>
+              <li>
+                <span class="join-step-num" aria-hidden="true">03</span>
+                <div>
+                  <strong>认领一件小事</strong>
+                  <p>从文档、设计、测试或一小段代码开始，先参与进来。</p>
+                </div>
+              </li>
+            </ol>
           </div>
 
-          <aside class="qr-card" aria-label="招新微信群">
-            <!--
-              替换真实二维码：
-              1. 把微信群二维码保存为 images/wechat-qr.png
-              2. 用下面这行代码替换 <div class="qr-placeholder">…</div>
-              <img class="qr-image" src="images/wechat-qr.png" alt="衡南一中编程社招新微信群二维码">
-            -->
-            <div class="qr-placeholder" aria-hidden="true">
-              <span class="qr-kicker">WECHAT GROUP</span>
-              <strong>二维码占位</strong>
-              <span class="qr-hint">把社团群二维码放在这里</span>
-            </div>
-            <p>扫码加入招新群</p>
-            <small>当前为占位图，替换方法见 README 或本文件注释。</small>
-          </aside>
+          <div class="join-contact">
+            <p class="join-contact-label">QQ 群</p>
+            <p class="join-number">1098931492</p>
+            <button class="button button--primary button--full" type="button" data-copy-value="1098931492" aria-label="复制 QQ 群号 1098931492">
+              <span data-copy-label>复制群号</span>
+            </button>
+
+            <div class="join-divider" aria-hidden="true"></div>
+
+            <p class="join-contact-label">邮箱</p>
+            <a class="join-email" href="mailto:483677268@qq.com">483677268@qq.com</a>
+            <button class="button button--secondary button--full" type="button" data-copy-value="483677268@qq.com" aria-label="复制邮箱 483677268@qq.com">
+              <span data-copy-label>复制邮箱</span>
+            </button>
+
+            <p class="join-note">邮件请简单介绍你自己，以及一个想做的小项目。</p>
+          </div>
         </div>
+
         <p class="sr-only" id="copy-status" role="status" aria-live="polite"></p>
       </div>
     </section>
@@ -266,27 +431,33 @@
 
   <footer class="site-footer">
     <div class="container footer-inner">
-      <a class="brand brand--footer" href="#top" aria-label="回到首页">
-        <span class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none">
-            <path d="M12 2v20M2 12h20M4.9 4.9l14.2 14.2M19.1 4.9 4.9 19.1" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
-          </svg>
-        </span>
-        <span class="brand-copy">
-          <strong>HN1Z CODE</strong>
-          <span>衡南一中编程社</span>
-        </span>
-      </a>
+      <div class="footer-brand">
+        <a class="brand" href="#top" aria-label="回到首页">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="m9 6-5 6 5 6M15 6l5 6-5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="brand-copy">
+            <strong>HN1Z CODE</strong>
+            <span>衡南一中编程社</span>
+          </span>
+        </a>
+        <p>把想法，写成代码。</p>
+      </div>
 
       <nav class="footer-nav" aria-label="页脚导航">
         <a href="#about">关于</a>
         <a href="#projects">项目</a>
+        <a href="#schedule">活动</a>
         <a href="#join">加入</a>
         <a href="https://github.com/ghxiaochi" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+        <a href="#top">回到顶部 ↑</a>
       </nav>
 
-      <p class="footer-copy">
-        © <span data-year>2026</span> 衡南一中编程社 · 用 HTML / CSS / JS 手工搭建
+      <p class="footer-meta">
+        © <span data-year>2026</span> 衡南一中编程社<br>
+        用 HTML / CSS / JavaScript 手工搭建
       </p>
     </div>
   </footer>

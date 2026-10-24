@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750" role="img" aria-labelledby="coverTitle coverDesc">
+  <title id="coverTitle">衡南一中编程社官网项目封面</title>
+  <desc id="coverDesc">浅蓝色背景上的 CLUB SITE 标题和简洁的浏览器窗口图形。</desc>
+
+  <rect width="1200" height="750" fill="#edf1fb"/>
+  <path d="M72 96h1056" stroke="#d5ddef" stroke-width="1"/>
+  <path d="M72 654h1056" stroke="#d5ddef" stroke-width="1"/>
+
+  <text x="72" y="78" fill="#5f6a82" font-family="'Courier New', monospace" font-size="18" letter-spacing="3">PROJECT / 02</text>
+  <text x="70" y="300" fill="#111310" font-family="Arial, Helvetica, sans-serif" font-size="160" font-weight="700" letter-spacing="-10">CLUB</text>
+  <text x="70" y="434" fill="#111310" font-family="Arial, Helvetica, sans-serif" font-size="160" font-weight="700" letter-spacing="-10">SITE</text>
+
+  <rect x="72" y="512" width="548" height="2" fill="#b9c5de"/>
+  <text x="72" y="555" fill="#3f4a60" font-family="'Courier New', monospace" font-size="18" letter-spacing="2">HTML · CSS · JAVASCRIPT</text>
+  <text x="72" y="586" fill="#6d7890" font-family="'Courier New', monospace" font-size="16" letter-spacing="2">STATIC · RESPONSIVE · GITHUB PAGES</text>
+
+  <g transform="translate(782 142)">
+    <rect width="326" height="430" rx="16" fill="#ffffff" stroke="#111310" stroke-width="2"/>
+    <path d="M0 54h326" fill="none" stroke="#111310" stroke-width="2"/>
+    <circle cx="28" cy="28" r="5" fill="#1f5eff"/>
+    <circle cx="48" cy="28" r="5" fill="#d8dad2"/>
+    <circle cx="68" cy="28" r="5" fill="#d8dad2"/>
+    <rect x="218" y="19" width="84" height="18" rx="9" fill="#f1f2ed"/>
+
+    <text x="32" y="118" fill="#111310" font-family="Arial, Helvetica, sans-serif" font-size="48" font-weight="700" letter-spacing="-2">HN1Z</text>
+    <text x="32" y="146" fill="#6b7069" font-family="'Courier New', monospace" font-size="13" letter-spacing="2">CODE CLUB</text>
+
+    <rect x="32" y="178" width="174" height="42" rx="21" fill="#111310"/>
+    <text x="119" y="204" fill="#ffffff" text-anchor="middle" font-family="'Courier New', monospace" font-size="12" letter-spacing="1.5">JOIN US →</text>
+
+    <g transform="translate(32 256)" fill="none" stroke="#c9ccc4" stroke-width="1.5">
+      <rect width="262" height="52" rx="6"/>
+      <path d="M16 18h92M16 35h160"/>
+    </g>
+    <g transform="translate(32 322)" fill="none" stroke="#c9ccc4" stroke-width="1.5">
+      <rect width="262" height="52" rx="6"/>
+      <path d="M16 18h120M16 35h78"/>
+    </g>
+  </g>
+
+  <circle cx="1104" cy="90" r="10" fill="#1f5eff"/>
+</svg>
