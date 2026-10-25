@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="coverTitle coverDesc">
+  <title id="coverTitle">DrawFunc 手表函数绘图项目封面</title>
+  <desc id="coverDesc">深蓝科技风封面：圆形手表屏幕上绘制函数曲线，配 DrawFunc 标题和四种绘图模式说明。</desc>
+
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071426"/>
+      <stop offset="0.55" stop-color="#0a1b30"/>
+      <stop offset="1" stop-color="#050d18"/>
+    </linearGradient>
+    <radialGradient id="glowBlue" cx="0.82" cy="0.48" r="0.55">
+      <stop offset="0" stop-color="#38bdf8" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#38bdf8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowCyan" cx="0.12" cy="0.82" r="0.45">
+      <stop offset="0" stop-color="#22d3ee" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#22d3ee" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="42" height="42" patternUnits="userSpaceOnUse">
+      <path d="M42 0H0V42" fill="none" stroke="#3b82f6" stroke-opacity="0.1" stroke-width="1"/>
+    </pattern>
+    <filter id="glow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <clipPath id="watchClip">
+      <circle cx="1150" cy="430" r="238"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect width="1600" height="900" fill="url(#glowBlue)"/>
+  <rect width="1600" height="900" fill="url(#glowCyan)"/>
+  <rect width="1600" height="900" fill="url(#grid)" opacity="0.75"/>
+
+  <!-- 左侧信息 -->
+  <g font-family="'Courier New', monospace">
+    <text x="92" y="104" fill="#38bdf8" font-size="24" letter-spacing="6">PROJECT_04 // KOTLIN</text>
+    <text x="88" y="278" fill="#eaf4ff" font-family="Arial, Helvetica, sans-serif" font-size="152" font-weight="700" letter-spacing="-7">DrawFunc</text>
+    <text x="96" y="352" fill="#38bdf8" font-size="30" letter-spacing="5">WATCH FUNCTION PLOTTER</text>
+    <text x="96" y="410" fill="#9fc4e8" font-size="21" letter-spacing="1">y = f(x)   ·   r = f(θ)   ·   (x(t), y(t))   ·   F(x,y) = 0</text>
+
+    <g transform="translate(96 482)">
+      <rect width="622" height="178" rx="10" fill="#08111f" stroke="#1e3a5f" stroke-width="2"/>
+      <circle cx="28" cy="28" r="5" fill="#22d3ee"/>
+      <text x="48" y="34" fill="#6f95b8" font-size="15">drawfunc // android 11 watch</text>
+      <text x="28" y="82" fill="#38bdf8" font-size="20">func = "sin(x) + 0.4 * x"</text>
+      <text x="28" y="120" fill="#eaf4ff" font-size="20">plot: ROUND DISPLAY · 466 × 466</text>
+      <text x="28" y="156" fill="#22d3ee" font-size="20">engine: 163 tests · 100% coverage</text>
+    </g>
+
+    <text x="96" y="742" fill="#6f95b8" font-size="19" letter-spacing="2">KOTLIN · JETPACK COMPOSE · MATERIAL 3 · MIT</text>
+  </g>
+
+  <!-- 手表 -->
+  <g>
+    <circle cx="1150" cy="430" r="286" fill="none" stroke="#16324f" stroke-width="2" stroke-dasharray="8 12"/>
+    <rect x="1400" y="386" width="36" height="88" rx="16" fill="#102943" stroke="#38bdf8" stroke-width="2"/>
+    <g stroke="#1e3a5f" stroke-width="2">
+      <path d="M1400 404H1436M1400 430H1440M1400 456H1436"/>
+    </g>
+    <circle cx="1150" cy="430" r="256" fill="#08111f" stroke="#1e3a5f" stroke-width="14"/>
+    <circle cx="1150" cy="430" r="238" fill="#0a1a2d"/>
+
+    <g clip-path="url(#watchClip)">
+      <g stroke="#3b82f6" stroke-opacity="0.18" stroke-width="1">
+        <path d="M912 430H1388M1150 192V668"/>
+        <path d="M930 250H1370M930 310H1370M930 370H1370M930 490H1370M930 550H1370M930 610H1370"/>
+        <path d="M970 210V650M1030 210V650M1090 210V650M1210 210V650M1270 210V650M1330 210V650"/>
+      </g>
+
+      <!-- 抛物线 -->
+      <path d="M966 590Q1150 214 1334 590" fill="none" stroke="#60a5fa" stroke-opacity="0.5" stroke-width="3" stroke-dasharray="7 9"/>
+
+      <!-- 正弦曲线 -->
+      <path d="M930 430C950 330 990 330 1010 430S1070 530 1090 430S1150 330 1170 430S1230 530 1250 430S1310 330 1330 430S1370 520 1390 430" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round" filter="url(#glow)"/>
+
+      <g fill="#22d3ee">
+        <circle cx="1010" cy="430" r="5"/>
+        <circle cx="1090" cy="430" r="5"/>
+        <circle cx="1170" cy="430" r="5"/>
+        <circle cx="1250" cy="430" r="5"/>
+        <circle cx="1330" cy="430" r="5"/>
+      </g>
+      <g fill="#eaf4ff" font-family="'Courier New', monospace" font-size="15" opacity="0.72">
+        <text x="1160" y="208">y</text>
+        <text x="1370" y="454">x</text>
+        <text x="1002" y="472">-2π</text>
+        <text x="1322" y="472">2π</text>
+      </g>
+    </g>
+
+    <circle cx="1150" cy="430" r="238" fill="none" stroke="#38bdf8" stroke-opacity="0.7" stroke-width="2"/>
+    <circle cx="1150" cy="430" r="224" fill="none" stroke="#22d3ee" stroke-opacity="0.2" stroke-width="1"/>
+  </g>
+</svg>

@@ -46,6 +46,13 @@
       coverImg: "",
       title: "LED 硬件实验",
       desc: "从点亮第一颗 LED 开始，练习 GPIO、基础电路和嵌入式程序结构。"
+    },
+    {
+      user: "vveyin",
+      repo: "DrawFunc",
+      coverImg: "images/project-drawfunc.svg",
+      title: "DrawFunc 手表函数绘图",
+      desc: "为 Android 11 手表写的开源函数绘图 App：支持显函数、极坐标、参数方程和隐函数，适配圆屏与旋转表冠。"
     }
   ];
 
@@ -61,6 +68,7 @@
     CSS: "#663399",
     HTML: "#e34c26",
     JavaScript: "#f1e05a",
+    Kotlin: "#A97BFF",
     Python: "#3572A5",
     TypeScript: "#3178c6",
     Arduino: "#bd79d1",
@@ -95,6 +103,14 @@
         "C++ 硬件实验仓库：从点亮一盏 LED 开始，练习 GPIO、基础电路和嵌入式程序结构。",
       language: "C++",
       stars: 1,
+      forks: 0
+    },
+    "vveyin/DrawFunc": {
+      name: "DrawFunc",
+      description:
+        "为 Android 11 手表写的开源函数绘图 App：支持显函数、极坐标、参数方程和隐函数，适配圆屏与旋转表冠。",
+      language: "Kotlin",
+      stars: 2,
       forks: 0
     }
   };
