@@ -2,7 +2,7 @@
 
 一个纯静态的社团官网：**HTML + CSS + 原生 JavaScript**，没有后端、没有数据库、没有构建步骤。
 
-整体是蓝白科技风：浅蓝底、白色卡片、深海军蓝文字。教学内容以 **Arduino 硬件编程**为主线。右下角有一个不署名的校徽，随页面滚动旋转，点击会说一句社团台词；「全部项目」页左下角还有 ghxiaochi 的像素头像彩蛋，点击若干次会出现隐藏台词。项目卡片通过 **GitHub API** 读取仓库信息；首页展示前 6 个，完整列表在单独的「全部项目」页按成员折叠。遇到 403 限流、404 或网络异常会自动切换到本地缓存或降级卡片。
+整体是蓝白科技风：浅蓝底、白色卡片、深海军蓝文字。教学内容以 **Arduino 硬件编程**为主线。右下角有一个不署名的校徽，随页面滚动旋转，点击会说一句社团台词；「全部项目」页左下角还有 ghxiaochi 的像素头像彩蛋，点击若干次会出现隐藏台词。首页加入区有 2026–2027 QQ 群二维码；「全部项目」页的 ghxiaochi 分组顶部有个人主页横幅和两张 Q 版贴纸。项目卡片通过 **GitHub API** 读取仓库信息；首页展示前 6 个，完整列表在单独的「全部项目」页按成员折叠。遇到 403 限流、404 或网络异常会自动切换到本地缓存或降级卡片。
 
 - **线上地址**：<https://ghxiaochi.github.io/club-website/>
 - **仓库地址**：<https://github.com/ghxiaochi/club-website>
@@ -56,8 +56,13 @@ club-website/
 │   ├── og-cover.png        # 1200×630 分享图
 │   ├── project-website.svg # 社团官网封面
 │   ├── project-zaco.svg    # Zaco 猜数字封面
+│   ├── join/
+│   │   └── qq-group-qr.svg  # 2026–2027 QQ 群二维码
+│   ├── personal/
+│   │   ├── chibi-1.jpg      # ghxiaochi 主页贴纸
+│   │   └── chibi-2.jpg      # ghxiaochi 主页贴纸
 │   └── pet/
-│       ├── badge-school.webp    # 原版校徽图片
+│       ├── badge-school-hd.webp  # 高清校徽
 │       └── ghxiaochi-avatar.webp # 像素头像彩蛋
 ├── robots.txt
 ├── sitemap.xml
@@ -218,9 +223,11 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 改这几个变量即可整体换色，不需要逐个改选择器。
 
-校徽位于两页的 `.hnyz-pet`，样式在 `css/pet.css`，交互在 `js/pet.js`。图片为 `images/pet/badge-school.webp`，放在右下角的浅蓝背景板里；如需停用，删除页面中的 `.hnyz-pet` 结构即可。
+校徽位于两页的 `.hnyz-pet`，样式在 `css/pet.css`，交互在 `js/pet.js`。图片为 `images/pet/badge-school-hd.webp`，放在右下角的浅蓝背景板里；如需停用，删除页面中的 `.hnyz-pet` 结构即可。
 
 像素头像彩蛋位于 `projects.html` 的 `.hnyz-avatar`，样式在 `css/avatar-pet.css`，交互在 `js/avatar-pet.js`。点击会轮播「干嘛？」等台词，点满 6 次显示「我绝对不会偷偷告诉你，这是AI写的网页」。它固定在左下角，右下角仍然保留校徽。
+
+加入区的 QQ 群二维码图片是 `images/join/qq-group-qr.svg`，群号仍以文本和复制按钮为准，二维码只是更方便手机扫码。ghxiaochi 的个人主页横幅由 `js/main.js` 的 `createMemberProfile()` 注入到「全部项目」页的第一个成员分组里，两张贴纸在 `images/personal/`。
 
 ---
 
@@ -266,10 +273,11 @@ Pages 会自动重新构建。如果页面还是旧版本，先强制刷新（`C
 - [ ] 封面图正常显示；`coverImg` 为空时显示科技网格占位
 - [ ] 卡片 Hover 有蓝色边框、发光和上浮
 - [ ] 手机宽度下卡片单列、导航可展开
-- [ ] QQ 群号 / 邮箱可以一键复制
+- [ ] QQ 群号 / 邮箱可以一键复制，加入区二维码可扫码
 - [ ] 资源墙的 C++ 和微雪 ESP32 链接可跳转
 - [ ] 断网或 403 时页面仍能显示降级卡片
 - [ ] 校徽在首页和全部项目页右下角；像素头像彩蛋在全部项目页左下角，点满 6 次出现隐藏台词
+- [ ] ghxiaochi 分组有个人主页横幅和两张贴纸，且不遮挡项目卡片
 - [ ] 分享链接有 `og:image`（1200×630）和 `twitter:card`
 - [ ] 不依赖任何后端
 

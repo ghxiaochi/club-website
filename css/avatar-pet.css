@@ -206,3 +206,9 @@
     transition: none;
   }
 }
+
+/* 当「ghxiaochi 的主页」横幅进入视口时，暂时收起固定头像，避免挡住主页文字 */
+.hnyz-avatar.is-away {
+  visibility: hidden;
+  pointer-events: none;
+}

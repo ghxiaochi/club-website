@@ -551,6 +551,57 @@
     count.textContent = `${groupMembers().length} MEMBERS // ${members.length} REPOS // ${mode}`;
   }
 
+  function createMemberProfile() {
+    const profile = document.createElement("div");
+    profile.className = "member-profile";
+
+    const copy = document.createElement("div");
+    copy.className = "member-profile__copy";
+
+    const kicker = document.createElement("p");
+    kicker.className = "member-profile__kicker";
+    kicker.textContent = "MEMBER_PAGE // 2026–2027";
+
+    const title = document.createElement("p");
+    title.className = "member-profile__title";
+    title.textContent = "ghxiaochi 的主页";
+
+    const desc = document.createElement("p");
+    desc.className = "member-profile__desc";
+    desc.textContent = "社团官网维护 · 把想法写成代码。下面的项目都是我的仓库。";
+
+    const link = document.createElement("a");
+    link.className = "member-profile__link";
+    link.href = "https://github.com/ghxiaochi";
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = "打开 GitHub 主页 ↗";
+
+    copy.append(kicker, title, desc, link);
+
+    const sprites = document.createElement("div");
+    sprites.className = "member-profile__sprites";
+    sprites.setAttribute("aria-hidden", "true");
+
+    [
+      ["images/personal/chibi-1.jpg", "member-chibi--a"],
+      ["images/personal/chibi-2.jpg", "member-chibi--b"],
+    ].forEach(([src, modifier]) => {
+      const img = document.createElement("img");
+      img.className = `member-chibi ${modifier}`;
+      img.src = src;
+      img.alt = "";
+      img.width = "400";
+      img.height = "400";
+      img.loading = "lazy";
+      img.decoding = "async";
+      sprites.appendChild(img);
+    });
+
+    profile.append(copy, sprites);
+    return profile;
+  }
+
   function createMemberGroup(user, list, index) {
     const details = document.createElement("details");
     details.className = "member-group";
@@ -598,6 +649,9 @@
     hint.textContent = "展开后加载这一组项目…";
 
     body.append(hint, grid);
+    if (user === "ghxiaochi") {
+      body.prepend(createMemberProfile());
+    }
     details.append(summary, body);
 
     details.addEventListener("toggle", () => {

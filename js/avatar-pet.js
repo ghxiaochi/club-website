@@ -46,6 +46,26 @@
 
   trigger.addEventListener("click", speak);
 
+  /* 个人主页横幅出现时暂时收起头像，离开后恢复 */
+  function watchProfile() {
+    const profile = document.querySelector(".member-profile");
+    if (!profile) {
+      window.setTimeout(watchProfile, 400);
+      return;
+    }
+    if (!("IntersectionObserver" in window)) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        pet.classList.toggle("is-away", entry.isIntersecting);
+      },
+      { threshold: 0.12 }
+    );
+    observer.observe(profile);
+  }
+
+  window.setTimeout(watchProfile, 300);
+
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
     window.clearTimeout(speechTimer);
