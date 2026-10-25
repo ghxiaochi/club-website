@@ -2,7 +2,7 @@
 
 一个纯静态的社团官网：**HTML + CSS + 原生 JavaScript**，没有后端、没有数据库、没有构建步骤。
 
-整体是蓝白科技风：浅蓝底、白色卡片、深海军蓝文字。教学内容以 **Arduino 硬件编程**为主线。左下角有一个不署名的校徽，随页面滚动旋转，点击会说一句社团台词。项目卡片通过 **GitHub API** 读取仓库信息；首页展示前 6 个，完整列表在单独的「全部项目」页按成员折叠。遇到 403 限流、404 或网络异常会自动切换到本地兜底数据。
+整体是蓝白科技风：浅蓝底、白色卡片、深海军蓝文字。教学内容以 **Arduino 硬件编程**为主线。右下角有一个不署名的校徽，随页面滚动旋转，点击会说一句社团台词。项目卡片通过 **GitHub API** 读取仓库信息；首页展示前 6 个，完整列表在单独的「全部项目」页按成员折叠。遇到 403 限流、404 或网络异常会自动切换到本地兜底数据。
 
 - **线上地址**：<https://ghxiaochi.github.io/club-website/>
 - **仓库地址**：<https://github.com/ghxiaochi/club-website>
@@ -44,7 +44,7 @@ club-website/
 ├── projects.html           # 全部项目页（按成员折叠）
 ├── css/
 │   ├── style.css           # 全站样式（蓝白科技风）
-│   └── pet.css             # 左下角校徽背景板样式
+│   └── pet.css             # 右下角校徽背景板样式
 ├── js/
 │   ├── main.js             # GitHub API、卡片渲染、折叠、交互
 │   └── pet.js              # 校徽滚动旋转、点击说话
@@ -205,7 +205,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 改这几个变量即可整体换色，不需要逐个改选择器。
 
-校徽位于 `index.html` 的 `.hnyz-pet`，样式在 `css/pet.css`，交互在 `js/pet.js`。图片为 `images/pet/badge-school.webp`，放在左下角的浅蓝背景板里；如需停用，删除 `index.html` 中的 `.hnyz-pet` 结构即可。
+校徽位于 `index.html` 的 `.hnyz-pet`，样式在 `css/pet.css`，交互在 `js/pet.js`。图片为 `images/pet/badge-school.webp`，放在右下角的浅蓝背景板里；如需停用，删除 `index.html` 中的 `.hnyz-pet` 结构即可。
 
 ---
 

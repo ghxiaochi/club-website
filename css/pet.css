@@ -3,13 +3,13 @@
    ---------------------------------------------------------
    轻量版：入场、点击说话、随页面滚动转动校徽。
    没有拖拽、滚轮缩放、键盘缩放，也没有机器人形象。
-   校徽使用学校提供的原版图片，放在左下角的浅蓝背景板里。
+   校徽使用学校提供的原版图片，放在右下角的浅蓝背景板里。
    ========================================================= */
 
 .hnyz-pet {
   --hnyz-pet-spin: 0deg;
   position: fixed;
-  left: clamp(8px, 1.6vw, 20px);
+  right: clamp(8px, 1.6vw, 20px);
   bottom: clamp(10px, 2.2vh, 22px);
   z-index: 35;
   width: clamp(84px, 8vw, 112px);
@@ -103,10 +103,10 @@
   animation: hnyz-pet-badge-poke 0.55s ease;
 }
 
-/* 台词气泡：左下方弹出，不遮挡校徽本身 */
+/* 台词气泡：右下方弹出，不遮挡校徽本身 */
 .hnyz-pet__speech {
   position: absolute;
-  left: 2%;
+  right: 2%;
   bottom: calc(100% - 2px);
   z-index: 5;
   width: max-content;
@@ -114,7 +114,7 @@
   margin: 0;
   padding: 9px 13px;
   border: 1px solid rgba(147, 197, 253, 0.8);
-  border-radius: 12px 12px 12px 4px;
+  border-radius: 12px 12px 4px 12px;
   background: rgba(255, 255, 255, 0.97);
   box-shadow: 0 12px 28px rgba(37, 99, 235, 0.16);
   color: var(--text-soft);
@@ -123,7 +123,7 @@
   text-align: left;
   opacity: 0;
   transform: translateY(6px) scale(0.98);
-  transform-origin: 0 100%;
+  transform-origin: 100% 100%;
   transition: opacity 0.2s ease, transform 0.2s ease;
   pointer-events: none;
 }
@@ -131,11 +131,11 @@
 .hnyz-pet__speech::after {
   content: "";
   position: absolute;
-  left: 14px;
+  right: 14px;
   bottom: -7px;
   width: 11px;
   height: 11px;
-  border-left: 1px solid rgba(147, 197, 253, 0.8);
+  border-right: 1px solid rgba(147, 197, 253, 0.8);
   border-bottom: 1px solid rgba(147, 197, 253, 0.8);
   background: rgba(255, 255, 255, 0.97);
   transform: rotate(45deg);
@@ -183,13 +183,13 @@
 
 @media (max-width: 720px) {
   .hnyz-pet {
-    left: 8px;
+    right: 8px;
     bottom: 8px;
     width: 76px;
   }
 
   .hnyz-pet__speech {
-    left: 0;
+    right: 0;
     max-width: 182px;
     font-size: 0.7rem;
   }
