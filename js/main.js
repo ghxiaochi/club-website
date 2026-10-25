@@ -123,15 +123,22 @@
      本地缓存：读、取、写
      localStorage 在隐私模式下可能抛异常，所以全部包在
      try/catch 里；缓存失败不能影响页面正常加载。
+     缓存内容在页面生命周期内只解析一次（cacheMemory），
+     避免每个仓库请求都重新 JSON.parse 一遍。
      ------------------------------------------------------- */
+  let cacheMemory = null;
+
   function readRepoCache() {
+    if (cacheMemory) return cacheMemory;
+
     try {
       const raw = window.localStorage.getItem(CACHE_KEY);
       const parsed = raw ? JSON.parse(raw) : null;
-      return parsed && typeof parsed === "object" ? parsed : {};
+      cacheMemory = parsed && typeof parsed === "object" ? parsed : {};
     } catch (error) {
-      return {};
+      cacheMemory = {};
     }
+    return cacheMemory;
   }
 
   function getCachedRepo(key) {
@@ -141,19 +148,22 @@
   }
 
   function setCachedRepo(key, data) {
+    const cache = readRepoCache();
+    cache[key] = { savedAt: Date.now(), data };
+    const keys = Object.keys(cache);
+    if (keys.length > CACHE_LIMIT) {
+      keys
+        .sort((a, b) => (cache[a].savedAt || 0) - (cache[b].savedAt || 0))
+        .slice(0, keys.length - CACHE_LIMIT)
+        .forEach((oldKey) => delete cache[oldKey]);
+    }
+
+    /* 先同步内存引用，再落盘；配额满或被禁用时静默忽略 */
+    cacheMemory = cache;
     try {
-      const cache = readRepoCache();
-      cache[key] = { savedAt: Date.now(), data };
-      const keys = Object.keys(cache);
-      if (keys.length > CACHE_LIMIT) {
-        keys
-          .sort((a, b) => (cache[a].savedAt || 0) - (cache[b].savedAt || 0))
-          .slice(0, keys.length - CACHE_LIMIT)
-          .forEach((oldKey) => delete cache[oldKey]);
-      }
       window.localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
     } catch (error) {
-      /* 配额满或被禁用时静默忽略 */
+      /* 忽略写入失败，本次会话内仍可用内存缓存 */
     }
   }
 
@@ -430,11 +440,10 @@
     }
 
     if (count) {
-      const mode = notices.size ? "DEGRADED" : cacheHits ? "CACHE" : "GITHUB_API";
       const scope = members.length > HOME_LIMIT
         ? `${projects.length} / ${members.length}`
         : `${projects.length}`;
-      count.textContent = `${scope} REPOS // ${mode}`;
+      count.textContent = `${scope} REPOS // ${currentMode()}`;
     }
 
     if (moreLabel) {
@@ -547,48 +556,62 @@
   function updateArchiveCount() {
     if (!count) return;
 
-    const mode = notices.size ? "DEGRADED" : cacheHits ? "CACHE" : "GITHUB_API";
-    count.textContent = `${groupMembers().length} MEMBERS // ${members.length} REPOS // ${mode}`;
+    count.textContent = `${groupMembers().length} MEMBERS // ${members.length} REPOS // ${currentMode()}`;
   }
 
-  function createMemberProfile() {
-    const profile = document.createElement("div");
-    profile.className = "member-profile";
+  /* 状态角标文案：有降级 > 有缓存 > 实时 API，优先级从高到低 */
+  function currentMode() {
+    return notices.size ? "DEGRADED" : cacheHits ? "CACHE" : "GITHUB_API";
+  }
+
+  /* 成员主页横幅：数据在 js/members.js 的 HNYZ_PROFILES 里，
+     main.js 只负责渲染；没有配置横幅的成员不显示这一块。 */
+  function createMemberProfile(user) {
+    const profiles = window.HNYZ_PROFILES || {};
+    const profile = profiles[user];
+    if (!profile) return null;
+
+    const root = document.createElement("div");
+    root.className = "member-profile";
 
     const copy = document.createElement("div");
     copy.className = "member-profile__copy";
 
     const kicker = document.createElement("p");
     kicker.className = "member-profile__kicker";
-    kicker.textContent = "MEMBER_PAGE // 2026–2027";
+    kicker.textContent = typeof profile.kicker === "string" ? profile.kicker : "";
 
     const title = document.createElement("p");
     title.className = "member-profile__title";
-    title.textContent = "ghxiaochi 的主页";
+    title.textContent = typeof profile.title === "string" ? profile.title : "";
 
     const desc = document.createElement("p");
     desc.className = "member-profile__desc";
-    desc.textContent = "社团官网维护 · 把想法写成代码。下面的项目都是我的仓库。";
+    desc.textContent = typeof profile.desc === "string" ? profile.desc : "";
 
-    const link = document.createElement("a");
-    link.className = "member-profile__link";
-    link.href = "https://github.com/ghxiaochi";
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    link.textContent = "打开 GitHub 主页 ↗";
+    copy.append(kicker, title, desc);
 
-    copy.append(kicker, title, desc, link);
+    const linkUrl = normalizeHttpUrl(profile.link);
+    if (linkUrl) {
+      const link = document.createElement("a");
+      link.className = "member-profile__link";
+      link.href = linkUrl;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = "打开 GitHub 主页 ↗";
+      copy.appendChild(link);
+    }
 
     const sprites = document.createElement("div");
     sprites.className = "member-profile__sprites";
     sprites.setAttribute("aria-hidden", "true");
 
-    [
-      ["images/personal/chibi-1.jpg", "member-chibi--a"],
-      ["images/personal/chibi-2.jpg", "member-chibi--b"],
-    ].forEach(([src, modifier]) => {
+    (Array.isArray(profile.sprites) ? profile.sprites : []).forEach((sprite, index) => {
+      const src = normalizeCover(sprite && sprite.src);
+      if (!src) return;
+
       const img = document.createElement("img");
-      img.className = `member-chibi ${modifier}`;
+      img.className = sprite.modifier ? `member-chibi ${sprite.modifier}` : "member-chibi";
       img.src = src;
       img.alt = "";
       img.width = "400";
@@ -598,8 +621,8 @@
       sprites.appendChild(img);
     });
 
-    profile.append(copy, sprites);
-    return profile;
+    root.append(copy, sprites);
+    return root;
   }
 
   function createMemberGroup(user, list, index) {
@@ -649,9 +672,8 @@
     hint.textContent = "展开后加载这一组项目…";
 
     body.append(hint, grid);
-    if (user === "ghxiaochi") {
-      body.prepend(createMemberProfile());
-    }
+    const profile = createMemberProfile(user);
+    if (profile) body.prepend(profile);
     details.append(summary, body);
 
     details.addEventListener("toggle", () => {
@@ -758,12 +780,15 @@
     const status = document.querySelector("#copy-status");
 
     document.querySelectorAll("[data-copy-value]").forEach((button) => {
+      /* 原始文案在绑定时就固定下来；如果放在点击回调里，
+         1.8 秒内连点两次会把「已复制」当成原文案存下来，按钮文字就坏了 */
+      const label = button.querySelector("[data-copy-label]") || button;
+      const original = label.textContent;
+
       button.addEventListener("click", async () => {
         const value = button.getAttribute("data-copy-value") || "";
         if (!value) return;
 
-        const label = button.querySelector("[data-copy-label]") || button;
-        const original = label.textContent;
         const copied = await writeClipboard(value);
 
         if (copied) {
