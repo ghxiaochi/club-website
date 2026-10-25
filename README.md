@@ -227,7 +227,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 像素头像彩蛋位于 `projects.html` 的 `.hnyz-avatar`，样式在 `css/avatar-pet.css`，交互在 `js/avatar-pet.js`。点击会轮播「干嘛？」等台词，点满 6 次显示「我绝对不会偷偷告诉你，这是AI写的网页」。它固定在左下角，右下角仍然保留校徽。
 
-加入区的 QQ 群二维码图片是 `images/join/qq-group-qr.svg`，群号仍以文本和复制按钮为准，二维码只是更方便手机扫码。ghxiaochi 的个人主页横幅由 `js/main.js` 的 `createMemberProfile()` 注入到「全部项目」页的第一个成员分组里，两张贴纸在 `images/personal/`。
+加入区的 QQ 群二维码图片是 `images/join/qq-group-qr.svg`，群号仍以文本和复制按钮为准，二维码只是更方便手机扫码。ghxiaochi 的个人主页横幅配置在 `js/members.js` 的 `window.HNYZ_PROFILES` 里（key 与成员的 `user` 一致才会显示），由 `js/main.js` 的 `createMemberProfile(user)` 渲染注入，两张贴纸在 `images/personal/`。新增成员想加横幅，在 `HNYZ_PROFILES` 里加一个同 user 的键即可。
 
 ---
 

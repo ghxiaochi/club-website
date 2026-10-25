@@ -45,3 +45,27 @@ window.HNYZ_MEMBERS = [
     language: "Kotlin"
   }
 ];
+
+/* =========================================================
+   成员主页横幅（projects.html 折叠面板顶部展示）
+   ---------------------------------------------------------
+   key 必须和上面 HNYZ_MEMBERS 里的 user 一致才会显示；
+   不想展示横幅的成员删掉对应键即可。
+   kicker / title / desc  卡片文案
+   link                   GitHub 主页等外链（留空不显示按钮）
+   sprites                装饰贴图列表；modifier 是 CSS 修饰类
+   ========================================================= */
+
+window.HNYZ_PROFILES = {
+  ghxiaochi: {
+    kicker: "MEMBER_PAGE // 2026–2027",
+    title: "ghxiaochi 的主页",
+    desc: "社团官网维护 · 把想法写成代码。下面的项目都是我的仓库。",
+    link: "https://github.com/ghxiaochi",
+    sprites: [
+      { src: "images/personal/chibi-1.jpg", modifier: "member-chibi--a" },
+      { src: "images/personal/chibi-2.jpg", modifier: "member-chibi--b" }
+    ]
+  }
+};
+

@@ -46,11 +46,15 @@
 
   trigger.addEventListener("click", speak);
 
-  /* 个人主页横幅出现时暂时收起头像，离开后恢复 */
+  /* 个人主页横幅出现时暂时收起头像，离开后恢复。
+     横幅由 main.js 同步创建，通常第一次就能找到；
+     轮询最多 25 次（约 10 秒），找不到就放弃，避免无限轮询。 */
+  let profileTries = 0;
+
   function watchProfile() {
     const profile = document.querySelector(".member-profile");
     if (!profile) {
-      window.setTimeout(watchProfile, 400);
+      if (profileTries++ < 25) window.setTimeout(watchProfile, 400);
       return;
     }
     if (!("IntersectionObserver" in window)) return;
