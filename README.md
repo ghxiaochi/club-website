@@ -19,6 +19,7 @@
 - **项目展示**：首页展示 `members` 前 6 个仓库，渲染 16:9 封面卡片；更多项目跳转到 `projects.html`
 - **活动节奏**：每周两次、每次 60 分钟，以及一次活动的流程
 - **资源墙**：C++ 菜鸟教程、微雪 ESP32 Wiki
+- **图集**：照片墙形式的梗图与原创壁纸，点击开灯箱，支持 ← → 翻页、Esc 关闭
 - **常见问题**：原生 `<details>` FAQ
 - **加入我们**：QQ 群、邮箱、三步加入流程
 
@@ -50,6 +51,8 @@ club-website/
 ├── js/
 │   ├── members.js          # 项目清单 + 成员主页横幅配置（唯一需要手动维护的数据）
 │   ├── main.js             # GitHub API、缓存、卡片渲染、折叠、交互
+│   ├── gallery-data.js     # 图集清单（加图改这里）
+│   ├── gallery.js          # 图集渲染与灯箱
 │   ├── theme.js            # 深浅色主题切换与记忆
 │   ├── personal.js         # 打字机标语、滚动渐显、卡片倾斜、彩蛋
 │   ├── pet.js              # 校徽滚动旋转、点击说话
@@ -61,9 +64,16 @@ club-website/
 │   ├── project-zaco.svg    # Zaco 猜数字封面
 │   ├── join/
 │   │   └── qq-group-qr.svg  # 2026–2027 QQ 群二维码
+│   ├── gallery/             # 图集素材
+│   │   ├── meme-cup.webp    # 梗图（已去底）
+│   │   ├── meme-dizzy.webp
+│   │   ├── meme-wink.webp
+│   │   ├── art-grid.svg     # 壁纸（原创 SVG）
+│   │   ├── art-circuit.svg
+│   │   ├── art-wave.svg
+│   │   └── art-stars.svg
 │   ├── personal/
-│   │   ├── sticker-1.webp   # ghxiaochi 主页贴纸（已去底）
-│   │   ├── sticker-2.webp
+│   │   ├── sticker-2.webp   # ghxiaochi 主页贴纸（已去底）
 │   │   ├── sticker-3.webp
 │   │   ├── sticker-4.webp
 │   │   ├── chibi-1.jpg      # 早期贴纸（未再使用）
@@ -224,6 +234,8 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 | 数字滚动 | 首屏 `data-count` 的统计数字从 0 滚到目标值 | `index.html` + `js/personal.js` |
 | 全站光标光晕 | 一层 fixed 柔光跟随鼠标，覆盖所有板块；浅色用 multiply、深色用 screen，触屏和减少动效时关闭 | `js/personal.js` |
 | 技术跑马灯 | 首屏下方的关键词带，自动复制到足够宽后按一组宽度循环，悬停暂停 | `js/personal.js` + `index.html` |
+| 图集 / 灯箱 | 照片墙卡片 + 点击看大图，支持键盘 ← → 翻页、Esc 关闭、焦点回到原卡片 | `js/gallery.js` |
+| 背景层 | body 多层柔光 + 点阵，加一层 fixed 光斑（静态，避免大尺寸动画在不同 GPU 上出现棋盘格） | `css/personal.css`
 | 手账感 | 卡片轻微倾斜 + 顶部胶带、引言做成便签、主按钮带厚度 | `css/personal.css` |
 | 首页贴纸 | 首屏关键词胶囊（#零基础友好 等），带轻微旋转 | `index.html` |
 | 卡片 3D 倾斜 | 仅精确指针（鼠标）启用，触屏不触发 | `js/personal.js` |
@@ -238,7 +250,22 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 深色配色是 `css/personal.css` 顶部的 `[data-theme="dark"]` 变量块，覆盖 `style.css` 里 `:root` 的同名变量。改深色只需要动这一块；少数组件在 `style.css` 里写死了浅色，已在 `personal.css` 里单独覆盖：次要按钮、联系卡标题栏、占位封面、校徽底板、页脚、移动端菜单，以及 **`.section--soft` 区块底色**（这一条曾经导致深色模式下出现一块灰白板、白字看不清，已修复）。
 
-## 8. 换主题色
+## 8. 往图集里加图
+
+1. 把图片放进 `images/gallery/`
+2. 打开 `js/gallery-data.js`，在数组末尾加一条：
+
+```js
+{
+  src: "images/gallery/你的文件名.webp",
+  title: "标题",
+  tag: "梗图"        // 或 壁纸 / 活动
+}
+```
+
+建议短边 ≥ 800px；透明底的贴纸类图片会自动在白色相纸里居中显示，不会变形。想删掉某张，删掉数组里那一项即可（首页 ghxiaochi 个人页的贴纸在 `js/members.js` 的 `HNYZ_PROFILES` 里，两者互不影响）。
+
+## 9. 换主题色
 
 所有颜色集中在 `css/style.css` 顶部的 `:root`：
 
@@ -264,7 +291,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 ---
 
-## 9. 部署到 GitHub Pages
+## 10. 部署到 GitHub Pages
 
 ### 首次部署
 
@@ -298,7 +325,7 @@ Pages 会自动重新构建。如果页面还是旧版本，先强制刷新（`C
 
 ---
 
-## 10. 验收清单
+## 11. 验收清单
 
 - [ ] 本地打开 `index.html` 能看到完整首页
 - [ ] 首页项目卡片由 GitHub API 渲染，最多 6 张
@@ -319,7 +346,7 @@ Pages 会自动重新构建。如果页面还是旧版本，先强制刷新（`C
 
 ---
 
-## 11. FAQ
+## 12. FAQ
 
 **Q：为什么卡片显示 `DEGRADED`？**  
 A：GitHub API 返回了 403（限流）、404 或网络异常，页面自动用了本地缓存或 `js/members.js` 里的字段降级渲染。stars / forks 未知时显示 `—`，不会假装成 0。

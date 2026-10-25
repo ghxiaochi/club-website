@@ -63,10 +63,9 @@ window.HNYZ_PROFILES = {
     desc: "社团官网维护 · 把想法写成代码。下面的项目都是我的仓库。",
     link: "https://github.com/ghxiaochi",
     sprites: [
-      { src: "images/personal/sticker-1.webp", modifier: "member-chibi--a" },
-      { src: "images/personal/sticker-2.webp", modifier: "member-chibi--b" },
-      { src: "images/personal/sticker-3.webp", modifier: "member-chibi--c" },
-      { src: "images/personal/sticker-4.webp", modifier: "member-chibi--d" }
+      { src: "images/personal/sticker-2.webp", modifier: "member-chibi--a" },
+      { src: "images/personal/sticker-3.webp", modifier: "member-chibi--b" },
+      { src: "images/personal/sticker-4.webp", modifier: "member-chibi--c" }
     ]
   }
 };

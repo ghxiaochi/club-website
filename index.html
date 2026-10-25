@@ -41,17 +41,26 @@
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css?v=20261025e">
   <link rel="stylesheet" href="css/pet.css?v=20261025b">
-  <link rel="stylesheet" href="css/personal.css?v=20261025h">
+  <link rel="stylesheet" href="css/personal.css?v=20261025i">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <!-- 项目卡片、全部项目折叠页和复制按钮由 js/main.js 驱动 -->
   <script src="js/theme.js?v=20261025g" defer></script>
-  <script src="js/members.js?v=20261025h" defer></script>
+  <script src="js/members.js?v=20261025i" defer></script>
   <script src="js/main.js?v=20261025f" defer></script>
   <script src="js/pet.js?v=20261025c" defer></script>
-  <script src="js/personal.js?v=20261025h" defer></script>
+  <script src="js/gallery-data.js?v=20261025i" defer></script>
+  <script src="js/gallery.js?v=20261025i" defer></script>
+  <script src="js/personal.js?v=20261025i" defer></script>
 </head>
 <body>
+  <div class="bg-orbs" aria-hidden="true">
+    <span class="bg-orbs__orb bg-orbs__orb--a"></span>
+    <span class="bg-orbs__orb bg-orbs__orb--b"></span>
+    <span class="bg-orbs__orb bg-orbs__orb--c"></span>
+    <span class="bg-orbs__dots"></span>
+  </div>
+
   <a class="skip-link" href="#main">跳到主要内容</a>
 
   <header class="site-header" data-header>
@@ -77,6 +86,7 @@
           <li><a href="projects.html">全部项目</a></li>
           <li><a href="#schedule">活动</a></li>
           <li><a href="#wall">资源墙</a></li>
+          <li><a href="#gallery">图集</a></li>
           <li><a href="#faq">FAQ</a></li>
         </ul>
         <a class="nav-cta" href="#join">
@@ -443,10 +453,35 @@
     </section>
 
     <!-- ========== 常见问题 ========== -->
+    <!-- ========== 图集 ========== -->
+    <section class="section" id="gallery" aria-labelledby="gallery-title">
+      <div class="container">
+        <div class="section-head">
+          <p class="section-label">06 / GALLERY</p>
+          <h2 id="gallery-title">一些没用的，<br><span class="accent-text">但很好看的东西。</span></h2>
+          <p class="section-intro">
+            社团群里传的梗图、凌晨做的壁纸，都贴在这面墙上。点开可以看大图，左右键翻页。
+          </p>
+        </div>
+
+        <div class="gallery-board">
+          <div class="gallery-grid" id="gallery-grid" aria-busy="true"></div>
+        </div>
+
+        <noscript>
+          <p class="gallery-note">图集需要 JavaScript 才能显示，请启用后再看。</p>
+        </noscript>
+
+        <p class="gallery-note">
+          想加图？把文件放进 <code>images/gallery/</code>，在 <code>js/gallery-data.js</code> 里加一条就行。
+        </p>
+      </div>
+    </section>
+
     <section class="section section--soft" id="faq" aria-labelledby="faq-title">
       <div class="container">
         <div class="section-head faq-head">
-          <p class="section-label">06 / FAQ</p>
+          <p class="section-label">07 / FAQ</p>
           <h2 id="faq-title">加入之前，<br>你可能想知道。</h2>
         </div>
 
@@ -519,7 +554,7 @@
       <div class="container">
         <div class="join-panel">
           <div class="join-copy">
-            <p class="section-label section-label--light">07 / JOIN_US</p>
+            <p class="section-label section-label--light">08 / JOIN_US</p>
             <h2 id="join-title">下一次活动，<br>来坐坐。</h2>
             <p class="join-lead">
               不限年级与班级，零基础也欢迎。先进群看看大家在做什么，
@@ -606,6 +641,7 @@
         <a href="projects.html">全部项目</a>
         <a href="#schedule">活动</a>
         <a href="#wall">资源墙</a>
+        <a href="#gallery">图集</a>
         <a href="#join">加入</a>
         <a href="https://github.com/ghxiaochi" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
         <a href="#top">回到顶部 ↑</a>
