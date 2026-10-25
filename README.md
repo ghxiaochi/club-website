@@ -62,7 +62,11 @@ club-website/
 │   ├── join/
 │   │   └── qq-group-qr.svg  # 2026–2027 QQ 群二维码
 │   ├── personal/
-│   │   ├── chibi-1.jpg      # ghxiaochi 主页贴纸
+│   │   ├── sticker-1.webp   # ghxiaochi 主页贴纸（已去底）
+│   │   ├── sticker-2.webp
+│   │   ├── sticker-3.webp
+│   │   ├── sticker-4.webp
+│   │   ├── chibi-1.jpg      # 早期贴纸（未再使用）
 │   │   └── chibi-2.jpg      # ghxiaochi 主页贴纸
 │   └── pet/
 │       ├── badge-school-hd.webp  # 高清校徽
@@ -218,6 +222,10 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 | 打字机标语 | 首屏按当前时段问候（「晚上好，这里是衡南一中编程社。」），随后轮播社团口号 | `js/personal.js` |
 | 滚动渐显 | 各区块、卡片进入视口时淡入上浮；`main.js` 动态渲染的项目卡片也会被 `MutationObserver` 捕获 | `js/personal.js` |
 | 数字滚动 | 首屏 `data-count` 的统计数字从 0 滚到目标值 | `index.html` + `js/personal.js` |
+| 全站光标光晕 | 一层 fixed 柔光跟随鼠标，覆盖所有板块；浅色用 multiply、深色用 screen，触屏和减少动效时关闭 | `js/personal.js` |
+| 技术跑马灯 | 首屏下方的关键词带，自动复制到足够宽后按一组宽度循环，悬停暂停 | `js/personal.js` + `index.html` |
+| 手账感 | 卡片轻微倾斜 + 顶部胶带、引言做成便签、主按钮带厚度 | `css/personal.css` |
+| 首页贴纸 | 首屏关键词胶囊（#零基础友好 等），带轻微旋转 | `index.html` |
 | 卡片 3D 倾斜 | 仅精确指针（鼠标）启用，触屏不触发 | `js/personal.js` |
 | 连点 Logo | 2.6 秒内连点 5 次品牌区，弹出一条随机台词 | `js/personal.js` |
 | 黑客模式 | 键盘输入 ↑↑↓↓←→←→BA，配色转绿 + 扫描线，9 秒后自动退出 | `js/personal.js` |
@@ -228,7 +236,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 ### 深色主题
 
-深色配色是 `css/personal.css` 顶部的 `[data-theme="dark"]` 变量块，覆盖 `style.css` 里 `:root` 的同名变量。改深色只需要动这一块；少数组件（次要按钮、联系卡标题栏、占位封面、校徽底板、移动端菜单）在 `style.css` 里写死了浅色，已在 `personal.css` 里单独覆盖。
+深色配色是 `css/personal.css` 顶部的 `[data-theme="dark"]` 变量块，覆盖 `style.css` 里 `:root` 的同名变量。改深色只需要动这一块；少数组件在 `style.css` 里写死了浅色，已在 `personal.css` 里单独覆盖：次要按钮、联系卡标题栏、占位封面、校徽底板、页脚、移动端菜单，以及 **`.section--soft` 区块底色**（这一条曾经导致深色模式下出现一块灰白板、白字看不清，已修复）。
 
 ## 8. 换主题色
 

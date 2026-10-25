@@ -55,6 +55,24 @@
   background: rgba(7, 15, 30, 0.86);
 }
 
+[data-theme="dark"] .site-header.is-scrolled {
+  background: rgba(6, 13, 26, 0.94);
+}
+
+/* 关键修复：.section--soft 在 style.css 里是硬编码的浅蓝，
+   深色模式下会变成一块灰白板，白字压在上面几乎看不清 */
+[data-theme="dark"] .section--soft {
+  background: rgba(9, 20, 38, 0.72);
+}
+
+[data-theme="dark"] .site-footer {
+  background: rgba(8, 17, 33, 0.82);
+}
+
+[data-theme="dark"] .join-qr {
+  background: var(--panel-2);
+}
+
 [data-theme="dark"] .skip-link {
   background: var(--panel);
 }
@@ -226,41 +244,35 @@ html.reveal-ready .project-card[data-reveal] {
   transform: translateZ(14px);
 }
 
-/* ---------- 5. 首屏光标光晕 ---------- */
-.hero {
-  --mx: 50%;
-  --my: 30%;
-}
-
-.hero::after {
-  content: "";
-  position: absolute;
+/* ---------- 5. 全站光标光晕 ---------- */
+/* 一层覆盖整个视口的柔光，跟随鼠标移动；用 blend 模式让它在
+   浅色下像投影灯、深色下像手电筒，而不是一块灰色蒙版 */
+.hnyz-glow {
+  position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: 5;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.45s ease;
+  transition: opacity 0.55s ease;
   background: radial-gradient(
-    320px circle at var(--mx) var(--my),
-    rgba(37, 99, 235, 0.16),
-    transparent 68%
+    430px circle at var(--gx, 50%) var(--gy, 26%),
+    rgba(37, 99, 235, 0.2),
+    transparent 66%
   );
+  mix-blend-mode: multiply;
 }
 
-[data-theme="dark"] .hero::after {
-  background: radial-gradient(
-    340px circle at var(--mx) var(--my),
-    rgba(91, 147, 255, 0.22),
-    transparent 68%
-  );
-}
-
-.hero.is-pointer-active::after {
+.hnyz-glow.is-on {
   opacity: 1;
 }
 
-.hero-grid {
-  z-index: 1;
+[data-theme="dark"] .hnyz-glow {
+  background: radial-gradient(
+    480px circle at var(--gx, 50%) var(--gy, 26%),
+    rgba(131, 176, 255, 0.26),
+    transparent 66%
+  );
+  mix-blend-mode: screen;
 }
 
 /* ---------- 6. 打字机标语 ---------- */
@@ -452,5 +464,312 @@ html[data-hacker="true"] {
   .hnyz-toast {
     bottom: 14px;
     font-size: 0.72rem;
+  }
+}
+
+/* =========================================================
+   12. 跑马灯（首屏下方的技术关键词带）
+   ========================================================= */
+.hnyz-ticker {
+  position: relative;
+  overflow: hidden;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--panel-2);
+}
+
+.hnyz-ticker::before,
+.hnyz-ticker::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 64px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hnyz-ticker::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--panel-2), transparent);
+}
+
+.hnyz-ticker::after {
+  right: 0;
+  background: linear-gradient(270deg, var(--panel-2), transparent);
+}
+
+.hnyz-ticker__track {
+  display: flex;
+  width: max-content;
+  animation: hnyzTicker 34s linear infinite;
+}
+
+.hnyz-ticker:hover .hnyz-ticker__track {
+  animation-play-state: paused;
+}
+
+.hnyz-ticker__group {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.hnyz-ticker__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 26px;
+  padding-right: 26px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.hnyz-ticker__item::after {
+  content: "◆";
+  color: var(--blue);
+  font-size: 0.55rem;
+  opacity: 0.55;
+}
+
+@keyframes hnyzTicker {
+  from { transform: translateX(0); }
+  to { transform: translateX(var(--shift, -50%)); }
+}
+
+/* =========================================================
+   13. 手账感：胶带、便签、倾斜卡片
+   ========================================================= */
+.do-card {
+  position: relative;
+  overflow: visible;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+/* 卡片顶部的小胶带 */
+.do-card::after {
+  content: "";
+  position: absolute;
+  top: -9px;
+  left: 24px;
+  width: 62px;
+  height: 18px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(37, 99, 235, 0.16) 0 6px,
+    rgba(37, 99, 235, 0.09) 6px 12px
+  );
+  border-left: 1px dashed rgba(37, 99, 235, 0.32);
+  border-right: 1px dashed rgba(37, 99, 235, 0.32);
+  transform: rotate(-3.5deg);
+  pointer-events: none;
+}
+
+.wall-card {
+  position: relative;
+}
+
+.wall-card::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  right: 26px;
+  width: 54px;
+  height: 16px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(14, 165, 233, 0.2) 0 6px,
+    rgba(14, 165, 233, 0.1) 6px 12px
+  );
+  transform: rotate(4deg);
+  pointer-events: none;
+}
+
+@media (min-width: 901px) {
+  /* 卡片轻微歪一点，hover 时摆正，像贴在墙上的手写卡片 */
+  .do-card:nth-child(4n + 1) { transform: rotate(-0.8deg); }
+  .do-card:nth-child(4n + 2) { transform: rotate(0.7deg); }
+  .do-card:nth-child(4n + 3) { transform: rotate(0.5deg); }
+  .do-card:nth-child(4n + 4) { transform: rotate(-0.6deg); }
+
+  .do-card:hover {
+    transform: rotate(0deg) translateY(-4px);
+    box-shadow: var(--glow-blue);
+  }
+
+  .wall-card:nth-child(odd) { transform: rotate(-0.6deg); }
+  .wall-card:nth-child(even) { transform: rotate(0.5deg); }
+
+  .wall-card:hover {
+    transform: rotate(0deg) translateY(-3px);
+  }
+}
+
+/* 引言改成一张便签 */
+.about-quote {
+  transform: rotate(-0.8deg);
+  box-shadow: 5px 6px 0 rgba(37, 99, 235, 0.07);
+}
+
+[data-theme="dark"] .about-quote {
+  box-shadow: 5px 6px 0 rgba(91, 147, 255, 0.08);
+}
+
+/* 主按钮做出一点实体厚度 */
+.button--primary {
+  box-shadow: 0 4px 0 rgba(29, 78, 216, 0.55);
+}
+
+.button--primary:hover {
+  box-shadow: 0 5px 0 rgba(29, 78, 216, 0.6);
+  transform: translateY(-1px);
+}
+
+.button--primary:active {
+  box-shadow: 0 2px 0 rgba(29, 78, 216, 0.55);
+  transform: translateY(2px);
+}
+
+/* =========================================================
+   14. 首屏关键词贴纸
+   ========================================================= */
+.hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--blue);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 0 rgba(37, 99, 235, 0.08);
+}
+
+.hero-tag:nth-child(1) { rotate: -2deg; }
+.hero-tag:nth-child(2) { rotate: 1.5deg; }
+.hero-tag:nth-child(3) { rotate: -1deg; }
+.hero-tag:nth-child(4) { rotate: 2deg; }
+
+/* =========================================================
+   15. 个人页贴纸墙
+   ========================================================= */
+.member-profile__sprites {
+  display: grid;
+  grid-template-columns: repeat(2, 92px);
+  gap: 0;
+  align-items: end;
+  margin-right: 6px;
+}
+
+.member-chibi {
+  width: 100px;
+  height: 92px;
+  border-radius: 0;
+  background: transparent;
+  object-fit: contain;
+  box-shadow: none;
+  transform: none;
+  filter: drop-shadow(0 8px 12px rgba(30, 64, 175, 0.2));
+  animation: hnyzStickerFloat 4.4s ease-in-out infinite;
+}
+
+.member-chibi--a { --sticker-rot: -7deg; animation-delay: 0s; }
+.member-chibi--b { --sticker-rot: 6deg; animation-delay: -1.1s; }
+.member-chibi--c { --sticker-rot: 4deg; animation-delay: -2.2s; }
+.member-chibi--d { --sticker-rot: -5deg; animation-delay: -3.3s; }
+
+.member-chibi {
+  rotate: var(--sticker-rot, 0deg);
+}
+
+@keyframes hnyzStickerFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* =========================================================
+   16. 小屏：关掉倾斜和贴纸，避免晃动与占位
+   ========================================================= */
+@media (max-width: 900px) {
+  .hnyz-glow {
+    display: none;
+  }
+
+  .do-card,
+  .wall-card,
+  .about-quote {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .do-card::after,
+  .wall-card::before {
+    display: none;
+  }
+
+}
+
+@media (max-width: 720px) {
+  /* 横幅改成竖排：文字在上，贴纸一行四张在下 */
+  .member-profile {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .member-profile__sprites {
+    grid-template-columns: repeat(4, 66px);
+    gap: 0;
+    margin: 2px 0 0;
+  }
+
+  .member-chibi {
+    width: 72px;
+    height: 66px;
+  }
+}
+
+@media (max-width: 520px) {
+  .hnyz-ticker__item {
+    font-size: 0.64rem;
+    letter-spacing: 0.14em;
+  }
+
+  .hero-tags {
+    gap: 6px;
+  }
+
+  .hero-tag {
+    font-size: 0.62rem;
+    padding: 4px 9px;
+  }
+
+}
+
+/* 减少动效时停掉跑马灯和贴纸浮动 */
+@media (prefers-reduced-motion: reduce) {
+  .hnyz-ticker__track {
+    animation: none;
+  }
+
+  .member-chibi {
+    animation: none;
+  }
+
+  .hnyz-glow {
+    display: none;
   }
 }

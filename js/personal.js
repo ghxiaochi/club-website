@@ -278,34 +278,85 @@
   }
 
   /* =======================================================
-     五、首屏光标光晕
+     五、全站光标光晕
+     -------------------------------------------------------
+     一层 fixed 的柔光跟着鼠标走，覆盖整站而不只是首屏。
+     用 mix-blend-mode 让它像投影/手电，而不是灰色蒙版；
+     触屏和「减少动效」下完全不启用。
      ======================================================= */
-  function initHeroGlow() {
-    const hero = document.querySelector(".hero");
-    if (!hero || reduceMotion.matches || !finePointer.matches) return;
+  function initGlobalGlow() {
+    if (reduceMotion.matches || !finePointer.matches) return;
+
+    const glow = document.createElement("div");
+    glow.className = "hnyz-glow";
+    glow.setAttribute("aria-hidden", "true");
+    document.body.appendChild(glow);
 
     let frame = 0;
+    let visible = false;
 
-    hero.addEventListener(
+    function follow(x, y) {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        root.style.setProperty("--gx", `${x}px`);
+        root.style.setProperty("--gy", `${y}px`);
+      });
+    }
+
+    window.addEventListener(
       "pointermove",
       (event) => {
-        const rect = hero.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-
-        hero.classList.add("is-pointer-active");
-
-        window.cancelAnimationFrame(frame);
-        frame = window.requestAnimationFrame(() => {
-          hero.style.setProperty("--mx", `${x}px`);
-          hero.style.setProperty("--my", `${y}px`);
-        });
+        if (!visible) {
+          glow.classList.add("is-on");
+          visible = true;
+        }
+        follow(event.clientX, event.clientY);
       },
       { passive: true }
     );
 
-    hero.addEventListener("pointerleave", () => {
-      hero.classList.remove("is-pointer-active");
+    document.addEventListener("pointerleave", () => {
+      glow.classList.remove("is-on");
+      visible = false;
+    });
+  }
+
+  /* =======================================================
+     五点五、技术关键词跑马灯
+     -------------------------------------------------------
+     把一组关键词复制到足够宽，再按「一组」的宽度位移，
+     循环时看不出接缝；窗口变化时重建。
+     ======================================================= */
+  function initTicker() {
+    const track = document.querySelector("[data-ticker-track]");
+    if (!track || reduceMotion.matches) return;
+
+    const base = track.firstElementChild;
+    if (!base) return;
+
+    let timer = 0;
+
+    function build() {
+      while (track.children.length > 1) track.lastElementChild.remove();
+
+      const groupWidth = base.getBoundingClientRect().width;
+      if (groupWidth < 10) return;
+
+      const need = Math.ceil((window.innerWidth * 2) / groupWidth) + 1;
+      for (let i = 1; i < need; i += 1) {
+        const clone = base.cloneNode(true);
+        clone.setAttribute("aria-hidden", "true");
+        track.appendChild(clone);
+      }
+
+      track.style.setProperty("--shift", `-${groupWidth}px`);
+      track.style.animationDuration = `${Math.max(20, Math.round(groupWidth / 46))}s`;
+    }
+
+    build();
+    window.addEventListener("resize", () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(build, 250);
     });
   }
 
@@ -433,7 +484,8 @@
   initRotator();
   initReveal();
   initTilt();
-  initHeroGlow();
+  initGlobalGlow();
+  initTicker();
   initBrandEgg();
   initHackerMode();
   initConsoleSignature();
