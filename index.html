@@ -5,6 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="HNYZ · 衡南一中编程社是一个面向全校学生的极客编程社团，教学内容以 Arduino 硬件编程为主线。我们通过项目、每周两次、每次一小时的活动和资源墙，一起把想法写成代码。">
   <meta name="theme-color" content="#f5f9ff">
+  <script>
+    /* 主题预置：首帧前定好深浅色，避免刷新时白闪 */
+    (function () {
+      try {
+        var saved = localStorage.getItem("hnyz:theme");
+        var theme = saved === "light" || saved === "dark"
+          ? saved
+          : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.dataset.theme = theme;
+      } catch (error) { /* 隐私模式下忽略 */ }
+    })();
+  </script>
   <meta property="og:title" content="HNYZ｜衡南一中编程社">
   <meta property="og:description" content="把想法，写成代码。">
   <meta property="og:type" content="website">
@@ -29,12 +41,15 @@
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css?v=20261025e">
   <link rel="stylesheet" href="css/pet.css?v=20261025b">
+  <link rel="stylesheet" href="css/personal.css?v=20261025g">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <!-- 项目卡片、全部项目折叠页和复制按钮由 js/main.js 驱动 -->
+  <script src="js/theme.js?v=20261025g" defer></script>
   <script src="js/members.js?v=20261025f" defer></script>
   <script src="js/main.js?v=20261025f" defer></script>
   <script src="js/pet.js?v=20261025c" defer></script>
+  <script src="js/personal.js?v=20261025g" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">跳到主要内容</a>
@@ -53,10 +68,6 @@
         </span>
       </a>
 
-      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="打开导航菜单" data-nav-toggle>
-        <span></span>
-        <span></span>
-      </button>
 
       <nav class="site-nav" id="site-nav" aria-label="主导航" data-nav>
         <ul class="nav-list">
@@ -73,6 +84,21 @@
           <span aria-hidden="true">↗</span>
         </a>
       </nav>
+      <div class="header-actions">
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换到深色模式" aria-pressed="false" title="切换到深色模式">
+          <svg class="theme-toggle__icon theme-toggle__icon--sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.4 5.4l1.6 1.6M17 17l1.6 1.6M18.6 5.4 17 7M7 17l-1.6 1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <svg class="theme-toggle__icon theme-toggle__icon--moon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M20 13.4A8.4 8.4 0 0 1 10.6 4a8.4 8.4 0 1 0 9.4 9.4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="打开导航菜单" data-nav-toggle>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -96,6 +122,12 @@
             我们从点亮第一颗 LED 开始，组队做项目、一起学习，把脑子里的点子变成真正能运行的作品。
           </p>
 
+          <p class="hero-rotator" aria-hidden="true">
+            <span class="hero-rotator__prompt">$</span>
+            <span class="hero-rotator__text" data-rotator></span>
+            <span class="hero-rotator__caret"></span>
+          </p>
+
           <div class="hero-actions">
             <a class="button button--primary" href="#join">
               加入我们
@@ -106,7 +138,7 @@
 
           <dl class="hero-stats" aria-label="社团概况">
             <div class="hero-stat">
-              <dt>2<small>次 / 周 · 1h</small></dt>
+              <dt><span data-count="2">2</span><small>次 / 周 · 1h</small></dt>
               <dd>常规活动</dd>
             </div>
             <div class="hero-stat">
@@ -114,7 +146,7 @@
               <dd>基础门槛</dd>
             </div>
             <div class="hero-stat">
-              <dt>4</dt>
+              <dt><span data-count="4">4</span></dt>
               <dd>实践方向</dd>
             </div>
             <div class="hero-stat">

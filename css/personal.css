@@ -1,0 +1,456 @@
+/* =========================================================
+   HNYZ · 个性化层
+   ---------------------------------------------------------
+   这一层不改动 style.css 的结构，只做三件事：
+   1. 深色主题：覆盖 :root 变量 + 少量硬编码白色的组件
+   2. 动效：滚动渐显、卡片倾斜、首屏光晕、数字滚动
+   3. 彩蛋：主题按钮、打字机标语、终端提示条、黑客模式
+
+   所有动效都尊重 prefers-reduced-motion。
+   ========================================================= */
+
+/* ---------- 1. 深色主题变量 ---------- */
+[data-theme="dark"] {
+  --bg: #060d1c;
+  --bg-deep: #040a16;
+  --panel: #0d1b33;
+  --panel-2: #102140;
+  --panel-3: #142a4f;
+
+  --border: #1e3557;
+  --border-strong: #2f5183;
+
+  --text: #e8f1ff;
+  --text-soft: #c3d6ef;
+  --muted: #94abc9;
+  --dim: #8098b8;
+
+  --blue: #5b93ff;
+  --blue-bright: #8ab4ff;
+  --green: #38bdf8;
+  --green-bright: #7dd3fc;
+  --orange: #fbbf24;
+  --red: #f87171;
+  --purple: #a78bfa;
+
+  --blue-soft: rgba(91, 147, 255, 0.16);
+  --green-soft: rgba(56, 189, 248, 0.16);
+
+  --glow-blue: 0 10px 30px rgba(91, 147, 255, 0.22);
+  --glow-green: 0 10px 26px rgba(56, 189, 248, 0.18);
+  --shadow-card: 0 18px 48px rgba(0, 0, 0, 0.46);
+
+  color-scheme: dark;
+}
+
+[data-theme="dark"] body {
+  background-image:
+    radial-gradient(ellipse 70% 42% at 50% -12%, rgba(91, 147, 255, 0.16), transparent 65%),
+    linear-gradient(rgba(91, 147, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(91, 147, 255, 0.045) 1px, transparent 1px);
+}
+
+/* 半透明白底的组件在深色下换成深面 */
+[data-theme="dark"] .site-header {
+  background: rgba(7, 15, 30, 0.86);
+}
+
+[data-theme="dark"] .skip-link {
+  background: var(--panel);
+}
+
+[data-theme="dark"] .quick-card,
+[data-theme="dark"] .do-card,
+[data-theme="dark"] .agenda-card,
+[data-theme="dark"] .wall-card,
+[data-theme="dark"] .join-contact,
+[data-theme="dark"] .member-profile {
+  background: linear-gradient(180deg, #10203c 0%, #0b172c 100%);
+}
+
+[data-theme="dark"] .cover-tag,
+[data-theme="dark"] .cover-badge {
+  background: rgba(8, 18, 36, 0.82);
+  color: var(--muted);
+}
+
+[data-theme="dark"] .member-chibi {
+  background: var(--panel-2);
+}
+
+/* 次要按钮、联系卡标题栏、占位封面这类硬编码的浅底 */
+[data-theme="dark"] .button--secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-soft);
+}
+
+[data-theme="dark"] .button--secondary:hover {
+  background: var(--blue-soft);
+}
+
+[data-theme="dark"] .quick-path {
+  background: rgba(16, 33, 64, 0.72);
+}
+
+[data-theme="dark"] .cover-placeholder {
+  background:
+    radial-gradient(circle at 78% 24%, rgba(91, 147, 255, 0.26), transparent 44%),
+    radial-gradient(circle at 12% 88%, rgba(56, 189, 248, 0.16), transparent 44%),
+    linear-gradient(135deg, #0d1c34 0%, #132a4c 52%, #0a1729 100%);
+}
+
+[data-theme="dark"] .cover-placeholder::before {
+  background-image:
+    linear-gradient(rgba(91, 147, 255, 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(91, 147, 255, 0.16) 1px, transparent 1px);
+}
+
+/* 校徽底板在深色下收暗，避免一块死白 */
+[data-theme="dark"] .hnyz-pet__board {
+  border-color: rgba(91, 147, 255, 0.45);
+  background: radial-gradient(circle at 50% 38%, #1a2f52 0%, #12233f 52%, #0b172c 100%);
+  box-shadow: 0 0 0 1px rgba(91, 147, 255, 0.18), 0 14px 32px rgba(0, 0, 0, 0.45);
+}
+
+[data-theme="dark"] .hnyz-pet__badge,
+[data-theme="dark"] .avatar-pet__img {
+  opacity: 0.92;
+}
+
+[data-theme="dark"] .hnyz-pet__speech,
+[data-theme="dark"] .hnyz-avatar__speech {
+  background: rgba(11, 23, 44, 0.96);
+  border-color: rgba(91, 147, 255, 0.55);
+}
+
+[data-theme="dark"] .hnyz-avatar__name {
+  background: rgba(11, 23, 44, 0.9);
+  border-color: rgba(91, 147, 255, 0.5);
+}
+
+[data-theme="dark"] img {
+  /* 浅底插画在深色下略微压暗，避免刺眼 */
+  filter: brightness(0.94) contrast(1.02);
+}
+
+[data-theme="dark"] .hnyz-pet__badge,
+[data-theme="dark"] .hnyz-avatar__img,
+[data-theme="dark"] .join-qr__img {
+  filter: none;
+}
+
+/* ---------- 2. 主题切换按钮 ---------- */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* 让导航和操作区一起靠右，品牌留在左侧 */
+.site-nav {
+  margin-left: auto;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--panel);
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, transform 0.35s ease,
+    box-shadow 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.theme-toggle:hover {
+  color: var(--blue);
+  border-color: var(--blue);
+  box-shadow: 0 0 0 4px var(--blue-soft);
+  transform: rotate(18deg);
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+
+.theme-toggle__icon {
+  width: 17px;
+  height: 17px;
+}
+
+.theme-toggle__icon--moon,
+[data-theme="dark"] .theme-toggle__icon--sun {
+  display: none;
+}
+
+[data-theme="dark"] .theme-toggle__icon--moon {
+  display: block;
+}
+
+/* ---------- 3. 滚动渐显 ---------- */
+html.reveal-ready [data-reveal] {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.7s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+html.reveal-ready [data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+}
+
+/* 卡片只做淡入，避免和 3D 倾斜的 transform 打架 */
+html.reveal-ready .project-card[data-reveal] {
+  transform: none;
+}
+
+/* ---------- 4. 项目卡片 3D 倾斜 ---------- */
+.project-card.is-tilting {
+  transition: transform 0.08s linear, border-color 0.3s ease, box-shadow 0.3s ease;
+  transform-style: preserve-3d;
+}
+
+.project-card.is-tilting .project-cover {
+  transform: translateZ(14px);
+}
+
+/* ---------- 5. 首屏光标光晕 ---------- */
+.hero {
+  --mx: 50%;
+  --my: 30%;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  background: radial-gradient(
+    320px circle at var(--mx) var(--my),
+    rgba(37, 99, 235, 0.16),
+    transparent 68%
+  );
+}
+
+[data-theme="dark"] .hero::after {
+  background: radial-gradient(
+    340px circle at var(--mx) var(--my),
+    rgba(91, 147, 255, 0.22),
+    transparent 68%
+  );
+}
+
+.hero.is-pointer-active::after {
+  opacity: 1;
+}
+
+.hero-grid {
+  z-index: 1;
+}
+
+/* ---------- 6. 打字机标语 ---------- */
+.hero-rotator {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-height: 1.9em;
+  margin: 18px 0 0;
+  color: var(--green);
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  letter-spacing: 0.01em;
+}
+
+.hero-rotator__prompt {
+  color: var(--muted);
+  opacity: 0.8;
+}
+
+.hero-rotator__caret {
+  display: inline-block;
+  width: 7px;
+  height: 1.05em;
+  margin-left: 1px;
+  background: var(--blue);
+  transform: translateY(2px);
+  animation: hnyzCaret 1.05s steps(1, end) infinite;
+}
+
+@keyframes hnyzCaret {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ---------- 7. 终端风格提示条 ---------- */
+.hnyz-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(520px, calc(100vw - 32px));
+  padding: 12px 18px;
+  border: 1px solid var(--border-strong);
+  border-left: 3px solid var(--blue);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow-card);
+  color: var(--text-soft);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  transform: translate(-50%, 18px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.hnyz-toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.hnyz-toast__prompt {
+  color: var(--blue);
+  font-weight: 700;
+}
+
+.hnyz-toast[data-tone="green"] {
+  border-left-color: var(--green);
+}
+
+.hnyz-toast[data-tone="green"] .hnyz-toast__prompt {
+  color: var(--green);
+}
+
+/* ---------- 8. 黑客模式 ---------- */
+html[data-hacker="true"] {
+  --blue: #22c55e;
+  --blue-bright: #4ade80;
+  --green: #f59e0b;
+  --green-bright: #fbbf24;
+  --blue-soft: rgba(34, 197, 94, 0.14);
+  --green-soft: rgba(245, 158, 11, 0.14);
+}
+
+.hnyz-scanlines {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(34, 197, 94, 0.09) 0px,
+    rgba(34, 197, 94, 0.09) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.hnyz-scanlines.is-on {
+  opacity: 1;
+}
+
+/* 连点 Logo 的反馈 */
+.brand.is-poked .brand-mark {
+  animation: hnyzBrandPulse 0.6s ease;
+}
+
+@keyframes hnyzBrandPulse {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.18) rotate(-6deg);
+    box-shadow: 0 0 0 6px var(--blue-soft);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ---------- 9. 页脚访问次数 ---------- */
+.footer-visits {
+  display: block;
+  margin-top: 6px;
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  opacity: 0.85;
+}
+
+/* ---------- 10. 减弱动效 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html.reveal-ready [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .hero-rotator__caret {
+    animation: none;
+  }
+
+  .theme-toggle:hover {
+    transform: none;
+  }
+
+  .hnyz-toast {
+    transition: none;
+  }
+}
+
+/* ---------- 11. 小屏适配 ---------- */
+@media (max-width: 900px) {
+  [data-theme="dark"] .site-nav {
+    background: var(--panel);
+    border-color: var(--border);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+  }
+
+  .theme-toggle {
+    width: 32px;
+    height: 32px;
+  }
+
+  .header-actions {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 520px) {
+  .hero-rotator {
+    font-size: 0.78rem;
+  }
+
+  .hnyz-toast {
+    bottom: 14px;
+    font-size: 0.72rem;
+  }
+}
