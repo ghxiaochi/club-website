@@ -44,11 +44,14 @@ club-website/
 ├── projects.html           # 全部项目页（按成员折叠）
 ├── css/
 │   ├── style.css           # 全站样式（蓝白科技风）
+│   ├── personal.css        # 深色主题、动效、彩蛋样式（在 style.css 之后加载）
 │   ├── pet.css             # 右下角校徽背景板样式
 │   └── avatar-pet.css      # 左下角像素头像彩蛋样式
 ├── js/
-│   ├── members.js          # 项目清单（唯一需要手动维护的数据）
+│   ├── members.js          # 项目清单 + 成员主页横幅配置（唯一需要手动维护的数据）
 │   ├── main.js             # GitHub API、缓存、卡片渲染、折叠、交互
+│   ├── theme.js            # 深浅色主题切换与记忆
+│   ├── personal.js         # 打字机标语、滚动渐显、卡片倾斜、彩蛋
 │   ├── pet.js              # 校徽滚动旋转、点击说话
 │   └── avatar-pet.js       # 头像点击台词与彩蛋
 ├── images/
@@ -205,7 +208,29 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 ---
 
-## 7. 换主题色
+## 7. 个性化与彩蛋
+
+这一层由 `css/personal.css` + `js/theme.js` + `js/personal.js` 组成，**不改动 `style.css`**，删掉这三行引用即可完全回到原版。
+
+| 功能 | 说明 | 位置 |
+|---|---|---|
+| 深浅色切换 | 首次访问跟随系统偏好；点击头部太阳/月亮按钮切换，选择存 `localStorage`（key：`hnyz:theme`）；页面 `<head>` 内联脚本负责首帧预置，避免刷新白闪 | `js/theme.js` |
+| 打字机标语 | 首屏按当前时段问候（「晚上好，这里是衡南一中编程社。」），随后轮播社团口号 | `js/personal.js` |
+| 滚动渐显 | 各区块、卡片进入视口时淡入上浮；`main.js` 动态渲染的项目卡片也会被 `MutationObserver` 捕获 | `js/personal.js` |
+| 数字滚动 | 首屏 `data-count` 的统计数字从 0 滚到目标值 | `index.html` + `js/personal.js` |
+| 卡片 3D 倾斜 | 仅精确指针（鼠标）启用，触屏不触发 | `js/personal.js` |
+| 连点 Logo | 2.6 秒内连点 5 次品牌区，弹出一条随机台词 | `js/personal.js` |
+| 黑客模式 | 键盘输入 ↑↑↓↓←→←→BA，配色转绿 + 扫描线，9 秒后自动退出 | `js/personal.js` |
+| 访问次数 | 页脚显示「这是你第 N 次打开这里」，存 `localStorage`（key：`hnyz:visits`） | `js/personal.js` |
+| 控制台签名 | 打开 DevTools 能看到 ASCII 标志、群号和彩蛋提示 | `js/personal.js` |
+
+> 所有动效都尊重 `prefers-reduced-motion`：系统开启「减少动态效果」时，渐显、打字机、倾斜、光晕全部停用，内容直接可见。
+
+### 深色主题
+
+深色配色是 `css/personal.css` 顶部的 `[data-theme="dark"]` 变量块，覆盖 `style.css` 里 `:root` 的同名变量。改深色只需要动这一块；少数组件（次要按钮、联系卡标题栏、占位封面、校徽底板、移动端菜单）在 `style.css` 里写死了浅色，已在 `personal.css` 里单独覆盖。
+
+## 8. 换主题色
 
 所有颜色集中在 `css/style.css` 顶部的 `:root`：
 
@@ -221,7 +246,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 }
 ```
 
-改这几个变量即可整体换色，不需要逐个改选择器。
+改这几个变量即可整体换色，不需要逐个改选择器。深色主题的同名变量在 `css/personal.css` 的 `[data-theme="dark"]` 里。
 
 校徽位于两页的 `.hnyz-pet`，样式在 `css/pet.css`，交互在 `js/pet.js`。图片为 `images/pet/badge-school-hd.webp`，放在右下角的浅蓝背景板里；如需停用，删除页面中的 `.hnyz-pet` 结构即可。
 
@@ -231,7 +256,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 ---
 
-## 8. 部署到 GitHub Pages
+## 9. 部署到 GitHub Pages
 
 ### 首次部署
 
@@ -265,7 +290,7 @@ Pages 会自动重新构建。如果页面还是旧版本，先强制刷新（`C
 
 ---
 
-## 9. 验收清单
+## 10. 验收清单
 
 - [ ] 本地打开 `index.html` 能看到完整首页
 - [ ] 首页项目卡片由 GitHub API 渲染，最多 6 张
@@ -279,11 +304,14 @@ Pages 会自动重新构建。如果页面还是旧版本，先强制刷新（`C
 - [ ] 校徽在首页和全部项目页右下角；像素头像彩蛋在全部项目页左下角，点满 6 次出现隐藏台词
 - [ ] ghxiaochi 分组有个人主页横幅和两张贴纸，且不遮挡项目卡片
 - [ ] 分享链接有 `og:image`（1200×630）和 `twitter:card`
+- [ ] 头部太阳/月亮按钮能切换深浅色，刷新后选择仍然保留
+- [ ] 首屏标语会打字轮播，输入 ↑↑↓↓←→←→BA 能进入黑客模式并自动退出
+- [ ] 系统开启「减少动态效果」时，所有内容立即可见、无动画
 - [ ] 不依赖任何后端
 
 ---
 
-## 10. FAQ
+## 11. FAQ
 
 **Q：为什么卡片显示 `DEGRADED`？**  
 A：GitHub API 返回了 403（限流）、404 或网络异常，页面自动用了本地缓存或 `js/members.js` 里的字段降级渲染。stars / forks 未知时显示 `—`，不会假装成 0。
