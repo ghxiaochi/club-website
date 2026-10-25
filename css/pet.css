@@ -9,6 +9,7 @@
 .hnyz-pet {
   --hnyz-pet-spin: 0deg;
   position: fixed;
+  left: auto;
   right: clamp(8px, 1.6vw, 20px);
   bottom: clamp(10px, 2.2vh, 22px);
   z-index: 35;
@@ -106,6 +107,7 @@
 /* 台词气泡：右下方弹出，不遮挡校徽本身 */
 .hnyz-pet__speech {
   position: absolute;
+  left: auto;
   right: 2%;
   bottom: calc(100% - 2px);
   z-index: 5;

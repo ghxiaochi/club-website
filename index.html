@@ -14,12 +14,12 @@
   <!-- 站点图标与样式。全部使用本地文件，无外部依赖。 -->
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/pet.css">
+  <link rel="stylesheet" href="css/pet.css?v=20261025b">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <!-- 项目卡片、全部项目折叠页和复制按钮由 js/main.js 驱动 -->
   <script src="js/main.js" defer></script>
-  <script src="js/pet.js" defer></script>
+  <script src="js/pet.js?v=20261025b" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">跳到主要内容</a>
@@ -540,7 +540,7 @@
   </footer>
 
   <!-- 站内校徽：使用原版校徽图片，放在右下角背景板里；随页面滚动旋转 -->
-  <div class="hnyz-pet" data-hnyz-pet>
+  <div class="hnyz-pet" data-hnyz-pet style="left: auto; right: clamp(8px, 1.6vw, 20px);">
     <div class="hnyz-pet__board" aria-hidden="true"></div>
     <button class="hnyz-pet__stage" type="button" data-hnyz-pet-trigger aria-label="和衡南一中校徽打个招呼">
       <span class="hnyz-pet__badge-wrap" data-hnyz-pet-badge aria-hidden="true">
