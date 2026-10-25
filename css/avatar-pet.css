@@ -176,7 +176,7 @@
 
 @media (max-width: 400px) {
   .hnyz-avatar {
-    width: 64px;
+    width: 56px;
   }
 
   .hnyz-avatar__speech {
@@ -186,7 +186,7 @@
 
 @media (max-width: 340px) {
   .hnyz-avatar {
-    width: 56px;
+    width: 50px;
   }
 }
 
