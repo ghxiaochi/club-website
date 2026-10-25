@@ -2,7 +2,7 @@
 
 一个纯静态的社团官网：**HTML + CSS + 原生 JavaScript**，没有后端、没有数据库、没有构建步骤。
 
-整体是蓝白科技风：浅蓝底、白色卡片、深海军蓝文字。教学内容以 **Arduino 硬件编程**为主线。右下角有一个不署名的校徽，随页面滚动旋转，点击会说一句社团台词。项目卡片通过 **GitHub API** 读取仓库信息；首页展示前 6 个，完整列表在单独的「全部项目」页按成员折叠。遇到 403 限流、404 或网络异常会自动切换到本地兜底数据。
+整体是蓝白科技风：浅蓝底、白色卡片、深海军蓝文字。教学内容以 **Arduino 硬件编程**为主线。右下角有一个不署名的校徽，随页面滚动旋转，点击会说一句社团台词；「全部项目」页左下角还有 ghxiaochi 的像素头像彩蛋，点击若干次会出现隐藏台词。项目卡片通过 **GitHub API** 读取仓库信息；首页展示前 6 个，完整列表在单独的「全部项目」页按成员折叠。遇到 403 限流、404 或网络异常会自动切换到本地缓存或降级卡片。
 
 - **线上地址**：<https://ghxiaochi.github.io/club-website/>
 - **仓库地址**：<https://github.com/ghxiaochi/club-website>
@@ -44,16 +44,23 @@ club-website/
 ├── projects.html           # 全部项目页（按成员折叠）
 ├── css/
 │   ├── style.css           # 全站样式（蓝白科技风）
-│   └── pet.css             # 右下角校徽背景板样式
+│   ├── pet.css             # 右下角校徽背景板样式
+│   └── avatar-pet.css      # 左下角像素头像彩蛋样式
 ├── js/
-│   ├── main.js             # GitHub API、卡片渲染、折叠、交互
-│   └── pet.js              # 校徽滚动旋转、点击说话
+│   ├── members.js          # 项目清单（唯一需要手动维护的数据）
+│   ├── main.js             # GitHub API、缓存、卡片渲染、折叠、交互
+│   ├── pet.js              # 校徽滚动旋转、点击说话
+│   └── avatar-pet.js       # 头像点击台词与彩蛋
 ├── images/
 │   ├── favicon.svg
+│   ├── og-cover.png        # 1200×630 分享图
 │   ├── project-website.svg # 社团官网封面
 │   ├── project-zaco.svg    # Zaco 猜数字封面
 │   └── pet/
-│       └── badge-school.webp # 原版校徽图片
+│       ├── badge-school.webp    # 原版校徽图片
+│       └── ghxiaochi-avatar.webp # 像素头像彩蛋
+├── robots.txt
+├── sitemap.xml
 └── README.md
 ```
 
@@ -83,30 +90,33 @@ npx serve .
 
 ## 4. 修改项目卡片
 
-打开 `js/main.js`，只改顶部的 `members` 数组：
+打开 `js/members.js`，只改 `window.HNYZ_MEMBERS` 数组：
 
 ```js
-const members = [
+window.HNYZ_MEMBERS = [
   {
     user: "ghxiaochi",
     repo: "club-website",
     coverImg: "images/project-website.svg",
     title: "社团官网 HNYZ",
-    desc: "HNYZ 社团官网：纯手写 HTML / CSS / JavaScript，部署在 GitHub Pages。"
+    desc: "HNYZ 社团官网：纯手写 HTML / CSS / JavaScript，部署在 GitHub Pages。",
+    language: "CSS"
   },
   {
     user: "ghxiaochi",
     repo: "zaco-guess-number",
     coverImg: "images/project-zaco.svg",
     title: "Zaco 猜数字",
-    desc: "运行在 Arduino 上的猜数字小游戏，练习随机数、循环和串口交互。"
+    desc: "运行在 Arduino 上的猜数字小游戏，练习随机数、循环和串口交互。",
+    language: "C++"
   },
   {
     user: "ghxiaochi",
     repo: "led",
     coverImg: "",
     title: "LED 硬件实验",
-    desc: "从点亮第一颗 LED 开始，练习 GPIO、基础电路和嵌入式程序结构。"
+    desc: "从点亮第一颗 LED 开始，练习 GPIO、基础电路和嵌入式程序结构。",
+    language: "C++"
   }
 ];
 ```
@@ -118,6 +128,7 @@ const members = [
 | `coverImg` | 否 | 封面图 URL；可填 `images/xxx.svg` 或 `https://...`；留空显示科技网格占位 |
 | `title` | 否 | 卡片上显示的中文名；不填就用仓库名 |
 | `desc` | 否 | 本地简介；GitHub 仓库没写简介时用它兜底 |
+| `language` | 否 | 语言名；GitHub API 不可用时用于降级显示 |
 
 新增项目时，在数组里追加一项即可，卡片会按数组顺序渲染。
 
@@ -160,13 +171,15 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 | 情况 | 处理 |
 | --- | --- |
 | `200` | 正常读取 `name / description / language / stargazers_count / forks_count / html_url` |
-| `403` | 未登录 API 限流（60 次 / 小时 / IP），显示本地兜底数据和提示 |
+| `403` | 未登录 API 限流（60 次 / 小时 / IP）；优先使用本地缓存，没有缓存时显示降级卡片和提示 |
 | `404` | 仓库不存在、改名或私有，显示 404 提示卡片 |
-| 网络错误 | 显示本地兜底数据 |
+| 网络错误 | 优先使用本地缓存，没有缓存时显示降级卡片 |
 
 项目区右侧的 `REPOS // GITHUB_API` 表示实时数据；出现 `DEGRADED` 表示用了兜底数据，页面顶部会出现黄色提示条。
 
-> 想减少限流影响，可以给 `fetch` 增加 GitHub Token，或把常用数据缓存到 `localStorage`。当前版本保持简单，不引入 Token。
+为减少 GitHub API 限流影响，`js/main.js` 会把成功返回的仓库数据写入 `localStorage`，缓存 10 分钟（key：`hnyz:github-repo-cache:v1`）。同一浏览器 10 分钟内重复打开页面不会重复请求 API；缓存不可用时会自动忽略，不影响页面加载。
+
+降级卡片只使用 `js/members.js` 里的本地字段（标题、简介、语言），不再维护第二份硬编码的 stars / forks 快照；数据未知时显示 `—`，避免展示过时数字。
 
 ---
 
@@ -179,7 +192,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 | `HNYZ` | `index.html`、`README.md`、封面 SVG |
 | `1098931492` | `index.html` 中 `data-copy-value` 和文本 |
 | `483677268@qq.com` | `index.html` 的 `mailto:` 和 `data-copy-value` |
-| `ghxiaochi` | `index.html` 的 GitHub 链接、`js/main.js` 的 `members` |
+| `ghxiaochi` | `index.html` 的 GitHub 链接、`js/members.js` 的 `HNYZ_MEMBERS` |
 
 活动频率和每次 60 分钟在 `index.html` 里搜索 `每周 2 次` / `每周两次` / `60 MIN`，涉及首屏数据、社团信息、活动节奏和 FAQ。
 
@@ -205,7 +218,9 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 改这几个变量即可整体换色，不需要逐个改选择器。
 
-校徽位于 `index.html` 的 `.hnyz-pet`，样式在 `css/pet.css`，交互在 `js/pet.js`。图片为 `images/pet/badge-school.webp`，放在右下角的浅蓝背景板里；如需停用，删除 `index.html` 中的 `.hnyz-pet` 结构即可。
+校徽位于两页的 `.hnyz-pet`，样式在 `css/pet.css`，交互在 `js/pet.js`。图片为 `images/pet/badge-school.webp`，放在右下角的浅蓝背景板里；如需停用，删除页面中的 `.hnyz-pet` 结构即可。
+
+像素头像彩蛋位于 `projects.html` 的 `.hnyz-avatar`，样式在 `css/avatar-pet.css`，交互在 `js/avatar-pet.js`。点击会轮播「干嘛？」等台词，点满 6 次显示「我绝对不会偷偷告诉你，这是AI写的网页」。它固定在左下角，右下角仍然保留校徽。
 
 ---
 
@@ -253,7 +268,9 @@ Pages 会自动重新构建。如果页面还是旧版本，先强制刷新（`C
 - [ ] 手机宽度下卡片单列、导航可展开
 - [ ] QQ 群号 / 邮箱可以一键复制
 - [ ] 资源墙的 C++ 和微雪 ESP32 链接可跳转
-- [ ] 断网或 403 时页面仍能显示兜底卡片
+- [ ] 断网或 403 时页面仍能显示降级卡片
+- [ ] 校徽在首页和全部项目页右下角；像素头像彩蛋在全部项目页左下角，点满 6 次出现隐藏台词
+- [ ] 分享链接有 `og:image`（1200×630）和 `twitter:card`
 - [ ] 不依赖任何后端
 
 ---
@@ -261,13 +278,13 @@ Pages 会自动重新构建。如果页面还是旧版本，先强制刷新（`C
 ## 10. FAQ
 
 **Q：为什么卡片显示 `DEGRADED`？**  
-A：GitHub API 返回了 403（限流）、404 或网络异常，页面自动用了 `main.js` 里的 `FALLBACK_REPOS` 兜底数据。
+A：GitHub API 返回了 403（限流）、404 或网络异常，页面自动用了本地缓存或 `js/members.js` 里的字段降级渲染。stars / forks 未知时显示 `—`，不会假装成 0。
 
 **Q：为什么改了 `members` 但页面没变化？**  
-A：先强制刷新；确认改的是 `js/main.js` 顶部的 `members`，不是旧版 `projects.json`。当前版本已经不再读取 `projects.json`。
+A：先强制刷新；确认改的是 `js/members.js` 里的 `window.HNYZ_MEMBERS`，不是旧版 `projects.json`。当前版本已经不再读取 `projects.json`。
 
 **Q：Star / Fork 数量不更新？**  
-A：数据来自 GitHub API 实时请求，可能有几分钟缓存。确认仓库是公开的，且没有触发 403 限流。
+A：成功请求会缓存 10 分钟，所以短时间内看到的是缓存值；超过 10 分钟或强制刷新后会重新请求。确认仓库是公开的，且没有触发 403 限流。
 
 **Q：可以加更多仓库吗？**  
 A：可以，`members` 没有数量上限。首页只展示前 6 个；更多项目会自动进入 `projects.html`，按成员折叠展示。

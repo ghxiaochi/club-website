@@ -2,13 +2,13 @@
    HNYZ · 衡南一中编程社 — 页面交互
    ---------------------------------------------------------
    这份脚本负责：
-   1. 读取 members 数组，用 Promise.all 并发请求 GitHub API
+   1. 读取 js/members.js 的 HNYZ_MEMBERS，用 Promise.all 并发请求 GitHub API
    2. 渲染赛博风项目卡片（封面、简介、语言、Stars、Forks）
    3. 处理 403 限流 / 404 仓库不存在 / 网络异常，自动降级
    4. QQ 群号、邮箱一键复制
    5. 移动端导航、页头滚动状态、页脚年份
 
-   想换展示的项目，只改下面的 members 数组即可。
+   想换展示的项目，只改 js/members.js 即可。
    不需要后端，也不需要构建工具。
    ========================================================= */
 
@@ -25,36 +25,8 @@
      title    : 可选，卡片上显示的中文项目名；不填就用仓库名。
      desc     : 可选，本地简介。GitHub 仓库没写简介时用它兜底。
      ======================================================= */
-  const members = [
-    {
-      user: "ghxiaochi",
-      repo: "club-website",
-      coverImg: "images/project-website.svg",
-      title: "社团官网 HNYZ",
-      desc: "HNYZ 社团官网：纯手写 HTML / CSS / JavaScript，部署在 GitHub Pages，用 GitHub API 实时展示社团仓库。"
-    },
-    {
-      user: "ghxiaochi",
-      repo: "zaco-guess-number",
-      coverImg: "images/project-zaco.svg",
-      title: "Zaco 猜数字",
-      desc: "运行在 Arduino 上的猜数字小游戏，练习随机数、循环、串口交互和 C++ 基础语法。"
-    },
-    {
-      user: "ghxiaochi",
-      repo: "led",
-      coverImg: "",
-      title: "LED 硬件实验",
-      desc: "从点亮第一颗 LED 开始，练习 GPIO、基础电路和嵌入式程序结构。"
-    },
-    {
-      user: "vveyin",
-      repo: "DrawFunc",
-      coverImg: "images/project-drawfunc.svg",
-      title: "DrawFunc 手表函数绘图",
-      desc: "为 Android 11 手表写的开源函数绘图 App：支持显函数、极坐标、参数方程和隐函数，适配圆屏与旋转表冠。"
-    }
-  ];
+  /* 项目清单在 js/members.js，避免和页面逻辑混在一起 */
+  const members = Array.isArray(window.HNYZ_MEMBERS) ? window.HNYZ_MEMBERS : [];
 
   const API_BASE = "https://api.github.com/repos";
 
@@ -76,44 +48,13 @@
   };
 
   /* -------------------------------------------------------
-     API 不可用时的本地兜底数据
-     说明：403（限流）、404、网络断开时，用这里的数据把卡片
-     正常渲染出来，避免页面出现空白或一堆报错。
+     GitHub API 本地缓存
+     说明：同一个浏览器 10 分钟内重复打开页面时，直接用缓存，
+     不重复消耗未登录 API 的 60 次/小时额度。
      ------------------------------------------------------- */
-  const FALLBACK_REPOS = {
-    "ghxiaochi/club-website": {
-      name: "club-website",
-      description:
-        "你现在看到的社团官网：纯 HTML、CSS、JavaScript 手写，部署在 GitHub Pages，卡片通过 GitHub API 实时读取。",
-      language: "CSS",
-      stars: 0,
-      forks: 0
-    },
-    "ghxiaochi/zaco-guess-number": {
-      name: "zaco-guess-number",
-      description:
-        "运行在 Arduino 上的猜数字小游戏，练习随机数、循环、串口交互和 C++ 基础语法。",
-      language: "C++",
-      stars: 1,
-      forks: 0
-    },
-    "ghxiaochi/led": {
-      name: "led",
-      description:
-        "C++ 硬件实验仓库：从点亮一盏 LED 开始，练习 GPIO、基础电路和嵌入式程序结构。",
-      language: "C++",
-      stars: 1,
-      forks: 0
-    },
-    "vveyin/DrawFunc": {
-      name: "DrawFunc",
-      description:
-        "为 Android 11 手表写的开源函数绘图 App：支持显函数、极坐标、参数方程和隐函数，适配圆屏与旋转表冠。",
-      language: "Kotlin",
-      stars: 2,
-      forks: 0
-    }
-  };
+  const CACHE_KEY = "hnyz:github-repo-cache:v1";
+  const CACHE_TTL = 10 * 60 * 1000;
+  const CACHE_LIMIT = 40;
 
   /* =======================================================
      二、DOM 引用与状态
@@ -127,9 +68,21 @@
   /* 记录这次加载中出现了哪些降级原因，最后合并成一条提示 */
   const notices = new Set();
 
+  /* 这次加载命中了几次 10 分钟缓存；用于把状态显示成 CACHE */
+  let cacheHits = 0;
+
   /* =======================================================
      三、工具函数
      ======================================================= */
+
+  /* 把高频事件（如 resize）压到一次，避免连续触发布局计算 */
+  function debounce(fn, wait = 150) {
+    let timer = 0;
+    return function debounced(...args) {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => fn.apply(this, args), wait);
+    };
+  }
 
   /* 只允许 http(s) 和站内相对路径，避免把 javascript: 之类的东西塞进 href */
   function normalizeHttpUrl(value) {
@@ -159,6 +112,51 @@
     return `${(number / 1000).toFixed(number >= 10000 ? 0 : 1)}k`;
   }
 
+  /* 统计值缺失时显示破折号，而不是假装它是 0 */
+  function formatStat(value) {
+    return value !== null && value !== undefined && Number.isFinite(Number(value))
+      ? formatNumber(value)
+      : "—";
+  }
+
+  /* -------------------------------------------------------
+     本地缓存：读、取、写
+     localStorage 在隐私模式下可能抛异常，所以全部包在
+     try/catch 里；缓存失败不能影响页面正常加载。
+     ------------------------------------------------------- */
+  function readRepoCache() {
+    try {
+      const raw = window.localStorage.getItem(CACHE_KEY);
+      const parsed = raw ? JSON.parse(raw) : null;
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch (error) {
+      return {};
+    }
+  }
+
+  function getCachedRepo(key) {
+    const entry = readRepoCache()[key];
+    if (!entry || !entry.data || !Number.isFinite(entry.savedAt)) return null;
+    return entry;
+  }
+
+  function setCachedRepo(key, data) {
+    try {
+      const cache = readRepoCache();
+      cache[key] = { savedAt: Date.now(), data };
+      const keys = Object.keys(cache);
+      if (keys.length > CACHE_LIMIT) {
+        keys
+          .sort((a, b) => (cache[a].savedAt || 0) - (cache[b].savedAt || 0))
+          .slice(0, keys.length - CACHE_LIMIT)
+          .forEach((oldKey) => delete cache[oldKey]);
+      }
+      window.localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+    } catch (error) {
+      /* 配额满或被禁用时静默忽略 */
+    }
+  }
+
   /* 用 GitHub API 返回的数据组装卡片需要的字段 */
   function normalizeRepo(data, member) {
     return {
@@ -183,14 +181,14 @@
     };
   }
 
-  /* 生成一张“降级卡片”的数据。status 会显示在封面角标上。 */
+  /* 生成一张“降级卡片”的数据。status 会显示在封面角标上。
+     只依赖 members.js 里的本地字段，不再维护第二份硬编码
+     仓库快照；stars / forks 未知时显示破折号，避免过时数字。 */
   function createFallback(member, status) {
     const key = `${member.user}/${member.repo}`;
-    const snapshot = FALLBACK_REPOS[key] || {};
 
     let description =
       (typeof member.desc === "string" && member.desc.trim()) ||
-      snapshot.description ||
       "GitHub API 暂时不可用，点开源码直接查看仓库。";
     if (status === "not-found") {
       description = "这个仓库返回了 404：可能已被删除、改名，或设置成了私有仓库。";
@@ -202,13 +200,12 @@
       repo: member.repo,
       name:
         (typeof member.title === "string" && member.title.trim()) ||
-        snapshot.name ||
         member.repo,
       owner: member.user,
       description,
-      language: snapshot.language || "TEXT",
-      stars: Number(snapshot.stars) || 0,
-      forks: Number(snapshot.forks) || 0,
+      language: member.language || "TEXT",
+      stars: null,
+      forks: null,
       url: `https://github.com/${member.user}/${member.repo}`,
       coverImg: normalizeCover(member.coverImg),
       status
@@ -287,7 +284,7 @@
      五、项目卡片
      ======================================================= */
 
-  function createStat(label, value, extra) {
+  function createStat(label, value, extra, accessibleLabel) {
     const stat = document.createElement("span");
     stat.className = "project-stat";
 
@@ -299,6 +296,12 @@
     val.className = "stat-value";
     if (extra) val.appendChild(extra);
     val.append(document.createTextNode(value));
+
+    if (accessibleLabel) {
+      stat.setAttribute("aria-label", `${accessibleLabel}：${value}`);
+      key.setAttribute("aria-hidden", "true");
+      val.setAttribute("aria-hidden", "true");
+    }
 
     stat.append(key, val);
     return stat;
@@ -343,9 +346,9 @@
     languageDot.setAttribute("aria-hidden", "true");
 
     stats.append(
-      createStat("LANG", project.language, languageDot),
-      createStat("🌟", formatNumber(project.stars)),
-      createStat("🍴", formatNumber(project.forks))
+      createStat("LANG", project.language, languageDot, "语言"),
+      createStat("🌟", formatStat(project.stars), null, "Stars"),
+      createStat("🍴", formatStat(project.forks), null, "Forks")
     );
 
     /* 科技风边框按钮 */
@@ -383,17 +386,20 @@
 
     if (notices.has("403")) {
       messages.push(
-        "GitHub API 返回 403：当前 IP 的未登录请求次数可能已用尽，已自动显示本地兜底数据，稍后刷新即可恢复实时数据。"
+        "GitHub API 返回 403：当前 IP 的未登录请求次数可能已用尽，已自动切换到本地缓存或降级卡片，稍后刷新即可恢复实时数据。"
       );
     }
     if (notices.has("404")) {
       messages.push("有仓库返回 404：可能已被删除、改名或设为私有，卡片仍保留入口。");
     }
+    if (notices.has("cache")) {
+      messages.push("部分数据来自本地缓存，10 分钟内不会重复请求 GitHub。");
+    }
     if (notices.has("network")) {
-      messages.push("GitHub API 暂时无法连接，已显示本地兜底数据。");
+      messages.push("GitHub API 暂时无法连接，已显示本地缓存或降级卡片。");
     }
     if (notices.has("error")) {
-      messages.push("部分仓库请求失败，已使用本地兜底数据。");
+      messages.push("部分仓库请求失败，已使用本地缓存或降级卡片。");
     }
 
     if (!messages.length) {
@@ -415,7 +421,7 @@
     if (!projects.length) {
       const empty = document.createElement("p");
       empty.className = "project-empty";
-      empty.textContent = "members 数组还是空的，先填入一个 GitHub 仓库吧。";
+      empty.textContent = "项目清单还是空的，先在 js/members.js 里填入一个 GitHub 仓库吧。";
       grid.appendChild(empty);
     } else {
       const fragment = document.createDocumentFragment();
@@ -424,7 +430,7 @@
     }
 
     if (count) {
-      const mode = notices.size ? "DEGRADED" : "GITHUB_API";
+      const mode = notices.size ? "DEGRADED" : cacheHits ? "CACHE" : "GITHUB_API";
       const scope = members.length > HOME_LIMIT
         ? `${projects.length} / ${members.length}`
         : `${projects.length}`;
@@ -449,6 +455,14 @@
 
   async function fetchRepo(member) {
     const apiUrl = `${API_BASE}/${encodeURIComponent(member.user)}/${encodeURIComponent(member.repo)}`;
+    const cacheKey = `${member.user}/${member.repo}`;
+    const cached = getCachedRepo(cacheKey);
+
+    /* 10 分钟内直接使用缓存，不消耗 GitHub API 配额 */
+    if (cached && Date.now() - cached.savedAt < CACHE_TTL) {
+      cacheHits += 1;
+      return normalizeRepo(cached.data, member);
+    }
 
     try {
       const response = await fetch(apiUrl, {
@@ -459,6 +473,11 @@
       /* 403：通常是未登录 API 限流（60 次 / 小时 / IP） */
       if (response.status === 403) {
         notices.add("403");
+        if (cached) {
+          notices.add("cache");
+          cacheHits += 1;
+          return normalizeRepo(cached.data, member);
+        }
         return createFallback(member, "rate-limit");
       }
 
@@ -474,10 +493,16 @@
       }
 
       const data = await response.json();
+      setCachedRepo(cacheKey, data);
       return normalizeRepo(data, member);
     } catch (error) {
       /* 断网、DNS 失败、CORS 等 */
       notices.add("network");
+      if (cached) {
+        notices.add("cache");
+        cacheHits += 1;
+        return normalizeRepo(cached.data, member);
+      }
       return createFallback(member, "network");
     }
   }
@@ -486,6 +511,7 @@
     if (!grid) return;
 
     notices.clear();
+    cacheHits = 0;
 
     try {
       /* 首页只请求前 6 个仓库，避免一次消耗太多 GitHub API 配额 */
@@ -502,7 +528,7 @@
   /* =======================================================
      七点五、全部项目页：按成员折叠，展开时才加载
      -------------------------------------------------------
-     members 数组可以放很多人的很多仓库。全部项目页先按
+     HNYZ_MEMBERS 可以放很多人的很多仓库。全部项目页先按
      GitHub 用户名分组，每组是一个原生 <details> 折叠面板；
      点开某组时才请求该组仓库，不会一进页面就把 API 配额打满。
      ======================================================= */
@@ -521,7 +547,7 @@
   function updateArchiveCount() {
     if (!count) return;
 
-    const mode = notices.size ? "DEGRADED" : "GITHUB_API";
+    const mode = notices.size ? "DEGRADED" : cacheHits ? "CACHE" : "GITHUB_API";
     count.textContent = `${groupMembers().length} MEMBERS // ${members.length} REPOS // ${mode}`;
   }
 
@@ -619,7 +645,7 @@
     if (!grouped.length) {
       const empty = document.createElement("p");
       empty.className = "project-empty";
-      empty.textContent = "members 数组还是空的，先填入一个 GitHub 仓库吧。";
+      empty.textContent = "项目清单还是空的，先在 js/members.js 里填入一个 GitHub 仓库吧。";
       groupsRoot.appendChild(empty);
       groupsRoot.setAttribute("aria-busy", "false");
       if (count) count.textContent = "0 MEMBERS // 0 REPOS";
@@ -741,9 +767,12 @@
       closeMenu();
     });
 
-    window.addEventListener("resize", () => {
-      if (window.innerWidth > 900) closeMenu();
-    });
+    window.addEventListener(
+      "resize",
+      debounce(() => {
+        if (window.innerWidth > 900) closeMenu();
+      })
+    );
   }
 
   /* =======================================================

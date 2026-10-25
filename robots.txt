@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ghxiaochi.github.io/club-website/sitemap.xml

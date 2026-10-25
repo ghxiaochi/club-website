@@ -6,16 +6,35 @@
   <meta name="description" content="HNYZ · 衡南一中编程社的全部项目。按成员折叠展示，支持很多同学和很多仓库。">
   <meta name="theme-color" content="#f5f9ff">
   <meta property="og:title" content="全部项目｜HNYZ · 衡南一中编程社">
-  <meta property="og:description" content="按成员折叠的完整项目列表。">
+  <meta property="og:description" content="按成员折叠的完整项目列表，收录社团成员的原创作品。">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ghxiaochi.github.io/club-website/projects.html">
+  <meta property="og:site_name" content="HNYZ · 衡南一中编程社">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:image" content="https://ghxiaochi.github.io/club-website/images/og-cover.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="HNYZ 衡南一中编程社：把想法，写成代码。">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="全部项目｜HNYZ · 衡南一中编程社">
+  <meta name="twitter:description" content="按成员折叠的完整项目列表，收录社团成员的原创作品。">
+  <meta name="twitter:image" content="https://ghxiaochi.github.io/club-website/images/og-cover.png">
+  <meta name="twitter:image:alt" content="HNYZ 衡南一中编程社：把想法，写成代码。">
+  <link rel="canonical" href="https://ghxiaochi.github.io/club-website/projects.html">
 
   <title>全部项目｜HNYZ · 衡南一中编程社</title>
 
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/pet.css?v=20261025b">
+  <link rel="stylesheet" href="css/avatar-pet.css?v=20261025a">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
-  <script src="js/main.js?v=20261025c" defer></script>
+  <script src="js/members.js?v=20261025d" defer></script>
+  <script src="js/main.js?v=20261025d" defer></script>
+  <script src="js/pet.js?v=20261025c" defer></script>
+  <script src="js/avatar-pet.js?v=20261025a" defer></script>
 </head>
 <body id="top">
   <a class="skip-link" href="#main">跳到主要内容</a>
@@ -101,7 +120,7 @@
         </noscript>
 
         <div class="archive-foot">
-          <p>想把自己的仓库放进列表？在群里发 GitHub 链接，或者直接改 <code>js/main.js</code> 里的 <code>members</code>。</p>
+          <p>想把自己的仓库放进列表？在群里发 GitHub 链接，或者直接改 <code>js/members.js</code> 里的 <code>HNYZ_MEMBERS</code>。</p>
           <a href="index.html#join">加入我们 <span aria-hidden="true">→</span></a>
         </div>
       </div>
@@ -141,6 +160,26 @@
       </p>
     </div>
   </footer>
+
+  <!-- 站内校徽：和首页一致的右下角背景板，随页面滚动旋转 -->
+  <div class="hnyz-pet" data-hnyz-pet style="left: auto; right: clamp(8px, 1.6vw, 20px);">
+    <div class="hnyz-pet__board" aria-hidden="true"></div>
+    <button class="hnyz-pet__stage" type="button" data-hnyz-pet-trigger aria-label="和衡南一中校徽打个招呼">
+      <span class="hnyz-pet__badge-wrap" data-hnyz-pet-badge aria-hidden="true">
+        <img class="hnyz-pet__badge" src="images/pet/badge-school.webp" alt="">
+      </span>
+    </button>
+    <p class="hnyz-pet__speech" data-hnyz-pet-speech role="status" aria-live="polite"></p>
+  </div>
+
+  <!-- ghxiaochi 的像素头像彩蛋：固定在左下角，点击若干次出现隐藏台词 -->
+  <div class="hnyz-avatar" data-hnyz-avatar>
+    <p class="hnyz-avatar__speech" data-hnyz-avatar-speech role="status" aria-live="polite"></p>
+    <button class="hnyz-avatar__button" type="button" data-hnyz-avatar-trigger aria-label="和 ghxiaochi 的像素头像互动">
+      <img class="hnyz-avatar__img" src="images/pet/ghxiaochi-avatar.webp" alt="ghxiaochi 的像素头像" width="648" height="954">
+      <span class="hnyz-avatar__name" aria-hidden="true">@ghxiaochi</span>
+    </button>
+  </div>
 
   <p class="sr-only" id="copy-status" role="status" aria-live="polite"></p>
 </body>

@@ -90,8 +90,12 @@
     }
   });
 
+  let resizeTimer = 0;
   window.addEventListener("scroll", updateSpinTarget, { passive: true });
-  window.addEventListener("resize", updateSpinTarget);
+  window.addEventListener("resize", function () {
+    window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(updateSpinTarget, 150);
+  });
   motionQuery.addEventListener?.("change", updateSpinTarget);
 
   currentSpin = motionQuery.matches ? 0 : window.scrollY * 0.24;

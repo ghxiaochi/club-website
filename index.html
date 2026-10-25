@@ -8,6 +8,20 @@
   <meta property="og:title" content="HNYZ｜衡南一中编程社">
   <meta property="og:description" content="把想法，写成代码。">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ghxiaochi.github.io/club-website/">
+  <meta property="og:site_name" content="HNYZ · 衡南一中编程社">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:image" content="https://ghxiaochi.github.io/club-website/images/og-cover.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="HNYZ 衡南一中编程社：把想法，写成代码。">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="HNYZ｜衡南一中编程社">
+  <meta name="twitter:description" content="把想法，写成代码。">
+  <meta name="twitter:image" content="https://ghxiaochi.github.io/club-website/images/og-cover.png">
+  <meta name="twitter:image:alt" content="HNYZ 衡南一中编程社：把想法，写成代码。">
+  <link rel="canonical" href="https://ghxiaochi.github.io/club-website/">
 
   <title>HNYZ｜衡南一中编程社 · 把想法写成代码</title>
 
@@ -18,8 +32,9 @@
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <!-- 项目卡片、全部项目折叠页和复制按钮由 js/main.js 驱动 -->
-  <script src="js/main.js?v=20261025c" defer></script>
-  <script src="js/pet.js?v=20261025b" defer></script>
+  <script src="js/members.js?v=20261025d" defer></script>
+  <script src="js/main.js?v=20261025d" defer></script>
+  <script src="js/pet.js?v=20261025c" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">跳到主要内容</a>
@@ -239,7 +254,7 @@
           <h2 id="projects-title">从仓库里，<br>长出来的作品。</h2>
           <p class="section-intro">
             项目卡片通过 GitHub API 实时读取。想换项目，只要修改
-            <code>js/main.js</code> 里的 <code>members</code> 数组；
+            <code>js/members.js</code> 里的 <code>HNYZ_MEMBERS</code> 数组；
             想换封面，就填 <code>coverImg</code>，留空会自动生成科技网格占位图。
             首页展示前 6 个，更多项目在「全部项目」页按成员折叠展示。
           </p>
@@ -436,7 +451,7 @@
               <span class="faq-icon" aria-hidden="true"></span>
             </summary>
             <div class="faq-answer">
-              <p>由 <code>js/main.js</code> 通过 GitHub API 实时读取 <code>members</code> 数组里的仓库信息。首页最多展示前 6 个，完整列表在「全部项目」页按成员折叠。遇到 403 限流、404 或网络异常时，会自动切换到本地兜底数据，页面不会空白。</p>
+              <p>由 <code>js/main.js</code> 通过 GitHub API 实时读取 <code>js/members.js</code> 里的仓库信息。首页最多展示前 6 个，完整列表在「全部项目」页按成员折叠。遇到 403 限流、404 或网络异常时，会自动切换到本地缓存或降级卡片，页面不会空白。</p>
             </div>
           </details>
         </div>
