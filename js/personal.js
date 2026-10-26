@@ -397,11 +397,11 @@
       icon.style.backgroundImage = `url("${icons[i % icons.length]}")`;
       icon.style.left = `${Math.min(left, 92)}%`;
       icon.style.top = `${Math.min(top, 90)}%`;
-      icon.style.setProperty("--s", `${24 + (i % 4) * 10}px`);
+      icon.style.setProperty("--s", `${26 + (i % 4) * 11}px`);
       icon.style.setProperty("--dur", `${9 + (i % 5) * 2.4}s`);
       icon.style.setProperty("--delay", `${-(i % 7) * 1.3}s`);
       icon.style.setProperty("--rot", `${((i % 5) - 2) * 9}deg`);
-      icon.style.setProperty("--o", `${0.09 + (i % 3) * 0.02}`);
+      icon.style.setProperty("--o", `${0.15 + (i % 3) * 0.03}`);
       layer.appendChild(icon);
     }
 
