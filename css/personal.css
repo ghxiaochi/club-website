@@ -1286,3 +1286,73 @@ body.is-lightbox-open {
     padding-bottom: 40px;
   }
 }
+
+/* =========================================================
+   22. 开屏
+   ---------------------------------------------------------
+   盖住首帧，等脚本把页面定位到「关于」后再淡出，
+   避免看到滑动过程。
+   ========================================================= */
+.boot {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 28%, rgba(37, 99, 235, 0.14), transparent 62%),
+    var(--bg);
+  transition: opacity 0.45s ease;
+}
+
+.boot.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.boot__inner {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  animation: bootIn 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.boot__mark {
+  font-family: var(--mono);
+  font-size: 1.5rem;
+  letter-spacing: 0.12em;
+  color: var(--blue);
+}
+
+.boot__brand {
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  color: var(--text);
+}
+
+.boot__line {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+@keyframes bootIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boot,
+  .boot__inner {
+    animation: none;
+    transition: none;
+  }
+}

@@ -87,7 +87,15 @@ club-website/
 
 ---
 
-## 3. 本地预览
+## 3. 开屏与首屏位置
+
+打开首页时会先显示约 0.8 秒的开屏（`{ }` + HNYZ + 口号），同时脚本把页面**直接定位到「关于」这一块**，不做平滑滚动：
+
+- 通过 `history.scrollRestoration = "manual"` 关掉浏览器的滚动位置恢复，避免刷新后停在页面底部
+- 打开时会清掉 URL 里残留的 `#join` 之类锚点，防止一进来就跳到页尾
+- 想改成打开时停在顶部首屏，把 `index.html` 里 `place()` 中的 `document.getElementById("about")` 换成 `null` 即可
+
+## 4. 本地预览
 
 ### 方式 A：直接打开
 
@@ -109,7 +117,7 @@ npx serve .
 
 ---
 
-## 4. 修改项目卡片
+## 5. 修改项目卡片
 
 打开 `js/members.js`，只改 `window.HNYZ_MEMBERS` 数组：
 
@@ -170,7 +178,7 @@ window.HNYZ_MEMBERS = [
 
 ---
 
-## 5. 数据与异常兜底
+## 6. 数据与异常兜底
 
 首页使用 `Promise.all` 并发请求前 6 个仓库：
 
@@ -204,7 +212,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 ---
 
-## 6. 修改品牌 / 联系方式
+## 7. 修改品牌 / 联系方式
 
 全局搜索替换即可：
 
@@ -221,7 +229,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 ---
 
-## 7. 个性化与彩蛋
+## 8. 个性化与彩蛋
 
 这一层由 `css/personal.css` + `js/theme.js` + `js/personal.js` 组成，**不改动 `style.css`**，删掉这三行引用即可完全回到原版。
 
@@ -249,7 +257,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 深色配色是 `css/personal.css` 顶部的 `[data-theme="dark"]` 变量块，覆盖 `style.css` 里 `:root` 的同名变量。改深色只需要动这一块；少数组件在 `style.css` 里写死了浅色，已在 `personal.css` 里单独覆盖：次要按钮、联系卡标题栏、占位封面、校徽底板、页脚、移动端菜单，以及 **`.section--soft` 区块底色**（这一条曾经导致深色模式下出现一块灰白板、白字看不清，已修复）。
 
-## 8. 往图集里加图
+## 9. 往图集里加图
 
 1. 把图片放进 `images/gallery/`
 2. 打开 `js/gallery-data.js`，在数组末尾加一条：
@@ -264,7 +272,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 建议短边 ≥ 800px；透明底的贴纸类图片会自动在白色相纸里居中显示，不会变形。想删掉某张，删掉数组里那一项即可（首页 ghxiaochi 个人页的贴纸在 `js/members.js` 的 `HNYZ_PROFILES` 里，两者互不影响）。
 
-## 9. 换主题色
+## 10. 换主题色
 
 所有颜色集中在 `css/style.css` 顶部的 `:root`：
 
@@ -292,7 +300,7 @@ ghxiaochi 的个人主页横幅配置在 `js/members.js` 的 `window.HNYZ_PROFIL
 
 ---
 
-## 10. 部署到 GitHub Pages
+## 11. 部署到 GitHub Pages
 
 ### 首次部署
 
@@ -326,7 +334,7 @@ Pages 会自动重新构建。如果页面还是旧版本，先强制刷新（`C
 
 ---
 
-## 11. 验收清单
+## 12. 验收清单
 
 - [ ] 本地打开 `index.html` 能看到完整首页
 - [ ] 首页项目卡片由 GitHub API 渲染，最多 6 张
@@ -347,7 +355,7 @@ Pages 会自动重新构建。如果页面还是旧版本，先强制刷新（`C
 
 ---
 
-## 12. FAQ
+## 13. FAQ
 
 **Q：为什么卡片显示 `DEGRADED`？**  
 A：GitHub API 返回了 403（限流）、404 或网络异常，页面自动用了本地缓存或 `js/members.js` 里的字段降级渲染。stars / forks 未知时显示 `—`，不会假装成 0。
