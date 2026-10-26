@@ -41,7 +41,7 @@
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css?v=20261025e">
   <link rel="stylesheet" href="css/pet.css?v=20261025b">
-  <link rel="stylesheet" href="css/personal.css?v=20261028">
+  <link rel="stylesheet" href="css/personal.css?v=20261030">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <!-- 项目卡片、全部项目折叠页和复制按钮由 js/main.js 驱动 -->
@@ -49,7 +49,7 @@
   <script src="js/members.js?v=20261025i" defer></script>
   <script src="js/main.js?v=20261025f" defer></script>
   <script src="js/pet.js?v=20261025c" defer></script>
-  <script src="js/personal.js?v=20261029" defer></script>
+  <script src="js/personal.js?v=20261030" defer></script>
 </head>
 <body>
   <div class="bg-orbs" aria-hidden="true">
@@ -447,13 +447,6 @@
         </div>
 
         <p class="wall-note">资源墙会持续补充。有想推荐给社团的教程、工具或项目，欢迎在 QQ 群里发链接。</p>
-
-        <a class="gallery-entry" href="gallery.html">
-          <span class="gallery-entry__index">[ 03 ]</span>
-          <span class="gallery-entry__label">图集</span>
-          <span class="gallery-entry__desc">梗图、社团日常和几张壁纸</span>
-          <span class="gallery-entry__arrow" aria-hidden="true">↗</span>
-        </a>
       </div>
     </section>
 
@@ -586,6 +579,17 @@
         </div>
 
         <p class="sr-only" id="copy-status" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+    <!-- 页面最下方：图集入口 -->
+    <section class="gallery-entry-row" aria-labelledby="gallery-entry-title">
+      <div class="container">
+        <a class="gallery-entry" href="gallery.html">
+          <span class="gallery-entry__index">[ EXTRA ]</span>
+          <span class="gallery-entry__label" id="gallery-entry-title">图集</span>
+          <span class="gallery-entry__desc">群里传的梗图、社团日常，都收在这里</span>
+          <span class="gallery-entry__arrow" aria-hidden="true">去看看 ↗</span>
+        </a>
       </div>
     </section>
   </main>

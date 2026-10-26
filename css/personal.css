@@ -1231,9 +1231,10 @@ body.is-lightbox-open {
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
-  opacity: var(--o, 0.06);
+  opacity: 0;
   transform: rotate(var(--rot, 0deg));
-  animation: bgIconFloat var(--dur, 12s) ease-in-out var(--delay, 0s) infinite alternate;
+  /* 像气泡一样持续往上飘：淡入 → 上升 → 淡出 → 从原点重来 */
+  animation: bgIconRise var(--dur, 18s) linear var(--delay, 0s) infinite;
 }
 
 [data-theme="dark"] .bg-icon {
@@ -1242,12 +1243,20 @@ body.is-lightbox-open {
   opacity: calc(var(--o, 0.06) * 0.9);
 }
 
-@keyframes bgIconFloat {
-  from {
-    transform: translateY(0) rotate(var(--rot, 0deg));
+@keyframes bgIconRise {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(var(--rot, 0deg)) scale(0.92);
+    opacity: 0;
   }
-  to {
-    transform: translateY(-18px) rotate(calc(var(--rot, 0deg) + 7deg));
+  12% {
+    opacity: var(--o, 0.15);
+  }
+  78% {
+    opacity: var(--o, 0.15);
+  }
+  100% {
+    transform: translate3d(var(--dx, 18px), -260px, 0) rotate(calc(var(--rot, 0deg) + 12deg)) scale(1.06);
+    opacity: 0;
   }
 }
 
@@ -1260,5 +1269,20 @@ body.is-lightbox-open {
 @media (prefers-reduced-motion: reduce) {
   .bg-icon {
     animation: none;
+  }
+}
+
+/* 页面最下方的图集入口 */
+.gallery-entry-row {
+  padding: 0 0 56px;
+}
+
+.gallery-entry-row .gallery-entry {
+  margin-top: 0;
+}
+
+@media (max-width: 520px) {
+  .gallery-entry-row {
+    padding-bottom: 40px;
   }
 }

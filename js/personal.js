@@ -398,8 +398,9 @@
       icon.style.left = `${Math.min(left, 92)}%`;
       icon.style.top = `${Math.min(top, 90)}%`;
       icon.style.setProperty("--s", `${26 + (i % 4) * 11}px`);
-      icon.style.setProperty("--dur", `${9 + (i % 5) * 2.4}s`);
-      icon.style.setProperty("--delay", `${-(i % 7) * 1.3}s`);
+      icon.style.setProperty("--dur", `${14 + (i % 5) * 3.2}s`);
+      icon.style.setProperty("--delay", `${-(i % 9) * 2.6}s`);
+      icon.style.setProperty("--dx", `${((i % 7) - 3) * 9}px`);
       icon.style.setProperty("--rot", `${((i % 5) - 2) * 9}deg`);
       icon.style.setProperty("--o", `${0.15 + (i % 3) * 0.03}`);
       layer.appendChild(icon);

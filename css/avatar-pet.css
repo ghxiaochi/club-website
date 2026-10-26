@@ -153,16 +153,55 @@
   }
 }
 
-@keyframes hnyz-avatar-poke {
-  0%,
-  100% {
-    transform: translateY(0) scale(1);
+/* 点击时的小星星：从头顶散开、向上飘走 */
+.hnyz-avatar__spark {
+  position: absolute;
+  left: 50%;
+  bottom: 54%;
+  z-index: 6;
+  color: var(--blue);
+  font-size: var(--size, 12px);
+  line-height: 1;
+  pointer-events: none;
+  opacity: 0;
+  animation: hnyz-avatar-spark 1.05s cubic-bezier(0.22, 0.61, 0.36, 1) var(--delay, 0s) forwards;
+}
+
+@keyframes hnyz-avatar-spark {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(0.35) rotate(0deg);
   }
-  40% {
-    transform: translateY(-4px) scale(1.06) rotate(-2deg);
+  18% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--px, 0px)), var(--py, -70px)) scale(1.15) rotate(40deg);
+  }
+}
+
+/* 彩蛋状态：整只头像泛一层绿光 */
+.hnyz-avatar.is-secret .hnyz-avatar__img {
+  filter: drop-shadow(0 0 16px rgba(74, 222, 128, 0.8))
+    drop-shadow(0 12px 16px rgba(15, 118, 110, 0.24));
+}
+
+@keyframes hnyz-avatar-poke {
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+  20% {
+    transform: scale(1.14, 0.86) rotate(-4deg);
+  }
+  45% {
+    transform: scale(0.9, 1.13) rotate(4deg);
   }
   70% {
-    transform: translateY(0) scale(0.98) rotate(1deg);
+    transform: scale(1.05, 0.95) rotate(-2deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
   }
 }
 
