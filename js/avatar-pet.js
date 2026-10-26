@@ -465,6 +465,12 @@
 
     if (mode === "summon") {
       pet.classList.add("is-visible");
+      summoned = true;
+      if (summonBtn) {
+        summonBtn.classList.add("is-active");
+        summonBtn.setAttribute("aria-pressed", "true");
+      }
+      scheduleStay();
     }
 
     window.setTimeout(() => {
@@ -522,6 +528,11 @@
 
   function leaveHome() {
     if (!summoned) return;
+    /* 正在暴走或已经躺下时先不走，等这边结束 */
+    if (state.rampage || state.dead) {
+      scheduleStay();
+      return;
+    }
 
     summoned = false;
     window.clearTimeout(stayTimer);
