@@ -2,7 +2,7 @@
    HNYZ · 音效
    ---------------------------------------------------------
    素材来自 Anuken 的音游 Animdustry（assets/sounds 与
-   assets/music），已转成单声道 OGG 并压到 200KB 左右。
+   assets/music），已转成单声道 MP3（兼容 iOS）并压到 300KB 左右。
    浏览器要求先有用户操作才允许播放，所以全部由点击触发。
    开关状态存在 localStorage：hnyz:sound
    ========================================================= */
@@ -11,16 +11,16 @@
   "use strict";
 
   const SRC = {
-    hover: "audio/jump.ogg",
-    click: "audio/pat.ogg",
-    locked: "audio/hit.ogg",
-    back: "audio/back.ogg",
-    select: "audio/select.ogg",
-    win: "audio/win.ogg",
-    get: "audio/get.ogg",
-    reveal: "audio/reveal.ogg",
-    die: "audio/die.ogg",
-    boom: "audio/vineboom.ogg"
+    hover: "audio/jump.mp3",
+    click: "audio/pat.mp3",
+    locked: "audio/hit.mp3",
+    back: "audio/back.mp3",
+    select: "audio/select.mp3",
+    win: "audio/win.mp3",
+    get: "audio/get.mp3",
+    reveal: "audio/reveal.mp3",
+    die: "audio/die.mp3",
+    boom: "audio/vineboom.mp3"
   };
 
   const KEY = "hnyz:sound";

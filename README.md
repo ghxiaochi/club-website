@@ -51,7 +51,7 @@ club-website/
 │   ├── personal.css        # 深色主题、动效、彩蛋样式（在 style.css 之后加载）
 │   ├── pet.css             # 右下角校徽背景板样式
 │   └── avatar-pet.css      # 左下角像素头像彩蛋样式
-├── audio/                  # 游戏原版音效（OGG 单声道，共约 200KB）
+├── audio/                  # 游戏原版音效（MP3 单声道，共约 300KB）
 │   ├── jump / pat / hit    # 悬停 / 点击 / 未解锁
 │   ├── back / select       # 关闭 / 选择
 │   └── reveal / win / get  # 抽卡音乐 / 解锁 / 复活
@@ -246,7 +246,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 ## 8. 音效
 
-`js/sfx.js` 是一个小音效池：每个音效预载 1–3 个实例，轮着播，所以快速连点不会互相打断。素材是 Animdustry 原版 `assets/sounds` 与 `assets/music`，转成单声道 OGG 后总共约 200KB，全部懒加载。
+`js/sfx.js` 是一个小音效池：每个音效预载 1–3 个实例，轮着播，所以快速连点不会互相打断。素材是 Animdustry 原版 `assets/sounds` 与 `assets/music`，转成单声道 MP3（96kbps，iOS 也能放）后总共约 300KB，全部懒加载。
 
 | 动作 | 音效 |
 |---|---|
