@@ -361,6 +361,54 @@
   }
 
   /* =======================================================
+     五点八、背景图标阵列
+     -------------------------------------------------------
+     校徽 / Arduino / token 三枚灰度图标，缩小后随机撒在
+     背景里，各自缓慢上下浮动。桌面端才生成，避免手机上
+    多出一层影响滚动性能。
+     ======================================================= */
+  function initBgIcons() {
+    if (reduceMotion.matches) return;
+    if (!window.matchMedia("(min-width: 901px)").matches) return;
+
+    const icons = [
+      "images/decor/icon-badge.webp",
+      "images/decor/icon-arduino.webp",
+      "images/decor/icon-token.webp"
+    ];
+
+    const layer = document.createElement("div");
+    layer.className = "bg-icons";
+    layer.setAttribute("aria-hidden", "true");
+
+    const COLS = 6;
+    const ROWS = 5;
+
+    for (let i = 0; i < COLS * ROWS; i += 1) {
+      const col = i % COLS;
+      const row = Math.floor(i / COLS);
+
+      /* 网格 + 抖动：既有分布感，又不会挤成一团 */
+      const left = col * 16.4 + 2.5 + ((i * 7) % 6);
+      const top = row * 18.5 + 3 + ((i * 11) % 6);
+
+      const icon = document.createElement("span");
+      icon.className = "bg-icon";
+      icon.style.backgroundImage = `url("${icons[i % icons.length]}")`;
+      icon.style.left = `${Math.min(left, 92)}%`;
+      icon.style.top = `${Math.min(top, 90)}%`;
+      icon.style.setProperty("--s", `${24 + (i % 4) * 10}px`);
+      icon.style.setProperty("--dur", `${9 + (i % 5) * 2.4}s`);
+      icon.style.setProperty("--delay", `${-(i % 7) * 1.3}s`);
+      icon.style.setProperty("--rot", `${((i % 5) - 2) * 9}deg`);
+      icon.style.setProperty("--o", `${0.09 + (i % 3) * 0.02}`);
+      layer.appendChild(icon);
+    }
+
+    document.body.appendChild(layer);
+  }
+
+  /* =======================================================
      六、彩蛋一：连点 Logo
      ======================================================= */
   function initBrandEgg() {
@@ -486,6 +534,7 @@
   initTilt();
   initGlobalGlow();
   initTicker();
+  initBgIcons();
   initBrandEgg();
   initHackerMode();
   initConsoleSignature();

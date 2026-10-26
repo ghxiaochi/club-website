@@ -27,9 +27,14 @@
   border-radius: 24px;
   background: transparent;
   color: inherit;
-  cursor: pointer;
+  cursor: grab;
   pointer-events: auto;
+  touch-action: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+.hnyz-avatar__button:active {
+  cursor: grabbing;
 }
 
 .hnyz-avatar__button:focus-visible {

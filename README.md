@@ -2,7 +2,7 @@
 
 一个纯静态的社团官网：**HTML + CSS + 原生 JavaScript**，没有后端、没有数据库、没有构建步骤。
 
-整体是蓝白科技风：浅蓝底、白色卡片、深海军蓝文字。教学内容以 **Arduino 硬件编程**为主线。右下角有一个不署名的校徽，随页面滚动旋转，点击会说一句社团台词；「全部项目」页左下角还有 ghxiaochi 的像素头像彩蛋，点击若干次会出现隐藏台词。「全部项目」页的 ghxiaochi 分组顶部有个人主页横幅和三张贴纸；独立「图集」页放着社团梗图和原创壁纸。项目卡片通过 **GitHub API** 读取仓库信息；首页展示前 6 个，完整列表在单独的「全部项目」页按成员折叠。遇到 403 限流、404 或网络异常会自动切换到本地缓存或降级卡片。
+整体是蓝白科技风：浅蓝底、白色卡片、深海军蓝文字。教学内容以 **Arduino 硬件编程**为主线。右下角有一个不署名的校徽，随页面滚动旋转，点击会说一句社团台词；「全部项目」页左下角还有 ghxiaochi 的像素头像彩蛋，点击若干次会出现隐藏台词。「全部项目」页的 ghxiaochi 分组顶部有个人主页横幅和三张贴纸；独立「图集」页放着社团梗图；背景里还散着一层灰度小图标（校徽 / Arduino / token）缓慢浮动。项目卡片通过 **GitHub API** 读取仓库信息；首页展示前 6 个，完整列表在单独的「全部项目」页按成员折叠。遇到 403 限流、404 或网络异常会自动切换到本地缓存或降级卡片。
 
 - **线上地址**：<https://ghxiaochi.github.io/club-website/>
 - **仓库地址**：<https://github.com/ghxiaochi/club-website>
@@ -19,7 +19,7 @@
 - **项目展示**：首页展示 `members` 前 6 个仓库，渲染 16:9 封面卡片；更多项目跳转到 `projects.html`
 - **活动节奏**：每周两次、每次 60 分钟，以及一次活动的流程
 - **资源墙**：C++ 菜鸟教程、微雪 ESP32 Wiki
-- **图集**（独立页 `gallery.html`）：瀑布流照片墙，可按梗图 / 壁纸 / 社团筛选，点击开灯箱，← → 翻页、Esc 关闭；首页资源墙下只有一个细条入口
+- **图集**（独立页 `gallery.html`）：瀑布流照片墙，可按梗图 / 社团筛选，点击开灯箱，← → 翻页、Esc 关闭；首页资源墙下只有一个细条入口
 - **常见问题**：原生 `<details>` FAQ
 - **加入我们**：QQ 群、邮箱、三步加入流程
 
@@ -63,14 +63,14 @@ club-website/
 │   ├── og-cover.png        # 1200×630 分享图
 │   ├── project-website.svg # 社团官网封面
 │   ├── project-zaco.svg    # Zaco 猜数字封面
+│   ├── decor/               # 背景图标（灰度、已去底）
+│   │   ├── icon-badge.webp
+│   │   ├── icon-arduino.webp
+│   │   └── icon-token.webp
 │   ├── gallery/             # 图集素材
 │   │   ├── meme-cup.webp    # 梗图（已去底）
 │   │   ├── meme-dizzy.webp
 │   │   ├── meme-wink.webp
-│   │   ├── art-grid.svg     # 壁纸（原创 SVG）
-│   │   ├── art-circuit.svg
-│   │   ├── art-wave.svg
-│   │   └── art-stars.svg
 │   ├── personal/
 │   │   ├── sticker-2.webp   # ghxiaochi 主页贴纸（已去底）
 │   │   ├── sticker-3.webp
@@ -258,7 +258,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 {
   src: "images/gallery/你的文件名.webp",
   title: "标题",
-  tag: "梗图"        // 或 壁纸 / 活动
+  tag: "梗图"        // 或 社团
 }
 ```
 
@@ -284,7 +284,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 校徽位于两页的 `.hnyz-pet`，样式在 `css/pet.css`，交互在 `js/pet.js`。图片为 `images/pet/badge-school-hd.webp`，放在右下角的浅蓝背景板里；如需停用，删除页面中的 `.hnyz-pet` 结构即可。
 
-像素头像彩蛋位于 `projects.html` 的 `.hnyz-avatar`，样式在 `css/avatar-pet.css`，交互在 `js/avatar-pet.js`。点击会轮播「干嘛？」等台词，点满 6 次显示「我绝对不会偷偷告诉你，这是AI写的网页」。它固定在左下角，右下角仍然保留校徽。
+像素头像彩蛋位于 `projects.html` 的 `.hnyz-avatar`，样式在 `css/avatar-pet.css`，交互在 `js/avatar-pet.js`。点击会轮播「干嘛？」等台词，点满 6 次显示「我绝对不会偷偷告诉你，这是AI写的网页」。它默认在左下角，可以按住拖到任意位置（位置会记住），右下角仍然保留校徽。
 
 ghxiaochi 的个人主页横幅配置在 `js/members.js` 的 `window.HNYZ_PROFILES` 里（key 与成员的 `user` 一致才会显示），由 `js/main.js` 的 `createMemberProfile(user)` 渲染注入，两张贴纸在 `images/personal/`。新增成员想加横幅，在 `HNYZ_PROFILES` 里加一个同 user 的键即可。
 
@@ -336,7 +336,7 @@ Pages 会自动重新构建。如果页面还是旧版本，先强制刷新（`C
 - [ ] 资源墙的 C++ 和微雪 ESP32 链接可跳转
 - [ ] 断网或 403 时页面仍能显示降级卡片
 - [ ] 校徽在首页和全部项目页右下角；像素头像彩蛋在全部项目页左下角，点满 6 次出现隐藏台词
-- [ ] ghxiaochi 分组有个人主页横幅和两张贴纸，且不遮挡项目卡片
+- [ ] 像素头像可以拖动，刷新后停在原处，单击仍然会说台词
 - [ ] 分享链接有 `og:image`（1200×630）和 `twitter:card`
 - [ ] 头部太阳/月亮按钮能切换深浅色，刷新后选择仍然保留
 - [ ] 首屏标语会打字轮播，输入 ↑↑↓↓←→←→BA 能进入黑客模式并自动退出

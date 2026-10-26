@@ -104,31 +104,10 @@ window.HNYZ_GALLERY = [
     h: 682
   },
   {
-    src: "images/gallery/art-grid.svg",
-    title: "另一个世界的日落",
-    tag: "壁纸",
-    w: 800,
-    h: 1000
-  },
-  {
-    src: "images/gallery/art-circuit.svg",
-    title: "焊点与走线",
-    tag: "壁纸",
-    w: 800,
-    h: 1000
-  },
-  {
-    src: "images/gallery/art-wave.svg",
-    title: "串口里的声音",
-    tag: "壁纸",
-    w: 800,
-    h: 1000
-  },
-  {
-    src: "images/gallery/art-stars.svg",
-    title: "凌晨两点的机房",
-    tag: "壁纸",
-    w: 800,
-    h: 1000
+    src: "images/gallery/meme-14.webp",
+    title: "大肥鱼的生活",
+    tag: "梗图",
+    w: 548,
+    h: 768
   }
 ];

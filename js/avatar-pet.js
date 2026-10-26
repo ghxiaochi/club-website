@@ -2,7 +2,7 @@
    ghxiaochi 的像素头像桌宠
    ---------------------------------------------------------
    点击轮播台词；第 6 次点击出现隐藏彩蛋。
-   不做拖拽、滚轮缩放、键盘缩放。
+   可以按住拖动，位置记在 localStorage，下次打开还在原处。
    ========================================================= */
 
 (() => {
@@ -44,31 +44,82 @@
     );
   }
 
-  trigger.addEventListener("click", speak);
+  /* ---------------- 拖动 ---------------- */
+  const drag = { active: false, moved: false, startX: 0, startY: 0, baseX: 0, baseY: 0 };
 
-  /* 个人主页横幅出现时暂时收起头像，离开后恢复。
-     横幅由 main.js 同步创建，通常第一次就能找到；
-     轮询最多 25 次（约 10 秒），找不到就放弃，避免无限轮询。 */
-  let profileTries = 0;
-
-  function watchProfile() {
-    const profile = document.querySelector(".member-profile");
-    if (!profile) {
-      if (profileTries++ < 25) window.setTimeout(watchProfile, 400);
-      return;
+  function restorePosition() {
+    try {
+      const raw = window.localStorage.getItem("hnyz:pet-pos");
+      if (!raw) return;
+      const pos = JSON.parse(raw);
+      if (typeof pos.x !== "number" || typeof pos.y !== "number") return;
+      pet.style.bottom = "auto";
+      pet.style.left = `${Math.max(4, Math.min(pos.x, window.innerWidth - pet.offsetWidth - 4))}px`;
+      pet.style.top = `${Math.max(4, Math.min(pos.y, window.innerHeight - pet.offsetHeight - 4))}px`;
+    } catch (error) {
+      /* 忽略 */
     }
-    if (!("IntersectionObserver" in window)) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        pet.classList.toggle("is-away", entry.isIntersecting);
-      },
-      { threshold: 0.12 }
-    );
-    observer.observe(profile);
   }
 
-  window.setTimeout(watchProfile, 300);
+  trigger.addEventListener("pointerdown", (event) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+
+    const rect = pet.getBoundingClientRect();
+    drag.active = true;
+    drag.moved = false;
+    drag.startX = event.clientX;
+    drag.startY = event.clientY;
+    drag.baseX = rect.left;
+    drag.baseY = rect.top;
+
+    pet.style.bottom = "auto";
+    pet.style.left = `${rect.left}px`;
+    pet.style.top = `${rect.top}px`;
+
+  });
+
+  window.addEventListener("pointermove", (event) => {
+    if (!drag.active) return;
+
+    const dx = event.clientX - drag.startX;
+    const dy = event.clientY - drag.startY;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) drag.moved = true;
+
+    const maxX = window.innerWidth - pet.offsetWidth - 4;
+    const maxY = window.innerHeight - pet.offsetHeight - 4;
+    pet.style.left = `${Math.min(Math.max(4, drag.baseX + dx), Math.max(4, maxX))}px`;
+    pet.style.top = `${Math.min(Math.max(4, drag.baseY + dy), Math.max(4, maxY))}px`;
+  });
+
+  window.addEventListener("pointerup", (event) => {
+    if (!drag.active) return;
+    drag.active = false;
+
+    if (!drag.moved) return;
+
+    try {
+      window.localStorage.setItem(
+        "hnyz:pet-pos",
+        JSON.stringify({ x: parseFloat(pet.style.left), y: parseFloat(pet.style.top) })
+      );
+    } catch (error) {
+      /* 忽略 */
+    }
+  });
+
+  trigger.addEventListener("click", (event) => {
+    /* 拖动结束时浏览器也会派发 click，这里吞掉，避免拖一下就说句话 */
+    if (drag.moved) {
+      drag.moved = false;
+      event.preventDefault();
+      return;
+    }
+    speak();
+  });
+
+  restorePosition();
+
+  /* 不再因为个人横幅而隐藏：桌宠可以拖走，遮挡交给用户自己决定 */
 
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
