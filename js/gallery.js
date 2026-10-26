@@ -1,27 +1,41 @@
 /* =========================================================
-   HNYZ · 图集
+   HNYZ · 图集页
    ---------------------------------------------------------
-   1. 读取下面的 HNYZ_GALLERY，渲染成照片墙
-   2. 点击任意一张打开灯箱，支持 ← → 切换、Esc 关闭
-   3. 新加图片：把文件放进 images/gallery/，在数组里加一行
+   1. 读取 js/gallery-data.js 的 HNYZ_GALLERY，渲染瀑布流
+   2. 顶部分类筛选（全部 / 梗图 / 壁纸 / 社团）
+   3. 点击图片开灯箱，← → 翻页、Esc 关闭；翻页只在当前筛选内
    ========================================================= */
 
 (() => {
   "use strict";
 
-  /* 每项：src 图片地址；title 标题；tag 分类（梗图 / 壁纸 / 活动…） */
   const items = Array.isArray(window.HNYZ_GALLERY) ? window.HNYZ_GALLERY : [];
 
   const grid = document.querySelector("#gallery-grid");
   if (!grid) return;
 
+  const countEl = document.querySelector("#gallery-count");
+  const filterBar = document.querySelector("[data-gallery-filters]");
+
+  /* 当前筛选下可见的条目下标，灯箱按这个顺序翻页 */
+  let visibleIndexes = items.map((_, index) => index);
+  let currentTag = "all";
+
+  const figures = [];
+
   /* =======================================================
-     一、渲染照片墙
+     一、渲染
      ======================================================= */
   function createItem(item, index) {
     const figure = document.createElement("figure");
     figure.className = "gallery-item";
+    figure.dataset.tag = item.tag || "";
     figure.style.setProperty("--tilt", `${((index % 5) - 2) * 0.9}deg`);
+
+    /* 按原图比例占位：梗图有长有扁，统一裁成 4:5 会切掉字 */
+    if (item.w && item.h) {
+      figure.style.setProperty("--ratio", `${item.w} / ${item.h}`);
+    }
 
     const button = document.createElement("button");
     button.className = "gallery-item__button";
@@ -33,8 +47,8 @@
     image.alt = item.title || "HNYZ 图集图片";
     image.loading = "lazy";
     image.decoding = "async";
-    image.width = 800;
-    image.height = 1000;
+    image.width = item.w || 800;
+    image.height = item.h || 1000;
 
     button.appendChild(image);
 
@@ -44,7 +58,6 @@
     const title = document.createElement("span");
     title.className = "gallery-item__title";
     title.textContent = item.title || "未命名";
-
     caption.appendChild(title);
 
     if (item.tag) {
@@ -67,23 +80,75 @@
     if (!items.length) {
       const empty = document.createElement("p");
       empty.className = "gallery-empty";
-      empty.textContent = "图集还是空的：在 js/gallery.js 里加一条，再把图片放进 images/gallery/。";
+      empty.textContent = "图集还是空的：在 js/gallery-data.js 里加一条，再把图片放进 images/gallery/。";
       grid.appendChild(empty);
       return;
     }
 
     const fragment = document.createDocumentFragment();
-    items.forEach((item, index) => fragment.appendChild(createItem(item, index)));
+    items.forEach((item, index) => {
+      const figure = createItem(item, index);
+      figures[index] = figure;
+      fragment.appendChild(figure);
+    });
     grid.appendChild(fragment);
+
+    updateCount();
+  }
+
+  function updateCount() {
+    if (!countEl) return;
+    const label = currentTag === "all" ? `${items.length} 张` : `${visibleIndexes.length} 张`;
+    countEl.textContent = `${label} // GALLERY`;
   }
 
   /* =======================================================
-     二、灯箱
+     二、筛选
+     ======================================================= */
+  function applyFilter(tag) {
+    currentTag = tag;
+    visibleIndexes = [];
+
+    items.forEach((item, index) => {
+      const figure = figures[index];
+      const match = tag === "all" || item.tag === tag;
+      if (figure) {
+        figure.hidden = !match;
+        figure.classList.toggle("is-hidden", !match);
+      }
+      if (match) visibleIndexes.push(index);
+    });
+
+    if (filterBar) {
+      filterBar.querySelectorAll("[data-filter]").forEach((button) => {
+        const active = button.dataset.filter === tag;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+    }
+
+    updateCount();
+  }
+
+  function initFilters() {
+    if (!filterBar) return;
+
+    filterBar.addEventListener("click", (event) => {
+      const button = event.target instanceof Element
+        ? event.target.closest("[data-filter]")
+        : null;
+      if (!button) return;
+      applyFilter(button.dataset.filter || "all");
+    });
+  }
+
+  /* =======================================================
+     三、灯箱
      ======================================================= */
   let lightbox = null;
   let lightboxImage = null;
   let lightboxCaption = null;
-  let lightboxIndex = 0;
+  let lightboxPos = 0;
   let lastFocused = null;
 
   function buildLightbox() {
@@ -145,8 +210,9 @@
     });
   }
 
-  function paintLightbox() {
-    const item = items[lightboxIndex];
+  function paint() {
+    const index = visibleIndexes[lightboxPos];
+    const item = items[index];
     if (!item) return;
 
     lightboxImage.src = item.src;
@@ -158,16 +224,19 @@
   }
 
   function step(delta) {
-    if (!items.length) return;
-    lightboxIndex = (lightboxIndex + delta + items.length) % items.length;
-    paintLightbox();
+    if (visibleIndexes.length < 2) return;
+    lightboxPos = (lightboxPos + delta + visibleIndexes.length) % visibleIndexes.length;
+    paint();
   }
 
   function openLightbox(index) {
+    const position = visibleIndexes.indexOf(index);
+    if (position < 0) return;
+
     if (!lightbox) buildLightbox();
     lastFocused = document.activeElement;
-    lightboxIndex = index;
-    paintLightbox();
+    lightboxPos = position;
+    paint();
     lightbox.hidden = false;
     document.body.classList.add("is-lightbox-open");
     lightbox.querySelector(".lightbox-close").focus();
@@ -182,4 +251,5 @@
   }
 
   render();
+  initFilters();
 })();
