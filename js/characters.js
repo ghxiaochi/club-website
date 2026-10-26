@@ -31,20 +31,31 @@
 
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  /* 音效模块（js/sfx.js），没加载时静默降级 */
+  const sfx = window.HNYZ_SFX || { play() {}, stop() {} };
+
   /* 角色数据来自游戏 src/vars.nim 的 allUnits，顺序与原作一致 */
   const characters = [
-    { id: "alpha", title: "-ALPHA-", sub: "the first of many", ability: "creates a wall every 10 moves", unlocked: true },
-    { id: "mono", title: "-MONO-", sub: "the gatherer", ability: "earns one extra point every 4 moves", unlocked: true },
-    { id: "oct", title: "-OCT-", sub: "the protector", ability: "creates a shield every 30 moves", unlocked: true },
-    { id: "crawler", title: "-CRAWLER-", sub: "boom", ability: "destroys 4 adjacent blocks every 4 moves", unlocked: true },
-    { id: "zenith", title: "-ZENITH-", sub: "gaming", ability: "destroys the next 4 blocks in a line every 4 moves", unlocked: false },
-    { id: "quad", title: "-QUAD-", sub: 'the "support" has arrived', ability: "destroys 8 adjacent blocks every 6 moves", unlocked: false },
-    { id: "oxynoe", title: "-OXYNOE-", sub: "as was foretold", ability: "destroys alternating adjacent blocks every other move", unlocked: false },
-    { id: "sei", title: "-SEI-", sub: "crossed out", ability: "destroys blocks in a diagonal cross every 4 moves", unlocked: false }
+    { id: "alpha", title: "-ALPHA-", sub: "the first of many", ability: "creates a wall every 10 moves", unlocked: true,
+      s1: "#b25840", s2: "#c07659", glow: "#ffd37f", pattern: "squares" },
+    { id: "mono", title: "-MONO-", sub: "the gatherer", ability: "earns one extra point every 4 moves", unlocked: true,
+      s1: "#235e62", s2: "#3a8a72", glow: "#84f490", pattern: "squares" },
+    { id: "oct", title: "-OCT-", sub: "the protector", ability: "creates a shield every 30 moves", unlocked: true,
+      s1: "#235e62", s2: "#3a8a72", glow: "#84f490", pattern: "circles" },
+    { id: "crawler", title: "-CRAWLER-", sub: "boom", ability: "destroys 4 adjacent blocks every 4 moves", unlocked: true,
+      s1: "#665c9f", s2: "#bf92f8", glow: "#bf92f8", pattern: "spin" },
+    { id: "zenith", title: "-ZENITH-", sub: "gaming", ability: "destroys the next 4 blocks in a line every 4 moves", unlocked: false,
+      s1: "#c45b4d", s2: "#ffa664", glow: "#ffd37f", pattern: "rays" },
+    { id: "quad", title: "-QUAD-", sub: 'the "support" has arrived', ability: "destroys 8 adjacent blocks every 6 moves", unlocked: false,
+      s1: "#235e62", s2: "#3a8a72", glow: "#84f490", pattern: "rays" },
+    { id: "oxynoe", title: "-OXYNOE-", sub: "as was foretold", ability: "destroys alternating adjacent blocks every other move", unlocked: false,
+      s1: "#235e62", s2: "#3a8a72", glow: "#c7ffb7", pattern: "circles" },
+    { id: "sei", title: "-SEI-", sub: "crossed out", ability: "destroys blocks in a diagonal cross every 4 moves", unlocked: false,
+      s1: "#ffa664", s2: "#ffcb82", glow: "#ffd37f", pattern: "circles" }
   ];
 
   const LOCK_LINES = ["还没抽到……", "这个位置空着。", "铜板不够，下次吧。"];
-  const COPPER_START = 23;
+  const COPPER_START = 88;
   const COPPER_COST = 10;
   const SAVE_KEY = "hnyz:gacha";
 
@@ -112,6 +123,12 @@
 
     slot.append(img, name);
     slot.addEventListener("click", () => poke(slot, char));
+
+    /* 悬停：游戏里 mouseEnter 会跳一下并响一声 */
+    slot.addEventListener("pointerenter", (event) => {
+      if (event.pointerType !== "mouse" || !isUnlocked(char.id)) return;
+      sfx.play("hover", { rate: 1 + index * 0.035, volume: 0.12 });
+    });
     stage.appendChild(slot);
     slots.push(slot);
   });
@@ -178,6 +195,7 @@
 
   function poke(slot, char) {
     squash(slot);
+    sfx.play("click", { rate: 1 + characters.indexOf(char) * 0.03, volume: 0.22 });
 
     if (!isUnlocked(char.id)) {
       slot.classList.remove("is-shaking");
@@ -185,6 +203,7 @@
       slot.classList.add("is-shaking");
       window.setTimeout(() => slot.classList.remove("is-shaking"), 520);
       say(LOCK_LINES[Math.floor(Math.random() * LOCK_LINES.length)], slot);
+      sfx.play("locked", { volume: 0.24 });
       return;
     }
 
@@ -205,8 +224,14 @@
 
     lastFocus = document.activeElement;
 
+    splash.style.setProperty("--s1", char.s1);
+    splash.style.setProperty("--s2", char.s2);
+    splash.style.setProperty("--glow", char.glow);
+    splash.dataset.pattern = char.pattern;
+
     if (splashImg) {
-      splashImg.src = `images/characters/unit-${char.id}.webp`;
+      /* 站位用小像素图，结果页用高精度立绘 */
+      splashImg.src = `images/characters/art-${char.id}.webp`;
       splashImg.alt = char.title;
     }
     if (splashTitle) splashTitle.textContent = char.title;
@@ -225,6 +250,9 @@
 
   function closeSplash() {
     if (!splash || splash.hidden) return;
+
+    sfx.stop("reveal");
+    sfx.play("back", { volume: 0.2 });
 
     splash.classList.remove("is-in");
     splash.classList.add("is-out");
@@ -264,6 +292,7 @@
         window.setTimeout(() => copperWrap.classList.remove("is-shaking"), 420);
       }
       say("铜板不够，去打一首吧。", rollBtn);
+      sfx.play("locked", { volume: 0.2 });
       return;
     }
 
@@ -271,6 +300,8 @@
 
     const char = characters[Math.floor(Math.random() * characters.length)];
     const first = !isUnlocked(char.id);
+
+    sfx.play("reveal", { volume: 0.26 });
 
     if (first) {
       save.unlocked.push(char.id);
@@ -289,6 +320,10 @@
     }
 
     window.setTimeout(() => openSplash(char), 110);
+
+    if (first) {
+      window.setTimeout(() => sfx.play("win", { volume: 0.22 }), 320);
+    }
   }
 
   if (rollBtn) rollBtn.addEventListener("click", doRoll);
@@ -303,6 +338,7 @@
       paintCopper();
       paintSlots();
       say("存档已重置。", resetBtn);
+      sfx.play("select", { volume: 0.2 });
     });
   }
 
@@ -328,7 +364,10 @@
       label.textContent = map.label;
 
       card.append(label);
-      card.addEventListener("click", () => say(map.line, card));
+      card.addEventListener("click", () => {
+        say(map.line, card);
+        sfx.play("select", { volume: 0.18 });
+      });
       mapsHost.appendChild(card);
     });
   }

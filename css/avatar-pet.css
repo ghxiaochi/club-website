@@ -472,7 +472,8 @@
 
 .hnyz-avatar.is-rampage .hnyz-avatar__img {
   animation: none !important;
-  filter: drop-shadow(0 16px 18px rgba(15, 23, 42, 0.35));
+  /* 不放 drop-shadow：1600px 大的元素每帧重算滤镜会卡 */
+  filter: none !important;
 }
 
 .hnyz-avatar.is-rampage .hnyz-avatar__speech {
@@ -538,59 +539,96 @@
   pointer-events: none;
 }
 
-/* 中间的字幕 */
+/* 中间的字幕：一个红字的弹窗方框 */
 .pet-rampage-line {
   position: fixed;
   left: 50%;
-  top: 46%;
+  top: 40%;
   z-index: 212;
   width: max-content;
-  max-width: 88vw;
+  max-width: min(86vw, 640px);
   margin: 0;
-  padding: 0 8px;
-  color: #ffffff;
-  font-size: clamp(1.4rem, 4.2vw, 2.8rem);
-  font-weight: 800;
+  padding: 26px 34px 24px;
+  border: 4px solid #14141a;
+  border-radius: 8px;
+  background: #fffdf5;
+  box-shadow:
+    10px 10px 0 rgba(20, 20, 26, 0.28),
+    inset 0 0 0 3px #ffffff,
+    inset 0 0 0 5px rgba(225, 29, 46, 0.18);
+  color: #e11d2e;
+  font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Heiti SC", sans-serif;
+  font-size: clamp(1.35rem, 3.8vw, 2.5rem);
+  font-weight: 900;
+  font-style: italic;
   letter-spacing: 0.04em;
-  line-height: 1.3;
+  line-height: 1.25;
   text-align: center;
   text-shadow:
-    0 0 22px rgba(37, 99, 235, 0.6),
-    0 3px 0 rgba(15, 23, 42, 0.45),
-    0 0 40px rgba(56, 189, 248, 0.4);
+    2px 2px 0 #ffd37f,
+    4px 4px 0 rgba(20, 20, 26, 0.16);
   opacity: 0;
-  transform: translate(-50%, -50%) scale(0.86);
-  transition: opacity 0.3s ease, transform 0.42s cubic-bezier(0.22, 0.9, 0.3, 1.4);
+  transform: translate(-50%, -50%) rotate(-2deg) scale(0.82);
+  transition: opacity 0.28s ease, transform 0.42s cubic-bezier(0.22, 0.9, 0.3, 1.4);
   pointer-events: none;
+  will-change: transform, opacity;
+}
+
+/* 方框顶部的小标签，像老式弹窗的标题栏 */
+.pet-rampage-line::before {
+  content: "!! WARNING !!";
+  position: absolute;
+  top: -16px;
+  left: 18px;
+  padding: 3px 10px;
+  border: 3px solid #14141a;
+  background: #e11d2e;
+  color: #fff8e7;
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  line-height: 1.4;
+  text-shadow: none;
+}
+
+/* 右下角的小尾巴，像对话框 */
+.pet-rampage-line::after {
+  content: "";
+  position: absolute;
+  right: 34px;
+  bottom: -18px;
+  width: 22px;
+  height: 22px;
+  border-right: 4px solid #14141a;
+  border-bottom: 4px solid #14141a;
+  background: #fffdf5;
+  transform: skewX(18deg) rotate(45deg);
 }
 
 .pet-rampage-line.is-visible {
   opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
+  transform: translate(-50%, -50%) rotate(-2deg) scale(1);
 }
 
 .pet-rampage-line.is-boom {
-  animation: petLineBoom 0.8s cubic-bezier(0.3, 0, 0.6, 1) forwards;
+  animation: petLineBoom 0.75s cubic-bezier(0.3, 0, 0.6, 1) forwards;
 }
 
+/* 只用 transform / opacity，不用 filter: blur（大字号模糊会卡） */
 @keyframes petLineBoom {
   0% {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-    letter-spacing: 0.04em;
-    filter: blur(0);
+    transform: translate(-50%, -50%) rotate(-2deg) scale(1);
   }
   55% {
-    opacity: 0.95;
-    transform: translate(-50%, -50%) scale(1.6);
-    letter-spacing: 0.08em;
-    filter: blur(0.4px);
+    opacity: 1;
+    transform: translate(-50%, -52%) rotate(4deg) scale(1.5);
   }
   100% {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(3.4);
-    letter-spacing: 0.24em;
-    filter: blur(9px);
+    transform: translate(-50%, -54%) rotate(9deg) scale(3.2);
   }
 }
 
@@ -631,7 +669,6 @@
   100% {
     opacity: 0;
     transform: scale(14);
-    border-width: 1px;
   }
 }
 
@@ -663,9 +700,7 @@
   inset: 0;
   z-index: 214;
   background:
-    radial-gradient(circle at 50% 54%, rgba(15, 23, 42, 0.32), rgba(15, 23, 42, 0.16) 58%, rgba(15, 23, 42, 0.05));
-  -webkit-backdrop-filter: blur(2px);
-  backdrop-filter: blur(2px);
+    radial-gradient(circle at 50% 54%, rgba(15, 23, 42, 0.42), rgba(15, 23, 42, 0.22) 58%, rgba(15, 23, 42, 0.08));
   opacity: 0;
   transition: opacity 0.45s ease;
   pointer-events: none;
@@ -713,19 +748,20 @@
 }
 
 .pet-tomb__btn:focus-visible {
-  outline: 2px dashed rgba(191, 236, 243, 0.9);
-  outline-offset: 7px;
-  border-radius: 999px;
+  outline: 2px dashed rgba(255, 211, 127, 0.8);
+  outline-offset: 10px;
+  border-radius: 26px;
 }
 
 .pet-tomb__stone {
   position: relative;
   display: grid;
-  place-content: center;
-  gap: 4px;
-  width: clamp(150px, 17vw, 196px);
-  aspect-ratio: 0.72;
-  padding: 22px 14px 18px;
+  justify-items: center;
+  align-content: start;
+  gap: 3px;
+  width: clamp(168px, 18vw, 212px);
+  aspect-ratio: 0.7;
+  padding: 12px 14px 16px;
   border: 3px solid #2a323e;
   border-radius: 999px 999px 8px 8px;
   background:
@@ -745,6 +781,88 @@
   filter: brightness(1.06);
 }
 
+/* 墓碑上刻着桌宠的样子 */
+.pet-tomb__portrait {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  width: 108px;
+  height: 128px;
+  margin: 2px auto 6px;
+  border-radius: 7px;
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(255, 255, 255, 0.16), transparent 70%),
+    linear-gradient(180deg, #6c778b, #485264);
+  box-shadow:
+    inset 0 0 0 2px rgba(24, 30, 40, 0.5),
+    inset 0 8px 14px rgba(12, 16, 24, 0.45);
+}
+
+.pet-tomb__portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 2%;
+  image-rendering: pixelated;
+  filter: grayscale(1) brightness(0.66) contrast(1.08);
+  opacity: 0.95;
+}
+
+/* 敲一下多一条裂纹 */
+.pet-tomb__stone::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image:
+    linear-gradient(112deg, transparent 46.6%, rgba(24, 28, 36, 0.55) 47.8%, transparent 49.4%),
+    linear-gradient(64deg, transparent 47%, rgba(24, 28, 36, 0.4) 48.2%, transparent 50%);
+  background-size: 58px 104px, 84px 150px;
+  opacity: calc(var(--cracks, 0) * 0.17);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.pet-tomb__stone[data-clicks="1"] { --cracks: 1; }
+.pet-tomb__stone[data-clicks="2"] { --cracks: 2; }
+.pet-tomb__stone[data-clicks="3"] { --cracks: 3; }
+.pet-tomb__stone[data-clicks="4"] { --cracks: 4; }
+.pet-tomb__stone[data-clicks="5"] { --cracks: 5; }
+
+/* 5 个提示点：敲一下亮一个 */
+.pet-tomb__pips {
+  display: flex;
+  gap: 6px;
+  margin-top: 7px;
+}
+
+.pet-tomb__pips i {
+  width: 7px;
+  height: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  background: transparent;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pet-tomb__pips i.is-on {
+  border-color: #ffd37f;
+  background: #ffd37f;
+  box-shadow: 0 0 7px rgba(255, 211, 127, 0.9);
+}
+
+/* 敲墓碑时抖一下 */
+.pet-tomb.is-hit .pet-tomb__stone {
+  animation: petTombHit 0.22s linear;
+}
+
+@keyframes petTombHit {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  30% { transform: translate(-3px, 1px) rotate(-1.2deg); }
+  65% { transform: translate(3px, -1px) rotate(1.2deg); }
+}
+
 .pet-tomb__stone::before {
   content: "";
   position: absolute;
@@ -760,8 +878,8 @@
 
 .pet-tomb__name {
   font-weight: 800;
-  font-size: clamp(1rem, 1.6vw, 1.2rem);
-  letter-spacing: 0.08em;
+  font-size: clamp(0.92rem, 1.5vw, 1.08rem);
+  letter-spacing: 0.06em;
 }
 
 .pet-tomb__date {
@@ -772,10 +890,10 @@
 }
 
 .pet-tomb__word {
-  margin-top: 3px;
-  font-size: 0.64rem;
-  line-height: 1.5;
-  opacity: 0.82;
+  margin-top: 1px;
+  font-size: 0.58rem;
+  line-height: 1.45;
+  opacity: 0.78;
 }
 
 .pet-tomb__hint {
@@ -833,4 +951,32 @@
   font-size: 0.68rem;
   letter-spacing: 0.3em;
   opacity: 0.8;
+}
+
+
+/* =========================================================
+   暴走时降负载
+   ---------------------------------------------------------
+   头像放大到 1600px 到处飞的时候，页面上任何“每帧重算”的
+   东西都会抢 GPU：头部 backdrop-filter、背景图标浮动、
+   跑马灯、舞台条纹。这里统一暂停，弹完自动恢复。
+   ========================================================= */
+body.is-pet-boom .site-header {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: var(--panel);
+}
+
+body.is-pet-boom .bg-icon,
+body.is-pet-boom .bg-orbs__orb,
+body.is-pet-boom .hnyz-ticker__track,
+body.is-pet-boom .char-stage__stripes,
+body.is-pet-boom .char-splash__stripes,
+body.is-pet-boom .char-splash__rays {
+  animation-play-state: paused !important;
+}
+
+body.is-pet-boom .hnyz-avatar {
+  /* 独立合成层，避免和页面一起重排 */
+  contain: layout style;
 }

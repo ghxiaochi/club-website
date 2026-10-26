@@ -49,16 +49,17 @@
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css?v=20261025e">
   <link rel="stylesheet" href="css/pet.css?v=20261025b">
-  <link rel="stylesheet" href="css/personal.css?v=20261032">
-  <link rel="stylesheet" href="css/avatar-pet.css?v=20261034">
+  <link rel="stylesheet" href="css/personal.css?v=20261037">
+  <link rel="stylesheet" href="css/avatar-pet.css?v=20261037">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <!-- 项目卡片、全部项目折叠页和复制按钮由 js/main.js 驱动 -->
+  <script src="js/sfx.js?v=20261037" defer></script>
   <script src="js/theme.js?v=20261025g" defer></script>
   <script src="js/members.js?v=20261034" defer></script>
   <script src="js/main.js?v=20261032" defer></script>
   <script src="js/pet.js?v=20261025c" defer></script>
-  <script src="js/avatar-pet.js?v=20261036" defer></script>
+  <script src="js/avatar-pet.js?v=20261037" defer></script>
   <script src="js/personal.js?v=20261030" defer></script>
 </head>
 <body>
@@ -114,6 +115,16 @@
         </a>
       </nav>
       <div class="header-actions">
+        <button class="sound-toggle" type="button" data-sound-toggle aria-label="关闭音效" aria-pressed="true" title="关闭音效">
+          <svg class="sound-toggle__icon sound-toggle__icon--on" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 9.4h3L12 5.4v13.2L7 14.6H4z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="M16 9.2a4.2 4.2 0 0 1 0 5.6M18.6 6.6a7.6 7.6 0 0 1 0 10.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+          <svg class="sound-toggle__icon sound-toggle__icon--off" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 9.4h3L12 5.4v13.2L7 14.6H4z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="m16 9.6 5 4.8m0-4.8-5 4.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </button>
         <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换到深色模式" aria-pressed="false" title="切换到深色模式">
           <svg class="theme-toggle__icon theme-toggle__icon--sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/>

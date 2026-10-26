@@ -49,9 +49,18 @@
 
   const state = { rampage: false, dead: false, scale: 1 };
 
+  /* 音效模块（js/sfx.js），没加载时静默降级 */
+  const sfx = window.HNYZ_SFX || { play() {}, stop() {} };
+  const TOMB_CLICKS = 5;
+  let tombClicks = 0;
+
   /* 点一下蹦几颗小星星，向上飘散 */
   function spawnSparks(secretMode) {
-    const count = secretMode ? 12 : 5;
+    if (state.rampage || state.dead) return;
+    /* 连点时最多同时存在 12 颗，避免一次点 100 下堆出几百个节点 */
+    if (pet.querySelectorAll(".hnyz-avatar__spark").length > 12) return;
+
+    const count = secretMode ? 8 : 4;
 
     for (let i = 0; i < count; i += 1) {
       const spark = document.createElement("span");
@@ -112,6 +121,7 @@
 
     showLine(messageFor(clicks), 3000);
     spawnSparks(clicks % 10 === 0);
+    sfx.play("click", { rate: 0.94 + (clicks % 7) * 0.03, volume: 0.12 });
     noteActivity(false);
   }
 
@@ -232,14 +242,18 @@
   tomb.className = "pet-tomb";
   tomb.hidden = true;
   tomb.innerHTML =
-    '<button class="pet-tomb__btn" type="button" data-pet-revive aria-label="点击墓碑，复活东方马也">' +
+    '<button class="pet-tomb__btn" type="button" data-pet-revive aria-label="点击墓碑 5 次，复活东方马也">' +
     '<span class="pet-tomb__stone">' +
+    '<span class="pet-tomb__portrait"><img src="images/pet/ghxiaochi-avatar.webp" alt="" width="648" height="954"></span>' +
     '<span class="pet-tomb__mark">R.I.P.</span>' +
     '<span class="pet-tomb__name">东方马也</span>' +
     '<span class="pet-tomb__date">2026 — 2026</span>' +
     '<span class="pet-tomb__word">把 bug 带进了坟墓</span>' +
+    '<span class="pet-tomb__pips" aria-hidden="true">' +
+    "<i></i><i></i><i></i><i></i><i></i>" +
     "</span>" +
-    '<span class="pet-tomb__hint">点一下墓碑</span>' +
+    "</span>" +
+    '<span class="pet-tomb__hint" data-pet-hint>点 5 下墓碑，唤醒他</span>' +
     "</button>";
   document.body.appendChild(tomb);
 
@@ -273,6 +287,9 @@
     pet.style.bottom = "auto";
     pet.style.right = "auto";
     pet.classList.add("is-rampage", "is-pinball");
+    document.body.classList.add("is-pet-boom");
+
+    sfx.play("boom", { volume: 0.3 });
 
     lineEl.textContent = "谁让你一直点我的。";
     lineEl.classList.add("is-visible");
@@ -395,11 +412,11 @@
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
 
-    for (let i = 0; i < 26; i += 1) {
+    for (let i = 0; i < 12; i += 1) {
       const shard = document.createElement("span");
       shard.className = "pet-shard";
       shard.setAttribute("aria-hidden", "true");
-      const angle = (Math.PI * 2 * i) / 26 + Math.random() * 0.2;
+      const angle = (Math.PI * 2 * i) / 12 + Math.random() * 0.2;
       const dist = 90 + Math.random() * 220;
       shard.style.left = `${cx}px`;
       shard.style.top = `${cy}px`;
@@ -424,11 +441,16 @@
 
       state.rampage = false;
       state.dead = true;
+      document.body.classList.remove("is-pet-boom");
+      sfx.stop("reveal");
       showTomb();
     }, 720);
   }
 
   function showTomb() {
+    tombClicks = 0;
+    paintTomb();
+
     tomb.hidden = false;
     tomb.classList.remove("is-leaving");
     /* 强制重排，让入场动画每次都播 */
@@ -463,6 +485,9 @@
     pet.classList.add("is-reviving");
     window.setTimeout(() => pet.classList.remove("is-reviving"), 900);
 
+    sfx.play("get", { volume: 0.26 });
+    document.body.classList.remove("is-pet-boom");
+
     if (mode === "summon") {
       pet.classList.add("is-visible");
       summoned = true;
@@ -478,7 +503,44 @@
     }, 260);
   }
 
-  if (reviveBtn) reviveBtn.addEventListener("click", revive);
+  function paintTomb() {
+    const pips = tomb.querySelectorAll(".pet-tomb__pips i");
+    pips.forEach((pip, index) => pip.classList.toggle("is-on", index < tombClicks));
+
+    const hint = tomb.querySelector("[data-pet-hint]");
+    if (hint) {
+      hint.textContent = tombClicks === 0
+        ? `点 ${TOMB_CLICKS} 下墓碑，唤醒他`
+        : `还差 ${TOMB_CLICKS - tombClicks} 下`;
+    }
+
+    const stone = tomb.querySelector(".pet-tomb__stone");
+    if (stone) stone.dataset.clicks = String(tombClicks);
+
+    if (reviveBtn) {
+      reviveBtn.setAttribute("aria-label", `点击墓碑唤醒东方马也，还差 ${Math.max(0, TOMB_CLICKS - tombClicks)} 下`);
+    }
+  }
+
+  if (reviveBtn) {
+    reviveBtn.addEventListener("click", () => {
+      if (!state.dead) return;
+
+      tombClicks += 1;
+      paintTomb();
+
+      /* 每敲一下：裂纹多一条、石头抖一下、音调高一点 */
+      sfx.play("locked", { rate: 0.9 + tombClicks * 0.12, volume: 0.24 });
+
+      tomb.classList.remove("is-hit");
+      void tomb.offsetWidth;
+      tomb.classList.add("is-hit");
+
+      if (tombClicks >= TOMB_CLICKS) {
+        window.setTimeout(revive, 160);
+      }
+    });
+  }
 
   /* =======================================================
      召唤模式：按钮叫出来，待一会儿自己回项目区

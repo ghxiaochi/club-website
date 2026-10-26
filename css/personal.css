@@ -1356,3 +1356,68 @@ body.is-lightbox-open {
     transition: none;
   }
 }
+
+
+/* =========================================================
+   音效开关（头部，和主题按钮同尺寸）
+   ========================================================= */
+.sound-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--panel);
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sound-toggle:hover {
+  color: var(--blue);
+  border-color: var(--blue);
+  box-shadow: 0 0 0 4px var(--blue-soft);
+}
+
+.sound-toggle:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+
+.sound-toggle__icon {
+  width: 18px;
+  height: 18px;
+}
+
+.sound-toggle__icon--off {
+  display: none;
+}
+
+.sound-toggle.is-muted .sound-toggle__icon--on {
+  display: none;
+}
+
+.sound-toggle.is-muted .sound-toggle__icon--off {
+  display: block;
+}
+
+.sound-toggle.is-muted {
+  color: var(--dim);
+}
+
+@media (max-width: 900px) {
+  .sound-toggle {
+    width: 32px;
+    height: 32px;
+  }
+
+  .sound-toggle__icon {
+    width: 17px;
+    height: 17px;
+  }
+}
