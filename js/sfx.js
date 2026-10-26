@@ -101,6 +101,22 @@
     sync();
   }
 
+  /* 第一次按下时把常用的几个音效先拉下来，避免第一声延迟 */
+  function prime() {
+    ["click", "hover", "locked", "back"].forEach((name) => {
+      pool(name).forEach((audio) => {
+        try {
+          audio.load();
+        } catch (error) {
+          /* 忽略 */
+        }
+      });
+    });
+  }
+
+  document.addEventListener("pointerdown", prime, { once: true, passive: true });
+  document.addEventListener("keydown", prime, { once: true });
+
   document.addEventListener("click", (event) => {
     const button = event.target.closest("[data-sound-toggle]");
     if (!button) return;
