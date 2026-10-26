@@ -525,7 +525,7 @@
 
 .char-splash__unit {
   display: block;
-  height: clamp(210px, 38vh, 360px);
+  height: clamp(240px, 44vh, 430px);
   width: auto;
   image-rendering: pixelated;
   filter: drop-shadow(0 18px 0 rgba(28, 32, 52, 0.22));
