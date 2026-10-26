@@ -148,6 +148,20 @@
 
   paintSlots();
 
+  /* 空闲时把 8 张立绘偷偷下好，第一次点开也不用等 */
+  function preloadArt() {
+    characters.forEach((char) => {
+      const img = new Image();
+      img.src = `images/characters/art-${char.id}.webp`;
+    });
+  }
+
+  if ("requestIdleCallback" in window) {
+    window.requestIdleCallback(preloadArt, { timeout: 2500 });
+  } else {
+    window.setTimeout(preloadArt, 1600);
+  }
+
   /* =======================================================
      三、铜板与 Roll
      ======================================================= */
@@ -231,8 +245,17 @@
 
     if (splashImg) {
       /* 站位用小像素图，结果页用高精度立绘 */
+      splashImg.classList.remove("is-loaded");
       splashImg.src = `images/characters/art-${char.id}.webp`;
       splashImg.alt = char.title;
+
+      /* 图没解码完就播动画会看到空白，等 decode 再显形 */
+      const revealArt = () => splashImg.classList.add("is-loaded");
+      if (typeof splashImg.decode === "function") {
+        splashImg.decode().then(revealArt).catch(revealArt);
+      } else {
+        revealArt();
+      }
     }
     if (splashTitle) splashTitle.textContent = char.title;
     if (splashSub) splashSub.textContent = char.sub;
