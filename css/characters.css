@@ -1,0 +1,306 @@
+/* =========================================================
+   HNYZ · 角色舞台样式（复刻音游 gacha 界面的舞台感）
+   ========================================================= */
+
+.char-stage {
+  position: relative;
+  margin: 26px 0 12px;
+  overflow: hidden;
+  border: 1px solid rgba(91, 147, 255, 0.35);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(180deg, #23365f 0%, #2f4a7d 46%, #3f5f98 100%);
+  isolation: isolate;
+}
+
+/* 斜条纹，和游戏背景一个味道 */
+.char-stage__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: repeating-linear-gradient(
+    118deg,
+    rgba(255, 255, 255, 0.07) 0 34px,
+    rgba(255, 255, 255, 0) 34px 68px
+  );
+  pointer-events: none;
+}
+
+.char-stage__head {
+  position: relative;
+  z-index: 2;
+  padding: 20px 26px 2px;
+}
+
+.char-stage__tag {
+  color: #9be3ff;
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.16em;
+}
+
+.char-stage__title {
+  margin: 6px 0 6px;
+  color: #ffffff;
+  font-size: clamp(1.3rem, 2.6vw, 1.7rem);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.char-stage__desc {
+  color: #c7dbf7;
+  font-size: 0.78rem;
+}
+
+/* ---------- 站位 ---------- */
+.char-stage__floor {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(4px, 1.4vw, 22px);
+  padding: 6px 16px 0;
+  min-height: 168px;
+}
+
+/* 地面阴影线 */
+.char-stage__floor::after {
+  content: "";
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(8, 20, 40, 0.45), transparent 70%);
+}
+
+.char-slot {
+  position: relative;
+  display: block;
+  width: clamp(62px, 7.8vw, 102px);
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transform-origin: 50% 100%;
+  animation: charIdle 4.2s ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+  transition: transform 0.28s cubic-bezier(0.22, 0.61, 0.36, 1), filter 0.28s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.char-slot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 8px 10px rgba(6, 14, 30, 0.45));
+  pointer-events: none;
+}
+
+.char-slot__name {
+  position: absolute;
+  left: 50%;
+  bottom: -2px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(8, 18, 36, 0.82);
+  color: #dbeafe;
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, 6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+
+.char-slot:hover,
+.char-slot:focus-visible {
+  transform: translateY(-10px) scale(1.05);
+  filter: brightness(1.08);
+  z-index: 3;
+}
+
+.char-slot:hover .char-slot__name,
+.char-slot:focus-visible .char-slot__name {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.char-slot:focus-visible {
+  outline: 2px solid #9be3ff;
+  outline-offset: 4px;
+}
+
+/* 未解锁：压暗成剪影 */
+.char-slot.is-locked img {
+  filter: brightness(0.32) saturate(0.1) drop-shadow(0 6px 8px rgba(6, 14, 30, 0.4));
+}
+
+.char-slot.is-locked:hover {
+  filter: brightness(0.45);
+}
+
+/* ---------- 动效 ---------- */
+.char-slot.is-jumping {
+  animation: charJump 0.62s cubic-bezier(0.28, 0.84, 0.42, 1);
+}
+
+.char-slot.is-shaking {
+  animation: charShake 0.5s linear;
+}
+
+@keyframes charIdle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes charJump {
+  0% { transform: translateY(0) scale(1, 1); }
+  22% { transform: translateY(2px) scale(1.06, 0.92); }
+  48% { transform: translateY(-22px) scale(0.96, 1.06); }
+  72% { transform: translateY(0) scale(1.04, 0.96); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+
+@keyframes charShake {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  20% { transform: translateX(-4px) rotate(-2deg); }
+  40% { transform: translateX(4px) rotate(2deg); }
+  60% { transform: translateX(-3px) rotate(-1deg); }
+  80% { transform: translateX(3px) rotate(1deg); }
+}
+
+/* 星星 */
+.char-spark {
+  position: absolute;
+  left: 50%;
+  top: 32%;
+  color: #ffe9a8;
+  font-size: 12px;
+  pointer-events: none;
+  animation: charSpark 0.85s ease-out var(--sd, 0s) forwards;
+}
+
+@keyframes charSpark {
+  0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--sx, 0px)), var(--sy, -60px)) scale(1.1); }
+}
+
+/* 对话气泡 */
+.char-bubble {
+  position: absolute;
+  left: var(--bx, 50%);
+  bottom: 150px;
+  z-index: 4;
+  transform: translate(-50%, 8px);
+  padding: 7px 12px;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1e3a5f;
+  font-size: 0.72rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  box-shadow: 0 10px 22px rgba(6, 16, 34, 0.35);
+}
+
+.char-bubble::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  width: 10px;
+  height: 10px;
+  background: #ffffff;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.char-bubble.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ---------- 底部 ---------- */
+.char-stage__foot {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 26px 18px;
+}
+
+.char-stage__roll {
+  padding: 7px 18px;
+  border: 1px solid rgba(155, 227, 255, 0.6);
+  border-radius: 6px;
+  background: rgba(9, 24, 46, 0.55);
+  color: #dff2ff;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+
+.char-stage__roll:hover {
+  background: rgba(37, 99, 235, 0.5);
+  border-color: #9be3ff;
+}
+
+.char-stage__roll:active {
+  transform: translateY(1px);
+}
+
+.char-stage__src {
+  color: #8fb3e0;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  text-decoration: none;
+}
+
+.char-stage__src:hover {
+  color: #cfe2ff;
+}
+
+@media (max-width: 720px) {
+  .char-stage__head {
+    padding: 18px 16px 0;
+  }
+
+  .char-stage__floor {
+    gap: 2px;
+    padding: 12px 6px 0;
+    min-height: 150px;
+  }
+
+  .char-slot {
+    width: clamp(38px, 10.5vw, 58px);
+  }
+
+  .char-stage__foot {
+    padding: 10px 16px 14px;
+  }
+
+  .char-bubble {
+    bottom: 132px;
+    font-size: 0.68rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .char-slot {
+    animation: none;
+  }
+
+  .char-slot:hover {
+    transform: none;
+  }
+}
