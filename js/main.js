@@ -653,12 +653,19 @@
 
     identity.append(prompt, name, meta);
 
+    const home = document.createElement("a");
+    home.className = "member-home";
+    home.href = `member.html?u=${encodeURIComponent(user)}`;
+    home.textContent = "个人主页 ↗";
+    /* 阻止点击 summary 触发展开/收起 */
+    home.addEventListener("click", (event) => event.stopPropagation());
+
     const marker = document.createElement("span");
     marker.className = "member-toggle";
     marker.setAttribute("aria-hidden", "true");
     marker.textContent = "+";
 
-    summary.append(identity, marker);
+    summary.append(identity, home, marker);
 
     const body = document.createElement("div");
     body.className = "member-body";

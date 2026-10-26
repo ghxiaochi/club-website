@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="HNYZ · 衡南一中编程社成员的个人主页：个人简介和 TA 的项目。>
+  <meta name="theme-color" content="#f5f9ff">
+  <script>
+    /* 主题预置：首帧前定好深浅色，避免刷新时白闪 */
+    (function () {
+      try {
+        var saved = localStorage.getItem("hnyz:theme");
+        var theme = saved === "light" || saved === "dark"
+          ? saved
+          : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.dataset.theme = theme;
+      } catch (error) { /* 隐私模式下忽略 */ }
+    })();
+  </script>
+  <meta property="og:title" content="成员主页｜HNYZ · 衡南一中编程社">
+  <meta property="og:description" content="社团成员的个人主页：个人简介 + 自己的项目。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ghxiaochi.github.io/club-website/projects.html">
+  <meta property="og:site_name" content="HNYZ · 衡南一中编程社">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:image" content="https://ghxiaochi.github.io/club-website/images/og-cover.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="HNYZ 衡南一中编程社：把想法，写成代码。">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="成员主页｜HNYZ · 衡南一中编程社">
+  <meta name="twitter:description" content="社团成员的个人主页：个人简介 + 自己的项目。">
+  <meta name="twitter:image" content="https://ghxiaochi.github.io/club-website/images/og-cover.png">
+  <meta name="twitter:image:alt" content="HNYZ 衡南一中编程社：把想法，写成代码。">
+  <link rel="canonical" href="https://ghxiaochi.github.io/club-website/member.html">
+
+  <title>成员主页｜HNYZ · 衡南一中编程社</title>
+
+  <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css?v=20261025e">
+  <link rel="stylesheet" href="css/pet.css?v=20261025b">
+  <link rel="stylesheet" href="css/personal.css?v=20261032">
+  <link rel="stylesheet" href="css/member.css?v=20261032">
+  <noscript><style>.loading-state { display: none; }</style></noscript>
+
+  <script src="js/theme.js?v=20261025g" defer></script>
+  <script src="js/members.js?v=20261032" defer></script>
+  <script src="js/main.js?v=20261032" defer></script>
+  <script src="js/pet.js?v=20261025c" defer></script>
+  <script src="js/member.js?v=20261032" defer></script>
+  <script src="js/personal.js?v=20261030" defer></script>
+</head>
+<body id="top">
+  <div class="bg-orbs" aria-hidden="true">
+    <span class="bg-orbs__orb bg-orbs__orb--a"></span>
+    <span class="bg-orbs__orb bg-orbs__orb--b"></span>
+    <span class="bg-orbs__orb bg-orbs__orb--c"></span>
+    <span class="bg-orbs__dots"></span>
+  </div>
+
+  <a class="skip-link" href="#main">跳到主要内容</a>
+
+  <header class="site-header" data-header>
+    <div class="container header-inner">
+      <a class="brand" href="index.html" aria-label="衡南一中编程社首页">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="m9 6-5 6 5 6M15 6l5 6-5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="brand-copy">
+          <strong>HNYZ</strong>
+          <span>衡南一中编程社</span>
+        </span>
+      </a>
+
+
+      <nav class="site-nav" id="site-nav" aria-label="主导航" data-nav>
+        <ul class="nav-list">
+          <li><a href="index.html#about">关于</a></li>
+          <li><a href="index.html#what-we-do">我们做什么</a></li>
+          <li><a href="index.html#projects">项目</a></li>
+          <li><a href="projects.html">全部项目</a></li>
+          <li><a href="gallery.html">图集</a></li>
+          <li><a href="index.html#schedule">活动</a></li>
+          <li><a href="index.html#wall">资源墙</a></li>
+          <li><a href="index.html#faq">FAQ</a></li>
+        </ul>
+        <a class="nav-cta" href="index.html#join">
+          加入我们
+          <span aria-hidden="true">↗</span>
+        </a>
+      </nav>
+      <div class="header-actions">
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换到深色模式" aria-pressed="false" title="切换到深色模式">
+          <svg class="theme-toggle__icon theme-toggle__icon--sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.4 5.4l1.6 1.6M17 17l1.6 1.6M18.6 5.4 17 7M7 17l-1.6 1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <svg class="theme-toggle__icon theme-toggle__icon--moon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M20 13.4A8.4 8.4 0 0 1 10.6 4a8.4 8.4 0 1 0 9.4 9.4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="打开导航菜单" data-nav-toggle>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <section class="section member-page" data-member-root>
+      <div class="container">
+        <div id="member-hero" aria-busy="true"></div>
+
+        <div class="member-projects-head">
+          <p class="eyebrow">
+            <span class="eyebrow-dot" aria-hidden="true"></span>
+            PROJECTS // 这个成员的作品
+          </p>
+        </div>
+
+        <div class="project-grid" id="member-projects" aria-busy="true"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <a class="brand" href="index.html" aria-label="回到首页">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="m9 6-5 6 5 6M15 6l5 6-5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="brand-copy">
+            <strong>HNYZ</strong>
+            <span>衡南一中编程社</span>
+          </span>
+        </a>
+        <p>把想法，写成代码。</p>
+      </div>
+
+      <nav class="footer-nav" aria-label="页脚导航">
+        <a href="index.html#about">关于</a>
+        <a href="projects.html">全部项目</a>
+        <a href="gallery.html">图集</a>
+        <a href="index.html#schedule">活动</a>
+        <a href="index.html#wall">资源墙</a>
+        <a href="index.html#join">加入</a>
+        <a href="https://github.com/ghxiaochi" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+        <a href="#top">回到顶部 ↑</a>
+      </nav>
+
+      <p class="footer-meta">
+        © <span data-year>2026</span> 衡南一中编程社<br>
+        用 HTML / CSS / JavaScript 手工搭建
+      </p>
+    </div>
+  </footer>
+
+  <!-- 站内校徽：和首页一致的右下角背景板，随页面滚动旋转 -->
+  <div class="hnyz-pet" data-hnyz-pet style="left: auto; right: clamp(8px, 1.6vw, 20px);">
+    <div class="hnyz-pet__board" aria-hidden="true"></div>
+    <button class="hnyz-pet__stage" type="button" data-hnyz-pet-trigger aria-label="和衡南一中校徽打个招呼">
+      <span class="hnyz-pet__badge-wrap" data-hnyz-pet-badge aria-hidden="true">
+        <img class="hnyz-pet__badge" src="images/pet/badge-school-hd.webp" alt="" width="360" height="360">
+      </span>
+    </button>
+    <p class="hnyz-pet__speech" data-hnyz-pet-speech role="status" aria-live="polite"></p>
+  </div>
+
+  <!-- ghxiaochi 的像素头像彩蛋：固定在左下角，点击若干次出现隐藏台词 -->
+  <p class="sr-only" id="copy-status" role="status" aria-live="polite"></p>
+</body>
+</html>

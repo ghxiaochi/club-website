@@ -1,0 +1,207 @@
+/* =========================================================
+   HNYZ · 成员个人页 + 项目区音游横幅
+   ========================================================= */
+
+.member-page {
+  padding-top: 28px;
+}
+
+/* ---------- 个人横幅 ---------- */
+.member-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 34px 36px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--member-accent) 35%, transparent);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(circle at 88% 12%, color-mix(in srgb, var(--member-accent) 22%, transparent), transparent 40%),
+    var(--panel);
+  box-shadow: var(--shadow-card);
+}
+
+.member-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--member-accent) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--member-accent) 8%, transparent) 1px, transparent 1px);
+  background-size: 26px 26px;
+  pointer-events: none;
+}
+
+.member-hero__copy {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+
+.member-hero__kicker {
+  color: var(--member-accent);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.member-hero__title {
+  margin: 10px 0 12px;
+  color: var(--text);
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.member-hero__desc {
+  max-width: 560px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+.member-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.member-hero__actions .button--primary {
+  background: var(--member-accent);
+  border-color: var(--member-accent);
+}
+
+.member-hero__sprites {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.member-hero__sprites .member-chibi {
+  width: 96px;
+  height: 96px;
+}
+
+.member-projects-head {
+  margin: 40px 0 18px;
+}
+
+/* ---------- 项目区里的成员主页入口 ---------- */
+.member-home {
+  margin-left: auto;
+  margin-right: 14px;
+  padding: 5px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  color: var(--blue);
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.member-home:hover {
+  border-color: var(--blue);
+  background: var(--blue-soft);
+}
+
+/* ---------- 音游横幅 ---------- */
+.ad-banner {
+  position: relative;
+  margin: 26px 0 12px;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(91, 147, 255, 0.3);
+  min-height: 230px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.ad-banner__bg {
+  position: absolute;
+  inset: 0;
+  background-image: url("../images/decor/animdustry.jpg");
+  background-size: cover;
+  background-position: center 24%;
+}
+
+.ad-banner__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(5, 11, 22, 0.05) 0%, rgba(5, 11, 22, 0.82) 78%);
+}
+
+.ad-banner__content {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  padding: 26px 28px;
+}
+
+.ad-banner__tag {
+  color: #9be3ff;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+}
+
+.ad-banner__title {
+  margin: 6px 0 8px;
+  color: #ffffff;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 800;
+}
+
+.ad-banner__desc {
+  max-width: 520px;
+  color: #cfe2ff;
+  font-size: 0.8rem;
+  line-height: 1.7;
+}
+
+.ad-banner__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.ad-banner__note {
+  color: #8fb3e0;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+}
+
+@media (max-width: 720px) {
+  .member-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 26px 22px;
+  }
+
+  .member-hero__sprites {
+    order: -1;
+  }
+
+  .member-hero__sprites .member-chibi {
+    width: 72px;
+    height: 72px;
+  }
+
+  .ad-banner__content {
+    padding: 22px 18px;
+  }
+}
