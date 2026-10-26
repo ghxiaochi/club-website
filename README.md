@@ -284,7 +284,9 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 校徽位于两页的 `.hnyz-pet`，样式在 `css/pet.css`，交互在 `js/pet.js`。图片为 `images/pet/badge-school-hd.webp`，放在右下角的浅蓝背景板里；如需停用，删除页面中的 `.hnyz-pet` 结构即可。
 
-像素头像彩蛋位于 `projects.html` 的 `.hnyz-avatar`，样式在 `css/avatar-pet.css`，交互在 `js/avatar-pet.js`。点击会轮播「干嘛？」等台词，连点 12 次显示「我绝对不会偷偷告诉你，这是AI写的网页」，之后计数清零，想再看要重新点满 12 下（第二次文案不同）。每次点击会蹦出几颗小星星。它默认在左下角，可以按住拖到任意位置（位置会记住），右下角仍然保留校徽。
+像素头像彩蛋位于 `projects.html` 的 `.hnyz-avatar`，样式在 `css/avatar-pet.css`，交互在 `js/avatar-pet.js`。点击会轮播「干嘛？」等台词，连点 12 次显示「我绝对不会偷偷告诉你，这是AI写的网页」，之后计数清零，想再看要重新点满 12 下（第二次文案不同）。每次点击会蹦出几颗小星星；点太快（2.6 秒内 6 下）会左右晃并说「头有点晕」。
+
+首页右下角有「召唤东方马也」按钮：点击后桌宠滑入并挥手，停留 26 秒（点击可续时）后自己说「我先回项目区了」再滑走；再次点击按钮可以提前让它回去。它默认在左下角，可以按住拖到任意位置（位置会记住），右下角仍然保留校徽。
 
 ghxiaochi 的个人主页横幅配置在 `js/members.js` 的 `window.HNYZ_PROFILES` 里（key 与成员的 `user` 一致才会显示），由 `js/main.js` 的 `createMemberProfile(user)` 渲染注入，两张贴纸在 `images/personal/`。新增成员想加横幅，在 `HNYZ_PROFILES` 里加一个同 user 的键即可。
 

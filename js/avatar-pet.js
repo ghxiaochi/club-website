@@ -1,10 +1,11 @@
 /* =========================================================
    ghxiaochi 的像素头像桌宠
    ---------------------------------------------------------
-   点击轮播台词；连点 12 次出现隐藏彩蛋，彩蛋出现后计数清零，
-   想再看一次要再点 12 下。
-   每次点击会蹦出几颗小星星，并做一个挤压回弹。
-   可以按住拖动，位置记在 localStorage，下次打开还在原处。
+   - 「全部项目」页：常驻左下角，可拖动
+   - 首页：默认不在，点右侧「召唤东方马也」按钮才出现，
+     待 26 秒（或再点一次按钮）后自己回项目区
+   点击轮播台词；连点 12 次出彩蛋，之后计数清零要重新点满。
+   每次点击蹦小星星；点太快会晕；召唤出来时会挥手。
    ========================================================= */
 
 (() => {
@@ -22,10 +23,18 @@
     "在写代码，别催。",
     "这个 bug 不是我写的。",
     "点我干嘛，快去写作业。",
-    "再点一下试试？"
+    "再点一下试试？",
+    "今天的 LED 亮了吗？",
+    "别卷了，去趟操场吧。",
+    "串口又乱码了？先检查波特率。",
+    "我把 token 藏起来了。",
+    "这个项目下周一定做完。"
   ];
   const secret = "我绝对不会偷偷告诉你，这是AI写的网页";
   const secretAgain = "还来？行吧，反正你也没别的事做。";
+
+  const mode = pet.getAttribute("data-avatar-mode") || "fixed";
+  const summonBtn = document.querySelector("[data-pet-summon]");
 
   const SECRET_AT = 12;
   const SPARKS = ["✦", "✧", "♥", "●", "✳"];
@@ -34,6 +43,8 @@
   let clicks = 0;
   let speechTimer = 0;
   let secretSeen = false;
+  let rapid = 0;
+  let rapidTimer = 0;
 
   /* 点一下蹦几颗小星星，向上飘散 */
   function spawnSparks(secretMode) {
@@ -59,19 +70,31 @@
     }
   }
 
+  /* 显示一句话：所有台词、彩蛋、系统提示都走这里 */
+  function showLine(text, duration = 3200, secretMode = false) {
+    speech.textContent = text;
+
+    /* 先移除再加回，连续点击时动画才会重播 */
+    pet.classList.remove("is-poked");
+    void pet.offsetWidth;
+    pet.classList.add("is-speaking", "is-poked");
+    pet.classList.toggle("is-secret", secretMode);
+
+    window.clearTimeout(speechTimer);
+    speechTimer = window.setTimeout(() => {
+      pet.classList.remove("is-speaking", "is-poked", "is-secret");
+    }, duration);
+  }
+
   function speak() {
     clicks += 1;
     const isSecret = clicks >= SECRET_AT;
 
-    speech.textContent = isSecret
-      ? (secretSeen ? secretAgain : secret)
-      : lines[(clicks - 1) % lines.length];
-
-    /* 重新触发动画：先移除再加回，避免连续点击时动画不重播 */
-    pet.classList.remove("is-poked");
-    void pet.offsetWidth;
-    pet.classList.add("is-speaking", "is-poked");
-    pet.classList.toggle("is-secret", isSecret);
+    showLine(
+      isSecret ? (secretSeen ? secretAgain : secret) : lines[(clicks - 1) % lines.length],
+      isSecret ? 6000 : 3200,
+      isSecret
+    );
 
     spawnSparks(isSecret);
 
@@ -81,13 +104,25 @@
       secretSeen = true;
     }
 
-    window.clearTimeout(speechTimer);
-    speechTimer = window.setTimeout(
-      () => {
-        pet.classList.remove("is-speaking", "is-poked", "is-secret");
-      },
-      isSecret ? 6000 : 3200
-    );
+    noteActivity(isSecret);
+  }
+
+  /* 点太快的检测 + 通知召唤计时器 */
+  function noteActivity(isSecret) {
+    rapid += 1;
+    window.clearTimeout(rapidTimer);
+    rapidTimer = window.setTimeout(() => {
+      rapid = 0;
+    }, 2600);
+
+    if (rapid >= 6 && !isSecret) {
+      rapid = 0;
+      pet.classList.add("is-dizzy");
+      window.setTimeout(() => pet.classList.remove("is-dizzy"), 1600);
+      showLine("别点了……头有点晕。", 2600);
+    }
+
+    if (mode === "summon") scheduleStay();
   }
 
   /* ---------------- 拖动 ---------------- */
@@ -163,13 +198,83 @@
     speak();
   });
 
-  restorePosition();
+  if (mode !== "summon") restorePosition();
+
+  /* =======================================================
+     召唤模式：按钮叫出来，待一会儿自己回项目区
+     ======================================================= */
+  const STAY_MS = 26000;
+  let stayTimer = 0;
+  let idleTimer = 0;
+  let summoned = false;
+
+  function scheduleIdle() {
+    window.clearTimeout(idleTimer);
+    idleTimer = window.setTimeout(() => {
+      if (!summoned) return;
+      if (!pet.classList.contains("is-speaking")) {
+        showLine(lines[Math.floor(Math.random() * lines.length)], 2800);
+      }
+      scheduleIdle();
+    }, 8000 + Math.random() * 5000);
+  }
+
+  function scheduleStay() {
+    if (!summoned) return;
+    window.clearTimeout(stayTimer);
+    stayTimer = window.setTimeout(leaveHome, STAY_MS);
+    scheduleIdle();
+  }
+
+  function summonHome() {
+    if (summoned) {
+      scheduleStay();
+      return;
+    }
+
+    summoned = true;
+    pet.classList.remove("is-leaving");
+    pet.classList.add("is-visible", "is-waving");
+    if (summonBtn) {
+      summonBtn.classList.add("is-active");
+      summonBtn.setAttribute("aria-pressed", "true");
+    }
+    window.setTimeout(() => pet.classList.remove("is-waving"), 800);
+    showLine("叫我？我这不是来了。", 3000);
+    scheduleStay();
+  }
+
+  function leaveHome() {
+    if (!summoned) return;
+
+    summoned = false;
+    window.clearTimeout(stayTimer);
+    window.clearTimeout(idleTimer);
+
+    showLine("我先回项目区了。", 1400);
+    pet.classList.add("is-leaving");
+
+    window.setTimeout(() => {
+      pet.classList.remove("is-visible", "is-leaving", "is-speaking", "is-poked", "is-secret");
+      if (summonBtn) {
+        summonBtn.classList.remove("is-active");
+        summonBtn.setAttribute("aria-pressed", "false");
+      }
+    }, 600);
+  }
+
+  if (mode === "summon" && summonBtn) {
+    summonBtn.addEventListener("click", () => {
+      if (summoned) leaveHome();
+      else summonHome();
+    });
+  }
 
   /* 不再因为个人横幅而隐藏：桌宠可以拖走，遮挡交给用户自己决定 */
 
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
     window.clearTimeout(speechTimer);
-    pet.classList.remove("is-speaking", "is-poked");
+    pet.classList.remove("is-speaking", "is-poked", "is-secret");
   });
 })();

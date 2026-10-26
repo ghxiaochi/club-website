@@ -256,3 +256,199 @@
   visibility: hidden;
   pointer-events: none;
 }
+
+/* =========================================================
+   首页召唤模式
+   ---------------------------------------------------------
+   默认不出现（opacity: 0），点右侧按钮后滑入；
+   26 秒后自己滑回右侧「项目区」。
+   ========================================================= */
+.hnyz-avatar--summon {
+  left: auto;
+  right: clamp(18px, 2.6vw, 40px);
+  bottom: clamp(150px, 20vh, 210px);
+  animation: none;
+  opacity: 0;
+  transform: translate(26px, 18px) scale(0.9);
+  /* visibility 让隐藏时不参与 Tab 焦点 */
+  visibility: hidden;
+  transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1),
+    visibility 0s linear 0.45s;
+  pointer-events: none;
+}
+
+.hnyz-avatar--summon .hnyz-avatar__button {
+  pointer-events: none;
+}
+
+.hnyz-avatar--summon.is-visible {
+  opacity: 1;
+  transform: none;
+  visibility: visible;
+  transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1),
+    visibility 0s;
+}
+
+.hnyz-avatar--summon.is-visible .hnyz-avatar__button {
+  pointer-events: auto;
+}
+
+.hnyz-avatar--summon.is-leaving {
+  opacity: 0;
+  transform: translate(96px, 10px) scale(0.86);
+}
+
+/* 靠右的桌宠，气泡改成右侧对齐，不然文字会顶出屏幕 */
+.hnyz-avatar--summon .hnyz-avatar__speech {
+  left: auto;
+  right: 0;
+  border-radius: 12px 12px 4px 12px;
+}
+
+.hnyz-avatar--summon .hnyz-avatar__speech::after {
+  left: auto;
+  right: 17px;
+}
+
+/* 挥手 */
+.hnyz-avatar.is-waving .hnyz-avatar__img {
+  animation: hnyz-avatar-wave 0.75s ease;
+}
+
+@keyframes hnyz-avatar-wave {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-7deg); }
+  42% { transform: rotate(6deg); }
+  64% { transform: rotate(-4deg); }
+  82% { transform: rotate(2deg); }
+}
+
+/* 被连点太多下：左右晃 */
+.hnyz-avatar.is-dizzy .hnyz-avatar__img {
+  animation: hnyz-avatar-dizzy 0.5s linear 3;
+}
+
+@keyframes hnyz-avatar-dizzy {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  20% { transform: translateX(-5px) rotate(-4deg); }
+  40% { transform: translateX(5px) rotate(4deg); }
+  60% { transform: translateX(-4px) rotate(-2deg); }
+  80% { transform: translateX(4px) rotate(2deg); }
+}
+
+/* =========================================================
+   右侧召唤按钮
+   ========================================================= */
+.pet-summon {
+  position: fixed;
+  top: 44%;
+  right: 0;
+  z-index: 36;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 12px 10px 9px;
+  border: 1px solid var(--border-strong);
+  border-right: 0;
+  border-radius: 14px 0 0 14px;
+  background: var(--panel);
+  box-shadow: -8px 10px 26px rgba(30, 64, 175, 0.14);
+  color: var(--text-soft);
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.pet-summon:hover {
+  transform: translateX(-4px);
+  border-color: var(--blue);
+  box-shadow: -10px 12px 30px rgba(37, 99, 235, 0.22);
+}
+
+.pet-summon:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+
+.pet-summon.is-active {
+  border-color: var(--green);
+  color: var(--green-bright);
+}
+
+.pet-summon.is-active .pet-summon__icon::after {
+  content: "";
+  position: absolute;
+  right: -2px;
+  bottom: 0;
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--panel);
+  border-radius: 50%;
+  background: var(--green);
+}
+
+.pet-summon__icon {
+  position: relative;
+}
+
+.pet-summon__icon {
+  display: block;
+  width: 26px;
+  height: 38px;
+  flex-shrink: 0;
+}
+
+.pet-summon__icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 6px rgba(15, 118, 110, 0.22));
+}
+
+.pet-summon__label {
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .pet-summon {
+    top: auto;
+    bottom: 104px;
+    padding: 8px 9px 8px 7px;
+  }
+
+  /* 手机上桌宠缩一号，放在按钮上方，别压住主要按钮 */
+  .hnyz-avatar--summon {
+    right: 6px;
+    bottom: 178px;
+    width: 60px;
+  }
+
+  .hnyz-avatar--summon .hnyz-avatar__speech {
+    max-width: 158px;
+    font-size: 0.66rem;
+    padding: 7px 10px;
+  }
+
+  .pet-summon__label {
+    display: none;
+  }
+
+  .pet-summon__icon {
+    width: 24px;
+    height: 35px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hnyz-avatar--summon {
+    transition: none;
+  }
+
+  .hnyz-avatar.is-waving .hnyz-avatar__img,
+  .hnyz-avatar.is-dizzy .hnyz-avatar__img {
+    animation: none;
+  }
+}

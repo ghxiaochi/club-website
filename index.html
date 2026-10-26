@@ -42,6 +42,7 @@
   <link rel="stylesheet" href="css/style.css?v=20261025e">
   <link rel="stylesheet" href="css/pet.css?v=20261025b">
   <link rel="stylesheet" href="css/personal.css?v=20261030">
+  <link rel="stylesheet" href="css/avatar-pet.css?v=20261031">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <!-- 项目卡片、全部项目折叠页和复制按钮由 js/main.js 驱动 -->
@@ -49,6 +50,7 @@
   <script src="js/members.js?v=20261025i" defer></script>
   <script src="js/main.js?v=20261025f" defer></script>
   <script src="js/pet.js?v=20261025c" defer></script>
+  <script src="js/avatar-pet.js?v=20261031" defer></script>
   <script src="js/personal.js?v=20261030" defer></script>
 </head>
 <body>
@@ -578,7 +580,24 @@
           </div>
         </div>
 
-        <p class="sr-only" id="copy-status" role="status" aria-live="polite"></p>
+        <!-- 右侧召唤按钮：点一下把桌宠叫到首页来 -->
+  <button class="pet-summon" type="button" data-pet-summon aria-pressed="false" aria-label="召唤东方马也">
+    <span class="pet-summon__icon" aria-hidden="true">
+      <img src="images/pet/ghxiaochi-avatar.webp" alt="" width="40" height="59" loading="lazy">
+    </span>
+    <span class="pet-summon__label">召唤<br>东方马也</span>
+  </button>
+
+  <!-- 桌宠：召唤后出现在首页，过一会儿自己回「全部项目」页 -->
+  <div class="hnyz-avatar hnyz-avatar--summon" data-hnyz-avatar data-avatar-mode="summon">
+    <p class="hnyz-avatar__speech" data-hnyz-avatar-speech role="status" aria-live="polite"></p>
+    <button class="hnyz-avatar__button" type="button" data-hnyz-avatar-trigger aria-label="和东方马也互动">
+      <img class="hnyz-avatar__img" src="images/pet/ghxiaochi-avatar.webp" alt="东方马也的像素头像" width="648" height="954">
+      <span class="hnyz-avatar__name" aria-hidden="true">东方马也</span>
+    </button>
+  </div>
+
+  <p class="sr-only" id="copy-status" role="status" aria-live="polite"></p>
       </div>
     </section>
     <!-- 页面最下方：图集入口 -->
