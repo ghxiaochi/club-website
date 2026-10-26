@@ -1,11 +1,12 @@
 /* =========================================================
-   HNYZ · 项目区：ANIMDUSTRY 抽卡界面复刻
+   HNYZ · 项目区：ANIMDUSTRY 的一排小人
    ---------------------------------------------------------
-   参考游戏源码（Anuken/animdustry 的 src/menus.nim）：
-   - 背景 patStripes(#accce3, #57639a)，斜 135°
-   - 角色站在底部面板的上沿，锁定角色用 mixColor rgb(0.26) 压暗
-   - 点击角色进入 splash 页：暗底 + 放射线 + 白色闪光 + 标题/副标题/技能
-   - Roll 一次 10 铜板，铜板不够时数字变红
+   只复刻游戏菜单里角色排的交互（参考 Anuken/animdustry
+   的 src/menus.nim）：
+   - 鼠标扫过：小人依次跳一下（unit.jumping，0.21s 正弦）
+   - 右键：压扁并换成「挨打」表情（clickTime → -hit 贴图）
+   - 左键：打开角色卡（splash：角色配色 + 立绘 + 标题/技能）
+   - 锁定的角色是全黑剪影（mixColor rgb(0.26)），点了会抖
    ========================================================= */
 
 (() => {
@@ -15,18 +16,12 @@
   if (!stage) return;
 
   const bubbleHost = document.querySelector("[data-char-bubble]");
-  const rollBtn = document.querySelector("[data-char-roll]");
-  const copperEl = document.querySelector("[data-char-copper]");
-  const copperWrap = document.querySelector("[data-char-copper-wrap]");
-  const resetBtn = document.querySelector("[data-char-reset]");
-  const mapsHost = document.querySelector("[data-char-maps]");
 
   const splash = document.querySelector("[data-char-splash]");
   const splashImg = splash ? splash.querySelector("[data-splash-img]") : null;
   const splashTitle = splash ? splash.querySelector("[data-splash-title]") : null;
   const splashSub = splash ? splash.querySelector("[data-splash-sub]") : null;
   const splashAbility = splash ? splash.querySelector("[data-splash-ability]") : null;
-  const splashCount = splash ? splash.querySelector("[data-splash-count]") : null;
   const splashBack = splash ? splash.querySelector("[data-splash-back]") : null;
 
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -34,7 +29,8 @@
   /* 音效模块（js/sfx.js），没加载时静默降级 */
   const sfx = window.HNYZ_SFX || { play() {}, stop() {} };
 
-  /* 角色数据来自游戏 src/vars.nim 的 allUnits，顺序与原作一致 */
+  /* 角色数据来自游戏 src/vars.nim 的 allUnits，顺序与原作一致；
+     s1/s2/glow/pattern 是游戏里 unit.draw 用的配色和花纹 */
   const characters = [
     { id: "alpha", title: "-ALPHA-", sub: "the first of many", ability: "creates a wall every 10 moves", unlocked: true,
       s1: "#b25840", s2: "#c07659", glow: "#ffd37f", pattern: "squares" },
@@ -54,51 +50,17 @@
       s1: "#ffa664", s2: "#ffcb82", glow: "#ffd37f", pattern: "circles" }
   ];
 
-  const LOCK_LINES = ["还没抽到……", "这个位置空着。", "铜板不够，下次吧。"];
-  const COPPER_START = 88;
-  const COPPER_COST = 10;
-  const SAVE_KEY = "hnyz:gacha";
+  const LOCK_LINES = ["还没抽到……", "这个位置空着。", "别戳了，是黑的。"];
+
+  /* 旧版抽卡存档已经不用了，清掉 */
+  try {
+    window.localStorage.removeItem("hnyz:gacha");
+  } catch (error) {
+    /* 忽略 */
+  }
 
   /* =======================================================
-     一、存档：铜板 / 已解锁 / 重复数
-     ======================================================= */
-  const save = {
-    copper: COPPER_START,
-    unlocked: characters.filter((c) => c.unlocked).map((c) => c.id),
-    duplicates: {}
-  };
-
-  function loadSave() {
-    try {
-      const raw = window.localStorage.getItem(SAVE_KEY);
-      if (!raw) return;
-      const data = JSON.parse(raw);
-      if (Number.isFinite(data.copper)) save.copper = Math.max(0, Math.floor(data.copper));
-      if (Array.isArray(data.unlocked)) {
-        save.unlocked = data.unlocked.filter((id) => characters.some((c) => c.id === id));
-      }
-      if (data.duplicates && typeof data.duplicates === "object") save.duplicates = data.duplicates;
-    } catch (error) {
-      /* 忽略 */
-    }
-  }
-
-  function persist() {
-    try {
-      window.localStorage.setItem(SAVE_KEY, JSON.stringify(save));
-    } catch (error) {
-      /* 忽略 */
-    }
-  }
-
-  function isUnlocked(id) {
-    return save.unlocked.includes(id);
-  }
-
-  loadSave();
-
-  /* =======================================================
-     二、渲染站位
+     一、渲染站位
      ======================================================= */
   const slots = [];
 
@@ -107,7 +69,6 @@
     slot.type = "button";
     slot.className = "char-slot";
     slot.dataset.char = char.id;
-    slot.style.setProperty("--i", String(index));
 
     const img = document.createElement("img");
     img.src = `images/characters/unit-${char.id}.webp`;
@@ -122,60 +83,95 @@
     name.textContent = char.title;
 
     slot.append(img, name);
-    slot.addEventListener("click", () => poke(slot, char));
 
-    /* 悬停：游戏里 mouseEnter 会跳一下并响一声 */
-    slot.addEventListener("pointerenter", (event) => {
-      if (event.pointerType !== "mouse" || !isUnlocked(char.id)) return;
-      sfx.play("hover", { rate: 1 + index * 0.035, volume: 0.12 });
+    if (char.unlocked) {
+      /* 悬停：和游戏一样，每次进到小人身上都会跳一下 */
+      slot.addEventListener("pointerenter", (event) => {
+        if (event.pointerType !== "mouse") return;
+        hop(slot);
+        sfx.play("hover", { rate: 1 + index * 0.045, volume: 0.12 });
+      });
+
+      /* 左键：打开角色卡 */
+      slot.addEventListener("click", () => {
+        squash(slot);
+        openSplash(char, slot);
+      });
+    }
+
+    /* 右键：压扁 + 换挨打表情（游戏里的 keyMouseRight） */
+    slot.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
+      hitFace(slot, char);
+      if (!char.unlocked) {
+        shake(slot);
+        say(LOCK_LINES[Math.floor(Math.random() * LOCK_LINES.length)], slot);
+      }
     });
+
+    slot.addEventListener("click", () => {
+      if (char.unlocked) return;
+      shake(slot);
+      say(LOCK_LINES[Math.floor(Math.random() * LOCK_LINES.length)], slot);
+      sfx.play("locked", { volume: 0.24 });
+    });
+
     stage.appendChild(slot);
     slots.push(slot);
   });
 
   /* 锁定的压暗成剪影，和游戏里 mixColor rgb(0.26) 一致 */
-  function paintSlots() {
-    slots.forEach((slot, index) => {
-      const char = characters[index];
-      const unlocked = isUnlocked(char.id);
-      slot.classList.toggle("is-locked", !unlocked);
-      slot.setAttribute(
-        "aria-label",
-        unlocked ? `${char.title}，点击查看卡片` : `${char.title} 未解锁，点击提示`
-      );
-    });
-  }
-
-  paintSlots();
-
-  /* 空闲时把 8 张立绘偷偷下好，第一次点开也不用等 */
-  function preloadArt() {
-    characters.forEach((char) => {
-      const img = new Image();
-      img.src = `images/characters/art-${char.id}.webp`;
-    });
-  }
-
-  if ("requestIdleCallback" in window) {
-    window.requestIdleCallback(preloadArt, { timeout: 2500 });
-  } else {
-    window.setTimeout(preloadArt, 1600);
-  }
+  slots.forEach((slot, index) => {
+    const char = characters[index];
+    slot.classList.toggle("is-locked", !char.unlocked);
+    slot.setAttribute(
+      "aria-label",
+      char.unlocked ? `${char.title}，左键看卡片，右键戳一下` : `${char.title} 未解锁`
+    );
+  });
 
   /* =======================================================
-     三、铜板与 Roll
+     二、三个小动作
      ======================================================= */
-  function paintCopper() {
-    if (copperEl) copperEl.textContent = `${save.copper} / ${COPPER_COST}`;
-    const enough = save.copper >= COPPER_COST;
-    if (copperWrap) copperWrap.classList.toggle("is-short", !enough);
-    if (rollBtn) rollBtn.classList.toggle("is-short", !enough);
+  function hop(slot) {
+    if (reduce) return;
+    slot.classList.remove("is-jumping");
+    void slot.offsetWidth;
+    slot.classList.add("is-jumping");
+    window.setTimeout(() => slot.classList.remove("is-jumping"), 320);
   }
 
-  paintCopper();
+  function squash(slot) {
+    slot.classList.remove("is-hit");
+    void slot.offsetWidth;
+    slot.classList.add("is-hit");
+    window.setTimeout(() => slot.classList.remove("is-hit"), 220);
+  }
+
+  /* 右键：0.2 秒内换成 -hit 贴图并压扁，然后换回来 */
+  function hitFace(slot, char) {
+    const img = slot.querySelector("img");
+    if (!img || reduce) return;
+
+    img.src = `images/characters/unit-${char.id}-hit.webp`;
+    slot.classList.add("is-squash");
+    sfx.play("click", { rate: 1 + characters.indexOf(char) * 0.04, volume: 0.22 });
+
+    window.setTimeout(() => {
+      img.src = `images/characters/unit-${char.id}.webp`;
+      slot.classList.remove("is-squash");
+    }, 220);
+  }
+
+  function shake(slot) {
+    slot.classList.remove("is-shaking");
+    void slot.offsetWidth;
+    slot.classList.add("is-shaking");
+    window.setTimeout(() => slot.classList.remove("is-shaking"), 520);
+  }
 
   /* =======================================================
-     四、气泡
+     三、气泡
      ======================================================= */
   let bubbleTimer = 0;
 
@@ -198,45 +194,14 @@
   }
 
   /* =======================================================
-     五、点击角色
-     ======================================================= */
-  function squash(slot) {
-    slot.classList.remove("is-hit");
-    void slot.offsetWidth;
-    slot.classList.add("is-hit");
-    window.setTimeout(() => slot.classList.remove("is-hit"), 220);
-  }
-
-  function poke(slot, char) {
-    squash(slot);
-    sfx.play("click", { rate: 1 + characters.indexOf(char) * 0.03, volume: 0.22 });
-
-    if (!isUnlocked(char.id)) {
-      slot.classList.remove("is-shaking");
-      void slot.offsetWidth;
-      slot.classList.add("is-shaking");
-      window.setTimeout(() => slot.classList.remove("is-shaking"), 520);
-      say(LOCK_LINES[Math.floor(Math.random() * LOCK_LINES.length)], slot);
-      sfx.play("locked", { volume: 0.24 });
-      return;
-    }
-
-    openSplash(char);
-  }
-
-  /* =======================================================
-     六、抽卡结果页（splash）
+     四、角色卡（splash）
      ======================================================= */
   let lastFocus = null;
 
-  function countOf(char) {
-    return 1 + (save.duplicates[char.id] || 0);
-  }
-
-  function openSplash(char) {
+  function openSplash(char, slot) {
     if (!splash) return;
 
-    lastFocus = document.activeElement;
+    lastFocus = slot || document.activeElement;
 
     splash.style.setProperty("--s1", char.s1);
     splash.style.setProperty("--s2", char.s2);
@@ -260,7 +225,6 @@
     if (splashTitle) splashTitle.textContent = char.title;
     if (splashSub) splashSub.textContent = char.sub;
     if (splashAbility) splashAbility.textContent = char.ability;
-    if (splashCount) splashCount.textContent = `x${countOf(char)}`;
 
     splash.hidden = false;
     splash.classList.remove("is-out");
@@ -269,12 +233,14 @@
 
     document.body.classList.add("is-splash-open");
     if (splashBack) splashBack.focus({ preventScroll: true });
+
+    sfx.play("view", { volume: 0.22 });
   }
 
   function closeSplash() {
     if (!splash || splash.hidden) return;
 
-    sfx.stop("reveal");
+    sfx.stop("view");
     sfx.play("back", { volume: 0.2 });
 
     splash.classList.remove("is-in");
@@ -300,98 +266,6 @@
     });
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") closeSplash();
-    });
-  }
-
-  /* =======================================================
-     七、Roll：扣铜板、抽一个、重复计数
-     ======================================================= */
-  function doRoll() {
-    if (save.copper < COPPER_COST) {
-      if (copperWrap) {
-        copperWrap.classList.remove("is-shaking");
-        void copperWrap.offsetWidth;
-        copperWrap.classList.add("is-shaking");
-        window.setTimeout(() => copperWrap.classList.remove("is-shaking"), 420);
-      }
-      say("铜板不够，去打一首吧。", rollBtn);
-      sfx.play("locked", { volume: 0.2 });
-      return;
-    }
-
-    save.copper -= COPPER_COST;
-
-    const char = characters[Math.floor(Math.random() * characters.length)];
-    const first = !isUnlocked(char.id);
-
-    sfx.play("reveal", { volume: 0.26 });
-
-    if (first) {
-      save.unlocked.push(char.id);
-    } else {
-      save.duplicates[char.id] = (save.duplicates[char.id] || 0) + 1;
-    }
-
-    persist();
-    paintCopper();
-    paintSlots();
-
-    if (first) {
-      const slot = slots[characters.indexOf(char)];
-      slot.classList.add("is-new");
-      window.setTimeout(() => slot.classList.remove("is-new"), 1600);
-    }
-
-    window.setTimeout(() => openSplash(char), 110);
-
-    if (first) {
-      window.setTimeout(() => sfx.play("win", { volume: 0.22 }), 320);
-    }
-  }
-
-  if (rollBtn) rollBtn.addEventListener("click", doRoll);
-
-  /* 齿轮：重置存档 */
-  if (resetBtn) {
-    resetBtn.addEventListener("click", () => {
-      save.copper = COPPER_START;
-      save.unlocked = characters.filter((c) => c.unlocked).map((c) => c.id);
-      save.duplicates = {};
-      persist();
-      paintCopper();
-      paintSlots();
-      say("存档已重置。", resetBtn);
-      sfx.play("select", { volume: 0.2 });
-    });
-  }
-
-  /* =======================================================
-     八、下面那排谱面卡
-     ======================================================= */
-  const maps = [
-    { label: "Map 1", cls: "map--1", line: "开胃菜，先热热手。" },
-    { label: "Map 2", cls: "map--2", line: "这段双押有点密。" },
-    { label: "Map 3", cls: "map--3", line: "副歌之前别断。" },
-    { label: "Map 4", cls: "map--4", line: "这首我还没全连。" },
-    { label: "[ locked ]", cls: "map--locked", line: "还没解锁，先去打前四首。" }
-  ];
-
-  if (mapsHost) {
-    maps.forEach((map) => {
-      const card = document.createElement("button");
-      card.type = "button";
-      card.className = `char-map ${map.cls}`;
-
-      const label = document.createElement("span");
-      label.className = "char-map__label";
-      label.textContent = map.label;
-
-      card.append(label);
-      card.addEventListener("click", () => {
-        say(map.line, card);
-        sfx.play("select", { volume: 0.18 });
-      });
-      mapsHost.appendChild(card);
     });
   }
 })();

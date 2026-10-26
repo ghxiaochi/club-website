@@ -43,16 +43,16 @@
   <link rel="stylesheet" href="css/avatar-pet.css?v=20261037">
   <link rel="stylesheet" href="css/personal.css?v=20261037">
   <link rel="stylesheet" href="css/member.css?v=20261035">
-  <link rel="stylesheet" href="css/characters.css?v=20261039">
+  <link rel="stylesheet" href="css/characters.css?v=20261042">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
-  <script src="js/sfx.js?v=20261041" defer></script>
+  <script src="js/sfx.js?v=20261042" defer></script>
   <script src="js/theme.js?v=20261025g" defer></script>
   <script src="js/members.js?v=20261034" defer></script>
   <script src="js/main.js?v=20261032" defer></script>
   <script src="js/pet.js?v=20261025c" defer></script>
   <script src="js/avatar-pet.js?v=20261037" defer></script>
-  <script src="js/characters.js?v=20261039" defer></script>
+  <script src="js/characters.js?v=20261042" defer></script>
   <script src="js/personal.js?v=20261030" defer></script>
 </head>
 <body id="top">
@@ -152,35 +152,16 @@
         <section class="char-stage" aria-labelledby="char-stage-title">
           <div class="char-stage__stripes" aria-hidden="true"></div>
 
-          <div class="char-stage__bar">
-            <button class="char-stage__icon" type="button" data-char-reset aria-label="重置抽卡存档" title="重置存档">
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="1.8"/>
-                <path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-              </svg>
-            </button>
-
-            <div class="char-stage__roll-group">
-              <button class="char-stage__roll" type="button" data-char-roll>Roll</button>
-              <span class="char-stage__copper" data-char-copper-wrap>
-                <i class="char-stage__coin" aria-hidden="true"></i>
-                <span data-char-copper>23 / 10</span>
-              </span>
-            </div>
-
-            <a class="char-stage__icon" href="https://github.com/Anuken/animdustry" target="_blank" rel="noopener noreferrer" aria-label="关于 Animdustry（新窗口打开）">
-              <span aria-hidden="true">i</span>
-            </a>
-          </div>
-
           <div class="char-stage__units" data-char-stage role="group" aria-label="角色列表"></div>
-
-          <div class="char-stage__maps" data-char-maps aria-label="谱面列表"></div>
 
           <h2 class="sr-only" id="char-stage-title">ANIMDUSTRY 角色</h2>
         </section>
 
-        <p class="char-bubble" data-char-bubble role="status" aria-live="polite"></p>
+        <p class="char-note">
+          小人来自 Anuken 的音游
+          <a href="https://github.com/Anuken/animdustry" target="_blank" rel="noopener noreferrer">Animdustry</a>
+          ——鼠标扫过会跳，右键戳一下会扁，左键看角色卡。
+        </p>
 
         <div class="project-toolbar">
           <p class="code-line"><span class="prompt">$</span> gh repo list --all-members</p>
@@ -279,8 +260,6 @@
       <p class="char-splash__title" data-splash-title></p>
       <p class="char-splash__sub" data-splash-sub></p>
     </div>
-
-    <p class="char-splash__count" data-splash-count aria-hidden="true">x1</p>
     <p class="char-splash__ability" data-splash-ability></p>
 
     <button class="char-splash__close" type="button" data-splash-close aria-label="关闭">×</button>

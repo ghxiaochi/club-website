@@ -15,12 +15,7 @@
     click: "audio/pat.mp3",
     locked: "audio/hit.mp3",
     back: "audio/back.mp3",
-    select: "audio/select.mp3",
-    win: "audio/win.mp3",
-    get: "audio/get.mp3",
-    reveal: "audio/reveal.mp3",
-    die: "audio/die.mp3",
-    boom: "audio/vineboom.mp3"
+    view: "audio/view.mp3"
   };
 
   const KEY = "hnyz:sound";
@@ -103,7 +98,7 @@
 
   /* 第一次按下时把常用的几个音效先拉下来，避免第一声延迟 */
   function prime() {
-    ["click", "hover", "locked", "back"].forEach((name) => {
+    ["click", "hover", "locked", "back", "view"].forEach((name) => {
       pool(name).forEach((audio) => {
         try {
           audio.load();

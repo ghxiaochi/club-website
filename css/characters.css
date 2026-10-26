@@ -35,122 +35,6 @@
   to { transform: translate3d(-110px, 110px, 0); }
 }
 
-/* ---------- 顶栏 ---------- */
-.char-stage__bar {
-  position: relative;
-  z-index: 3;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: start;
-  gap: 12px;
-  padding: 14px 14px 0;
-}
-
-.char-stage__icon {
-  display: grid;
-  place-items: center;
-  width: 46px;
-  height: 46px;
-  padding: 0;
-  border: 3px solid #bfecf3;
-  background: #14141a;
-  color: #bfecf3;
-  font-family: var(--mono);
-  font-size: 1.1rem;
-  font-style: normal;
-  line-height: 1;
-  cursor: pointer;
-  text-decoration: none;
-  transition: transform 0.15s ease, background 0.2s ease;
-}
-
-.char-stage__icon:hover {
-  background: #26262f;
-}
-
-.char-stage__icon:active {
-  transform: translateY(2px);
-}
-
-.char-stage__icon svg {
-  width: 24px;
-  height: 24px;
-}
-
-/* Roll + 铜板 */
-.char-stage__roll-group {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.char-stage__roll {
-  min-width: clamp(112px, 16vw, 168px);
-  padding: 9px 22px;
-  border: 3px solid #d8dee9;
-  background: #3c3c46;
-  color: #ffda8c;
-  font-family: var(--mono);
-  font-size: clamp(0.92rem, 1.4vw, 1.1rem);
-  letter-spacing: 0.06em;
-  cursor: pointer;
-  transition: background 0.16s ease, transform 0.1s ease, color 0.16s ease;
-}
-
-.char-stage__roll:hover {
-  background: #4a4a56;
-  color: #fff3d0;
-}
-
-.char-stage__roll:active {
-  transform: translateY(2px);
-}
-
-.char-stage__roll.is-short {
-  border-color: #8b8b96;
-  color: #9d9daa;
-}
-
-.char-stage__copper {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  color: #ffffff;
-  font-family: var(--mono);
-  font-size: clamp(0.92rem, 1.4vw, 1.1rem);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-shadow: 2px 2px 0 rgba(20, 26, 46, 0.55);
-}
-
-.char-stage__copper.is-short {
-  color: #ff4843;
-}
-
-.char-stage__copper.is-shaking {
-  animation: charCopperShake 0.4s linear;
-}
-
-@keyframes charCopperShake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  50% { transform: translateX(4px); }
-  75% { transform: translateX(-3px); }
-}
-
-/* 铜块图标 */
-.char-stage__coin {
-  position: relative;
-  width: 20px;
-  height: 16px;
-  flex-shrink: 0;
-  background: linear-gradient(150deg, #f0c39a, #d99d73 55%, #a9714c);
-  clip-path: polygon(22% 0, 100% 12%, 84% 100%, 0 82%);
-  box-shadow: inset 0 0 0 1px rgba(120, 74, 45, 0.45);
-}
-
 /* ---------- 角色排 ---------- */
 .char-stage__units {
   position: relative;
@@ -159,9 +43,22 @@
   align-items: flex-end;
   justify-content: center;
   gap: clamp(6px, 1.5vw, 20px);
-  margin: 4px 0 -3px;
-  padding: 0 18px;
-  min-height: clamp(76px, 11vw, 150px);
+  margin: 14px 0 0;
+  padding: 0 18px 12px;
+  min-height: clamp(96px, 13vw, 178px);
+}
+
+/* 地面：小人站在这条深色边台上 */
+.char-stage::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 12px;
+  background: #57639a;
+  border-top: 2px solid rgba(20, 24, 40, 0.35);
+  pointer-events: none;
 }
 
 .char-slot {
@@ -186,16 +83,20 @@
   transition: transform 0.1s ease, filter 0.18s ease;
 }
 
-/* 悬停：游戏里是 fade 到白色 20% + 跳一下 */
+/* 悬停：游戏里是 fade 到白色 20%（跳动由 JS 逐个触发） */
 .char-slot:hover img,
 .char-slot:focus-visible img {
   filter: brightness(1.22) drop-shadow(0 2px 0 rgba(24, 32, 54, 0.35));
-  animation: charHop 0.42s cubic-bezier(0.3, 0.7, 0.4, 1);
 }
 
 .char-slot:focus-visible {
   outline: 2px solid #14141a;
   outline-offset: 3px;
+}
+
+/* 鼠标扫过时依次跳一下 */
+.char-slot.is-jumping img {
+  animation: charHop 0.32s cubic-bezier(0.3, 0.7, 0.4, 1);
 }
 
 @keyframes charHop {
@@ -226,6 +127,11 @@
   100% { transform: scale(1, 1); }
 }
 
+/* 右键：0.2 秒压扁 + 换挨打表情 */
+.char-slot.is-squash img {
+  transform: scale(1.14, 0.86);
+}
+
 .char-slot.is-shaking {
   animation: charShake 0.5s linear;
 }
@@ -239,16 +145,6 @@
 }
 
 /* 刚抽到：金色描边闪一下 */
-.char-slot.is-new img {
-  animation: charNew 1.5s ease;
-}
-
-@keyframes charNew {
-  0%, 100% { filter: none; }
-  20% { filter: brightness(1.9) drop-shadow(0 0 10px #ffd37f); }
-  55% { filter: brightness(1.35) drop-shadow(0 0 6px #ffd37f); }
-}
-
 /* 名牌 */
 .char-slot__name {
   position: absolute;
@@ -273,142 +169,36 @@
   transform: translate(-50%, 0);
 }
 
-/* ---------- 谱面面板 ---------- */
-.char-stage__maps {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 7px;
-  padding: 9px;
-  border-top: 3px solid #bfecf3;
-  background: #1d1f28;
-}
-
-.char-map {
-  position: relative;
-  display: block;
-  text-align: left;
-  overflow: hidden;
-  min-height: clamp(120px, 20vw, 214px);
-  padding: 8px;
-  border: 3px solid transparent;
-  cursor: pointer;
-  transition: transform 0.18s ease, filter 0.18s ease;
-}
-
-.char-map:hover,
-.char-map:focus-visible {
-  transform: translateY(-3px);
-  filter: brightness(1.08);
-}
-
-.char-map:focus-visible {
-  outline: 2px solid #bfecf3;
-  outline-offset: 2px;
-}
-
-.char-map__label {
-  position: relative;
-  z-index: 2;
-  display: block;
-  white-space: nowrap;
-  color: #ffffff;
-  font-family: var(--mono);
-  font-size: clamp(0.74rem, 1.2vw, 0.98rem);
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-shadow: 2px 2px 0 rgba(12, 14, 24, 0.85), -1px -1px 0 rgba(12, 14, 24, 0.6);
-}
-
-/* Map 1：粉 */
-.char-map.map--1 {
-  border-color: #ffd3e2;
-  background:
-    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0 34px, transparent 34px 68px),
-    linear-gradient(150deg, #ff6f9d, #ff9dc1 58%, #ffc3d8);
-}
-
-.char-map.map--1::after {
-  content: "";
-  position: absolute;
-  right: -10%;
-  bottom: 18%;
-  width: 74%;
-  height: 16%;
-  background: rgba(255, 255, 255, 0.16);
-  transform: rotate(-28deg);
-}
-
-/* Map 2：深紫 */
-.char-map.map--2 {
-  border-color: #c9a4de;
-  background:
-    linear-gradient(200deg, rgba(20, 8, 30, 0.7) 0%, transparent 42%),
-    repeating-linear-gradient(140deg, #2b1738 0 40px, #3a2350 40px 80px),
-    #2b1738;
-}
-
-.char-map.map--2::after {
-  content: "";
-  position: absolute;
-  left: -12%;
-  top: 38%;
-  width: 86%;
-  height: 26%;
-  background: #4a2b63;
-  transform: rotate(-9deg);
-  opacity: 0.85;
-}
-
-/* Map 3：品红 + 三角 */
-.char-map.map--3 {
-  border-color: #e2b8f0;
-  background: linear-gradient(160deg, #8e4bb0, #b06ad0 55%, #c98ade);
-}
-
-.char-map.map--3::after {
-  content: "";
-  position: absolute;
-  right: 6%;
-  top: 20%;
-  width: 62%;
-  height: 52%;
-  background: rgba(58, 24, 76, 0.3);
-  clip-path: polygon(50% 0, 100% 100%, 0 100%);
-}
-
-/* Map 4：深夜蓝 */
-.char-map.map--4 {
-  border-color: #8fa6c8;
-  background:
-    radial-gradient(rgba(120, 220, 220, 0.55) 1.2px, transparent 1.6px) 0 0 / 26px 26px,
-    linear-gradient(170deg, #131a33, #0a0f1e);
-}
-
-.char-map.map--4::after {
-  content: "";
-  position: absolute;
-  left: 10%;
-  bottom: 12%;
-  width: 52%;
-  height: 30%;
-  background: #0b1428;
-  transform: rotate(-6deg);
-  opacity: 0.9;
-}
-
-/* 未解锁：褐色 */
-.char-map.map--locked {
-  border-color: #d9c0a6;
-  background:
-    radial-gradient(rgba(255, 255, 255, 0.14) 6px, transparent 7px) 0 0 / 46px 46px,
-    linear-gradient(160deg, #8a6244, #6b4a33 60%, #4d3424);
-}
-
 /* 深色主题下稍微压一点亮度，别太刺眼 */
 [data-theme="dark"] .char-stage {
   filter: brightness(0.93) saturate(0.96);
+}
+
+/* 舞台下面的一行说明 */
+.char-note {
+  margin: 10px 0 0;
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.02em;
+  text-align: right;
+}
+
+.char-note a {
+  color: var(--blue);
+  text-decoration: none;
+  border-bottom: 1px dashed currentColor;
+}
+
+.char-note a:hover {
+  color: var(--text-soft);
+}
+
+@media (max-width: 900px) {
+  .char-note {
+    text-align: left;
+    font-size: 0.6rem;
+  }
 }
 
 /* ---------- 气泡（挂在视口上，跟随被点的元素） ---------- */
@@ -626,21 +416,6 @@
   letter-spacing: 0.06em;
 }
 
-/* 右上角 xN */
-.char-splash__count {
-  position: absolute;
-  top: 20px;
-  right: 24px;
-  padding: 2px 9px;
-  border-radius: 5px;
-  background: rgba(20, 20, 26, 0.5);
-  color: #ffd37f;
-  font-family: var(--mono);
-  font-size: clamp(1rem, 2vw, 1.35rem);
-  font-weight: 800;
-  text-shadow: 2px 2px 0 rgba(24, 28, 48, 0.5);
-}
-
 /* 右下角技能 */
 .char-splash__ability {
   position: absolute;
@@ -726,59 +501,20 @@ body.is-splash-open {
 
 /* ---------- 小屏 ---------- */
 @media (max-width: 900px) {
-  .char-stage__bar {
-    padding: 10px 10px 0;
-    gap: 8px;
-  }
-
-  .char-stage__icon {
-    width: 36px;
-    height: 36px;
-    border-width: 2px;
-  }
-
-  .char-stage__icon svg {
-    width: 18px;
-    height: 18px;
-  }
-
   .char-stage__units {
     gap: 3px;
-    padding: 0 6px;
-    margin-bottom: -2px;
-    min-height: 64px;
+    padding: 20px 6px 10px;
+    min-height: 66px;
   }
 
   .char-slot {
     width: clamp(28px, 9vw, 46px);
   }
 
-  .char-stage__maps {
-    gap: 4px;
-    padding: 6px;
-    border-top-width: 2px;
-  }
-
-  .char-map {
-    min-height: 104px;
-    padding: 5px;
-    border-width: 2px;
-  }
-
-  .char-map__label {
-    font-size: 0.62rem;
-    letter-spacing: 0;
-  }
-
   .char-splash__ability {
     right: 14px;
     bottom: 78px;
     max-width: 80vw;
-  }
-
-  .char-splash__count {
-    top: 14px;
-    right: 16px;
   }
 }
 
@@ -789,10 +525,11 @@ body.is-splash-open {
     animation: none;
   }
 
-  .char-slot:hover img,
+  .char-slot.is-jumping img,
   .char-slot.is-hit img,
-  .char-slot.is-new img {
+  .char-slot.is-squash img {
     animation: none;
+    transform: none;
   }
 
   .char-splash__unit,
