@@ -61,6 +61,31 @@
 
     copy.appendChild(desc);
 
+    /* 简介里的彩蛋：平时被涂掉，点一下才显形 */
+    if (typeof profile.secret === "string" && profile.secret.trim()) {
+      const secret = document.createElement("button");
+      secret.type = "button";
+      secret.className = "member-secret";
+      secret.setAttribute("aria-expanded", "false");
+      secret.setAttribute("aria-label", "查看简介里被涂掉的一句话");
+
+      const mask = document.createElement("span");
+      mask.className = "member-secret__mask";
+      mask.textContent = "（这里有一句话被涂掉了）";
+
+      const text = document.createElement("span");
+      text.className = "member-secret__text";
+      text.textContent = profile.secret.trim();
+
+      secret.append(mask, text);
+      secret.addEventListener("click", () => {
+        const open = secret.classList.toggle("is-open");
+        secret.setAttribute("aria-expanded", String(open));
+      });
+
+      copy.appendChild(secret);
+    }
+
     const actions = document.createElement("div");
     actions.className = "member-hero__actions";
 

@@ -71,6 +71,8 @@ window.HNYZ_PROFILES = {
     title: "ghxiaochi 的主页",
     desc: "社团官网维护 · 把想法写成代码。下面的项目都是我的仓库。",
     intro: "写代码、焊板子、做网站。Arduino 是主线，最近在折腾网页和小装置。",
+    /* 放在简介里的彩蛋，点一下才会显示 */
+    secret: "我绝对不会偷偷告诉你，这是AI写的网页。",
     link: "https://github.com/ghxiaochi",
     accent: "#2563eb",
     sprites: [

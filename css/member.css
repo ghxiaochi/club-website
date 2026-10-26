@@ -205,3 +205,72 @@
     padding: 22px 18px;
   }
 }
+
+/* =========================================================
+   简介里的彩蛋：被涂掉的一句话
+   ========================================================= */
+.member-secret {
+  display: inline-block;
+  max-width: 100%;
+  margin: 10px 0 2px;
+  padding: 5px 11px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  line-height: 1.6;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease;
+}
+
+.member-secret:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.member-secret:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+
+.member-secret__text {
+  display: none;
+}
+
+.member-secret.is-open {
+  border-style: solid;
+  border-color: var(--blue);
+  background: var(--blue-soft);
+  color: var(--text-soft);
+}
+
+.member-secret.is-open .member-secret__mask {
+  display: none;
+}
+
+.member-secret.is-open .member-secret__text {
+  display: inline;
+  animation: memberSecretIn 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+@keyframes memberSecretIn {
+  0% {
+    opacity: 0;
+    filter: blur(4px);
+    letter-spacing: 0.14em;
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    letter-spacing: normal;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .member-secret.is-open .member-secret__text {
+    animation: none;
+  }
+}

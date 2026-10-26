@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="HNYZ · 衡南一中编程社成员的个人主页：个人简介和 TA 的项目。>
+  <meta name="description" content="HNYZ · 衡南一中编程社成员的个人主页：个人简介和 TA 的项目。">
   <meta name="theme-color" content="#f5f9ff">
   <script>
     /* 主题预置：首帧前定好深浅色，避免刷新时白闪 */
@@ -41,14 +41,16 @@
   <link rel="stylesheet" href="css/style.css?v=20261025e">
   <link rel="stylesheet" href="css/pet.css?v=20261025b">
   <link rel="stylesheet" href="css/personal.css?v=20261032">
-  <link rel="stylesheet" href="css/member.css?v=20261032">
+  <link rel="stylesheet" href="css/member.css?v=20261034">
+  <link rel="stylesheet" href="css/avatar-pet.css?v=20261034">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <script src="js/theme.js?v=20261025g" defer></script>
-  <script src="js/members.js?v=20261032" defer></script>
+  <script src="js/members.js?v=20261034" defer></script>
   <script src="js/main.js?v=20261032" defer></script>
   <script src="js/pet.js?v=20261025c" defer></script>
-  <script src="js/member.js?v=20261032" defer></script>
+  <script src="js/member.js?v=20261034" defer></script>
+  <script src="js/avatar-pet.js?v=20261034" defer></script>
   <script src="js/personal.js?v=20261030" defer></script>
 </head>
 <body id="top">
@@ -171,6 +173,15 @@
       </span>
     </button>
     <p class="hnyz-pet__speech" data-hnyz-pet-speech role="status" aria-live="polite"></p>
+  </div>
+
+  <!-- ghxiaochi 的桌宠：可以拖动，点久了会出事 -->
+  <div class="hnyz-avatar" data-hnyz-avatar>
+    <p class="hnyz-avatar__speech" data-hnyz-avatar-speech role="status" aria-live="polite"></p>
+    <button class="hnyz-avatar__button" type="button" data-hnyz-avatar-trigger aria-label="和东方马也互动">
+      <img class="hnyz-avatar__img" src="images/pet/ghxiaochi-avatar.webp" alt="东方马也的像素头像" width="648" height="954">
+      <span class="hnyz-avatar__name" aria-hidden="true">东方马也</span>
+    </button>
   </div>
 
   <!-- ghxiaochi 的像素头像彩蛋：固定在左下角，点击若干次出现隐藏台词 -->

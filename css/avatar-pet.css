@@ -452,3 +452,385 @@
     animation: none;
   }
 }
+
+/* =========================================================
+   100 次彩蛋：暴走 / 弹球 / 字幕爆炸 / 墓碑复活
+   ========================================================= */
+
+/* 暴走状态：接管定位，取消所有入场/漂浮/召唤的动画与过渡 */
+.hnyz-avatar.is-rampage,
+.hnyz-avatar--summon.is-rampage {
+  z-index: 210 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transition: none !important;
+  animation: none !important;
+  transform-origin: 0 0 !important;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.hnyz-avatar.is-rampage .hnyz-avatar__img {
+  animation: none !important;
+  filter: drop-shadow(0 16px 18px rgba(15, 23, 42, 0.35));
+}
+
+.hnyz-avatar.is-rampage .hnyz-avatar__speech {
+  display: none;
+}
+
+.hnyz-avatar.is-rampage .hnyz-avatar__button {
+  cursor: default;
+}
+
+/* 爆炸时人先胀一下再消失 */
+.hnyz-avatar.is-dying .hnyz-avatar__img {
+  animation: petDie 0.7s ease-in forwards !important;
+}
+
+@keyframes petDie {
+  0% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  38% {
+    opacity: 1;
+    transform: scale(1.45) rotate(-6deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.15) rotate(28deg);
+  }
+}
+
+.hnyz-avatar.is-gone {
+  display: none !important;
+}
+
+/* 复活：从小弹回来 */
+.hnyz-avatar.is-reviving .hnyz-avatar__img {
+  animation: petRevive 0.9s cubic-bezier(0.22, 0.9, 0.3, 1.3) both;
+}
+
+@keyframes petRevive {
+  0% {
+    opacity: 0;
+    transform: scale(0.15) rotate(-16deg);
+    filter: drop-shadow(0 0 22px rgba(74, 222, 128, 0.9));
+  }
+  55% {
+    opacity: 1;
+    transform: scale(1.12) rotate(4deg);
+    filter: drop-shadow(0 0 16px rgba(74, 222, 128, 0.65));
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* 覆盖层：只用来放冲击波和碎片，不吃鼠标 */
+.pet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 205;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* 中间的字幕 */
+.pet-rampage-line {
+  position: fixed;
+  left: 50%;
+  top: 46%;
+  z-index: 212;
+  width: max-content;
+  max-width: 88vw;
+  margin: 0;
+  padding: 0 8px;
+  color: #ffffff;
+  font-size: clamp(1.4rem, 4.2vw, 2.8rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+  text-align: center;
+  text-shadow:
+    0 0 22px rgba(37, 99, 235, 0.6),
+    0 3px 0 rgba(15, 23, 42, 0.45),
+    0 0 40px rgba(56, 189, 248, 0.4);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.86);
+  transition: opacity 0.3s ease, transform 0.42s cubic-bezier(0.22, 0.9, 0.3, 1.4);
+  pointer-events: none;
+}
+
+.pet-rampage-line.is-visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.pet-rampage-line.is-boom {
+  animation: petLineBoom 0.8s cubic-bezier(0.3, 0, 0.6, 1) forwards;
+}
+
+@keyframes petLineBoom {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    letter-spacing: 0.04em;
+    filter: blur(0);
+  }
+  55% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) scale(1.6);
+    letter-spacing: 0.08em;
+    filter: blur(0.4px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(3.4);
+    letter-spacing: 0.24em;
+    filter: blur(9px);
+  }
+}
+
+/* 白闪 */
+.pet-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 230;
+  background: #ffffff;
+  opacity: 0;
+  pointer-events: none;
+  animation: petFlash 0.5s ease-out forwards;
+}
+
+@keyframes petFlash {
+  0% { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+
+/* 冲击波 */
+.pet-shock {
+  position: fixed;
+  left: 50%;
+  top: 46%;
+  width: 60px;
+  height: 60px;
+  margin: -30px 0 0 -30px;
+  border: 4px solid rgba(37, 99, 235, 0.65);
+  border-radius: 50%;
+  animation: petShock 0.85s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+
+@keyframes petShock {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.3);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(14);
+    border-width: 1px;
+  }
+}
+
+/* 碎片 */
+.pet-shard {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  background: var(--c, #2563eb);
+  pointer-events: none;
+  animation: petShard 0.9s cubic-bezier(0.2, 0.6, 0.4, 1) forwards;
+}
+
+@keyframes petShard {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx, 0), var(--dy, 0)) scale(0.3) rotate(var(--rot, 180deg));
+  }
+}
+
+/* ---------- 墓碑 ---------- */
+.pet-tomb-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 214;
+  background:
+    radial-gradient(circle at 50% 54%, rgba(15, 23, 42, 0.32), rgba(15, 23, 42, 0.16) 58%, rgba(15, 23, 42, 0.05));
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  pointer-events: none;
+}
+
+.pet-tomb-veil.is-visible {
+  opacity: 1;
+}
+
+.pet-tomb {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 215;
+  display: grid;
+  justify-items: center;
+  transform: translate(-50%, calc(-50% + 24px)) scale(0.9);
+  opacity: 0;
+  transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.22, 0.9, 0.3, 1.25);
+}
+
+.pet-tomb[hidden] {
+  display: none;
+}
+
+.pet-tomb.is-visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.pet-tomb.is-leaving {
+  opacity: 0;
+  transform: translate(-50%, calc(-50% + 18px)) scale(0.92);
+}
+
+.pet-tomb__btn {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pet-tomb__btn:focus-visible {
+  outline: 2px dashed rgba(191, 236, 243, 0.9);
+  outline-offset: 7px;
+  border-radius: 999px;
+}
+
+.pet-tomb__stone {
+  position: relative;
+  display: grid;
+  place-content: center;
+  gap: 4px;
+  width: clamp(150px, 17vw, 196px);
+  aspect-ratio: 0.72;
+  padding: 22px 14px 18px;
+  border: 3px solid #2a323e;
+  border-radius: 999px 999px 8px 8px;
+  background:
+    linear-gradient(180deg, #8d99ad 0%, #6f7b8f 30%, #4f5a6c 66%, #353d4c 100%);
+  box-shadow:
+    inset 0 -7px 0 rgba(16, 22, 32, 0.28),
+    inset 0 7px 0 rgba(255, 255, 255, 0.16),
+    0 26px 44px rgba(15, 23, 42, 0.45);
+  color: #f4f8ff;
+  text-align: center;
+  text-shadow: 0 1px 0 rgba(12, 18, 28, 0.55);
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.pet-tomb__btn:hover .pet-tomb__stone {
+  transform: translateY(-3px);
+  filter: brightness(1.06);
+}
+
+.pet-tomb__stone::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -13px;
+  width: 132%;
+  height: 26px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(34, 197, 94, 0.35), transparent 68%);
+  pointer-events: none;
+}
+
+.pet-tomb__name {
+  font-weight: 800;
+  font-size: clamp(1rem, 1.6vw, 1.2rem);
+  letter-spacing: 0.08em;
+}
+
+.pet-tomb__date {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  opacity: 0.8;
+}
+
+.pet-tomb__word {
+  margin-top: 3px;
+  font-size: 0.64rem;
+  line-height: 1.5;
+  opacity: 0.82;
+}
+
+.pet-tomb__hint {
+  padding: 3px 10px;
+  border: 1px dashed rgba(37, 99, 235, 0.55);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--blue);
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  animation: petTombHint 2.4s ease-in-out infinite;
+}
+
+@keyframes petTombHint {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+[data-theme="dark"] .pet-tomb__stone {
+  background: linear-gradient(180deg, #78849a 0%, #5d687c 34%, #414a5b 72%, #2b323f 100%);
+  color: #eef4ff;
+}
+
+@media (max-width: 720px) {
+  .pet-rampage-line {
+    font-size: clamp(1.25rem, 7vw, 1.9rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pet-tomb,
+  .pet-rampage-line {
+    transition: none;
+  }
+
+  .pet-rampage-line.is-boom {
+    animation-duration: 0.4s;
+  }
+
+  .pet-shard,
+  .pet-shock,
+  .pet-flash {
+    display: none;
+  }
+
+  .hnyz-avatar.is-reviving .hnyz-avatar__img {
+    animation: none;
+  }
+}
+
+.pet-tomb__mark {
+  margin-bottom: 3px;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.3em;
+  opacity: 0.8;
+}

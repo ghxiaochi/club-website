@@ -1,11 +1,14 @@
 /* =========================================================
-   ghxiaochi 的像素头像桌宠
+   ghxiaochi 的像素头像桌宠（东方马也）
    ---------------------------------------------------------
-   - 「全部项目」页：常驻左下角，可拖动
+   - 「全部项目」页 / 个人主页：常驻左下角，可拖动
    - 首页：默认不在，点右侧「召唤东方马也」按钮才出现，
      待 26 秒（或再点一次按钮）后自己回项目区
-   点击轮播台词；连点 12 次出彩蛋，之后计数清零要重新点满。
-   每次点击蹦小星星；点太快会晕；召唤出来时会挥手。
+   - 点击会数次数：每 3 下报一次「你已经点了我 N 次」，
+     超过 30 下就变成「你又点了我，这是第 N 次」
+   - 第 100 下：整个人突然变大，然后在屏幕里像弹珠一样
+     四边乱弹，中间浮出「谁让你一直点我的。」，之后字幕
+     放大爆炸，计数清零，原地立一块墓碑，点墓碑复活
    ========================================================= */
 
 (() => {
@@ -16,6 +19,7 @@
 
   const trigger = pet.querySelector("[data-hnyz-avatar-trigger]");
   const speech = pet.querySelector("[data-hnyz-avatar-speech]");
+  const avatarImg = pet.querySelector(".hnyz-avatar__img");
   if (!trigger || !speech) return;
 
   const lines = [
@@ -30,21 +34,20 @@
     "我把 token 藏起来了。",
     "这个项目下周一定做完。"
   ];
-  const secret = "我绝对不会偷偷告诉你，这是AI写的网页";
-  const secretAgain = "还来？行吧，反正你也没别的事做。";
 
   const mode = pet.getAttribute("data-avatar-mode") || "fixed";
   const summonBtn = document.querySelector("[data-pet-summon]");
 
-  const SECRET_AT = 12;
+  const RAMPAGE_AT = 100;
   const SPARKS = ["✦", "✧", "♥", "●", "✳"];
   const SECRET_COLORS = ["#2563eb", "#38bdf8", "#7c3aed", "#f59e0b", "#22c55e"];
 
   let clicks = 0;
   let speechTimer = 0;
-  let secretSeen = false;
   let rapid = 0;
   let rapidTimer = 0;
+
+  const state = { rampage: false, dead: false, scale: 1 };
 
   /* 点一下蹦几颗小星星，向上飘散 */
   function spawnSparks(secretMode) {
@@ -86,25 +89,30 @@
     }, duration);
   }
 
+  /* 数着点击次数说话 */
+  function messageFor(n) {
+    if (n === 1) return "干嘛？";
+    if (n === RAMPAGE_AT - 1) return "别点了，真的。";
+    if (n === RAMPAGE_AT - 2) return "你再点一下试试。";
+    if (n > 30) {
+      const tail = ["你又点了我。", "又是你。", "手不酸吗。"][n % 3];
+      return `${tail}这是第 ${n} 次了。`;
+    }
+    if (n % 3 === 0) return `你已经点了我 ${n} 次了。`;
+    return lines[n % lines.length];
+  }
+
   function speak() {
     clicks += 1;
-    const isSecret = clicks >= SECRET_AT;
 
-    showLine(
-      isSecret ? (secretSeen ? secretAgain : secret) : lines[(clicks - 1) % lines.length],
-      isSecret ? 6000 : 3200,
-      isSecret
-    );
-
-    spawnSparks(isSecret);
-
-    if (isSecret) {
-      /* 彩蛋出现后计数清零：想再看一次，得重新点满 12 下 */
-      clicks = 0;
-      secretSeen = true;
+    if (clicks >= RAMPAGE_AT) {
+      startRampage();
+      return;
     }
 
-    noteActivity(isSecret);
+    showLine(messageFor(clicks), 3000);
+    spawnSparks(clicks % 10 === 0);
+    noteActivity(false);
   }
 
   /* 点太快的检测 + 通知召唤计时器 */
@@ -115,7 +123,7 @@
       rapid = 0;
     }, 2600);
 
-    if (rapid >= 6 && !isSecret) {
+    if (rapid >= 6 && !isSecret && !state.rampage) {
       rapid = 0;
       pet.classList.add("is-dizzy");
       window.setTimeout(() => pet.classList.remove("is-dizzy"), 1600);
@@ -143,6 +151,7 @@
   }
 
   trigger.addEventListener("pointerdown", (event) => {
+    if (state.rampage || state.dead) return;
     if (event.pointerType === "mouse" && event.button !== 0) return;
 
     const rect = pet.getBoundingClientRect();
@@ -156,7 +165,6 @@
     pet.style.bottom = "auto";
     pet.style.left = `${rect.left}px`;
     pet.style.top = `${rect.top}px`;
-
   });
 
   window.addEventListener("pointermove", (event) => {
@@ -195,10 +203,276 @@
       event.preventDefault();
       return;
     }
+    if (state.rampage || state.dead) return;
     speak();
   });
 
   if (mode !== "summon") restorePosition();
+
+  /* =======================================================
+     100 次：暴走 → 弹球 → 字幕爆炸 → 墓碑 → 复活
+     ======================================================= */
+  const overlay = document.createElement("div");
+  overlay.className = "pet-overlay";
+  overlay.setAttribute("aria-hidden", "true");
+  document.body.appendChild(overlay);
+
+  const lineEl = document.createElement("p");
+  lineEl.className = "pet-rampage-line";
+  lineEl.setAttribute("role", "status");
+  lineEl.setAttribute("aria-live", "polite");
+  document.body.appendChild(lineEl);
+
+  const veil = document.createElement("div");
+  veil.className = "pet-tomb-veil";
+  veil.setAttribute("aria-hidden", "true");
+  document.body.appendChild(veil);
+
+  const tomb = document.createElement("div");
+  tomb.className = "pet-tomb";
+  tomb.hidden = true;
+  tomb.innerHTML =
+    '<button class="pet-tomb__btn" type="button" data-pet-revive aria-label="点击墓碑，复活东方马也">' +
+    '<span class="pet-tomb__stone">' +
+    '<span class="pet-tomb__mark">R.I.P.</span>' +
+    '<span class="pet-tomb__name">东方马也</span>' +
+    '<span class="pet-tomb__date">2026 — 2026</span>' +
+    '<span class="pet-tomb__word">把 bug 带进了坟墓</span>' +
+    "</span>" +
+    '<span class="pet-tomb__hint">点一下墓碑</span>' +
+    "</button>";
+  document.body.appendChild(tomb);
+
+  const reviveBtn = tomb.querySelector("[data-pet-revive]");
+
+  let frame = 0;
+  let savedStyle = null;
+
+  function startRampage() {
+    if (state.rampage || state.dead) return;
+
+    state.rampage = true;
+    clicks = 0;
+
+    window.clearTimeout(speechTimer);
+    window.clearTimeout(rapidTimer);
+    pet.classList.remove("is-speaking", "is-poked", "is-secret", "is-dizzy", "is-waving");
+    speech.textContent = "";
+
+    /* 记录原始定位，复活时还原 */
+    savedStyle = {
+      left: pet.style.left,
+      top: pet.style.top,
+      bottom: pet.style.bottom,
+      right: pet.style.right
+    };
+
+    const rect = pet.getBoundingClientRect();
+    pet.style.left = "0px";
+    pet.style.top = "0px";
+    pet.style.bottom = "auto";
+    pet.style.right = "auto";
+    pet.classList.add("is-rampage", "is-pinball");
+
+    lineEl.textContent = "谁让你一直点我的。";
+    lineEl.classList.add("is-visible");
+
+    /* 先变大，再开始弹 */
+    const growStart = performance.now();
+    const growFrom = 1;
+    const growTo = 2.5;
+
+    function grow(now) {
+      const t = Math.min(1, (now - growStart) / 520);
+      state.scale = growFrom + (growTo - growFrom) * (1 - Math.pow(1 - t, 3));
+      pet.style.transform = `translate3d(${rect.left}px, ${rect.top}px, 0) scale(${state.scale})`;
+      if (t < 1) {
+        frame = window.requestAnimationFrame(grow);
+      } else {
+        startPinball(rect.left, rect.top);
+      }
+    }
+
+    frame = window.requestAnimationFrame(grow);
+  }
+
+  function startPinball(startX, startY) {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const w = pet.offsetWidth * state.scale;
+    const h = pet.offsetHeight * state.scale;
+
+    let x = Math.min(Math.max(0, startX), Math.max(0, window.innerWidth - w));
+    let y = Math.min(Math.max(0, startY), Math.max(0, window.innerHeight - h));
+
+    /* 速度：每秒上千像素，像弹珠一样四边乱弹 */
+    let vx = (Math.random() > 0.5 ? 1 : -1) * (1080 + Math.random() * 360);
+    let vy = (Math.random() > 0.5 ? 1 : -1) * (900 + Math.random() * 320);
+
+    let last = performance.now();
+    let elapsed = 0;
+    let angle = 0;
+    let squash = 0;
+
+    const DURATION = reduce ? 2600 : 6800;
+
+    function step(now) {
+      const dt = Math.min(0.034, (now - last) / 1000);
+      last = now;
+      elapsed += dt * 1000;
+
+      x += vx * dt;
+      y += vy * dt;
+
+      let bounced = false;
+
+      if (x <= 0) {
+        x = 0;
+        vx = Math.abs(vx);
+        bounced = true;
+      } else if (x + w >= window.innerWidth) {
+        x = window.innerWidth - w;
+        vx = -Math.abs(vx);
+        bounced = true;
+      }
+
+      if (y <= 0) {
+        y = 0;
+        vy = Math.abs(vy);
+        bounced = true;
+      } else if (y + h >= window.innerHeight) {
+        y = window.innerHeight - h;
+        vy = -Math.abs(vy);
+        bounced = true;
+      }
+
+      if (bounced) {
+        squash = 1;
+        /* 每弹一次换一点角度，轨迹更乱 */
+        vx *= 1 + (Math.random() - 0.5) * 0.04;
+        vy *= 1 + (Math.random() - 0.5) * 0.04;
+      }
+
+      squash = Math.max(0, squash - dt * 6);
+      angle += (vx / 40) * dt * 20;
+
+      pet.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${state.scale})`;
+
+      if (avatarImg) {
+        const sx = 1 + squash * 0.12;
+        const sy = 1 - squash * 0.12;
+        avatarImg.style.transform = `rotate(${Math.sin(elapsed / 260) * 12}deg) scale(${sx}, ${sy})`;
+      }
+
+      if (elapsed < DURATION) {
+        frame = window.requestAnimationFrame(step);
+      } else {
+        explode();
+      }
+    }
+
+    frame = window.requestAnimationFrame(step);
+  }
+
+  function explode() {
+    window.cancelAnimationFrame(frame);
+
+    /* 字幕放大爆炸 */
+    lineEl.classList.add("is-boom");
+
+    /* 屏幕闪一下 + 冲击波 + 碎片 */
+    const flash = document.createElement("div");
+    flash.className = "pet-flash";
+    document.body.appendChild(flash);
+    window.setTimeout(() => flash.remove(), 520);
+
+    const ring = document.createElement("span");
+    ring.className = "pet-shock";
+    overlay.appendChild(ring);
+    window.setTimeout(() => ring.remove(), 900);
+
+    const rect = pet.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+
+    for (let i = 0; i < 26; i += 1) {
+      const shard = document.createElement("span");
+      shard.className = "pet-shard";
+      shard.setAttribute("aria-hidden", "true");
+      const angle = (Math.PI * 2 * i) / 26 + Math.random() * 0.2;
+      const dist = 90 + Math.random() * 220;
+      shard.style.left = `${cx}px`;
+      shard.style.top = `${cy}px`;
+      shard.style.setProperty("--dx", `${Math.cos(angle) * dist}px`);
+      shard.style.setProperty("--dy", `${Math.sin(angle) * dist}px`);
+      shard.style.setProperty("--rot", `${Math.random() * 360}deg`);
+      shard.style.setProperty("--c", SECRET_COLORS[i % SECRET_COLORS.length]);
+      overlay.appendChild(shard);
+      window.setTimeout(() => shard.remove(), 1000);
+    }
+
+    /* 人先胀一下再消失 */
+    pet.classList.add("is-dying");
+    if (avatarImg) avatarImg.style.transform = "";
+
+    window.setTimeout(() => {
+      pet.classList.remove("is-dying", "is-rampage", "is-pinball");
+      pet.classList.add("is-gone");
+      pet.style.transform = "";
+      lineEl.classList.remove("is-visible", "is-boom");
+      lineEl.textContent = "";
+
+      state.rampage = false;
+      state.dead = true;
+      showTomb();
+    }, 720);
+  }
+
+  function showTomb() {
+    tomb.hidden = false;
+    tomb.classList.remove("is-leaving");
+    /* 强制重排，让入场动画每次都播 */
+    void tomb.offsetWidth;
+    tomb.classList.add("is-visible");
+    veil.classList.add("is-visible");
+    if (reviveBtn) reviveBtn.focus({ preventScroll: true });
+  }
+
+  function revive() {
+    if (!state.dead) return;
+
+    state.dead = false;
+    clicks = 0;
+
+    tomb.classList.remove("is-visible");
+    tomb.classList.add("is-leaving");
+    veil.classList.remove("is-visible");
+    window.setTimeout(() => {
+      tomb.hidden = true;
+      tomb.classList.remove("is-leaving");
+    }, 380);
+
+    /* 还原位置 */
+    pet.classList.remove("is-gone");
+    pet.style.left = savedStyle ? savedStyle.left : "";
+    pet.style.top = savedStyle ? savedStyle.top : "";
+    pet.style.bottom = savedStyle ? savedStyle.bottom : "";
+    pet.style.right = savedStyle ? savedStyle.right : "";
+    pet.style.transform = "";
+
+    pet.classList.add("is-reviving");
+    window.setTimeout(() => pet.classList.remove("is-reviving"), 900);
+
+    if (mode === "summon") {
+      pet.classList.add("is-visible");
+    }
+
+    window.setTimeout(() => {
+      showLine("……我回来了。别数了。", 3600);
+    }, 260);
+  }
+
+  if (reviveBtn) reviveBtn.addEventListener("click", revive);
 
   /* =======================================================
      召唤模式：按钮叫出来，待一会儿自己回项目区
@@ -211,7 +485,7 @@
   function scheduleIdle() {
     window.clearTimeout(idleTimer);
     idleTimer = window.setTimeout(() => {
-      if (!summoned) return;
+      if (!summoned || state.rampage || state.dead) return;
       if (!pet.classList.contains("is-speaking")) {
         showLine(lines[Math.floor(Math.random() * lines.length)], 2800);
       }
@@ -227,6 +501,8 @@
   }
 
   function summonHome() {
+    if (state.dead) return;
+
     if (summoned) {
       scheduleStay();
       return;
@@ -269,8 +545,6 @@
       else summonHome();
     });
   }
-
-  /* 不再因为个人横幅而隐藏：桌宠可以拖走，遮挡交给用户自己决定 */
 
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
