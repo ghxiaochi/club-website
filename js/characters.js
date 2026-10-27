@@ -32,14 +32,13 @@
 
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* 游戏原版的升调公式（src/main.nim 的 calcPitch）：
-     按大三和弦 0 / 4 / 7 半音 + 八度递增，
-     所以从左到右划过时，每个小人的音调都不一样 */
+  /* 从左到右一条完整的大调音阶（0/2/4/5/7/9/11/12 半音），
+     平滑地从低音升到高音，划过最后一个刚好高一个八度 */
+  const PITCH_STEPS = [0, 2, 4, 5, 7, 9, 11, 12];
+
   function calcPitch(note) {
-    const indices = [0, 4, 7];
-    const octave = Math.floor(note / 3);
-    const index = note % 3;
-    return Math.pow(2, (indices[index] + octave * 12) / 12);
+    const step = PITCH_STEPS[Math.abs(note) % PITCH_STEPS.length];
+    return Math.pow(2, step / 12);
   }
 
   /* 音效模块（js/sfx.js），没加载时静默降级 */
@@ -206,7 +205,7 @@
 
     img.src = `images/characters/unit-${char.id}-hit.webp`;
     slot.classList.add("is-squash");
-    sfx.play("click", { rate: calcPitch(characters.indexOf(char) % 2), volume: 0.22 });
+    sfx.play("click", { rate: calcPitch(characters.indexOf(char)), volume: 0.22 });
 
     window.setTimeout(() => {
       img.src = `images/characters/unit-${char.id}.webp`;

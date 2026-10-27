@@ -263,24 +263,72 @@ html.is-theme-swap .hnyz-glow {
   transition: none !important;
 }
 
-/* 图标翻一下，换主题时有个交代 */
-.theme-toggle.is-switching .theme-toggle__icon--sun,
-.theme-toggle.is-switching .theme-toggle__icon--moon {
-  animation: themeIconFlip 0.68s cubic-bezier(0.2, 0.9, 0.25, 1.2);
+/* 图标切换：新图标带旋转弹一下，外圈再放一圈太阳光芒 */
+.theme-toggle {
+  position: relative;
 }
 
-@keyframes themeIconFlip {
+.theme-toggle.is-switching {
+  animation: themeBtnPop 0.58s cubic-bezier(0.22, 1.1, 0.36, 1);
+}
+
+@keyframes themeBtnPop {
+  0%, 100% { scale: 1; }
+  35% { scale: 1.16; }
+  70% { scale: 0.96; }
+}
+
+.theme-toggle.is-switching .theme-toggle__icon--sun,
+.theme-toggle.is-switching .theme-toggle__icon--moon {
+  animation: themeIconPop 0.66s cubic-bezier(0.22, 1.1, 0.36, 1) both;
+}
+
+@keyframes themeIconPop {
   0% {
     opacity: 0;
-    transform: rotate(-150deg) scale(0.35);
+    transform: rotate(-140deg) scale(0.22);
   }
-  55% {
+  45% {
     opacity: 1;
-    transform: rotate(10deg) scale(1.18);
+    transform: rotate(12deg) scale(1.22);
+  }
+  68% {
+    transform: rotate(-6deg) scale(0.94);
   }
   100% {
     opacity: 1;
     transform: rotate(0) scale(1);
+  }
+}
+
+/* 太阳光芒：只在切换的一瞬间出现 */
+.theme-toggle.is-switching::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    from 0deg,
+    var(--blue) 0deg 1.5deg,
+    transparent 1.5deg 30deg
+  );
+  -webkit-mask-image: radial-gradient(circle, transparent 58%, #000 64%, #000 92%, transparent 100%);
+  mask-image: radial-gradient(circle, transparent 58%, #000 64%, #000 92%, transparent 100%);
+  animation: themeRays 0.55s ease-out both;
+  pointer-events: none;
+}
+
+@keyframes themeRays {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) rotate(-18deg);
+  }
+  30% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.35) rotate(10deg);
   }
 }
 

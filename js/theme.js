@@ -7,8 +7,7 @@
    4. 切换时从按钮位置长出一个圆形：用 View Transitions
       让「新界面」做圆形遮罩；浏览器不支持就直接换色，
       只留按钮上的扩散圆环。
-   5. 可以连续点击：新的一次会跳过上一次未播完的转场，
-      主题永远以最后一次点击为准。
+   5. 一次只切换一次：过渡没播完之前，再点不响应。
    ========================================================= */
 
 (() => {
@@ -23,10 +22,6 @@
 
   const THEME_COLORS = { light: "#f5f9ff", dark: "#060d1c" };
 
-  /* 连点时 DOM 可能还没换完色：
-     targetTheme 记最后一次点击的目标，pendingTheme 记还没落地的那个 */
-  let pendingTheme = "";
-  let targetTheme = root.dataset.theme === "dark" ? "dark" : "light";
   let activeTransition = null;
   let activeBurst = null;
 
@@ -49,7 +44,6 @@
 
   function apply(theme) {
     root.dataset.theme = theme;
-    if (pendingTheme === theme) pendingTheme = "";
 
     if (metaTheme) {
       metaTheme.setAttribute("content", THEME_COLORS[theme] || THEME_COLORS.light);
@@ -84,7 +78,7 @@
     button.classList.remove("is-switching");
     void button.offsetWidth;
     button.classList.add("is-switching");
-    window.setTimeout(() => button.classList.remove("is-switching"), 700);
+    window.setTimeout(() => button.classList.remove("is-switching"), 760);
   }
 
   function ringBurst(x, y) {
@@ -104,8 +98,7 @@
     }, 760);
   }
 
-  /* 转场期间暂停最费性能的几层：头部毛玻璃、漂浮图标、跑马灯、
-     鼠标光晕。转场结束后自动恢复。 */
+  /* 转场期间暂停持续动画和鼠标光晕，圆推得更顺 */
   function beginSwap(duration) {
     root.classList.add("is-theme-swap");
     window.clearTimeout(beginSwap.timer);
@@ -128,24 +121,12 @@
     /* 圆的半径越大，动画稍微长一点；小屏更快，手感更利落 */
     const duration = Math.max(380, Math.min(640, Math.round(origin.r * 0.52)));
 
-    spinIcon();
-    ringBurst(origin.x, origin.y);
-
     if (typeof document.startViewTransition !== "function") {
       apply(next);
       save(next);
+      spinIcon();
+      ringBurst(origin.x, origin.y);
       return;
-    }
-
-    /* 上一次还没播完就直接跳过，让它给新的这次让路 */
-    if (activeTransition) {
-      const old = activeTransition;
-      activeTransition = null;
-      try {
-        old.skipTransition();
-      } catch (error) {
-        /* 已经结束了，忽略 */
-      }
     }
 
     beginSwap(duration);
@@ -184,22 +165,23 @@
         );
       })
       .catch(() => {
-        /* 被新的点击跳过时会 reject，属正常情况 */
+        /* 转场被中断时会 reject，属正常情况 */
       });
 
     transition.finished
       .catch(() => {})
       .finally(() => {
-        if (activeTransition === transition) {
-          activeTransition = null;
-          endSwap();
-        }
+        if (activeTransition !== transition) return;
+        activeTransition = null;
+        endSwap();
 
-        /* 最后一次点击如果因为转场被跳过而没落地，这里补上 */
-        if (pendingTheme && root.dataset.theme !== pendingTheme) {
-          apply(pendingTheme);
-          save(pendingTheme);
-        }
+        /* 兜底：极端情况下回调没落地，也把主题补上 */
+        if (root.dataset.theme !== next) apply(next);
+
+        /* 圆推完再放图标弹跳 + 圆环：
+           View Transitions 会把动画冻在快照里，放前面就看不到了 */
+        spinIcon();
+        ringBurst(origin.x, origin.y);
       });
   }
 
@@ -207,11 +189,11 @@
   apply(root.dataset.theme === "dark" ? "dark" : "light");
 
   function toggleTheme() {
-    /* 以 targetTheme 为准，不依赖 DOM 此刻是否已经换色：
-       连续点击时每一次点击都算一次翻转 */
-    targetTheme = targetTheme === "dark" ? "light" : "dark";
-    pendingTheme = targetTheme;
-    switchTheme(targetTheme);
+    /* 过渡没结束之前不响应，避免连点把画面切来切去 */
+    if (activeTransition) return;
+
+    const next = root.dataset.theme === "dark" ? "light" : "dark";
+    switchTheme(next);
   }
 
   if (button) {
@@ -219,38 +201,12 @@
       toggleTheme();
       button.blur();
     });
-
-    /* 转场进行中，整页顶层的快照会挡住按钮的点击（事件 target 变成
-       HTML）。这里接住发生在按钮范围内的点击，让用户可以连续切换，
-       而不是等动画播完。 */
-    document.addEventListener(
-      "click",
-      (event) => {
-        if (!activeTransition) return;
-
-        const rect = button.getBoundingClientRect();
-        const inside =
-          event.clientX >= rect.left - 6 &&
-          event.clientX <= rect.right + 6 &&
-          event.clientY >= rect.top - 6 &&
-          event.clientY <= rect.bottom + 6;
-
-        if (!inside) return;
-
-        event.preventDefault();
-        event.stopPropagation();
-        toggleTheme();
-      },
-      true
-    );
   }
 
   media.addEventListener("change", (event) => {
     if (readStored()) return;
-    const theme = event.matches ? "dark" : "light";
-    targetTheme = theme;
-    pendingTheme = "";
-    apply(theme);
+    if (activeTransition) return;
+    apply(event.matches ? "dark" : "light");
   });
 
   window.HNYZ_THEME = { apply, readStored };
