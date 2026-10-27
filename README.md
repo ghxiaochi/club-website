@@ -314,15 +314,15 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 ### 页脚小恐龙
 
-每个页面最下方（页脚之后）有一条 `DINO_RUN` 跑道：四只像素小恐龙排队往前跑，右侧竖排两个按钮。
+每个页面最下方（页脚之后）有一条 `DINO_RUN` 跑道：四只像素小恐龙排队往前跑（窄屏两只），右侧竖排两个按钮。
 
 | 按钮 | 行为 |
 |---|---|
 | `AUTO` | 按仙人掌距离自己起跳，不用管；分数最高值存 `localStorage`（key：`hnyz:dino-hi`） |
 | `MANUAL` | 点跑道 / 空格 / ↑ 起跳，撞到仙人掌会显示 `SIGNAL LOST // REBOOT`，1.4 秒后自动重开 |
 
-- 小恐龙是 **22×24 的字符串点阵**（`DINO_FRAMES`），逐格 `fillRect` 预渲染成离屏 canvas，主循环只 `drawImage`；换肤 / 换主题时重新着色，不重算形状。
-- 后面三只按「领头龙 0.3 秒前的高度」取样，所以看起来是波浪式跟跳，而不是四只黏在一起同时起跳。
+- 小恐龙是 **44×47 的字符串点阵**（`DINO_FRAMES`，按 Chrome 官方 sprite 逐像素提取），逐格 `fillRect` 预渲染成离屏 canvas，主循环只 `drawImage`；换肤 / 换主题时重新着色，不重算形状。两帧只差一条腿的抬起，跑起来是踏步。
+- 后面三只按「领头龙 `间距 ÷ 速度` 秒前的高度」取样，所以看起来是波浪式跟跳，而不是四只黏在一起同时起跳。
 - 跑道只在进入视口时跑 `requestAnimationFrame`，离开就停；同时在视口内时右下角校徽会让位（`body.is-dino-visible`）。
 - 尊重 `prefers-reduced-motion`：开启减少动效时默认停在手动模式，不自动跑。
 

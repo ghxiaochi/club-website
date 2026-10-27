@@ -82,7 +82,7 @@
 
 .dino-run__stage {
   position: relative;
-  height: clamp(150px, 12vw, 175px);
+  height: clamp(186px, 13.5vw, 196px);
   overflow: hidden;
   border: 1px solid rgba(125, 211, 252, 0.2);
   border-radius: var(--radius);
@@ -280,7 +280,7 @@ html[data-style="hacker"][data-theme="light"] .dino-run__mode {
   }
 
   .dino-run__stage {
-    height: 150px;
+    height: 186px;
   }
 
   .dino-run__bar {
