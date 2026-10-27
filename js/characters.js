@@ -26,6 +26,16 @@
 
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  /* 游戏原版的升调公式（src/main.nim 的 calcPitch）：
+     按大三和弦 0 / 4 / 7 半音 + 八度递增，
+     所以从左到右划过时，每个小人的音调都不一样 */
+  function calcPitch(note) {
+    const indices = [0, 4, 7];
+    const octave = Math.floor(note / 3);
+    const index = note % 3;
+    return Math.pow(2, (indices[index] + octave * 12) / 12);
+  }
+
   /* 音效模块（js/sfx.js），没加载时静默降级 */
   const sfx = window.HNYZ_SFX || { play() {}, stop() {} };
 
@@ -86,7 +96,7 @@
     slot.addEventListener("pointerenter", (event) => {
       if (event.pointerType !== "mouse") return;
       hop(slot);
-      sfx.play("hover", { rate: 1 + index * 0.045, volume: 0.12 });
+      sfx.play("hover", { rate: calcPitch(index), volume: 0.12 });
     });
 
     /* 左键：打开角色卡 */
@@ -128,7 +138,7 @@
       touchSlot = slot;
       hop(slot);
       const index = slots.indexOf(slot);
-      sfx.play("hover", { rate: 1 + index * 0.045, volume: 0.1 });
+      sfx.play("hover", { rate: calcPitch(index), volume: 0.1 });
     } else if (!slot) {
       touchSlot = null;
     }
@@ -164,7 +174,7 @@
 
     img.src = `images/characters/unit-${char.id}-hit.webp`;
     slot.classList.add("is-squash");
-    sfx.play("click", { rate: 1 + characters.indexOf(char) * 0.04, volume: 0.22 });
+    sfx.play("click", { rate: calcPitch(characters.indexOf(char) % 2), volume: 0.22 });
 
     window.setTimeout(() => {
       img.src = `images/characters/unit-${char.id}.webp`;

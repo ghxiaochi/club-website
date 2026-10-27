@@ -1,3 +1,15 @@
+@font-face {
+  font-family: "AnimTitle";
+  src: url("../fonts/anim-title.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "AnimPixel";
+  src: url("../fonts/anim-pixel.ttf") format("truetype");
+  font-display: swap;
+}
+
 /* =========================================================
    HNYZ · ANIMDUSTRY 抽卡界面复刻
    ---------------------------------------------------------
@@ -155,7 +167,7 @@
   padding: 2px 6px;
   background: rgba(20, 20, 26, 0.92);
   color: #d8f4f8;
-  font-family: var(--mono);
+  font-family: "AnimPixel", var(--mono);
   font-size: 0.56rem;
   letter-spacing: 0.04em;
   white-space: nowrap;
@@ -367,11 +379,33 @@
 .char-splash__stage {
   position: absolute;
   inset: 0;
+}
+
+/* 标题 / 副标题在顶部，和游戏一致 */
+.char-splash__head {
+  position: absolute;
+  top: 18px;
+  left: 0;
+  right: 0;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* 人物的上下浮动：和游戏 hoverOffset 一样不停悬浮 */
+.char-splash__bob {
+  position: absolute;
+  inset: 0;
   display: grid;
   place-items: center;
-  align-content: center;
-  gap: 6px;
-  padding: 40px 24px;
+  animation: splashBob 0.7s ease-in-out infinite alternate;
+}
+
+@keyframes splashBob {
+  from { transform: translateY(3px); }
+  to { transform: translateY(-12px); }
 }
 
 .char-splash__unit {
@@ -386,9 +420,24 @@
 /* 等图片解码完再弹出来，避免先看到一块空白。
    splashWash：先整体高亮（游戏的白色闪光），亮度再慢慢降回正常 */
 .char-splash__unit.is-loaded {
+  /* 游戏里人物先以约 1.7 倍出现，再在几秒内缩到正常大小 */
   animation:
-    splashUnitPop 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2) both,
+    splashIntro 2.8s cubic-bezier(0.16, 1, 0.3, 1) both,
     splashWash 2s ease-out both;
+}
+
+@keyframes splashIntro {
+  0% {
+    opacity: 0;
+    transform: scale(1.75) translateY(1.5%);
+  }
+  8% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 @keyframes splashWash {
@@ -412,9 +461,9 @@
 .char-splash__title {
   margin: 10px 0 0;
   color: #ffffff;
-  font-family: var(--mono);
+  font-family: "AnimTitle", var(--mono);
   font-size: clamp(1.5rem, 4.4vw, 2.8rem);
-  font-weight: 800;
+  font-weight: 400;
   letter-spacing: 0.06em;
   text-shadow: 4px 4px 0 rgba(24, 28, 48, 0.45);
   animation: splashTitle 0.7s cubic-bezier(0.2, 0.8, 0.3, 1) both;
@@ -428,7 +477,7 @@
 .char-splash__sub {
   margin: 2px 0 0;
   color: rgba(255, 255, 255, 0.82);
-  font-family: var(--mono);
+  font-family: "AnimPixel", var(--mono);
   font-size: clamp(0.76rem, 1.4vw, 0.92rem);
   letter-spacing: 0.06em;
 }
@@ -441,7 +490,7 @@
   max-width: 46vw;
   margin: 0;
   color: rgba(255, 255, 255, 0.72);
-  font-family: var(--mono);
+  font-family: "AnimPixel", var(--mono);
   font-size: clamp(0.66rem, 1.2vw, 0.8rem);
   text-align: right;
 }
@@ -528,6 +577,10 @@ body.is-splash-open {
     width: clamp(28px, 9vw, 46px);
   }
 
+  .char-splash__head {
+    top: 12px;
+  }
+
   .char-splash__ability {
     right: 14px;
     bottom: 78px;
@@ -558,5 +611,10 @@ body.is-splash-open {
     opacity: 1;
     transform: none;
     filter: drop-shadow(0 18px 22px rgba(16, 18, 34, 0.38));
+  }
+
+  .char-splash__bob,
+  .char-splash__bloom {
+    animation: none;
   }
 }

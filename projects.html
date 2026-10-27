@@ -37,13 +37,15 @@
 
   <title>全部项目｜HNYZ · 衡南一中编程社</title>
 
+  <link rel="preload" href="fonts/anim-title.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="fonts/anim-pixel.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css?v=20261025e">
   <link rel="stylesheet" href="css/pet.css?v=20261025b">
   <link rel="stylesheet" href="css/avatar-pet.css?v=20261037">
   <link rel="stylesheet" href="css/personal.css?v=20261037">
   <link rel="stylesheet" href="css/member.css?v=20261035">
-  <link rel="stylesheet" href="css/characters.css?v=20261043">
+  <link rel="stylesheet" href="css/characters.css?v=20261044">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <script src="js/sfx.js?v=20261042" defer></script>
@@ -52,7 +54,7 @@
   <script src="js/main.js?v=20261032" defer></script>
   <script src="js/pet.js?v=20261025c" defer></script>
   <script src="js/avatar-pet.js?v=20261037" defer></script>
-  <script src="js/characters.js?v=20261043" defer></script>
+  <script src="js/characters.js?v=20261044" defer></script>
   <script src="js/personal.js?v=20261043" defer></script>
 </head>
 <body id="top">
@@ -256,9 +258,13 @@
     <div class="char-splash__grid" aria-hidden="true"></div>
 
     <div class="char-splash__stage">
-      <img class="char-splash__unit" data-splash-img src="" alt="">
-      <p class="char-splash__title" data-splash-title></p>
-      <p class="char-splash__sub" data-splash-sub></p>
+      <div class="char-splash__head">
+        <p class="char-splash__title" data-splash-title></p>
+        <p class="char-splash__sub" data-splash-sub></p>
+      </div>
+      <div class="char-splash__bob">
+        <img class="char-splash__unit" data-splash-img src="" alt="">
+      </div>
     </div>
     <p class="char-splash__ability" data-splash-ability></p>
 
