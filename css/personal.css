@@ -223,31 +223,6 @@
   isolation: auto;
 }
 
-/* 按钮中心扩散的圆环 */
-.theme-burst {
-  position: fixed;
-  z-index: 60;
-  width: 34px;
-  height: 34px;
-  margin: -17px 0 0 -17px;
-  border: 2px solid var(--blue);
-  border-radius: 50%;
-  opacity: 0.9;
-  pointer-events: none;
-  animation: themeBurst 0.72s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
-}
-
-@keyframes themeBurst {
-  from {
-    opacity: 0.85;
-    transform: scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: scale(13);
-  }
-}
-
 /* 转场的一瞬间先暂停持续动画和鼠标光晕，圆推得更顺 */
 html.is-theme-swap .bg-icon,
 html.is-theme-swap .bg-orbs__orb,
@@ -270,6 +245,8 @@ html.is-theme-swap .hnyz-glow {
 
 .theme-toggle.is-switching {
   animation: themeBtnPop 0.58s cubic-bezier(0.22, 1.1, 0.36, 1);
+  /* 去掉 hover 的 4px 光晕，别和太阳光芒叠成一个厚圈 */
+  box-shadow: none;
 }
 
 @keyframes themeBtnPop {

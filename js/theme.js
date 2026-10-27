@@ -23,7 +23,6 @@
   const THEME_COLORS = { light: "#f5f9ff", dark: "#060d1c" };
 
   let activeTransition = null;
-  let activeBurst = null;
 
   function readStored() {
     try {
@@ -81,23 +80,6 @@
     window.setTimeout(() => button.classList.remove("is-switching"), 760);
   }
 
-  function ringBurst(x, y) {
-    if (activeBurst) activeBurst.remove();
-
-    const ring = document.createElement("span");
-    ring.className = "theme-burst";
-    ring.setAttribute("aria-hidden", "true");
-    ring.style.left = `${x}px`;
-    ring.style.top = `${y}px`;
-    document.body.appendChild(ring);
-    activeBurst = ring;
-
-    window.setTimeout(() => {
-      if (activeBurst === ring) activeBurst = null;
-      ring.remove();
-    }, 760);
-  }
-
   /* 转场期间暂停持续动画和鼠标光晕，圆推得更顺 */
   function beginSwap(duration) {
     root.classList.add("is-theme-swap");
@@ -125,7 +107,6 @@
       apply(next);
       save(next);
       spinIcon();
-      ringBurst(origin.x, origin.y);
       return;
     }
 
@@ -178,10 +159,9 @@
         /* 兜底：极端情况下回调没落地，也把主题补上 */
         if (root.dataset.theme !== next) apply(next);
 
-        /* 圆推完再放图标弹跳 + 圆环：
+        /* 圆推完再放图标弹跳：
            View Transitions 会把动画冻在快照里，放前面就看不到了 */
         spinIcon();
-        ringBurst(origin.x, origin.y);
       });
   }
 
