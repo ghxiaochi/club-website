@@ -403,6 +403,29 @@
   animation: splashBob 0.7s ease-in-out infinite alternate;
 }
 
+/* 像素小人先顶上（立绘还在加载时），加载完淡出 */
+.char-splash__pixel,
+.char-splash__unit {
+  grid-area: 1 / 1;
+}
+
+.char-splash__pixel {
+  display: block;
+  height: clamp(240px, 46vh, 460px);
+  width: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 18px 22px rgba(16, 18, 34, 0.38));
+}
+
+.char-splash__pixel.is-out {
+  animation: pixelFade 0.35s ease both;
+}
+
+@keyframes pixelFade {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
 @keyframes splashBob {
   from { transform: translateY(3px); }
   to { transform: translateY(-12px); }
@@ -415,6 +438,11 @@
   image-rendering: auto;
   filter: drop-shadow(0 18px 22px rgba(16, 18, 34, 0.38));
   opacity: 0;
+}
+
+/* 立绘还在加载时，像素小人必须可见 */
+.char-splash__pixel:not(.is-out) {
+  opacity: 1;
 }
 
 /* 等图片解码完再弹出来，避免先看到一块空白。
@@ -607,10 +635,15 @@ body.is-splash-open {
     animation: none;
   }
 
-  .char-splash__unit {
+  .char-splash__unit,
+  .char-splash__pixel {
     opacity: 1;
     transform: none;
     filter: drop-shadow(0 18px 22px rgba(16, 18, 34, 0.38));
+  }
+
+  .char-splash__pixel.is-out {
+    display: none;
   }
 
   .char-splash__bob,

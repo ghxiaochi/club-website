@@ -19,6 +19,7 @@
 
   const splash = document.querySelector("[data-char-splash]");
   const splashImg = splash ? splash.querySelector("[data-splash-img]") : null;
+  const splashPixel = splash ? splash.querySelector("[data-splash-pixel]") : null;
   const splashTitle = splash ? splash.querySelector("[data-splash-title]") : null;
   const splashSub = splash ? splash.querySelector("[data-splash-sub]") : null;
   const splashAbility = splash ? splash.querySelector("[data-splash-ability]") : null;
@@ -246,18 +247,33 @@
     splash.style.setProperty("--glow", char.glow);
     splash.dataset.pattern = char.pattern;
 
+    if (splashPixel) {
+      /* 像素小人立刻出现（贴图早就缓存在页面里），和游戏 view 页一样 */
+      splashPixel.src = `images/characters/unit-${char.id}.webp`;
+      splashPixel.alt = char.title;
+      splashPixel.classList.remove("is-out");
+    }
+
     if (splashImg) {
-      /* 站位用小像素图，结果页用高精度立绘 */
+      /* 高精度立绘在后台加载，好了以后淡入替换像素小人 */
+      let artShown = false;
+      const showArt = () => {
+        if (artShown) return;
+        artShown = true;
+        splashImg.classList.add("is-loaded");
+        if (splashPixel) splashPixel.classList.add("is-out");
+      };
+
       splashImg.classList.remove("is-loaded");
       splashImg.src = `images/characters/art-${char.id}.webp`;
       splashImg.alt = char.title;
 
-      /* 图没解码完就播动画会看到空白，等 decode 再显形 */
-      const revealArt = () => splashImg.classList.add("is-loaded");
+      splashImg.addEventListener("load", showArt, { once: true });
+      splashImg.addEventListener("error", showArt, { once: true });
+      /* 兜底：1.2 秒后无论如何都切换，不让画面卡在半路 */
+      window.setTimeout(showArt, 1200);
       if (typeof splashImg.decode === "function") {
-        splashImg.decode().then(revealArt).catch(revealArt);
-      } else {
-        revealArt();
+        splashImg.decode().then(showArt).catch(() => {});
       }
     }
     if (splashTitle) splashTitle.textContent = char.title;
@@ -284,6 +300,8 @@
     splash.classList.remove("is-in");
     splash.classList.add("is-out");
     document.body.classList.remove("is-splash-open");
+    if (splashPixel) splashPixel.classList.remove("is-out");
+    if (splashImg) splashImg.classList.remove("is-loaded");
 
     window.setTimeout(() => {
       splash.hidden = true;
