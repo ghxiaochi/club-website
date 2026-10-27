@@ -163,11 +163,8 @@
     });
   }
 
-  if (document.readyState === "complete") {
-    window.setTimeout(preloadArt, 300);
-  } else {
-    window.addEventListener("load", () => window.setTimeout(preloadArt, 300));
-  }
+  /* 脚本是 defer 的，这里直接开始预载，越早越好 */
+  preloadArt();
 
   /* =======================================================
      二、三个小动作
@@ -268,13 +265,10 @@
       splashImg.src = `images/characters/art-${char.id}.webp`;
       splashImg.alt = char.title;
 
+      /* 只在完整下载并解码后切换：WebP 是渐进解码的，
+         提前显示会漏出「只剩一个头」的半张图 */
       splashImg.addEventListener("load", showArt, { once: true });
       splashImg.addEventListener("error", showArt, { once: true });
-      /* 兜底：1.2 秒后无论如何都切换，不让画面卡在半路 */
-      window.setTimeout(showArt, 1200);
-      if (typeof splashImg.decode === "function") {
-        splashImg.decode().then(showArt).catch(() => {});
-      }
     }
     if (splashTitle) splashTitle.textContent = char.title;
     if (splashSub) splashSub.textContent = char.sub;
