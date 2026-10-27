@@ -665,8 +665,8 @@ body.is-splash-open {
   .char-splash__ability {
     right: 14px;
     bottom: 78px;
-    max-width: 54vw;
-    font-size: 0.74rem;
+    max-width: 60vw;
+    font-size: 0.78rem;
     -webkit-text-stroke: 3px #17161c;
   }
 
