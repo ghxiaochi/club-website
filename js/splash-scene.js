@@ -255,10 +255,18 @@
 
     /* 角色背后的一团柔光，别让人物陷进底纹里 */
     const glow = g.createRadialGradient(CX, CY - H * 0.04, 0, CX, CY - H * 0.04, H * 0.62);
-    glow.addColorStop(0, "rgba(255, 255, 255, 0.26)");
-    glow.addColorStop(0.42, rgba(c.accent, 0.1));
+    glow.addColorStop(0, "rgba(255, 255, 255, 0.3)");
+    glow.addColorStop(0.42, rgba(c.accent, 0.12));
     glow.addColorStop(1, rgba(c.accent, 0));
     g.fillStyle = glow;
+    g.fillRect(0, 0, W, H);
+
+    /* 一层斜向的薄光：底纹不再是一块平色，气泡浮在上面更有空间感 */
+    const sweep = g.createLinearGradient(0, 0, W * 0.9, H);
+    sweep.addColorStop(0, "rgba(255, 255, 255, 0.055)");
+    sweep.addColorStop(0.42, "rgba(255, 255, 255, 0)");
+    sweep.addColorStop(1, "rgba(16, 16, 30, 0.07)");
+    g.fillStyle = sweep;
     g.fillRect(0, 0, W, H);
 
     /* 中间的大多边形：先填一层淡的，再描一圈粗边 */
@@ -314,7 +322,7 @@
     /* 四角压一点点暗，白字更稳 */
     const vig = g.createRadialGradient(W / 2, H * 0.5, H * 0.2, W / 2, H * 0.5, Math.hypot(W, H) * 0.62);
     vig.addColorStop(0, "rgba(20, 18, 34, 0)");
-    vig.addColorStop(1, "rgba(20, 18, 34, 0.14)");
+    vig.addColorStop(1, "rgba(20, 18, 34, 0.2)");
     g.fillStyle = vig;
     g.fillRect(0, 0, W, H);
   }
@@ -340,7 +348,60 @@
   }
 
   function buildSprites() {
-    sprites = { white: makeBlob("#fff1d6") };
+    sprites = { white: makeBlob("#fff1d6"), bubbles: new Map() };
+  }
+
+  /* 气泡贴图：亮心 + 一圈更亮的边 + 左上高光。
+     比纯柔光多一圈轮廓，在深色底纹上更清楚，也更像游戏 bloom
+     里那些一颗颗浮着的光泡。 */
+  function makeBubble(color) {
+    if (sprites.bubbles.has(color)) return sprites.bubbles.get(color);
+
+    const size = 192;
+    const c = document.createElement("canvas");
+    c.width = size;
+    c.height = size;
+    const g = c.getContext("2d");
+    const cx = size / 2;
+    const r = size / 2;
+
+    /* 外圈柔光，让气泡和背景之间有过渡 */
+    const halo = g.createRadialGradient(cx, cx, r * 0.45, cx, cx, r);
+    halo.addColorStop(0, rgba(color, 0));
+    halo.addColorStop(0.58, rgba(color, 0.05));
+    halo.addColorStop(0.8, rgba(color, 0.16));
+    halo.addColorStop(0.92, rgba(color, 0.08));
+    halo.addColorStop(1, rgba(color, 0));
+    g.fillStyle = halo;
+    g.fillRect(0, 0, size, size);
+
+    /* 亮心偏白，越靠边越带角色色 */
+    const body = g.createRadialGradient(cx, cx, 0, cx, cx, r * 0.9);
+    body.addColorStop(0, "rgba(255, 253, 246, 0.96)");
+    body.addColorStop(0.46, "rgba(255, 250, 236, 0.78)");
+    body.addColorStop(0.7, rgba(color, 0.4));
+    body.addColorStop(0.84, "rgba(255, 255, 255, 0.72)");
+    body.addColorStop(0.92, rgba(color, 0.32));
+    body.addColorStop(1, rgba(color, 0));
+    g.fillStyle = body;
+    g.fillRect(0, 0, size, size);
+
+    /* 细亮边：气泡的「壳」 */
+    g.strokeStyle = "rgba(255, 255, 255, 0.2)";
+    g.lineWidth = Math.max(1, size * 0.009);
+    g.beginPath();
+    g.arc(cx, cx, r * 0.81, 0, Math.PI * 2);
+    g.stroke();
+
+    /* 左上高光 */
+    const spec = g.createRadialGradient(cx - r * 0.3, cx - r * 0.32, 0, cx - r * 0.3, cx - r * 0.32, r * 0.2);
+    spec.addColorStop(0, "rgba(255, 255, 255, 0.55)");
+    spec.addColorStop(1, "rgba(255, 255, 255, 0)");
+    g.fillStyle = spec;
+    g.fillRect(0, 0, size, size);
+
+    sprites.bubbles.set(color, c);
+    return c;
   }
 
   /* -------------------------------------------------------
@@ -384,7 +445,9 @@
         phase: rand() * Math.PI * 2,
         pulse: 0.6 + rand() * 1.3,
         life: rand(),
-        len: 15 + rand() * 19
+        len: 15 + rand() * 19,
+        /* 远近层次：鼠标视差时，大颗粒走得稍快一点 */
+        depth: 0.3 + rand() * 0.9
       });
     }
   }
@@ -394,18 +457,34 @@
     const c = cfg.lines;
     const a = (c.angle * Math.PI) / 180;
 
-    g.strokeStyle = rgba(c.color, 0.8);
-    g.lineWidth = Math.max(2, 0.006 * H);
-    g.lineCap = "round";
-
-    lines.forEach((line) => {
+    const points = lines.map((line) => {
       const ox = Math.sin(t * line.speed + line.phase) * line.mag;
       const oy = Math.cos(t * line.speed * 0.8 + line.phase * 1.7) * line.mag;
-      const x = W / 2 + line.x + ox;
-      const y = H / 2 + line.y + oy;
+      return {
+        x: W / 2 + line.x + ox,
+        y: H / 2 + line.y + oy,
+        len: line.len
+      };
+    });
+
+    g.lineCap = "round";
+
+    /* 先铺一层宽的淡光，再压一根细亮线，线条也有 bloom */
+    g.strokeStyle = rgba(c.color, 0.22);
+    g.lineWidth = Math.max(5, 0.018 * H);
+    points.forEach((point) => {
       g.beginPath();
-      g.moveTo(x - Math.cos(a) * line.len * 0.5, y - Math.sin(a) * line.len * 0.5);
-      g.lineTo(x + Math.cos(a) * line.len * 0.5, y + Math.sin(a) * line.len * 0.5);
+      g.moveTo(point.x - Math.cos(a) * point.len * 0.5, point.y - Math.sin(a) * point.len * 0.5);
+      g.lineTo(point.x + Math.cos(a) * point.len * 0.5, point.y + Math.sin(a) * point.len * 0.5);
+      g.stroke();
+    });
+
+    g.strokeStyle = rgba(c.color, 0.85);
+    g.lineWidth = Math.max(2, 0.006 * H);
+    points.forEach((point) => {
+      g.beginPath();
+      g.moveTo(point.x - Math.cos(a) * point.len * 0.5, point.y - Math.sin(a) * point.len * 0.5);
+      g.lineTo(point.x + Math.cos(a) * point.len * 0.5, point.y + Math.sin(a) * point.len * 0.5);
       g.stroke();
     });
   }
@@ -414,9 +493,13 @@
     const c = cfg.bloom;
     const pad = H * 0.2;
     const layer = sprites.white;
+    const bubble = makeBubble(c.color);
 
     parts.forEach((p) => {
       const type = c.type;
+      /* 远近不同的颗粒，鼠标视差时错开一点，背景更有厚度 */
+      const depthX = px * (p.depth - 0.6) * 0.9;
+      const depthY = py * (p.depth - 0.6) * 0.9;
 
       if (type === "fallSquares" || type === "flame") {
         const cycle = (p.life + t / p.len) % 1;
@@ -435,16 +518,16 @@
         } else {
           const y = H + pad - cycle * (H + pad * 2);
           const x = p.x + Math.sin(t * 0.9 + p.phase) * H * 0.03;
-          const r = p.r * (1 - cycle * 0.75);
+          const r = p.r * (1 - cycle * 0.75) * 1.1;
           const fade = Math.sin(cycle * Math.PI * 0.9);
           g.globalAlpha = p.alpha * fade;
-          g.drawImage(layer, x - r, y - r, r * 2, r * 2);
+          g.drawImage(makeBubble(p.life > 0.5 ? c.color2 : c.color), x - r, y - r, r * 2, r * 2);
         }
         return;
       }
 
-      const x = wrap(p.x + p.vx * t, -pad, W + pad);
-      const y = wrap(p.y + p.vy * t, -pad, H + pad);
+      const x = wrap(p.x + p.vx * t, -pad, W + pad) + depthX;
+      const y = wrap(p.y + p.vy * t, -pad, H + pad) + depthY;
 
       if (type === "squares") {
         const s = p.r * (1 + Math.sin(t * p.pulse + p.phase) * 0.22);
@@ -498,11 +581,11 @@
         return;
       }
 
-      /* 默认：patCircles 的圆形光斑 */
+      /* 默认：patCircles 的圆形气泡 */
       const pulse = 1 + Math.sin(t * p.pulse + p.phase) * 0.12;
-      const r = p.r * pulse;
-      g.globalAlpha = p.alpha * 0.85;
-      g.drawImage(layer, x - r, y - r, r * 2, r * 2);
+      const r = p.r * pulse * 1.1;
+      g.globalAlpha = Math.min(1, p.alpha * 0.98);
+      g.drawImage(bubble, x - r, y - r, r * 2, r * 2);
     });
 
     g.globalAlpha = 1;

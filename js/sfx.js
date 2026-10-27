@@ -31,8 +31,9 @@
   function pool(name) {
     if (!pools[name]) {
       const src = SRC[name];
-      /* reveal 是一段小音乐，只留一个；其余留 4 个用来叠着播 */
-      const size = name === "reveal" ? 1 : 3;
+      /* reveal 是一段小音乐，只留一个；hover 要连续走音阶，多留几个；
+         其余留 4 个用来叠着播 */
+      const size = name === "reveal" ? 1 : name === "hover" ? 6 : 4;
       pools[name] = Array.from({ length: size }, () => {
         const audio = new Audio(src);
         audio.preload = "auto";

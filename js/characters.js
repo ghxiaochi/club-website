@@ -102,11 +102,11 @@
 
     slot.append(img, name);
 
-    /* 悬停（鼠标）：和游戏一样，每次进到小人身上都会跳一下 */
+    /* 悬停（鼠标）：和游戏一样，每次进到小人身上都会跳一下。
+       音高统一交给下面的「滑动音阶」处理，避免一次划动响两遍 */
     slot.addEventListener("pointerenter", (event) => {
       if (event.pointerType !== "mouse") return;
       hop(slot);
-      sfx.play("hover", { rate: calcPitch(index), volume: 0.12 });
     });
 
     /* 左键：打开角色卡 */
@@ -130,34 +130,134 @@
   });
 
   /* =======================================================
-     一点五、触屏：手指划过时，指到谁谁就跳
+     一点五、滑动音阶
      -------------------------------------------------------
-     手机上没有 hover，用 pointermove + elementFromPoint
-     判断手指正压在哪个小人身上；进入新的小人就跳一下。
-     不阻止默认行为，上下滑动仍然正常滚屏。
+     不是「停在某个小人身上才响一下」，而是指针在角色排上
+     横向划动时，按当前所在的水平位置取音：滑过谁就发谁的
+     音，滑得再快也不会漏掉中间的音阶。
+     桌面鼠标、手指拖动、触控板横向滑动都走同一套映射。
      ======================================================= */
-  let touchSlot = null;
+  let noteSpots = [];
+  let noteTop = 0;
+  let noteBottom = 0;
+  let lastNote = -1;
+  let lastNoteAt = 0;
+  let touchStart = null;
+  let wheelPos = -1;
+
+  function measureNoteSpots() {
+    if (!slots.length) return;
+    noteSpots = slots.map((slot) => slot.offsetLeft + slot.offsetWidth / 2);
+    noteTop = slots[0].offsetTop - 8;
+    noteBottom = slots[0].offsetTop + slots[0].offsetHeight + 8;
+  }
+
+  /* 指针落在第几个小人身上；在角色排外返回 -1 */
+  function noteAt(x, y) {
+    if (noteSpots.length < 2) return -1;
+
+    const rect = stage.getBoundingClientRect();
+    const lx = x - rect.left;
+    const ly = y - rect.top;
+
+    if (ly < noteTop || ly > noteBottom) return -1;
+
+    /* 左右各放宽一点，滑到队伍边缘时音阶也能收尾 */
+    const half = slots[0].offsetWidth * 0.75;
+    if (lx < noteSpots[0] - half || lx > noteSpots[noteSpots.length - 1] + half) return -1;
+
+    let index = 0;
+    let best = Infinity;
+    for (let i = 0; i < noteSpots.length; i += 1) {
+      const distance = Math.abs(lx - noteSpots[i]);
+      if (distance < best) {
+        best = distance;
+        index = i;
+      }
+    }
+    return index;
+  }
+
+  function playNote(index, volume, jump) {
+    if (index < 0) return;
+
+    const now = performance.now();
+    /* 换音至少隔 38ms：快速划动时不会被音频池吞掉 */
+    if (index === lastNote || now - lastNoteAt < 38) return;
+
+    lastNote = index;
+    lastNoteAt = now;
+    sfx.play("hover", { rate: calcPitch(index), volume });
+    if (jump) hop(slots[index]);
+  }
+
+  measureNoteSpots();
+  if (window.ResizeObserver) {
+    new ResizeObserver(measureNoteSpots).observe(stage);
+  }
+  window.addEventListener("load", measureNoteSpots);
 
   stage.addEventListener("pointermove", (event) => {
-    if (event.pointerType === "mouse") return;
+    const index = noteAt(event.clientX, event.clientY);
 
-    const el = document.elementFromPoint(event.clientX, event.clientY);
-    const slot = el && typeof el.closest === "function" ? el.closest(".char-slot") : null;
-
-    if (slot && slot !== touchSlot) {
-      touchSlot = slot;
-      hop(slot);
-      const index = slots.indexOf(slot);
-      sfx.play("hover", { rate: calcPitch(index), volume: 0.1 });
-    } else if (!slot) {
-      touchSlot = null;
+    if (event.pointerType === "mouse") {
+      if (index < 0) {
+        lastNote = -1;
+        return;
+      }
+      wheelPos = -1;
+      playNote(index, 0.14, false);
+      return;
     }
+
+    if (!touchStart) return;
+
+    if (!touchStart.horizontal) {
+      const dx = event.clientX - touchStart.x;
+      const dy = event.clientY - touchStart.y;
+      if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+      /* 竖着滑是滚页面，不发声；横着划才走音阶 */
+      if (Math.abs(dx) <= Math.abs(dy)) {
+        touchStart = null;
+        return;
+      }
+      touchStart.horizontal = true;
+    }
+
+    playNote(index, 0.12, true);
   }, { passive: true });
 
-  const clearTouch = () => { touchSlot = null; };
-  stage.addEventListener("pointerdown", clearTouch, { passive: true });
-  stage.addEventListener("pointercancel", clearTouch, { passive: true });
-  stage.addEventListener("pointerup", clearTouch, { passive: true });
+  stage.addEventListener("pointerdown", (event) => {
+    if (event.pointerType === "mouse") return;
+    touchStart = { x: event.clientX, y: event.clientY, horizontal: false };
+    lastNote = -1;
+    wheelPos = -1;
+  }, { passive: true });
+
+  const endTouch = () => {
+    touchStart = null;
+    lastNote = -1;
+  };
+
+  stage.addEventListener("pointerup", endTouch, { passive: true });
+  stage.addEventListener("pointercancel", endTouch, { passive: true });
+  stage.addEventListener("pointerleave", () => {
+    lastNote = -1;
+    wheelPos = -1;
+  }, { passive: true });
+
+  /* 触控板横向滑动：笔记本上没有「划过」的指针轨迹，用 wheel 补一段音阶 */
+  stage.addEventListener("wheel", (event) => {
+    if (!noteSpots.length) return;
+    if (Math.abs(event.deltaX) < Math.abs(event.deltaY) * 1.4) return;
+
+    /* 连续滚动时从当前音继续往上/往下走，不要每帧都回到原点 */
+    if (wheelPos < 0) {
+      wheelPos = lastNote < 0 ? 0.5 : lastNote / (noteSpots.length - 1);
+    }
+    wheelPos = Math.min(1, Math.max(0, wheelPos + event.deltaX * 0.0022));
+    playNote(Math.round(wheelPos * (noteSpots.length - 1)), 0.12, false);
+  }, { passive: true });
 
   /* =======================================================
      一点六、预载立绘
