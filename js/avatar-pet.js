@@ -297,15 +297,15 @@
       let x = 50;
       let y = 50;
 
-      if (edge < 0.4) {
-        x = Math.random() * 100;
-        y = Math.random() < 0.5 ? 0 : 100;
-      } else if (edge < 0.7) {
-        x = Math.random() < 0.5 ? 0 : 100;
-        y = Math.random() * 100;
+      if (edge < 0.42) {
+        x = Math.random() * 112 - 6;
+        y = Math.random() < 0.5 ? -7 : 107;
+      } else if (edge < 0.74) {
+        x = Math.random() < 0.5 ? -7 : 107;
+        y = Math.random() * 112 - 6;
       } else {
-        x = Math.random() * 100;
-        y = Math.random() * 100;
+        x = Math.random() * 112 - 6;
+        y = Math.random() * 112 - 6;
       }
 
       const angle = Math.random() * Math.PI * 2;
@@ -317,8 +317,8 @@
       spark.style.setProperty("--dy", `${Math.sin(angle) * dist - 18}px`);
       spark.style.setProperty("--rot", `${Math.random() * 260 - 130}deg`);
       spark.style.setProperty("--c", colors[i % colors.length]);
-      spark.style.setProperty("--d", `${1.05 + Math.random() * 0.55}s`);
-      spark.style.setProperty("--sz", `${6 + Math.random() * 10}px`);
+      spark.style.setProperty("--d", `${1.15 + Math.random() * 0.6}s`);
+      spark.style.setProperty("--sz", `${7 + Math.random() * 10}px`);
 
       lineEl.appendChild(spark);
       spark.addEventListener("animationend", () => spark.remove(), { once: true });

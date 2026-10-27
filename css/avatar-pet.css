@@ -708,11 +708,19 @@
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.4) rotate(0deg);
   }
-  18% { opacity: 0.95; }
+  12% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1) rotate(calc(var(--rot, 0deg) * 0.2));
+  }
+  70% {
+    opacity: 0.92;
+    transform: translate(calc(-50% + var(--dx, 0px) * 0.72), calc(-50% + var(--dy, 0px) * 0.72))
+      scale(0.88) rotate(calc(var(--rot, 0deg) * 0.7));
+  }
   100% {
     opacity: 0;
     transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, 0px)))
-      scale(0.15) rotate(var(--rot, 0deg));
+      scale(0.25) rotate(var(--rot, 0deg));
   }
 }
 
