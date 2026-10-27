@@ -150,6 +150,25 @@
   stage.addEventListener("pointerup", clearTouch, { passive: true });
 
   /* =======================================================
+     一点六、预载立绘
+     -------------------------------------------------------
+     页面加载完就把 8 张高精度立绘拉下来，
+     这样第一次点开角色卡不用等网络。
+     ======================================================= */
+  function preloadArt() {
+    characters.forEach((char) => {
+      const img = new Image();
+      img.src = `images/characters/art-${char.id}.webp`;
+    });
+  }
+
+  if (document.readyState === "complete") {
+    window.setTimeout(preloadArt, 300);
+  } else {
+    window.addEventListener("load", () => window.setTimeout(preloadArt, 300));
+  }
+
+  /* =======================================================
      二、三个小动作
      ======================================================= */
   function hop(slot) {
