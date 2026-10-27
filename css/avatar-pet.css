@@ -971,8 +971,9 @@ body.is-pet-boom .bg-icon,
 body.is-pet-boom .bg-orbs__orb,
 body.is-pet-boom .hnyz-ticker__track,
 body.is-pet-boom .char-stage__stripes,
-body.is-pet-boom .char-splash__stripes,
-body.is-pet-boom .char-splash__rays {
+body.is-pet-boom .char-splash__burst,
+body.is-pet-boom .char-splash__bob,
+body.is-pet-boom .char-splash__decor {
   animation-play-state: paused !important;
 }
 

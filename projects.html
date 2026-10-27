@@ -42,10 +42,10 @@
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css?v=20261025e">
   <link rel="stylesheet" href="css/pet.css?v=20261025b">
-  <link rel="stylesheet" href="css/avatar-pet.css?v=20261037">
+  <link rel="stylesheet" href="css/avatar-pet.css?v=20261051">
   <link rel="stylesheet" href="css/personal.css?v=20261037">
   <link rel="stylesheet" href="css/member.css?v=20261035">
-  <link rel="stylesheet" href="css/characters.css?v=20261046">
+  <link rel="stylesheet" href="css/characters.css?v=20261051">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <script src="js/sfx.js?v=20261042" defer></script>
@@ -54,7 +54,8 @@
   <script src="js/main.js?v=20261032" defer></script>
   <script src="js/pet.js?v=20261025c" defer></script>
   <script src="js/avatar-pet.js?v=20261037" defer></script>
-  <script src="js/characters.js?v=20261047" defer></script>
+  <script src="js/splash-scene.js?v=20261051" defer></script>
+  <script src="js/characters.js?v=20261051" defer></script>
   <script src="js/personal.js?v=20261043" defer></script>
 </head>
 <body id="top">
@@ -249,13 +250,10 @@
   <p class="sr-only" id="copy-status" role="status" aria-live="polite"></p>
 
 <!-- 抽卡结果页：对应游戏里点开角色后的 splash -->
-  <div class="char-splash" data-char-splash role="dialog" aria-modal="true" aria-label="抽卡结果" hidden>
-    <div class="char-splash__stripes" aria-hidden="true"></div>
-    <div class="char-splash__pattern" aria-hidden="true"></div>
-    <div class="char-splash__scrim" aria-hidden="true"></div>
-    <div class="char-splash__rays" aria-hidden="true"></div>
-    <div class="char-splash__bloom" aria-hidden="true"></div>
-    <div class="char-splash__grid" aria-hidden="true"></div>
+  <div class="char-splash" data-char-splash role="dialog" aria-modal="true" aria-label="角色卡" hidden>
+    <!-- 背景不是一张图：canvas 按 units.nim 的绘制顺序重画每个角色的底纹和粒子 -->
+    <canvas class="char-splash__scene" data-splash-scene aria-hidden="true"></canvas>
+    <div class="char-splash__burst" aria-hidden="true"></div>
 
     <div class="char-splash__stage">
       <div class="char-splash__head">
@@ -263,11 +261,14 @@
         <p class="char-splash__sub" data-splash-sub></p>
       </div>
       <div class="char-splash__bob">
+        <img class="char-splash__decor char-splash__decor--a" data-splash-decor="a" src="" alt="" aria-hidden="true" hidden>
+        <img class="char-splash__decor char-splash__decor--b" data-splash-decor="b" src="" alt="" aria-hidden="true" hidden>
         <img class="char-splash__pixel" data-splash-pixel src="" alt="" width="24" height="36">
         <img class="char-splash__unit" data-splash-img src="" alt="">
       </div>
     </div>
     <p class="char-splash__ability" data-splash-ability></p>
+    <p class="char-splash__count" data-splash-count aria-hidden="true">×1</p>
 
     <button class="char-splash__close" type="button" data-splash-close aria-label="关闭">×</button>
     <button class="char-splash__back" type="button" data-splash-back>Back</button>

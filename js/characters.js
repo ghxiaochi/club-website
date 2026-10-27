@@ -24,6 +24,11 @@
   const splashSub = splash ? splash.querySelector("[data-splash-sub]") : null;
   const splashAbility = splash ? splash.querySelector("[data-splash-ability]") : null;
   const splashBack = splash ? splash.querySelector("[data-splash-back]") : null;
+  const splashCount = splash ? splash.querySelector("[data-splash-count]") : null;
+  const splashDecor = splash ? Array.from(splash.querySelectorAll("[data-splash-decor]")) : [];
+
+  /* 角色卡背景的 canvas 画布（js/splash-scene.js），没加载时静默降级 */
+  const scene = window.HNYZ_SPLASH_SCENE || { show() {}, hide() {}, resize() {} };
 
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -52,7 +57,11 @@
     { id: "crawler", title: "-CRAWLER-", sub: "boom", ability: "destroys 4 adjacent blocks every 4 moves", unlocked: true,
       s1: "#665c9f", s2: "#bf92f8", glow: "#bf92f8", pattern: "spin" },
     { id: "zenith", title: "-ZENITH-", sub: "gaming", ability: "destroys the next 4 blocks in a line every 4 moves", unlocked: true,
-      s1: "#c45b4d", s2: "#ffa664", glow: "#ffd37f", pattern: "rays" },
+      s1: "#c45b4d", s2: "#ffa664", glow: "#ffd37f", pattern: "rays",
+      decor: [
+        "images/characters/decor-zenith-chips.webp",
+        "images/characters/decor-zenith-controller.webp"
+      ] },
     { id: "quad", title: "-QUAD-", sub: 'the "support" has arrived', ability: "destroys 8 adjacent blocks every 6 moves", unlocked: true,
       s1: "#235e62", s2: "#3a8a72", glow: "#84f490", pattern: "rays" },
     { id: "oxynoe", title: "-OXYNOE-", sub: "as was foretold", ability: "destroys alternating adjacent blocks every other move", unlocked: true,
@@ -78,6 +87,7 @@
     slot.type = "button";
     slot.className = "char-slot";
     slot.dataset.char = char.id;
+    slot.style.setProperty("--i", String(index));
 
     const img = document.createElement("img");
     img.src = `images/characters/unit-${char.id}.webp`;
@@ -160,6 +170,11 @@
     characters.forEach((char) => {
       const img = new Image();
       img.src = `images/characters/art-${char.id}.webp`;
+
+      (char.decor || []).forEach((src) => {
+        const decor = new Image();
+        decor.src = src;
+      });
     });
   }
 
@@ -233,6 +248,7 @@
      四、角色卡（splash）
      ======================================================= */
   let lastFocus = null;
+  let artToken = 0;
 
   function openSplash(char, slot) {
     if (!splash) return;
@@ -252,10 +268,12 @@
     }
 
     if (splashImg) {
-      /* 高精度立绘在后台加载，好了以后淡入替换像素小人 */
+      /* 高精度立绘在后台加载，好了以后淡入替换像素小人。
+         连续点开不同角色时，用 token 丢掉上一张的 load 回调 */
       let artShown = false;
+      const token = (artToken += 1);
       const showArt = () => {
-        if (artShown) return;
+        if (artShown || token !== artToken) return;
         artShown = true;
         splashImg.classList.add("is-loaded");
         if (splashPixel) splashPixel.classList.add("is-out");
@@ -273,7 +291,21 @@
     if (splashTitle) splashTitle.textContent = char.title;
     if (splashSub) splashSub.textContent = char.sub;
     if (splashAbility) splashAbility.textContent = char.ability;
+    if (splashCount) splashCount.textContent = "×1";
 
+    /* 角色旁边飘的小物件（目前只有 Zenith 有） */
+    splashDecor.forEach((node, index) => {
+      const src = (char.decor || [])[index];
+      if (src) {
+        node.src = src;
+        node.hidden = false;
+      } else {
+        node.hidden = true;
+        node.removeAttribute("src");
+      }
+    });
+
+    splash.dataset.character = char.id;
     splash.hidden = false;
     splash.classList.remove("is-out");
     void splash.offsetWidth;
@@ -282,6 +314,8 @@
     document.body.classList.add("is-splash-open");
     if (splashBack) splashBack.focus({ preventScroll: true });
 
+    /* 背景交给 canvas：按游戏 units.nim 的画法重绘 */
+    scene.show(char.id);
     sfx.play("view", { volume: 0.22 });
   }
 
@@ -290,6 +324,7 @@
 
     sfx.stop("view");
     sfx.play("back", { volume: 0.2 });
+    scene.hide();
 
     splash.classList.remove("is-in");
     splash.classList.add("is-out");
