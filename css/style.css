@@ -1377,18 +1377,6 @@ code {
   line-height: 1.7;
 }
 
-.member-profile__link {
-  display: inline-block;
-  margin-top: 8px;
-  color: var(--blue);
-  font-family: var(--mono);
-  font-size: 0.68rem;
-}
-
-.member-profile__link:hover {
-  color: var(--green);
-}
-
 .member-profile__sprites {
   position: relative;
   z-index: 1;

@@ -6,6 +6,14 @@
   <meta name="description" content="HNYZ · 衡南一中编程社成员的个人主页：个人简介和 TA 的项目。">
   <meta name="theme-color" content="#f5f9ff">
   <script>
+    /* 新开/刷新页面固定从顶部开始，不恢复上次的滚动位置 */
+    (function () {
+      try {
+        if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+      } catch (error) { /* 忽略 */ }
+    })();
+  </script>
+  <script>
     /* 主题预置：首帧前定好深浅色，避免刷新时白闪 */
     (function () {
       try {
@@ -38,22 +46,22 @@
   <title>成员主页｜HNYZ · 衡南一中编程社</title>
 
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/style.css?v=20261025e">
+  <link rel="stylesheet" href="css/style.css?v=20261058">
   <link rel="stylesheet" href="css/pet.css?v=20261025b">
-  <link rel="stylesheet" href="css/personal.css?v=20261055">
+  <link rel="stylesheet" href="css/personal.css?v=20261058">
   <link rel="stylesheet" href="css/member.css?v=20261035">
   <link rel="stylesheet" href="css/avatar-pet.css?v=20261057">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <script src="js/sfx.js?v=20261041" defer></script>
-  <script src="js/theme.js?v=20261055" defer></script>
+  <script src="js/theme.js?v=20261058" defer></script>
   <script src="js/members.js?v=20261034" defer></script>
-  <script src="js/main.js?v=20261032" defer></script>
+  <script src="js/main.js?v=20261058" defer></script>
   <script src="js/pet.js?v=20261025c" defer></script>
   <script src="js/member.js?v=20261034" defer></script>
   <script src="js/avatar-pet.js?v=20261057" defer></script>
   <script src="js/personal.js?v=20261043" defer></script>
-  <script src="js/click-fx.js?v=20261055" defer></script>
+  <script src="js/click-fx.js?v=20261058" defer></script>
 </head>
 <body id="top">
   <div class="bg-orbs" aria-hidden="true">
@@ -165,7 +173,6 @@
         <a href="index.html#schedule">活动</a>
         <a href="index.html#wall">资源墙</a>
         <a href="index.html#join">加入</a>
-        <a href="https://github.com/ghxiaochi" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
         <a href="#top">回到顶部 ↑</a>
       </nav>
 

@@ -47,21 +47,21 @@
 
   <!-- 站点图标与样式。全部使用本地文件，无外部依赖。 -->
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/style.css?v=20261025e">
+  <link rel="stylesheet" href="css/style.css?v=20261058">
   <link rel="stylesheet" href="css/pet.css?v=20261025b">
-  <link rel="stylesheet" href="css/personal.css?v=20261055">
+  <link rel="stylesheet" href="css/personal.css?v=20261058">
   <link rel="stylesheet" href="css/avatar-pet.css?v=20261057">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <!-- 项目卡片、全部项目折叠页和复制按钮由 js/main.js 驱动 -->
   <script src="js/sfx.js?v=20261041" defer></script>
-  <script src="js/theme.js?v=20261055" defer></script>
+  <script src="js/theme.js?v=20261058" defer></script>
   <script src="js/members.js?v=20261034" defer></script>
-  <script src="js/main.js?v=20261032" defer></script>
+  <script src="js/main.js?v=20261058" defer></script>
   <script src="js/pet.js?v=20261025c" defer></script>
   <script src="js/avatar-pet.js?v=20261057" defer></script>
   <script src="js/personal.js?v=20261043" defer></script>
-  <script src="js/click-fx.js?v=20261055" defer></script>
+  <script src="js/click-fx.js?v=20261058" defer></script>
 </head>
 <body>
 
@@ -378,16 +378,15 @@
 
         <noscript>
           <p class="noscript-note">
-            项目卡片需要 JavaScript 才能渲染。请启用 JavaScript，或直接查看
-            <a href="https://github.com/ghxiaochi">我们的 GitHub 主页</a>。
+            项目卡片需要 JavaScript 才能渲染。请启用 JavaScript 后再查看。
           </p>
         </noscript>
 
         <div class="projects-foot">
           <p>有想法？欢迎在群里提出，或者直接开一个自己的仓库。</p>
-          <a href="https://github.com/ghxiaochi" target="_blank" rel="noopener noreferrer">
-            GitHub 主页
-            <span aria-hidden="true">↗</span>
+          <a href="projects.html">
+            看看成员主页
+            <span aria-hidden="true">→</span>
           </a>
         </div>
       </div>
@@ -629,45 +628,30 @@
   </div>
 
   <script>
-    /* 开屏定位：直接落在「关于」那一块，不做平滑滚动 */
+    /* 开屏：固定停在首屏（顶部），不走平滑滚动，也不恢复到上次的位置。
+       带 #锚点 的链接仍然按锚点落位。 */
     (function () {
       var boot = document.querySelector("[data-boot-screen]");
-      var HEADER = 72;
+      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var root = document.documentElement;
 
-      /* 旧地址里如果带着 #join 之类的锚点，先清掉，避免一打开就跳到页尾 */
-      try {
-        if (window.location.hash) {
-          history.replaceState(null, "", window.location.pathname + window.location.search);
-        }
-      } catch (error) { /* 忽略 */ }
-
-      function place() {
-        var target = document.getElementById("about");
-        var root = document.documentElement;
+      if (!window.location.hash) {
         root.style.scrollBehavior = "auto";
-
-        if (target) {
-          var top = target.getBoundingClientRect().top + window.pageYOffset - HEADER;
-          window.scrollTo(0, Math.max(0, top));
-        } else {
-          window.scrollTo(0, 0);
-        }
-
-        window.requestAnimationFrame(function () {
-          root.style.scrollBehavior = "";
+        window.scrollTo(0, 0);
+        window.addEventListener("load", function () {
+          if (!window.location.hash) window.scrollTo(0, 0);
         });
+        window.setTimeout(function () {
+          if (!window.location.hash) window.scrollTo(0, 0);
+          root.style.scrollBehavior = "";
+        }, 80);
       }
 
-      place();
-      window.addEventListener("load", place);
-      window.setTimeout(place, 280);
-
-      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       window.setTimeout(function () {
         if (!boot) return;
         boot.classList.add("is-hidden");
-        window.setTimeout(function () { boot.remove(); }, reduce ? 0 : 600);
-      }, reduce ? 120 : 780);
+        window.setTimeout(function () { boot.remove(); }, reduce ? 0 : 500);
+      }, reduce ? 100 : 620);
     })();
   </script>
 
@@ -712,7 +696,6 @@
         <a href="#wall">资源墙</a>
         <a href="gallery.html">图集</a>
         <a href="#join">加入</a>
-        <a href="https://github.com/ghxiaochi" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
         <a href="#top">回到顶部 ↑</a>
       </nav>
 

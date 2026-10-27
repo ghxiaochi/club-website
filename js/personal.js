@@ -298,8 +298,8 @@
     function follow(x, y) {
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(() => {
-        root.style.setProperty("--gx", `${x}px`);
-        root.style.setProperty("--gy", `${y}px`);
+        /* 只动 transform，让光晕走合成层，不触发整屏重绘 */
+        glow.style.transform = `translate3d(${x}px, ${y}px, 0)`;
       });
     }
 

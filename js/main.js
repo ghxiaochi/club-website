@@ -84,18 +84,6 @@
     };
   }
 
-  /* 只允许 http(s) 和站内相对路径，避免把 javascript: 之类的东西塞进 href */
-  function normalizeHttpUrl(value) {
-    if (typeof value !== "string" || !value.trim()) return "";
-
-    try {
-      const url = new URL(value.trim(), window.location.href);
-      return url.protocol === "http:" || url.protocol === "https:" ? url.href : "";
-    } catch (error) {
-      return "";
-    }
-  }
-
   /* 封面地址校验：允许 https、绝对路径、./ 相对路径和 images/xxx 这种写法 */
   function normalizeCover(value) {
     if (typeof value !== "string") return "";
@@ -591,17 +579,6 @@
 
     copy.append(kicker, title, desc);
 
-    const linkUrl = normalizeHttpUrl(profile.link);
-    if (linkUrl) {
-      const link = document.createElement("a");
-      link.className = "member-profile__link";
-      link.href = linkUrl;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      link.textContent = "打开 GitHub 主页 ↗";
-      copy.appendChild(link);
-    }
-
     const sprites = document.createElement("div");
     sprites.className = "member-profile__sprites";
     sprites.setAttribute("aria-hidden", "true");
@@ -869,12 +846,27 @@
     const header = document.querySelector("[data-header]");
     if (!header) return;
 
+    let pending = false;
+    let scrolled = null;
+
     const update = () => {
-      header.classList.toggle("is-scrolled", window.scrollY > 8);
+      const next = window.scrollY > 8;
+      if (next === scrolled) return;
+      scrolled = next;
+      header.classList.toggle("is-scrolled", next);
+    };
+
+    const onScroll = () => {
+      if (pending) return;
+      pending = true;
+      window.requestAnimationFrame(() => {
+        pending = false;
+        update();
+      });
     };
 
     update();
-    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
   }
 
   function initYear() {

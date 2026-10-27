@@ -248,6 +248,21 @@
   }
 }
 
+/* 转场的一瞬间先暂停持续动画和鼠标光晕，圆推得更顺 */
+html.is-theme-swap .bg-icon,
+html.is-theme-swap .bg-orbs__orb,
+html.is-theme-swap .hnyz-ticker__track,
+html.is-theme-swap .hnyz-sticker,
+html.is-theme-swap .char-slot {
+  animation-play-state: paused !important;
+}
+
+html.is-theme-swap .hynz-glow,
+html.is-theme-swap .hnyz-glow {
+  opacity: 0 !important;
+  transition: none !important;
+}
+
 /* 图标翻一下，换主题时有个交代 */
 .theme-toggle.is-switching .theme-toggle__icon--sun,
 .theme-toggle.is-switching .theme-toggle__icon--moon {
@@ -267,25 +282,6 @@
     opacity: 1;
     transform: rotate(0) scale(1);
   }
-}
-
-/* 不支持 View Transitions 的浏览器：色块圆 wipe */
-.theme-wipe {
-  position: fixed;
-  inset: 0;
-  z-index: 9997;
-  background: var(--wipe-color, #f5f9ff);
-  clip-path: circle(0 at var(--wipe-x, 50%) var(--wipe-y, 50%));
-  transition: clip-path 0.62s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.4s ease;
-  pointer-events: none;
-}
-
-.theme-wipe.is-on {
-  clip-path: circle(var(--wipe-r, 150vmax) at var(--wipe-x, 50%) var(--wipe-y, 50%));
-}
-
-.theme-wipe.is-fade {
-  opacity: 0;
 }
 
 .theme-toggle__icon--moon,
@@ -332,17 +328,24 @@ html.reveal-ready .project-card[data-reveal] {
    浅色下像投影灯、深色下像手电筒，而不是一块灰色蒙版 */
 .hnyz-glow {
   position: fixed;
-  inset: 0;
+  left: 0;
+  top: 0;
+  /* 固定大小 + transform 平移：不用每帧重绘整屏渐变 */
+  width: 900px;
+  height: 900px;
+  margin: -450px 0 0 -450px;
   z-index: 5;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.55s ease;
   background: radial-gradient(
-    430px circle at var(--gx, 50%) var(--gy, 26%),
+    circle closest-side,
     rgba(37, 99, 235, 0.2),
     transparent 66%
   );
   mix-blend-mode: multiply;
+  transform: translate3d(-2000px, -2000px, 0);
+  will-change: transform;
 }
 
 .hnyz-glow.is-on {
@@ -351,7 +354,7 @@ html.reveal-ready .project-card[data-reveal] {
 
 [data-theme="dark"] .hnyz-glow {
   background: radial-gradient(
-    480px circle at var(--gx, 50%) var(--gy, 26%),
+    circle closest-side,
     rgba(131, 176, 255, 0.26),
     transparent 66%
   );
