@@ -25,6 +25,17 @@
       } catch (error) { /* 隐私模式下忽略 */ }
     })();
   </script>
+  <script>
+    /* 风格预置：首帧前挂上上次选的皮肤，避免先闪一下默认风 */
+    (function () {
+      try {
+        var style = localStorage.getItem("hnyz:style");
+        if (style === "minimal" || style === "hacker") {
+          document.documentElement.dataset.style = style;
+        }
+      } catch (error) { /* 隐私模式下忽略 */ }
+    })();
+  </script>
   <meta property="og:title" content="全部项目｜HNYZ · 衡南一中编程社">
   <meta property="og:description" content="按成员折叠的完整项目列表，收录社团成员的原创作品。">
   <meta property="og:type" content="website">
@@ -51,6 +62,8 @@
   <link rel="stylesheet" href="css/style.css?v=20261058">
   <link rel="stylesheet" href="css/pet.css?v=20261025b">
   <link rel="stylesheet" href="css/avatar-pet.css?v=20261057">
+  <link rel="stylesheet" href="css/skins.css?v=20261073">
+  <link rel="stylesheet" href="css/dino.css?v=20261073">
   <link rel="stylesheet" href="css/personal.css?v=20261060">
   <link rel="stylesheet" href="css/member.css?v=20261035">
   <link rel="stylesheet" href="css/characters.css?v=20261052">
@@ -66,6 +79,8 @@
   <script src="js/characters.js?v=20261072" defer></script>
   <script src="js/personal.js?v=20261043" defer></script>
   <script src="js/click-fx.js?v=20261058" defer></script>
+  <script src="js/skins.js?v=20261073" defer></script>
+  <script src="js/dino.js?v=20261073" defer></script>
 </head>
 <body id="top">
   <div class="bg-orbs" aria-hidden="true">
@@ -118,6 +133,9 @@
             <path d="M4 9.4h3L12 5.4v13.2L7 14.6H4z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
             <path d="m16 9.6 5 4.8m0-4.8-5 4.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
           </svg>
+        </button>
+        <button class="style-toggle" type="button" data-style-toggle aria-label="切换网页风格" aria-haspopup="dialog" aria-expanded="false" title="切换风格">
+          <span class="style-toggle__grid" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
         </button>
         <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换到深色模式" aria-pressed="false" title="切换到深色模式">
           <svg class="theme-toggle__icon theme-toggle__icon--sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -233,6 +251,42 @@
       </p>
     </div>
   </footer>
+
+  <!-- 页脚小恐龙：AUTO 自动跳 / MANUAL 手动跳，画布由 js/dino.js 驱动 -->
+  <section class="dino-run" data-dino-run data-mode="auto" aria-labelledby="dino-run-title">
+    <div class="container dino-run__inner">
+      <div class="dino-run__main">
+        <div class="dino-run__bar">
+          <h2 class="dino-run__kicker" id="dino-run-title">
+            <span class="dino-run__led" aria-hidden="true"></span>
+            DINO_RUN
+            <span class="dino-run__ver">// 08-BIT</span>
+          </h2>
+          <p class="dino-run__score" data-dino-score>HI 00000  00000</p>
+        </div>
+        <div class="dino-run__stage" data-dino-stage tabindex="-1">
+          <canvas class="dino-run__canvas" data-dino-canvas aria-hidden="true"></canvas>
+          <p class="dino-run__hint" data-dino-hint>AUTO_PILOT // ON</p>
+          <p class="dino-run__toast" data-dino-toast hidden>SIGNAL LOST // REBOOT</p>
+        </div>
+      </div>
+      <div class="dino-run__controls" role="group" aria-label="小恐龙控制">
+        <button class="dino-run__mode" type="button" data-dino-mode="auto" aria-pressed="true" title="自动跳跃：小恐龙自己躲仙人掌">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M20 12a8 8 0 1 1-2.4-5.7M20 4v5h-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>AUTO</span>
+        </button>
+        <button class="dino-run__mode" type="button" data-dino-mode="manual" aria-pressed="false" title="手动控制：空格 / ↑ / 点击画布跳跃">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 19V6M7 11l5-5 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M6 21h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <span>MANUAL</span>
+        </button>
+      </div>
+    </div>
+  </section>
 
   <!-- 站内校徽：和首页一致的右下角背景板，随页面滚动旋转 -->
   <div class="hnyz-pet" data-hnyz-pet style="left: auto; right: clamp(8px, 1.6vw, 20px);">

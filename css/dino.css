@@ -1,0 +1,324 @@
+/* =========================================================
+   HNYZ · 页脚小恐龙
+   ---------------------------------------------------------
+   一排 8-bit 小恐龙在页脚跑动：
+   - AUTO：自动判断仙人掌距离起跳
+   - MANUAL：空格 / ↑ / 点击画布起跳
+   画布只画角色和障碍，天空/网格交给 CSS，换皮肤不用重绘。
+   ========================================================= */
+
+.dino-run {
+  --dino-ink: #e8f1ff;
+  --dino-accent: #7dd3fc;
+  --dino-dim: #3a5a80;
+  --dino-ground: rgba(125, 211, 252, 0.42);
+  position: relative;
+  z-index: 1;
+  padding: 16px 0 20px;
+  border-top: 1px solid rgba(125, 211, 252, 0.18);
+  color: var(--dino-ink);
+  background-color: #081426;
+  background-image:
+    radial-gradient(ellipse 70% 120% at 50% 110%, rgba(37, 99, 235, 0.22), transparent 70%),
+    linear-gradient(rgba(125, 211, 252, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(125, 211, 252, 0.06) 1px, transparent 1px);
+  background-size: auto, 24px 24px, 24px 24px;
+}
+
+.dino-run__inner {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+}
+
+.dino-run__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.dino-run__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  color: var(--dino-dim);
+  text-transform: uppercase;
+}
+
+.dino-run__kicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font: inherit;
+  color: var(--dino-ink);
+}
+
+.dino-run__led {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--dino-accent);
+  box-shadow: 0 0 10px var(--dino-accent);
+  animation: dinoLed 1.8s ease-in-out infinite;
+}
+
+.dino-run__ver {
+  color: var(--dino-dim);
+  letter-spacing: 0.08em;
+}
+
+.dino-run__score {
+  margin: 0;
+  white-space: pre;
+  color: var(--dino-ink);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.12em;
+}
+
+.dino-run__stage {
+  position: relative;
+  height: clamp(150px, 12vw, 175px);
+  overflow: hidden;
+  border: 1px solid rgba(125, 211, 252, 0.2);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(180deg, rgba(125, 211, 252, 0.04), transparent 46%),
+    rgba(3, 9, 18, 0.38);
+  cursor: default;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dino-run[data-mode="manual"] .dino-run__stage {
+  cursor: pointer;
+}
+
+.dino-run__stage:focus-visible {
+  outline: 2px solid var(--dino-accent);
+  outline-offset: 2px;
+}
+
+.dino-run__canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+.dino-run__hint {
+  position: absolute;
+  left: 12px;
+  bottom: 9px;
+  margin: 0;
+  color: var(--dino-dim);
+  font-family: var(--mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.dino-run[data-mode="auto"] .dino-run__hint {
+  opacity: 0.48;
+}
+
+.dino-run__toast {
+  position: absolute;
+  pointer-events: none;
+  inset: 0;
+  display: grid;
+  place-items: start center;
+  padding-top: 16px;
+  margin: 0;
+  background: rgba(3, 9, 18, 0.52);
+  color: var(--dino-accent);
+  font-family: var(--mono);
+  font-size: clamp(0.62rem, 1.4vw, 0.78rem);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  animation: dinoToast 0.25s ease both;
+}
+
+.dino-run__toast[hidden] {
+  display: none;
+}
+
+@keyframes dinoToast {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes dinoLed {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+/* ---------- 右侧竖排按钮 ---------- */
+.dino-run__controls {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 6px;
+  width: 48px;
+  flex-shrink: 0;
+}
+
+.dino-run__mode {
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  width: 48px;
+  height: 48px;
+  padding: 5px 0 4px;
+  border: 1px solid rgba(125, 211, 252, 0.24);
+  border-radius: var(--radius);
+  background: rgba(3, 9, 18, 0.42);
+  color: var(--dino-dim);
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.dino-run__mode svg {
+  width: 17px;
+  height: 17px;
+}
+
+.dino-run__mode span {
+  font-family: var(--mono);
+  font-size: 0.44rem;
+  line-height: 1;
+  letter-spacing: 0.08em;
+}
+
+.dino-run__mode:hover {
+  color: var(--dino-ink);
+  border-color: var(--dino-accent);
+}
+
+.dino-run__mode[aria-pressed="true"] {
+  color: var(--dino-accent);
+  border-color: var(--dino-accent);
+  background: rgba(125, 211, 252, 0.09);
+  box-shadow: inset 0 0 0 1px var(--dino-accent), 0 0 18px rgba(125, 211, 252, 0.12);
+}
+
+.dino-run__mode:focus-visible {
+  outline: 2px solid var(--dino-accent);
+  outline-offset: 2px;
+}
+
+/* 极简风：去掉发光与网格 */
+html[data-style="minimal"] .dino-run {
+  padding: 14px 0 18px;
+}
+
+html[data-style="minimal"] .dino-run__stage {
+  background: transparent;
+  border-color: #deded8;
+}
+
+html[data-style="minimal"] .dino-run__mode {
+  border-radius: 2px;
+  background: transparent;
+}
+
+html[data-style="minimal"] .dino-run__mode[aria-pressed="true"] {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+
+html[data-style="minimal"] .dino-run__led {
+  animation: none;
+  box-shadow: none;
+}
+
+/* 黑客风：绿色终端 */
+html[data-style="hacker"] .dino-run__stage {
+  border-color: rgba(57, 255, 136, 0.22);
+  background:
+    repeating-linear-gradient(180deg, rgba(57, 255, 136, 0.04) 0 1px, transparent 1px 3px),
+    rgba(1, 5, 3, 0.5);
+}
+
+html[data-style="hacker"] .dino-run__mode {
+  border-radius: 2px;
+  background: rgba(2, 8, 4, 0.6);
+}
+
+html[data-style="hacker"] .dino-run__mode[aria-pressed="true"] {
+  background: rgba(57, 255, 136, 0.08);
+  box-shadow: inset 0 0 0 1px #39ff88, 0 0 18px rgba(57, 255, 136, 0.2);
+}
+
+html[data-style="hacker"][data-theme="light"] .dino-run__stage {
+  background:
+    repeating-linear-gradient(180deg, rgba(10, 143, 74, 0.05) 0 1px, transparent 1px 3px),
+    rgba(255, 255, 255, 0.4);
+}
+
+html[data-style="hacker"][data-theme="light"] .dino-run__mode {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* ---------- 小屏 ---------- */
+@media (max-width: 900px) {
+  .dino-run {
+    padding: 12px 0 16px;
+  }
+
+  .dino-run__inner {
+    gap: 10px;
+  }
+
+  .dino-run__stage {
+    height: 150px;
+  }
+
+  .dino-run__bar {
+    font-size: 0.5rem;
+    margin-bottom: 6px;
+  }
+
+  .dino-run__controls {
+    width: 42px;
+    gap: 5px;
+  }
+
+  .dino-run__mode {
+    width: 42px;
+    height: 42px;
+    padding: 4px 0;
+  }
+
+  .dino-run__mode svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .dino-run__mode span {
+    font-size: 0.4rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .dino-run__hint {
+    left: 8px;
+    bottom: 6px;
+    font-size: 0.46rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dino-run__led {
+    animation: none;
+  }
+}
