@@ -6,7 +6,7 @@
    - 鼠标扫过：小人依次跳一下（unit.jumping，0.21s 正弦）
    - 右键：压扁并换成「挨打」表情（clickTime → -hit 贴图）
    - 左键：打开角色卡（splash：角色配色 + 立绘 + 标题/技能）
-   - 锁定的角色是全黑剪影（mixColor rgb(0.26)），点了会抖
+   - 8 个角色全部解锁（想恢复剪影，把 unlocked 改回 false 即可）
    ========================================================= */
 
 (() => {
@@ -40,17 +40,15 @@
       s1: "#235e62", s2: "#3a8a72", glow: "#84f490", pattern: "circles" },
     { id: "crawler", title: "-CRAWLER-", sub: "boom", ability: "destroys 4 adjacent blocks every 4 moves", unlocked: true,
       s1: "#665c9f", s2: "#bf92f8", glow: "#bf92f8", pattern: "spin" },
-    { id: "zenith", title: "-ZENITH-", sub: "gaming", ability: "destroys the next 4 blocks in a line every 4 moves", unlocked: false,
+    { id: "zenith", title: "-ZENITH-", sub: "gaming", ability: "destroys the next 4 blocks in a line every 4 moves", unlocked: true,
       s1: "#c45b4d", s2: "#ffa664", glow: "#ffd37f", pattern: "rays" },
-    { id: "quad", title: "-QUAD-", sub: 'the "support" has arrived', ability: "destroys 8 adjacent blocks every 6 moves", unlocked: false,
+    { id: "quad", title: "-QUAD-", sub: 'the "support" has arrived', ability: "destroys 8 adjacent blocks every 6 moves", unlocked: true,
       s1: "#235e62", s2: "#3a8a72", glow: "#84f490", pattern: "rays" },
-    { id: "oxynoe", title: "-OXYNOE-", sub: "as was foretold", ability: "destroys alternating adjacent blocks every other move", unlocked: false,
+    { id: "oxynoe", title: "-OXYNOE-", sub: "as was foretold", ability: "destroys alternating adjacent blocks every other move", unlocked: true,
       s1: "#235e62", s2: "#3a8a72", glow: "#c7ffb7", pattern: "circles" },
-    { id: "sei", title: "-SEI-", sub: "crossed out", ability: "destroys blocks in a diagonal cross every 4 moves", unlocked: false,
+    { id: "sei", title: "-SEI-", sub: "crossed out", ability: "destroys blocks in a diagonal cross every 4 moves", unlocked: true,
       s1: "#ffa664", s2: "#ffcb82", glow: "#ffd37f", pattern: "circles" }
   ];
-
-  const LOCK_LINES = ["还没抽到……", "这个位置空着。", "别戳了，是黑的。"];
 
   /* 旧版抽卡存档已经不用了，清掉 */
   try {
@@ -84,51 +82,62 @@
 
     slot.append(img, name);
 
-    if (char.unlocked) {
-      /* 悬停：和游戏一样，每次进到小人身上都会跳一下 */
-      slot.addEventListener("pointerenter", (event) => {
-        if (event.pointerType !== "mouse") return;
-        hop(slot);
-        sfx.play("hover", { rate: 1 + index * 0.045, volume: 0.12 });
-      });
+    /* 悬停（鼠标）：和游戏一样，每次进到小人身上都会跳一下 */
+    slot.addEventListener("pointerenter", (event) => {
+      if (event.pointerType !== "mouse") return;
+      hop(slot);
+      sfx.play("hover", { rate: 1 + index * 0.045, volume: 0.12 });
+    });
 
-      /* 左键：打开角色卡 */
-      slot.addEventListener("click", () => {
-        squash(slot);
-        openSplash(char, slot);
-      });
-    }
+    /* 左键：打开角色卡 */
+    slot.addEventListener("click", () => {
+      squash(slot);
+      openSplash(char, slot);
+    });
 
     /* 右键：压扁 + 换挨打表情（游戏里的 keyMouseRight） */
     slot.addEventListener("contextmenu", (event) => {
       event.preventDefault();
       hitFace(slot, char);
-      if (!char.unlocked) {
-        shake(slot);
-        say(LOCK_LINES[Math.floor(Math.random() * LOCK_LINES.length)], slot);
-      }
-    });
-
-    slot.addEventListener("click", () => {
-      if (char.unlocked) return;
-      shake(slot);
-      say(LOCK_LINES[Math.floor(Math.random() * LOCK_LINES.length)], slot);
-      sfx.play("locked", { volume: 0.24 });
     });
 
     stage.appendChild(slot);
     slots.push(slot);
   });
 
-  /* 锁定的压暗成剪影，和游戏里 mixColor rgb(0.26) 一致 */
   slots.forEach((slot, index) => {
-    const char = characters[index];
-    slot.classList.toggle("is-locked", !char.unlocked);
-    slot.setAttribute(
-      "aria-label",
-      char.unlocked ? `${char.title}，左键看卡片，右键戳一下` : `${char.title} 未解锁`
-    );
+    slot.setAttribute("aria-label", `${characters[index].title}，左键看卡片，右键戳一下`);
   });
+
+  /* =======================================================
+     一点五、触屏：手指划过时，指到谁谁就跳
+     -------------------------------------------------------
+     手机上没有 hover，用 pointermove + elementFromPoint
+     判断手指正压在哪个小人身上；进入新的小人就跳一下。
+     不阻止默认行为，上下滑动仍然正常滚屏。
+     ======================================================= */
+  let touchSlot = null;
+
+  stage.addEventListener("pointermove", (event) => {
+    if (event.pointerType === "mouse") return;
+
+    const el = document.elementFromPoint(event.clientX, event.clientY);
+    const slot = el && typeof el.closest === "function" ? el.closest(".char-slot") : null;
+
+    if (slot && slot !== touchSlot) {
+      touchSlot = slot;
+      hop(slot);
+      const index = slots.indexOf(slot);
+      sfx.play("hover", { rate: 1 + index * 0.045, volume: 0.1 });
+    } else if (!slot) {
+      touchSlot = null;
+    }
+  }, { passive: true });
+
+  const clearTouch = () => { touchSlot = null; };
+  stage.addEventListener("pointerdown", clearTouch, { passive: true });
+  stage.addEventListener("pointercancel", clearTouch, { passive: true });
+  stage.addEventListener("pointerup", clearTouch, { passive: true });
 
   /* =======================================================
      二、三个小动作

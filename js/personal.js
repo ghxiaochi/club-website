@@ -381,16 +381,16 @@
     layer.className = "bg-icons";
     layer.setAttribute("aria-hidden", "true");
 
-    const COLS = 6;
-    const ROWS = 5;
+    const COLS = 5;
+    const ROWS = 4;
 
     for (let i = 0; i < COLS * ROWS; i += 1) {
       const col = i % COLS;
       const row = Math.floor(i / COLS);
 
       /* 网格 + 抖动：既有分布感，又不会挤成一团 */
-      const left = col * 16.4 + 2.5 + ((i * 7) % 6);
-      const top = row * 18.5 + 3 + ((i * 11) % 6);
+      const left = col * 19.5 + 3 + ((i * 7) % 7);
+      const top = row * 22.5 + 3 + ((i * 11) % 7);
 
       const icon = document.createElement("span");
       icon.className = "bg-icon";
@@ -535,7 +535,13 @@
   initTilt();
   initGlobalGlow();
   initTicker();
-  initBgIcons();
+
+  /* 背景图标不着急：等页面空闲下来再撒，首屏更快 */
+  if ("requestIdleCallback" in window) {
+    window.requestIdleCallback(initBgIcons, { timeout: 2000 });
+  } else {
+    window.setTimeout(initBgIcons, 1200);
+  }
   initBrandEgg();
   initHackerMode();
   initConsoleSignature();
