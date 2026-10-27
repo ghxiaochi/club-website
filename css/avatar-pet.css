@@ -541,6 +541,8 @@
 
 /* 中间的字幕：一个红字的弹窗方框 */
 .pet-rampage-line {
+  --zoom: 1;
+  --shake: 1;
   position: fixed;
   left: 50%;
   top: 40%;
@@ -568,10 +570,11 @@
     2px 2px 0 #ffd37f,
     4px 4px 0 rgba(20, 20, 26, 0.16);
   opacity: 0;
-  transform: translate(-50%, -50%) rotate(-2deg) scale(0.82);
-  transition: opacity 0.28s ease, transform 0.42s cubic-bezier(0.22, 0.9, 0.3, 1.4);
+  transform: translate(-50%, -50%) rotate(-2deg) scale(calc(var(--zoom) * 0.82));
+  transition: opacity 0.28s ease, transform 0.18s cubic-bezier(0.22, 0.9, 0.3, 1.4);
   pointer-events: none;
   will-change: transform, opacity;
+  user-select: none;
 }
 
 /* 方框顶部的小标签，像老式弹窗的标题栏 */
@@ -609,7 +612,124 @@
 
 .pet-rampage-line.is-visible {
   opacity: 1;
-  transform: translate(-50%, -50%) rotate(-2deg) scale(1);
+  transform: translate(-50%, -50%) rotate(-2deg) scale(var(--zoom));
+  pointer-events: auto;
+  cursor: zoom-in;
+  touch-action: none;
+}
+
+.pet-rampage-line.is-boom {
+  pointer-events: none;
+}
+
+/* 逐字抖动：每个字一个很小的错位，密度刚好是“老式显示器在抖” */
+.pet-rampage-chars {
+  display: inline;
+}
+
+/* 每隔两三秒整行抖一下，像信号不好 */
+.pet-rampage-line.is-visible .pet-rampage-chars {
+  animation: petLineGlitch 2.7s steps(1, end) infinite;
+}
+
+@keyframes petLineGlitch {
+  0%, 92%, 100% { translate: 0 0; }
+  93% { translate: -2px 1px; }
+  95% { translate: 2px -1px; }
+  97% { translate: -1px -1px; }
+}
+
+.pet-rampage-char {
+  display: inline-block;
+  animation: petCharShake 0.16s steps(2, end) infinite;
+  animation-delay: calc(var(--i, 0) * -0.019s);
+  will-change: transform;
+}
+
+@keyframes petCharShake {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% {
+    transform: translate(calc(-1px * var(--shake, 1)), calc(0.6px * var(--shake, 1)))
+      rotate(calc(-0.7deg * var(--shake, 1)));
+  }
+  50% {
+    transform: translate(calc(0.7px * var(--shake, 1)), calc(-0.8px * var(--shake, 1)))
+      rotate(calc(0.5deg * var(--shake, 1)));
+  }
+  75% {
+    transform: translate(calc(0.5px * var(--shake, 1)), calc(0.7px * var(--shake, 1)))
+      rotate(calc(-0.4deg * var(--shake, 1)));
+  }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+/* 缩放时的外框脉冲 */
+.pet-rampage-line.is-bumped {
+  animation: petLineBump 0.3s ease;
+}
+
+@keyframes petLineBump {
+  0%, 100% {
+    box-shadow:
+      10px 10px 0 rgba(20, 20, 26, 0.28),
+      inset 0 0 0 3px #ffffff,
+      inset 0 0 0 5px rgba(225, 29, 46, 0.18);
+  }
+  50% {
+    box-shadow:
+      0 0 0 12px rgba(225, 29, 46, 0.22),
+      10px 10px 0 rgba(20, 20, 26, 0.28),
+      inset 0 0 0 3px #ffffff,
+      inset 0 0 0 5px rgba(225, 29, 46, 0.3);
+  }
+}
+
+/* 弹窗边缘的小粒子 */
+.pet-line-spark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--sz, 6px);
+  height: var(--sz, 6px);
+  border-radius: 50%;
+  background: var(--c, #e11d2e);
+  box-shadow: 0 0 7px var(--c, #e11d2e);
+  opacity: 0;
+  pointer-events: none;
+  animation: petLineSpark var(--d, 0.7s) cubic-bezier(0.15, 0.7, 0.25, 1) forwards;
+}
+
+.pet-line-spark:nth-child(3n) {
+  border-radius: 2px;
+}
+
+@keyframes petLineSpark {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4) rotate(0deg);
+  }
+  18% { opacity: 0.95; }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, 0px)))
+      scale(0.15) rotate(var(--rot, 0deg));
+  }
+}
+
+/* 角落提示：告诉用户可以缩放 */
+.pet-rampage-zoomhint {
+  position: absolute;
+  left: 14px;
+  bottom: 7px;
+  color: #b4232f;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  opacity: 0.55;
+  text-shadow: none;
+  pointer-events: none;
 }
 
 .pet-rampage-line.is-boom {
@@ -980,4 +1100,17 @@ body.is-pet-boom .char-splash__decor {
 body.is-pet-boom .hnyz-avatar {
   /* 独立合成层，避免和页面一起重排 */
   contain: layout style;
+}
+
+/* 减少动态：弹窗只保留缩放能力，不再抖、不再喷粒子 */
+@media (prefers-reduced-motion: reduce) {
+  .pet-rampage-char,
+  .pet-rampage-line.is-visible .pet-rampage-chars,
+  .pet-rampage-line.is-bumped {
+    animation: none;
+  }
+
+  .pet-line-spark {
+    display: none;
+  }
 }

@@ -229,9 +229,166 @@
 
   const lineEl = document.createElement("p");
   lineEl.className = "pet-rampage-line";
-  lineEl.setAttribute("role", "status");
-  lineEl.setAttribute("aria-live", "polite");
+  /* 视觉层里会不停加粒子，不能让 aria-live 盯着它；
+     播报交给下面那个仅读屏可见的 status */
+  lineEl.setAttribute("aria-hidden", "true");
   document.body.appendChild(lineEl);
+
+  const lineLive = document.createElement("p");
+  lineLive.className = "sr-only";
+  lineLive.setAttribute("role", "status");
+  lineLive.setAttribute("aria-live", "polite");
+  document.body.appendChild(lineLive);
+
+  /* -------------------------------------------------------
+     弹窗本体：字号逐字抖动 + 滚轮/双指缩放 + 粒子
+     ------------------------------------------------------- */
+  const ZOOM = { value: 1, min: 0.55, max: 2.4 };
+  let ambientTimer = 0;
+
+  function setLineText(text) {
+    lineEl.textContent = "";
+    lineLive.textContent = text;
+
+    const chars = document.createElement("span");
+    chars.className = "pet-rampage-chars";
+    chars.setAttribute("aria-hidden", "true");
+
+    Array.from(text).forEach((ch, index) => {
+      const span = document.createElement("span");
+      span.className = "pet-rampage-char";
+      span.textContent = ch;
+      span.style.setProperty("--i", index);
+      chars.appendChild(span);
+    });
+
+    const hint = document.createElement("span");
+    hint.className = "pet-rampage-zoomhint";
+    hint.textContent = "滚轮 / 双指 缩放";
+    hint.setAttribute("aria-hidden", "true");
+
+    lineEl.append(chars, hint);
+  }
+
+  function applyZoom(value, bump) {
+    ZOOM.value = Math.min(ZOOM.max, Math.max(ZOOM.min, value));
+    lineEl.style.setProperty("--zoom", ZOOM.value.toFixed(3));
+    lineEl.style.setProperty("--shake", (1 + (ZOOM.value - 1) * 1.1).toFixed(2));
+
+    if (bump) {
+      lineEl.classList.remove("is-bumped");
+      void lineEl.offsetWidth;
+      lineEl.classList.add("is-bumped");
+    }
+  }
+
+  /* 从弹窗边缘喷几颗粒子；scale 会跟着弹窗一起放大 */
+  function popLineSparks(count) {
+    if (!state.rampage || lineEl.classList.contains("is-boom")) return;
+
+    const colors = ["#e11d2e", "#ffd37f", "#14141a", "#ff8a8a"];
+
+    for (let i = 0; i < count; i += 1) {
+      const spark = document.createElement("span");
+      spark.className = "pet-line-spark";
+      spark.setAttribute("aria-hidden", "true");
+
+      const edge = Math.random();
+      let x = 50;
+      let y = 50;
+
+      if (edge < 0.4) {
+        x = Math.random() * 100;
+        y = Math.random() < 0.5 ? 0 : 100;
+      } else if (edge < 0.7) {
+        x = Math.random() < 0.5 ? 0 : 100;
+        y = Math.random() * 100;
+      } else {
+        x = Math.random() * 100;
+        y = Math.random() * 100;
+      }
+
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 42 + Math.random() * 120;
+
+      spark.style.left = `${x}%`;
+      spark.style.top = `${y}%`;
+      spark.style.setProperty("--dx", `${Math.cos(angle) * dist}px`);
+      spark.style.setProperty("--dy", `${Math.sin(angle) * dist - 18}px`);
+      spark.style.setProperty("--rot", `${Math.random() * 260 - 130}deg`);
+      spark.style.setProperty("--c", colors[i % colors.length]);
+      spark.style.setProperty("--d", `${1.05 + Math.random() * 0.55}s`);
+      spark.style.setProperty("--sz", `${6 + Math.random() * 10}px`);
+
+      lineEl.appendChild(spark);
+      spark.addEventListener("animationend", () => spark.remove(), { once: true });
+    }
+  }
+
+  function startAmbient() {
+    stopAmbient();
+    ambientTimer = window.setInterval(() => {
+      if (!state.rampage || lineEl.classList.contains("is-boom")) return;
+      popLineSparks(1 + (Math.random() < 0.7 ? 1 : 0));
+    }, 300);
+  }
+
+  function stopAmbient() {
+    window.clearInterval(ambientTimer);
+    ambientTimer = 0;
+  }
+
+  lineEl.addEventListener(
+    "wheel",
+    (event) => {
+      if (!state.rampage || lineEl.classList.contains("is-boom")) return;
+      event.preventDefault();
+      applyZoom(ZOOM.value * Math.exp(-event.deltaY * 0.0016), true);
+      if (Math.random() < 0.5) popLineSparks(3);
+    },
+    { passive: false }
+  );
+
+  lineEl.addEventListener("dblclick", () => {
+    applyZoom(1, true);
+    popLineSparks(10);
+  });
+
+  /* 双指捏合 */
+  const pointers = new Map();
+  let pinchStart = 0;
+  let pinchBase = 1;
+
+  function pointerDistance() {
+    const list = Array.from(pointers.values());
+    if (list.length < 2) return 0;
+    return Math.hypot(list[0].x - list[1].x, list[0].y - list[1].y);
+  }
+
+  lineEl.addEventListener("pointerdown", (event) => {
+    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (pointers.size === 2) {
+      pinchStart = pointerDistance();
+      pinchBase = ZOOM.value;
+    }
+  });
+
+  lineEl.addEventListener("pointermove", (event) => {
+    if (!pointers.has(event.pointerId)) return;
+    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (pointers.size === 2 && pinchStart > 0) {
+      applyZoom(pinchBase * (pointerDistance() / pinchStart));
+    }
+  });
+
+  function endPointer(event) {
+    pointers.delete(event.pointerId);
+    if (pointers.size < 2) pinchStart = 0;
+  }
+
+  lineEl.addEventListener("pointerup", endPointer);
+  lineEl.addEventListener("pointercancel", endPointer);
+  lineEl.addEventListener("pointerleave", endPointer);
 
   const veil = document.createElement("div");
   veil.className = "pet-tomb-veil";
@@ -291,7 +448,10 @@
 
     sfx.play("boom", { volume: 0.3 });
 
-    lineEl.textContent = "谁让你一直点我的。";
+    setLineText("谁让你一直点我的。");
+    applyZoom(1);
+    popLineSparks(18);
+    startAmbient();
     lineEl.classList.add("is-visible");
 
     /* 先变大，再开始弹 */
@@ -394,6 +554,9 @@
   function explode() {
     window.cancelAnimationFrame(frame);
 
+    stopAmbient();
+    popLineSparks(16);
+
     /* 字幕放大爆炸 */
     lineEl.classList.add("is-boom");
 
@@ -438,6 +601,7 @@
       pet.style.transform = "";
       lineEl.classList.remove("is-visible", "is-boom");
       lineEl.textContent = "";
+      lineLive.textContent = "";
 
       state.rampage = false;
       state.dead = true;
