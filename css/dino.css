@@ -432,3 +432,151 @@ body.is-dino-visible .pet-summon {
     letter-spacing: 0.06em;
   }
 }
+
+/* =========================================================
+   灭绝结局 · 中文压屏 + 左侧滑出的「时间回溯」
+   ---------------------------------------------------------
+   陨石砸完恐龙就没了，画面中间留一句中文，占跑道 2/3；
+   左边贴边滑出一颗按钮。不点它，这一帧就一直是结局。
+   ========================================================= */
+
+.dino-run__extinct {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-items: start;
+  justify-items: center;
+  padding-top: 10px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.55s ease;
+}
+
+/* hidden 必须硬过上面的 display:grid */
+.dino-run__extinct[hidden] {
+  display: none;
+}
+
+.dino-run__extinct.is-on {
+  opacity: 1;
+}
+
+.dino-run__extinct-text {
+  box-sizing: border-box;
+  width: 66.6%;
+  height: 66.6%;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 138, 84, 0.26);
+  border-radius: 10px;
+  background:
+    radial-gradient(ellipse at 50% 118%, rgba(255, 96, 40, 0.22), transparent 62%),
+    linear-gradient(180deg, rgba(13, 8, 7, 0.62), rgba(7, 4, 4, 0.78));
+  box-shadow:
+    inset 0 0 46px rgba(255, 96, 40, 0.12),
+    0 12px 40px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(1.5px);
+  color: #ffd9c0;
+  font-family: inherit;
+  font-size: clamp(0.8rem, 1.5vw, 1.18rem);
+  font-weight: 600;
+  line-height: 1.9;
+  letter-spacing: 0.16em;
+  text-align: center;
+  text-shadow: 0 1px 14px rgba(255, 92, 40, 0.32);
+  transform: translateY(8px) scale(0.975);
+  transition: transform 0.7s cubic-bezier(0.22, 0.68, 0.32, 1);
+}
+
+.dino-run__extinct.is-on .dino-run__extinct-text {
+  transform: translateY(0) scale(1);
+}
+
+/* 左边那颗按钮：从画面外滑进来，像挂在结局旁边的一枚书签 */
+.dino-run__rewind {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 9px;
+  border: 1px solid rgba(255, 138, 84, 0.55);
+  border-radius: 4px;
+  background: rgba(11, 6, 5, 0.88);
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  color: #ffc59b;
+  white-space: nowrap;
+  cursor: pointer;
+  pointer-events: auto;
+  transform: translate(-155%, -50%);
+  box-shadow: 0 0 16px rgba(255, 110, 50, 0.22);
+  transition:
+    transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.25),
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dino-run__extinct.is-on .dino-run__rewind {
+  transform: translate(0, -50%);
+  /* 文字先落定，按钮再弹出来 */
+  transition-delay: 0.32s, 0s, 0s, 0s;
+}
+
+.dino-run__rewind:hover,
+.dino-run__rewind:focus-visible {
+  color: #fff0e2;
+  border-color: #ff9a5c;
+  box-shadow: 0 0 22px rgba(255, 110, 50, 0.45);
+  outline: none;
+}
+
+.dino-run__rewind:active {
+  transform: translate(0, -50%) scale(0.96);
+}
+
+.dino-run.is-extinct .dino-run__hint {
+  opacity: 0 !important;
+}
+
+@media (max-width: 520px) {
+  .dino-run__extinct {
+    padding-top: 6px;
+  }
+
+  .dino-run__rewind {
+    left: 5px;
+    padding: 8px 6px;
+    font-size: 0.52rem;
+    letter-spacing: 0;
+  }
+
+  .dino-run__extinct-text {
+    padding: 0 10px;
+    letter-spacing: 0.1em;
+    line-height: 1.8;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dino-run__extinct,
+  .dino-run__extinct-text,
+  .dino-run__rewind {
+    transition: none;
+  }
+
+  .dino-run__extinct-text {
+    transform: none;
+  }
+
+  .dino-run__extinct.is-on .dino-run__rewind {
+    transform: translate(0, -50%);
+  }
+}

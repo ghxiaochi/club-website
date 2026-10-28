@@ -22,6 +22,8 @@
   const hintEl = strip.querySelector("[data-dino-hint]");
   const toastEl = strip.querySelector("[data-dino-toast]");
   const timeEl = strip.querySelector("[data-dino-time]");
+  const extinctEl = strip.querySelector("[data-dino-extinct]");
+  const rewindBtn = strip.querySelector("[data-dino-rewind]");
   const modeButtons = Array.from(strip.querySelectorAll("[data-dino-mode]"));
   /* 带模式按钮时听用户的；按钮已经拿掉，就恒定自动跑 */
   const hasControls = modeButtons.length > 0;
@@ -58,6 +60,10 @@
   let running = false;
   let raf = 0;
   let lastTime = 0;
+  /* 每帧 update / draw 的平滑耗时，用来盯性能（不影响逻辑） */
+  let perfUpdate = 0;
+  let perfDraw = 0;
+  let idleSkip = false;
 
   let jumpY = 0;
   let vy = 0;
@@ -99,6 +105,12 @@
   let timeScale = 1;
   /* 100 级灭绝演出：非空时接管整条 update */
   let cine = null;
+  /* 演出里的粒子、灰烬、火星：数组复用，不每帧新建 */
+  let sparks = [];
+  let smoke = [];
+  let ash = [];
+  /* 陨石砸完，恐龙就该消失了 */
+  let hideDinos = false;
 
   let palette = {
     ink: "#e8f1ff",
@@ -119,6 +131,16 @@
   };
   /* 月亮预渲染成一张小图：两圆相减必须用合成模式，逐帧做太浪费 */
   let moonSprite = null;
+  /* 太阳、星星、火光、烟、焦痕、墓碑：全部预渲染，主循环只 drawImage */
+  let sunSprite = null;
+  let starSprites = null;
+  let fireSprite = null;
+  let smokeSprite = null;
+  let scorchSprite = null;
+  let meteorSprite = null;
+  let tombSprites = [];
+  /* 天空渐变按尺寸缓存，尺寸变了才重建 */
+  let skyGrad = null;
 
   try {
     hiScore = Number(window.localStorage.getItem(HI_KEY)) || 0;
@@ -438,7 +460,6 @@
       makeSprite(14, 9, S, (g, s) => paintPtero(g, s, frame))
     );
     sprites.star = makeSprite(9, 8, S, (g) => paintStar(g, S));
-    moonSprite = buildMoonSprite();
   }
 
   /* 画一个正确的弯月：先填整圆，再用 destination-out 啃掉偏心的一个圆。
@@ -469,7 +490,180 @@
     g.fill();
     g.globalCompositeOperation = "source-over";
 
-    return { node, box };
+    /* 月晕也烘进这张图：逐帧 createRadialGradient 是手机端最容易掉帧的地方 */
+    const side = box * 2;
+    const center = side / 2;
+    const halo = document.createElement("canvas");
+    halo.width = Math.ceil(side * scale);
+    halo.height = Math.ceil(side * scale);
+    const hg = halo.getContext("2d");
+    hg.scale(scale, scale);
+    const ring = hg.createRadialGradient(center, center, r * 0.5, center, center, center);
+    ring.addColorStop(0, withAlpha(palette.moon, 0.22));
+    ring.addColorStop(0.45, withAlpha(palette.moon, 0.07));
+    ring.addColorStop(1, withAlpha(palette.moon, 0));
+    hg.fillStyle = ring;
+    hg.beginPath();
+    hg.arc(center, center, center, 0, Math.PI * 2);
+    hg.fill();
+    hg.drawImage(node, center - box / 2, center - box / 2, box, box);
+
+    return { node: halo, box: side, glow: true };
+  }
+
+  /* ---------- 太阳：光晕烘成一张图，圆盘按高度改色，逐帧只画一个 arc ---------- */
+  function buildSun() {
+    const box = 120;
+    const node = document.createElement("canvas");
+    node.width = box * 2;
+    node.height = box * 2;
+    const g = node.getContext("2d");
+    g.scale(2, 2);
+
+    const ring = g.createRadialGradient(box / 2, box / 2, 3, box / 2, box / 2, box / 2);
+    ring.addColorStop(0, withAlpha(palette.gold, 0.5));
+    ring.addColorStop(0.35, withAlpha(palette.gold, 0.16));
+    ring.addColorStop(1, withAlpha(palette.gold, 0));
+
+    g.fillStyle = ring;
+    g.beginPath();
+    g.arc(box / 2, box / 2, box / 2, 0, Math.PI * 2);
+    g.fill();
+
+    sunSprite = { node, box, r: H >= 150 ? 8.5 : 7 };
+  }
+
+  /* ---------- 星星：去掉逐颗 shadowBlur，改成两张预渲染小图 ---------- */
+  function buildStarSprites() {
+    const dot = document.createElement("canvas");
+    dot.width = 2;
+    dot.height = 2;
+    const dg = dot.getContext("2d");
+    dg.fillStyle = palette.ink;
+    dg.fillRect(0, 0, 2, 2);
+
+    const big = document.createElement("canvas");
+    big.width = 9;
+    big.height = 9;
+    const bg = big.getContext("2d");
+    bg.fillStyle = palette.ink;
+    bg.fillRect(3, 3, 3, 3);
+    bg.globalAlpha = 0.5;
+    bg.fillRect(0, 4, 9, 1);
+    bg.fillRect(4, 0, 1, 9);
+
+    starSprites = { dot, big };
+  }
+
+  /* ---------- 火光 / 烟 / 焦痕：陨石尾焰与爆炸全靠这三张图 ---------- */
+  function buildFxSprites() {
+    const make = (size, stops) => {
+      const node = document.createElement("canvas");
+      node.width = size;
+      node.height = size;
+      const g = node.getContext("2d");
+      const half = size / 2;
+      const ring = g.createRadialGradient(half, half, 0, half, half, half);
+      stops.forEach(([at, color]) => ring.addColorStop(at, color));
+      g.fillStyle = ring;
+      g.fillRect(0, 0, size, size);
+      return node;
+    };
+
+    fireSprite = make(160, [
+      [0, "rgba(255, 252, 226, 0.98)"],
+      [0.22, "rgba(255, 214, 130, 0.92)"],
+      [0.48, "rgba(255, 132, 58, 0.66)"],
+      [0.74, "rgba(196, 48, 20, 0.26)"],
+      [1, "rgba(120, 20, 6, 0)"]
+    ]);
+    smokeSprite = make(128, [
+      [0, "rgba(46, 40, 38, 0.5)"],
+      [0.55, "rgba(34, 30, 30, 0.24)"],
+      [1, "rgba(20, 18, 18, 0)"]
+    ]);
+    scorchSprite = make(128, [
+      [0, "rgba(4, 4, 6, 0.78)"],
+      [0.45, "rgba(8, 6, 6, 0.42)"],
+      [1, "rgba(10, 8, 8, 0)"]
+    ]);
+  }
+
+  /* ---------- 墓碑：拱顶石碑 + 十字刻痕，三种高矮 ---------- */
+  function buildTombSprites() {
+    tombSprites = [[10, 14], [9, 11], [11, 16]].map(([w, h], index) => {
+      const node = document.createElement("canvas");
+      node.width = w * S * 2;
+      node.height = h * S * 2;
+      const g = node.getContext("2d");
+      g.scale(S * 2, S * 2);
+      g.imageSmoothingEnabled = false;
+
+      const stone = index === 1 ? "#7d8494" : "#98a1b3";
+      g.fillStyle = stone;
+      g.beginPath();
+      g.moveTo(0.5, h - 0.5);
+      g.lineTo(0.5, w * 0.45);
+      g.quadraticCurveTo(0.5, 0.5, w / 2, 0.5);
+      g.quadraticCurveTo(w - 0.5, 0.5, w - 0.5, w * 0.45);
+      g.lineTo(w - 0.5, h - 0.5);
+      g.closePath();
+      g.fill();
+
+      /* 顶面高光 + 右侧暗部，小尺寸下也能看出是块石头 */
+      g.fillStyle = "rgba(255, 255, 255, 0.26)";
+      g.fillRect(1, w * 0.5, 0.9, h - w * 0.5 - 1);
+      g.fillStyle = "rgba(0, 0, 0, 0.22)";
+      g.fillRect(w - 1.6, w * 0.5, 1.2, h - w * 0.5 - 1);
+
+      /* 刻痕：十字 */
+      g.globalCompositeOperation = "destination-out";
+      g.fillRect(w / 2 - 0.55, w * 0.62, 1.1, h * 0.5);
+      g.fillRect(w * 0.26, w * 0.95, w * 0.48, 1.1);
+      g.globalCompositeOperation = "source-over";
+
+      return { node, w: w * S, h: h * S };
+    });
+  }
+
+  /* ---------- 天空渐变：尺寸不变就一直用同一份 ---------- */
+  function buildSkyGradients() {
+    const night = ctx.createLinearGradient(0, 0, 0, H);
+    night.addColorStop(0, "rgba(3, 7, 18, 0.62)");
+    night.addColorStop(0.62, "rgba(4, 9, 22, 0.46)");
+    night.addColorStop(1, "rgba(2, 6, 16, 0.34)");
+
+    /* 夕阳：顶上压一层紫，中间玫瑰，贴地才烧成橙红 */
+    const dusk = ctx.createLinearGradient(0, 0, 0, H);
+    dusk.addColorStop(0, "rgba(44, 18, 66, 0.66)");
+    dusk.addColorStop(0.42, "rgba(118, 40, 84, 0.52)");
+    dusk.addColorStop(0.72, "rgba(234, 102, 58, 0.54)");
+    dusk.addColorStop(1, "rgba(255, 170, 92, 0.44)");
+
+    /* 血色的灭绝天幕 */
+    const blood = ctx.createLinearGradient(0, 0, 0, H);
+    blood.addColorStop(0, "rgba(96, 8, 12, 0.62)");
+    blood.addColorStop(0.55, "rgba(134, 20, 16, 0.5)");
+    blood.addColorStop(1, "rgba(72, 8, 8, 0.42)");
+
+    /* 废墟：烧过的灰天，越往上越黑 */
+    const dead = ctx.createLinearGradient(0, 0, 0, H);
+    dead.addColorStop(0, "rgba(5, 5, 8, 0.97)");
+    dead.addColorStop(0.6, "rgba(15, 10, 11, 0.9)");
+    dead.addColorStop(1, "rgba(30, 15, 12, 0.78)");
+
+    skyGrad = { night, dusk, blood, dead };
+  }
+
+  /* 一次性把不随等级变的东西全烘出来 */
+  function buildScenery() {
+    buildSun();
+    moonSprite = buildMoonSprite();
+    buildStarSprites();
+    buildFxSprites();
+    buildMeteor();
+    buildTombSprites();
+    buildSkyGradients();
   }
 
   /* -------------------------------------------------------
@@ -501,6 +695,7 @@
     startX = Math.max(packLeft, Math.min(W * 0.36, W - 260));
 
     buildSprites();
+    buildScenery();
     buildClouds();
     buildStars();
     return true;
@@ -559,7 +754,15 @@
     starTimer = 0;
     starIn = 14;
     cine = null;
-    strip.classList.remove("is-cine");
+    hideDinos = false;
+    sparks = [];
+    smoke = [];
+    ash = [];
+    strip.classList.remove("is-cine", "is-extinct");
+    if (extinctEl) {
+      extinctEl.hidden = true;
+      extinctEl.classList.remove("is-on");
+    }
     if (timeEl) timeEl.classList.remove("is-locked");
     if (levelEl) levelEl.textContent = "LV.1";
     if (popEl) {
@@ -636,10 +839,22 @@
     });
   }
 
+  /* 结局里唯一能点的东西：时间回溯 */
+  if (rewindBtn) {
+    rewindBtn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      startRewind();
+    });
+  }
+
   /* -------------------------------------------------------
      三、跳跃 / 障碍 / 碰撞
      ------------------------------------------------------- */
   function jump() {
+    /* 灭绝演出期间，点画布不跳；要重来只能按左边的「时间回溯」 */
+    if (cine) return;
+
     if (!activated) {
       activated = true;
       resetRun();
@@ -879,7 +1094,7 @@
       break;
     }
 
-    coins = coins.filter((coin) => !coin.got);
+    compact(coins, (coin) => !coin.got);
   }
 
   /* 金币被吃掉时炸出几粒金屑，给一点「拿到手」的实感 */
@@ -921,13 +1136,13 @@
   function update(dt) {
     if (!activated) return;
 
-    /* 昼夜循环独立于跑动：只受时间倍率影响（演出期间倍率锁 1） */
-    gameClock = (gameClock + dt / DAY_CYCLE) % 1;
-
+    /* 演出自己管昼夜（回溯时还要把日月倒着走），所以不在外面推进 */
     if (cine) {
       updateCinematic(dt);
       return;
     }
+
+    gameClock = (gameClock + dt / DAY_CYCLE) % 1;
 
     worldX += speed * dt;
     clock += dt;
@@ -1000,22 +1215,16 @@
       /* 翼龙比世界快一截，扑过来才有威胁 */
       item.x -= (item.kind === "ptero" ? speed * 1.18 + 24 : speed) * dt;
     });
-    obstacles = obstacles.filter((item) => item.x + item.w > -40);
+    compact(obstacles, (item) => item.x + item.w > -40);
 
     coins.forEach((coin) => {
       coin.x -= speed * dt;
       coin.spin += dt * 5;
     });
-    coins = coins.filter((coin) => coin.x + 9 * S > -20 && coin.x < W + 80);
+    compact(coins, (coin) => coin.x + 9 * S > -20 && coin.x < W + 80);
     collectCoins();
 
-    dust.forEach((particle) => {
-      particle.x += particle.vx * dt;
-      particle.y += particle.vy * dt;
-      particle.vy += 220 * dt;
-      particle.life -= dt;
-    });
-    dust = dust.filter((particle) => particle.life > 0);
+    stepParticles(dt);
 
     if (popTimer > 0) popTimer -= dt;
     if (popEl && popTimer <= 0 && popEl.classList.contains("is-on")) {
@@ -1027,18 +1236,42 @@
   }
 
   /* -------------------------------------------------------
-     四之二、100 级灭绝演出：天变 → 陨石 → 回溯 → 重生
+     四之二、100 级灭绝演出
+     ---------------------------------------------------------
+     天塌 → 巨型陨石 → 爆炸 → 废墟。砸完就停在结局里：
+     恐龙没了，地上留一个坑和几块墓碑，画面中间压一句中文，
+     左边滑出「时间回溯」。不点它，就永远停在这一帧。
      ------------------------------------------------------- */
+  const SKY_T = 1.15;
+  const FALL_T = 1.55;
+  const BLAST_T = 1.3;
+  const WIND_T = 1.9;
+
+  /* 陨石直径按跑道面积算，约占三分之一；再用高度封顶，窄屏也撑得满 */
+  function meteorRadius() {
+    const d = Math.max(H * 0.74, Math.min(W * 0.34, H * 1.5));
+    return d / 2;
+  }
+
   function startExtinction() {
+    const r = meteorRadius();
     cine = {
-      phase: reduce.matches ? "toast1" : "sky",
+      phase: reduce.matches ? "ruins" : "sky",
       t: 0,
-      shown: false,
+      r,
+      clock0: gameClock,
       worldX0: worldX,
       score0: score,
-      mx: 0,
-      my: 0
+      impactX: Math.max(W * 0.34, Math.min(W * 0.66, startX + 110 * S)),
+      impactY: groundY - 2,
+      mx: W * 1.06,
+      my: -r * 1.2,
+      shock: 0,
+      fire: 0,
+      tombs: [],
+      rubble: []
     };
+
     timeScale = 1;
     if (timeEl) {
       timeEl.textContent = "TIME ×1";
@@ -1048,26 +1281,139 @@
     strip.classList.add("is-cine");
     obstacles = [];
     coins = [];
+    dust = [];
+    sparks = [];
+    smoke = [];
+    ash = [];
     dead = false;
+    hideDinos = false;
+
+    /* 减弱动效：直接给结局，不做下落与爆炸 */
+    if (reduce.matches) enterRuins();
   }
 
-  function cineShow(text) {
-    if (!toastEl) return;
-    toastEl.hidden = false;
-    toastEl.textContent = text;
+  /* 落地：火球、冲击波、火星、烟，恐龙在这一帧消失 */
+  function blast() {
+    const c = cine;
+    c.phase = "blast";
+    c.t = 0;
+    shake = 1;
+    flash = 1;
+    hideDinos = true;
+    layRuins();
+
+    for (let i = 0; i < 54; i += 1) {
+      const angle = Math.random() * Math.PI * 2;
+      const power = 90 + Math.random() * 430;
+      sparks.push({
+        x: c.impactX,
+        y: c.impactY - 6,
+        vx: Math.cos(angle) * power,
+        vy: Math.sin(angle) * power * 0.72 - 130,
+        life: 0.5 + Math.random() * 0.8,
+        max: 1.3,
+        size: Math.random() < 0.35 ? 3 : 2,
+        heat: 0.7 + Math.random() * 0.3
+      });
+    }
+
+    for (let i = 0; i < 14; i += 1) {
+      smoke.push({
+        x: c.impactX + (Math.random() - 0.5) * c.r,
+        y: c.impactY - 8 - Math.random() * 10,
+        vx: (Math.random() - 0.5) * 54,
+        vy: -22 - Math.random() * 46,
+        life: 1.5 + Math.random() * 1.4,
+        max: 3,
+        size: c.r * (0.7 + Math.random() * 0.9)
+      });
+    }
+  }
+
+  /* 墓碑与碎石的位置：砸之前就排好，砸完只让它们往上升 */
+  function layRuins() {
+    const c = cine;
+    const spots = [0.15, 0.29, 0.71, 0.85];
+    c.tombs = spots.map((f, i) => ({
+      x: W * f + (i % 2 ? 3 : -3),
+      variant: i % 3,
+      tilt: (i % 2 ? 1 : -1) * (2 + (i % 3) * 2),
+      rise: 0
+    }));
+
+    c.pit = Array.from({ length: 9 }, (_, i) => 0.55 + Math.random() * 0.9 + (i === 4 ? 0.5 : 0));
+
+    c.rubble = [];
+    for (let i = 0; i < 8; i += 1) {
+      c.rubble.push({
+        x: W * (0.06 + i * 0.12) + Math.random() * 10,
+        w: 4 + Math.random() * 9,
+        h: 2 + Math.random() * 4,
+        dark: i % 3 === 0
+      });
+    }
+  }
+
+  /* 结局：中文压屏 + 左边按钮，之后不再自动推进 */
+  function enterRuins() {
+    cine.phase = "ruins";
+    cine.t = 0;
+    hideDinos = true;
+    if (!cine.tombs.length) layRuins();
+    cine.tombs.forEach((tomb) => {
+      tomb.rise = 1;
+    });
+    buildAsh();
+    cine.smokeIn = 0.3;
+    strip.classList.add("is-extinct");
+    if (hintEl) hintEl.style.opacity = "0";
+    if (timeEl) timeEl.classList.add("is-locked");
+    if (extinctEl) {
+      extinctEl.hidden = false;
+      window.requestAnimationFrame(() => extinctEl.classList.add("is-on"));
+    }
+  }
+
+  /* 用户点「时间回溯」才走这一步 */
+  function startRewind() {
+    if (!cine || cine.phase !== "ruins") return;
+    cine.phase = "rewind";
+    cine.t = 0;
+    cine.clock0 = gameClock;
+    strip.classList.remove("is-extinct");
+    if (extinctEl) extinctEl.classList.remove("is-on");
+    ash = [];
+    if (reduce.matches) {
+      cineFinish();
+      return;
+    }
+    /* 火星倒着收回去，像磁带倒放 */
+    sparks.forEach((p) => {
+      p.vx *= -1.2;
+      p.vy = p.vy * -0.6;
+      p.life = Math.max(p.life, 0.7);
+    });
   }
 
   function cineFinish() {
     cine = null;
-    if (toastEl) toastEl.hidden = true;
-    strip.classList.remove("is-cine");
+    hideDinos = false;
+    sparks = [];
+    smoke = [];
+    ash = [];
+    if (extinctEl) {
+      extinctEl.hidden = true;
+      extinctEl.classList.remove("is-on");
+    }
+    strip.classList.remove("is-cine", "is-extinct");
     if (timeEl) timeEl.classList.remove("is-locked");
     resetRun();
-    pop("REBORN // AGAIN", "level");
+    pop("时间重新流动", "level");
   }
 
   function updateCinematic(dt) {
-    cine.t += dt;
+    const c = cine;
+    c.t += dt;
 
     /* 演出期间公共的余韵衰减照常走 */
     if (flash > 0) flash = Math.max(0, flash - dt * 1.1);
@@ -1076,165 +1422,487 @@
     if (popEl && popTimer <= 0 && popEl.classList.contains("is-on")) {
       popEl.classList.remove("is-on");
     }
-    dust.forEach((particle) => {
-      particle.x += particle.vx * dt;
-      particle.y += particle.vy * dt;
-      particle.vy += 220 * dt;
-      particle.life -= dt;
-    });
-    dust = dust.filter((particle) => particle.life > 0);
+    stepParticles(dt);
 
-    if (cine.phase === "toast1") {
-      /* reduced-motion：不做震屏与粒子，两行文案讲完 */
-      if (!cine.shown) {
-        cineShow("MASS EXTINCTION // THIS IS THE TRUTH OF THE DINOSAURS");
-        cine.shown = true;
-      }
-      if (cine.t >= 1.7) {
-        cine.phase = "toast2";
-        cine.t = 0;
-        cine.shown = false;
+    if (c.phase === "sky") {
+      /* 天压下来、血色渗进来，星星一颗颗灭；日月就停在被吞掉的那一刻 */
+      if (c.t >= SKY_T) {
+        c.phase = "meteor";
+        c.t = 0;
       }
       return;
     }
 
-    if (cine.phase === "toast2") {
-      if (!cine.shown) {
-        cineShow("TIME REWIND // RESTORING THE TIMELINE");
-        cine.shown = true;
-      }
-      if (cine.t >= 1.7) cineFinish();
-      return;
-    }
+    if (c.phase === "meteor") {
+      const p = Math.min(1, c.t / FALL_T);
+      const ease = Math.pow(p, 1.7); /* 越落越快 */
+      c.mx = W * 1.12 + (c.impactX - W * 1.12) * ease;
+      c.my = -c.r * 1.05 + (c.impactY - c.r * 0.5 + c.r * 1.05) * ease;
 
-    if (cine.phase === "sky") {
-      /* 天压暗、染血色，星星一颗颗灭掉（星星 alpha 在 draw 里读 cine） */
-      if (cine.t >= 1.1) {
-        cine.phase = "meteor";
-        cine.t = 0;
-      }
-      return;
-    }
-
-    if (cine.phase === "meteor") {
-      const p = Math.min(1, cine.t / 1.25);
-      cine.mx = W * 0.92 - (W * 0.92 - (startX + 150 * S)) * p;
-      cine.my = -24 + (groundY - 20 * S + 24) * p * p;
-      if (Math.random() < 0.7) {
-        dust.push({
-          x: cine.mx + (Math.random() - 0.5) * 8,
-          y: cine.my - 6,
-          vx: 30 - Math.random() * 90,
-          vy: -40 - Math.random() * 60,
-          life: 0.55,
-          max: 0.55,
-          size: 2,
-          tone: "fire"
+      /* 尾焰拖一把碎火，落到一半就越烧越旺 */
+      if (Math.random() < 0.9) {
+        sparks.push({
+          x: c.mx + (Math.random() - 0.5) * c.r * 1.2,
+          y: c.my - c.r * 0.6 + (Math.random() - 0.5) * c.r,
+          vx: 40 - Math.random() * 130,
+          vy: -50 - Math.random() * 70,
+          life: 0.4 + Math.random() * 0.4,
+          max: 0.8,
+          size: Math.random() < 0.5 ? 3 : 2,
+          heat: 0.85
         });
       }
-      if (cine.t >= 1.25) {
-        cine.phase = "impact";
-        cine.t = 0;
-        shake = 0.62;
-        flash = 1;
-        burstDebris(46);
-        burstDust(14);
-        cineShow("MASS EXTINCTION // THIS IS THE TRUTH OF THE DINOSAURS");
-      }
+
+      if (c.t >= FALL_T) blast();
       return;
     }
 
-    if (cine.phase === "impact") {
-      if (cine.t >= 1.7) {
-        cine.phase = "rewind";
-        cine.t = 0;
-        cineShow("TIME REWIND // RESTORING THE TIMELINE");
-        /* 碎片全部倒飞回去 */
-        dust.forEach((particle) => {
-          particle.vx *= -1.7;
-          particle.vy = particle.vy * -1.7 - 40;
-          particle.life = Math.max(particle.life, 0.8);
-          particle.max = Math.max(particle.max, 0.8);
+    if (c.phase === "blast") {
+      c.shock = Math.min(1, c.t / 0.7);
+      c.fire = Math.min(1, c.t / 0.32);
+      c.tombs.forEach((tomb, i) => {
+        tomb.rise = Math.min(1, Math.max(0, (c.t - 0.45 - i * 0.09) / 0.55));
+      });
+      if (c.t >= BLAST_T) enterRuins();
+      return;
+    }
+
+    if (c.phase === "ruins") {
+      /* 只剩灰在落、烟在冒。什么都不推进，等用户按左边那颗按钮 */
+      updateAsh(dt);
+      c.smokeIn -= dt;
+      if (c.smokeIn <= 0 && smoke.length < 16) {
+        smoke.push({
+          x: c.impactX + (Math.random() - 0.5) * c.r * 0.9,
+          y: groundY - 4,
+          vx: 4 - Math.random() * 14,
+          vy: -12 - Math.random() * 16,
+          life: 2.6,
+          max: 2.6,
+          size: c.r * (0.34 + Math.random() * 0.3),
+          a: 0.4
         });
+        c.smokeIn = 0.45 + Math.random() * 0.55;
       }
       return;
     }
 
-    if (cine.phase === "rewind") {
-      const p = Math.min(1, cine.t / 2.3);
+    if (c.phase === "rewind") {
+      const p = Math.min(1, c.t / WIND_T);
       const eased = p * p * (3 - 2 * p);
-      worldX = cine.worldX0 * (1 - eased);
-      score = cine.score0 * (1 - eased);
+
+      /* 时间倒着走：日月跟着倒退大半圈，中途能看到月亮沉下去、太阳升上来 */
+      gameClock = (c.clock0 - 0.58 * eased + 1) % 1;
+      worldX = c.worldX0 * (1 - eased);
+      score = c.score0 * (1 - eased);
       distance = score * 14;
       updateScore(false);
-      if (cine.t >= 2.3) cineFinish();
+
+      c.tombs.forEach((tomb, i) => {
+        const back = Math.min(1, Math.max(0, (c.t - 0.18 - i * 0.06) / 0.7));
+        tomb.rise = 1 - back;
+      });
+
+      if (p >= 1) cineFinish();
     }
   }
 
-  /* 游戏内昼夜：0.40 进夜、0.50 全黑、0.92 出夜；黄昏压在两个交界上 */
+  /* -------------------------------------------------------
+     四之三、粒子与废墟
+     ---------------------------------------------------------
+     所有粒子都用「下标覆盖」就地压缩，不用 filter 造新数组：
+     跑动时每秒几十次分配，GC 一抖就是肉眼可见的卡顿。
+     ------------------------------------------------------- */
+  /* 就地压缩：活着的往前搬，不新建数组（每帧 filter 一次就是一次 GC） */
+  function compact(list, alive) {
+    let keep = 0;
+    for (let i = 0; i < list.length; i += 1) {
+      const item = list[i];
+      if (!alive || alive(item)) {
+        list[keep] = item;
+        keep += 1;
+      }
+    }
+    list.length = keep;
+  }
+
+  function stepList(list, dt, gravity, drag) {
+    let keep = 0;
+    for (let i = 0; i < list.length; i += 1) {
+      const p = list[i];
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.vy += gravity * dt;
+      if (drag) p.vx *= 1 - Math.min(0.9, dt * drag);
+      p.life -= dt;
+      if (p.life > 0) {
+        list[keep] = p;
+        keep += 1;
+      }
+    }
+    list.length = keep;
+  }
+
+  function stepParticles(dt) {
+    if (dust.length) stepList(dust, dt, 220, 0);
+    if (sparks.length) stepList(sparks, dt, 320, 0.6);
+    if (smoke.length) stepList(smoke, dt, -14, 0.9);
+  }
+
+  function buildAsh() {
+    ash = [];
+    const n = W < 520 ? 12 : 20;
+    for (let i = 0; i < n; i += 1) {
+      ash.push({
+        x: Math.random() * W,
+        y: Math.random() * groundY,
+        vx: -6 - Math.random() * 12,
+        vy: 10 + Math.random() * 20,
+        size: Math.random() < 0.4 ? 2 : 1,
+        a: 0.16 + Math.random() * 0.32
+      });
+    }
+  }
+
+  function updateAsh(dt) {
+    for (let i = 0; i < ash.length; i += 1) {
+      const a = ash[i];
+      a.x += a.vx * dt;
+      a.y += a.vy * dt;
+      if (a.y > groundY) {
+        a.y = -3;
+        a.x = Math.random() * W;
+      }
+      if (a.x < -6) a.x = W + 4;
+    }
+  }
+
+  function drawAsh() {
+    if (!cine || cine.phase !== "ruins" || !ash.length) return;
+    ctx.fillStyle = "#d9cfc2";
+    for (let i = 0; i < ash.length; i += 1) {
+      const a = ash[i];
+      ctx.globalAlpha = a.a;
+      ctx.fillRect(Math.round(a.x), Math.round(a.y), a.size, a.size);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  /* 火星：新的是亮黄，烧到最后转暗红 */
+  function drawSparks() {
+    if (!sparks.length) return;
+    for (let i = 0; i < sparks.length; i += 1) {
+      const p = sparks[i];
+      const t = Math.max(0, Math.min(1, p.life / p.max));
+      ctx.fillStyle = t > 0.62 ? "#ffe6a8" : t > 0.3 ? "#ff9a4d" : "#a83a1c";
+      ctx.globalAlpha = Math.min(1, t * 1.4);
+      ctx.fillRect(Math.round(p.x), Math.round(p.y), p.size, p.size);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawSmoke() {
+    if (!smoke.length || !smokeSprite) return;
+    for (let i = 0; i < smoke.length; i += 1) {
+      const p = smoke[i];
+      const t = Math.max(0, Math.min(1, p.life / p.max));
+      const size = p.size * (1.6 - t * 0.7);
+      ctx.globalAlpha = Math.min(0.5, t * 0.6) * (p.a || 1);
+      ctx.drawImage(smokeSprite, p.x - size / 2, p.y - size / 2, size, size);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  /* 爆炸：膨大的火球 + 贴着地面的冲击波 + 掀起来的土 */
+  function drawBlast() {
+    if (!cine || cine.phase !== "blast" || !fireSprite) return;
+    const c = cine;
+    const cx = c.impactX;
+    const cy = c.impactY;
+
+    const grow = Math.min(1, c.t / 0.3);
+    const fade = 1 - Math.min(1, Math.max(0, (c.t - 0.22) / 0.7));
+    const size = c.r * (0.7 + grow * 2.1);
+
+    /* 火球本体 + 几团上下翻的火，别让它只是一坨圆光 */
+    ctx.globalAlpha = fade * 0.95;
+    ctx.drawImage(fireSprite, cx - size / 2, cy - size * 0.72, size, size);
+    for (let i = 0; i < 5; i += 1) {
+      const wob = Math.sin(clock * 9 + i * 2.3) * size * 0.18;
+      const s2 = size * (0.3 + 0.14 * ((i * 7) % 3));
+      ctx.globalAlpha = fade * (0.55 - i * 0.07);
+      ctx.drawImage(
+        fireSprite,
+        cx - s2 / 2 + wob,
+        cy - size * (0.3 + 0.1 * i) - s2 / 2 + wob * 0.4,
+        s2,
+        s2
+      );
+    }
+
+    /* 冲击波：两圈贴着地面荡开，别飞上天 */
+    for (let i = 0; i < 2; i += 1) {
+      const p = Math.min(1, Math.max(0, (c.t - i * 0.1) / (0.66 + i * 0.18)));
+      if (p <= 0) continue;
+      const rr = c.r * (0.55 + p * (1.4 + i * 0.5));
+      ctx.globalAlpha = (1 - p) * (0.5 - i * 0.2);
+      ctx.strokeStyle = i ? "#ff9a4d" : "#ffd2a0";
+      ctx.lineWidth = Math.max(1, (1 - p) * 3.5);
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.scale(1, 0.2);
+      ctx.beginPath();
+      ctx.arc(0, 0, rr, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    /* 地面被掀起来的一圈尘 */
+    const dustP = Math.min(1, c.t / 0.7);
+    ctx.globalAlpha = (1 - dustP) * 0.2;
+    ctx.fillStyle = "#8a6a52";
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(1, 0.16);
+    ctx.beginPath();
+    ctx.arc(0, 0, c.r * (0.6 + dustP * 3), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.globalAlpha = 1;
+  }
+
+  /* 废墟地面：焦痕、陨石坑、碎石、墓碑 */
+  function drawRuinsGround() {
+    if (!cine) return;
+    const c = cine;
+    if (c.phase !== "blast" && c.phase !== "ruins" && c.phase !== "rewind") return;
+
+    const fade = c.phase === "rewind" ? Math.max(0, 1 - c.t / (WIND_T * 0.85)) : 1;
+    if (fade <= 0.01) return;
+
+    const r = c.r;
+
+    /* 焦痕 */
+    if (scorchSprite) {
+      ctx.globalAlpha = 0.8 * fade;
+      ctx.drawImage(scorchSprite, c.impactX - r * 1.5, groundY - r * 0.55, r * 3, r * 1.1);
+    }
+
+    /* 坑：撕开的地面 + 坑底余烬 + 坑口碎石 */
+    if (c.phase !== "blast" || c.t > 0.08) {
+      const rx = r * 0.95;
+      const pit = c.pit || [1, 1, 1, 1, 1, 1, 1, 1, 1];
+      const depth = Math.max(10, r * 0.3);
+
+      ctx.globalAlpha = fade * 0.32;
+      ctx.fillStyle = "rgba(9, 5, 4, 0.9)";
+      ctx.beginPath();
+      ctx.ellipse(c.impactX, groundY + 4, rx * 1.3, rx * 0.16, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      /* 锯齿坑口：中间最深，两边收口 */
+      ctx.globalAlpha = fade;
+      ctx.fillStyle = "rgba(2, 3, 5, 0.96)";
+      ctx.beginPath();
+      ctx.moveTo(c.impactX - rx, groundY + 1);
+      for (let i = 0; i < pit.length; i += 1) {
+        const t = i / (pit.length - 1);
+        const dip = Math.sin(t * Math.PI) * depth * pit[i];
+        ctx.lineTo(c.impactX - rx + rx * 2 * t, groundY + 1 + dip);
+      }
+      ctx.lineTo(c.impactX + rx, groundY + 13);
+      ctx.lineTo(c.impactX - rx, groundY + 13);
+      ctx.closePath();
+      ctx.fill();
+
+      /* 坑口那圈还没冷透的红光 */
+      const cool = c.phase === "blast" ? Math.max(0, 1 - c.t / 1.8) : 0.18;
+      ctx.globalAlpha = fade * (0.16 + cool * 0.55);
+      ctx.strokeStyle = "#ff7b3a";
+      ctx.lineWidth = Math.max(1, r * 0.03);
+      ctx.beginPath();
+      ctx.moveTo(c.impactX - rx, groundY + 1);
+      for (let i = 0; i < pit.length; i += 1) {
+        const t = i / (pit.length - 1);
+        ctx.lineTo(c.impactX - rx + rx * 2 * t, groundY + 1 + Math.sin(t * Math.PI) * depth * pit[i]);
+      }
+      ctx.stroke();
+
+      /* 坑口碎石 */
+      ctx.globalAlpha = 0.9 * fade;
+      ctx.fillStyle = "#4b423a";
+      for (let i = 0; i < 4; i += 1) {
+        const side = i % 2 ? 1 : -1;
+        const off = r * (0.95 + (i >> 1) * 0.2) * side;
+        const h = 3 + (i % 3) * 2;
+        ctx.fillRect(Math.round(c.impactX + off), Math.round(groundY - h), 5 + (i % 2) * 3, h);
+      }
+
+      /* 坑底余烬 */
+      ctx.fillStyle = "#ff8a3d";
+      for (let i = 0; i < 3; i += 1) {
+        const flick = 0.35 + 0.45 * Math.abs(Math.sin(clock * 2.2 + i * 2.1));
+        ctx.globalAlpha = fade * flick;
+        ctx.fillRect(
+          Math.round(c.impactX - r * 0.3 + i * r * 0.26),
+          Math.round(groundY + 5 + (i % 2) * 3),
+          2 + (i % 2),
+          2
+        );
+      }
+    }
+
+    /* 碎石 */
+    ctx.globalAlpha = 0.9 * fade;
+    for (let i = 0; i < c.rubble.length; i += 1) {
+      const rock = c.rubble[i];
+      ctx.fillStyle = rock.dark ? "#3a3330" : "#6b6157";
+      ctx.fillRect(Math.round(rock.x), Math.round(groundY - rock.h), Math.round(rock.w), Math.round(rock.h));
+    }
+
+    /* 墓碑：从土里顶出来，只在土面以上可见 */
+    if (tombSprites.length) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, 0, W, groundY);
+      ctx.clip();
+      for (let i = 0; i < c.tombs.length; i += 1) {
+        const tomb = c.tombs[i];
+        if (tomb.rise <= 0.02) continue;
+        const sprite = tombSprites[tomb.variant % tombSprites.length];
+        if (!sprite) continue;
+        const lift = sprite.h * (1 - tomb.rise);
+        ctx.globalAlpha = fade;
+        ctx.save();
+        ctx.translate(tomb.x, groundY + lift + 2);
+        ctx.rotate((tomb.tilt * Math.PI) / 180);
+        ctx.drawImage(sprite.node, -sprite.w / 2, -sprite.h, sprite.w, sprite.h);
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+
+    ctx.globalAlpha = 1;
+  }
+
+  /* 游戏内昼夜：太阳走 0→0.5 的白天弧，月亮走 0.5→1 的夜弧。
+     两头都贴着地平线淡出，交接时不是「啪」地换个天体，而是天先烧成晚霞，
+     太阳沉下去、月亮跟着浮上来。 */
   function skyPhases() {
     const cyc = gameClock;
-    const nightAmt = cyc < 0.4 ? 0
-      : cyc < 0.5 ? (cyc - 0.4) / 0.1
-        : cyc < 0.92 ? 1
-          : 1 - (cyc - 0.92) / 0.08;
-    const duskAmt =
-      Math.max(0, 1 - Math.abs(cyc - 0.45) / 0.07) +
-      Math.max(0, 1 - Math.abs(cyc - 0.96) / 0.07);
-    return { cyc, nightAmt, duskAmt };
+    const smooth = (a, b, v) => {
+      const t = Math.min(1, Math.max(0, (v - a) / (b - a)));
+      return t * t * (3 - 2 * t);
+    };
+    const nightAmt = smooth(0.45, 0.55, cyc) * (1 - smooth(0.93, 1, cyc));
+
+    /* 晚霞/朝霞：两团热压在日落、日出两头，中间连续过渡 */
+    const bump = (c, w) => {
+      const d = Math.abs(cyc - c) / w;
+      return d >= 1 ? 0 : 1 - d * d;
+    };
+    const duskAmt = Math.max(bump(0.47, 0.14), bump(0.97, 0.12));
+
+    const sunT = cyc < 0.5 ? cyc / 0.5 : -1;
+    const moonT = cyc >= 0.5 ? (cyc - 0.5) / 0.5 : -1;
+    return { cyc, nightAmt, duskAmt, sunT, moonT };
   }
 
-  /* 演出的血色天幕：sky 渐入，rewind 渐出 */
+  /* 天体走的扁弧：贴地平线升起，中间最高，落到另一头 */
+  function arcPos(t, radius) {
+    const foot = groundY - radius - 6;
+    const high = Math.max(14, groundY * 0.17);
+    return {
+      x: W * (0.05 + 0.9 * t),
+      y: foot - Math.sin(t * Math.PI) * (foot - high)
+    };
+  }
+
+  /* 日月在演出里什么时候还在：天塌时被吞掉，回溯时重新升起来 */
+  function celestialKill() {
+    if (!cine) return 1;
+    switch (cine.phase) {
+      case "sky": return Math.max(0, 1 - cine.t / 0.9);
+      case "rewind": return Math.min(1, cine.t / 1.1);
+      default: return 0;
+    }
+  }
+
+  /* 演出的血色天幕：sky 渐入，砸完停在血天，回溯时退回白昼 */
   function bloodAmt() {
     if (!cine) return 0;
-    if (cine.phase === "sky") return Math.min(1, cine.t / 1.1);
-    if (cine.phase === "meteor" || cine.phase === "impact") return 1;
-    if (cine.phase === "rewind") return Math.max(0, 1 - (cine.t / 2.3) * 1.6);
-    return 0;
+    switch (cine.phase) {
+      case "sky": return Math.min(1, cine.t / 1.0);
+      case "meteor": return 1;
+      case "blast": return 1 - Math.min(0.45, cine.t / 1.2 * 0.45);
+      case "ruins": return 0.55;
+      case "rewind": return Math.max(0, 0.55 - (cine.t / 1.9) * 1.1);
+      default: return 0;
+    }
   }
 
-  function drawSky() {
-    const { nightAmt, duskAmt } = skyPhases();
+  function drawSky(phases) {
+    const { nightAmt, duskAmt } = phases;
 
-    if (nightAmt > 0.02) {
-      ctx.fillStyle = `rgba(4, 9, 22, ${(0.34 * nightAmt).toFixed(3)})`;
+    if (nightAmt > 0.01) {
+      ctx.globalAlpha = nightAmt;
+      ctx.fillStyle = skyGrad.night;
       ctx.fillRect(0, 0, W, H);
     }
-    if (duskAmt > 0.02) {
-      const warm = ctx.createLinearGradient(0, groundY - 90, 0, H);
-      warm.addColorStop(0, "rgba(255, 138, 84, 0)");
-      warm.addColorStop(1, `rgba(255, 138, 84, ${(0.2 * Math.min(1, duskAmt)).toFixed(3)})`);
-      ctx.fillStyle = warm;
-      ctx.fillRect(0, groundY - 90, W, 90);
+    if (duskAmt > 0.01) {
+      ctx.globalAlpha = Math.min(1, duskAmt * 1.05);
+      ctx.fillStyle = skyGrad.dusk;
+      ctx.fillRect(0, 0, W, H);
     }
+    ctx.globalAlpha = 1;
+
     const blood = bloodAmt();
-    if (blood > 0.02) {
-      ctx.fillStyle = `rgba(150, 22, 22, ${(0.3 * blood).toFixed(3)})`;
+    if (blood > 0.01) {
+      ctx.globalAlpha = blood;
+      ctx.fillStyle = skyGrad.blood;
       ctx.fillRect(0, 0, W, H);
     }
+
+    /* 陨石落下来时天就该黑透，不然火光跟血天糊成一片 */
+    let dead = 0;
+    if (cine) {
+      if (cine.phase === "meteor") dead = Math.min(1, cine.t / 0.9) * 0.62;
+      else if (cine.phase === "blast") dead = 0.62 + Math.min(1, cine.t / 0.6) * 0.38;
+      else if (cine.phase === "ruins") dead = 1;
+      else if (cine.phase === "rewind") dead = Math.max(0, 1 - cine.t / 1.4);
+    }
+    if (dead > 0.01) {
+      ctx.globalAlpha = dead * 0.92;
+      ctx.fillStyle = skyGrad.dead;
+      ctx.fillRect(0, 0, W, H);
+    }
+    ctx.globalAlpha = 1;
   }
 
-  /* 太阳：白天沿弧线走，夜里沉下去 */
+  /* 太阳：贴地时发红、升高转金，全由高度算，不另存状态 */
   function drawSun(phases) {
-    const { cyc, nightAmt } = phases;
-    if (isNight() || nightAmt > 0.96) return;
-    const dayT = cyc >= 0.92 ? (cyc - 0.92) / 0.58 : cyc / 0.5;
-    const x = W * (0.08 + 0.8 * dayT);
-    const y = 24 + (1 - Math.sin(dayT * Math.PI)) * 20;
+    if (!sunSprite || phases.sunT < 0) return;
+
+    const t = phases.sunT;
+    /* 出地平线、入地平线都淡出，避免凭空出现 */
+    const fade = Math.min(1, t / 0.07) * Math.min(1, (1 - t) / 0.07);
+    if (fade <= 0.01) return;
+
+    const alt = Math.sin(t * Math.PI);
+    const r = sunSprite.r;
+    const p = arcPos(t, r);
+    const kill = celestialKill();
+    if (kill <= 0.02) return;
+    const alpha = fade * (isNight() ? 0.78 : 1) * kill;
 
     ctx.save();
-    ctx.globalAlpha = Math.max(0, 1 - nightAmt);
-    const glow = ctx.createRadialGradient(x, y, 2, x, y, 34);
-    glow.addColorStop(0, withAlpha(palette.gold, 0.5));
-    glow.addColorStop(1, withAlpha(palette.gold, 0));
-    ctx.fillStyle = glow;
+    ctx.globalAlpha = alpha * 0.9;
+    ctx.drawImage(sunSprite.node, p.x - sunSprite.box / 2, p.y - sunSprite.box / 2, sunSprite.box, sunSprite.box);
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = mixHex("#ff6a3d", palette.goldLit, Math.min(1, alt * 1.7));
     ctx.beginPath();
-    ctx.arc(x, y, 34, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = palette.goldLit;
-    ctx.beginPath();
-    ctx.arc(x, y, 6, 0, Math.PI * 2);
+    ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
   }
@@ -1270,104 +1938,70 @@
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
-  function drawStars() {
-    if (!stars.length) return;
+  function drawStars(phases) {
+    if (!stars.length || !starSprites) return;
 
-    const night = isNight() || skyPhases().nightAmt > 0.35;
-    /* 夜间星星是主角，日间只留一层几乎看不见的底噪；演出时天塌下来星星先灭 */
-    const cineKill = cine && (cine.phase === "sky" || cine.phase === "meteor" || cine.phase === "impact")
-      ? 1 - bloodAmt()
-      : 1;
-    const base = (night ? 1 : 0.2) * cineKill;
+    const nightSky = phases.nightAmt;
+    /* 夜里满星；白天（尤其是暗色主题）留一层几乎看不见的底噪 */
+    const base = Math.max(nightSky * 0.95, (isNight() ? 0.16 : 0.08) * (1 - nightSky))
+      * (1 - Math.min(1, phases.duskAmt * 0.85));
+    /* 演出的天塌下来：星星先一颗颗灭 */
+    const kill = 1 - bloodAmt();
+    const strength = base * kill;
+    if (strength < 0.02) return;
 
-    ctx.fillStyle = palette.ink;
-    stars.forEach((star) => {
+    const night = nightSky > 0.35;
+    for (let i = 0; i < stars.length; i += 1) {
+      const star = stars[i];
       const drift = (star.x - worldX * star.depth) % (W + 40);
-      const x = drift < 0 ? drift + W + 40 : drift;
+      const x = Math.round(drift < 0 ? drift + W + 40 : drift);
 
-      /* 夜间：把 sin 的峰值削尖，亮一下再暗下去，闪得更明显 */
+      /* 夜间把 sin 的峰值削尖，亮一下再暗下去 */
       const wave = 0.5 + 0.5 * Math.sin(clock * star.twSpeed + star.tw);
       const pulse = night ? Math.pow(wave, 1.7) : wave;
-      const twinkle = night ? 0.26 + 0.74 * pulse : 0.72 + 0.28 * pulse;
-      const alpha = base * twinkle;
+      const alpha = strength * (night ? 0.26 + 0.74 * pulse : 0.72 + 0.28 * pulse);
+      if (alpha < 0.015) continue;
 
-      const px = Math.round(x);
-      const py = Math.round(star.y);
-
-      /* 小星闪到最亮的那一下会「跳」成 2px，比单纯调透明度更像在眨眼 */
-      const size = star.big || (night && pulse > 0.84) ? 2 : 1;
-      const half = (size - 1) / 2;
-
-      ctx.globalAlpha = alpha;
-
-      /* 亮星带一点点自身的光，才像在发亮而不是贴了白点 */
-      if (night && star.big) {
-        ctx.shadowColor = palette.ink;
-        ctx.shadowBlur = 7 * alpha;
+      ctx.globalAlpha = Math.min(1, alpha);
+      if (star.big && starSprites.big) {
+        ctx.drawImage(starSprites.big, x - 4, Math.round(star.y) - 4);
+      } else {
+        ctx.drawImage(starSprites.dot, x, Math.round(star.y));
       }
-
-      ctx.fillRect(px, py, size, size);
-
-      if (night && star.big) {
-        ctx.shadowBlur = 0;
-        /* 十字星芒，跟着闪烁一起呼吸 */
-        ctx.globalAlpha = alpha * 0.55;
-        ctx.fillRect(px - 2, py + half, size + 4, 1);
-        ctx.fillRect(px + half, py - 2, 1, size + 4);
-      }
-    });
-    ctx.globalAlpha = 1;
-    ctx.shadowBlur = 0;
-  }
-
-  /* 月亮：网站夜间固定右上角；游戏内入夜后沿弧线巡天 */
-  function drawMoon() {
-    const phases = skyPhases();
-    const cycleNight = phases.nightAmt > 0.05;
-    if ((!isNight() && !cycleNight) || !moonSprite) return;
-
-    let cx;
-    let cy;
-    if (cycleNight) {
-      const nightT = Math.min(1, Math.max(0, (phases.cyc - 0.36) / 0.64));
-      cx = W * (0.08 + 0.84 * nightT);
-      cy = 22 + (1 - Math.sin(nightT * Math.PI)) * 16;
-    } else {
-      const r = H > 150 ? 14 : 11;
-      cx = W - r - 22;
-      cy = r + 18;
     }
-    const r = H > 150 ? 14 : 11;
-
-    ctx.save();
-
-    /* 一圈很淡的月晕，让月亮从夜色里浮出来 */
-    const halo = ctx.createRadialGradient(cx, cy, r * 0.35, cx, cy, r * 2.9);
-    halo.addColorStop(0, withAlpha(palette.moon, 0.2));
-    halo.addColorStop(0.5, withAlpha(palette.moon, 0.06));
-    halo.addColorStop(1, withAlpha(palette.moon, 0));
-    ctx.fillStyle = halo;
-    ctx.beginPath();
-    ctx.arc(cx, cy, r * 2.9, 0, Math.PI * 2);
-    ctx.fill();
-
-    const half = moonSprite.box / 2;
-    ctx.drawImage(moonSprite.node, cx - half, cy - half, moonSprite.box, moonSprite.box);
-
-    ctx.restore();
+    ctx.globalAlpha = 1;
   }
 
-  function drawClouds() {
-    /* 夜里不画云：留出干净的星空给月亮 */
-    if (isNight()) return;
-    const nightFade = 1 - skyPhases().nightAmt;
+  /* 月亮：跟着游戏内夜弧走，跟太阳一头落一头起 */
+  function drawMoon(phases) {
+    if (!moonSprite || phases.moonT < 0) return;
+
+    const t = phases.moonT;
+    const fade = Math.min(1, t / 0.06) * Math.min(1, (1 - t) / 0.06);
+    if (fade <= 0.01) return;
+
+    const kill = celestialKill();
+    if (kill <= 0.02) return;
+
+    const p = arcPos(t, 11);
+    const half = moonSprite.box / 2;
+
+    ctx.globalAlpha = fade * (isNight() ? 1 : 0.94) * kill;
+    ctx.drawImage(moonSprite.node, p.x - half, p.y - half, moonSprite.box, moonSprite.box);
+    ctx.globalAlpha = 1;
+  }
+
+  function drawClouds(phases) {
+    const nightFade = 1 - phases.nightAmt;
     if (nightFade < 0.05) return;
 
     const s = S;
-    ctx.fillStyle = palette.dim;
+    /* 晚霞把云染暖，白天还是皮肤色 */
+    ctx.fillStyle = mixHex(palette.dim, "#ff8a4d", Math.min(1, phases.duskAmt * 0.85));
     ctx.globalAlpha = 0.45 * nightFade;
 
-    clouds.forEach((cloud) => {
+    for (let i = 0; i < clouds.length; i += 1) {
+      const cloud = clouds[i];
       const drift = (worldX * 0.08 + cloud.x) % (W + 120);
       const x = W + 40 - drift;
       const y = cloud.y;
@@ -1375,7 +2009,7 @@
       ctx.fillRect(x, y + s, 6 * s, 2 * s);
       ctx.fillRect(x + 2 * s, y, 4 * s, 2 * s);
       ctx.fillRect(x + 5 * s, y + s, 5 * s, 2 * s);
-    });
+    }
 
     ctx.globalAlpha = 1;
   }
@@ -1435,6 +2069,7 @@
   }
 
   function drawDinos(frame) {
+    if (hideDinos) return;
     const sprite = sprites.dino[frame];
 
     /* 40 级起，跟随龙从波浪跟跳收紧成衔尾式齐冲 */
@@ -1503,24 +2138,38 @@
       ctx.translate((Math.random() - 0.5) * amp, (Math.random() - 0.5) * amp);
     }
 
-    drawSky();
+    /* 每帧只算一次昼夜，日、月、星、云共用同一份 */
     const phases = skyPhases();
+    drawSky(phases);
     drawSun(phases);
-    drawStars();
-    drawMoon();
-    drawClouds();
+    drawStars(phases);
+    drawMoon(phases);
+    drawClouds(phases);
     drawSpeedLines();
     drawGround();
+    drawRuinsGround();
     drawObstacles();
-    drawMeteor();
     drawCoins();
     drawDinos(frame);
+    drawMeteor();
+    drawSmoke();
+    drawBlast();
     drawDust();
+    drawSparks();
+    drawAsh();
 
     /* 里程碑轻闪：一下就收，不喧宾夺主 */
     if (flash > 0) {
       ctx.fillStyle = withAlpha(palette.goldLit, 0.16 * Math.min(1, flash));
       ctx.fillRect(0, 0, W, H);
+    }
+
+    /* 陨石落地的白光：只有爆炸那一瞬 */
+    if (cine && cine.phase === "blast" && cine.t < 0.13) {
+      ctx.globalAlpha = (1 - cine.t / 0.13) * 0.9;
+      ctx.fillStyle = "#fff4e0";
+      ctx.fillRect(0, 0, W, H);
+      ctx.globalAlpha = 1;
     }
 
     ctx.restore();
@@ -1542,34 +2191,119 @@
   }
 
   /* 灭绝陨石：带尾焰的像素火球，倒飞阶段从原地折返 */
+  /* 陨石：一颗占满画面三分之一的火球，拖十六团尾焰砸下来 */
   function drawMeteor() {
-    if (!cine) return;
-    if (cine.phase !== "meteor" && cine.phase !== "impact" && cine.phase !== "rewind") return;
+    if (!cine || !meteorSprite || !fireSprite) return;
+    const c = cine;
+    if (c.phase !== "meteor" && c.phase !== "rewind") return;
 
-    let mx = cine.mx;
-    let my = cine.my;
-    if (cine.phase === "rewind") {
-      const p = Math.min(1, cine.t / 2.3);
-      mx = cine.mx + (W * 1.05 - cine.mx) * p;
-      my = cine.my + (-40 - cine.my) * p;
+    let mx = c.mx;
+    let my = c.my;
+    if (c.phase === "rewind") {
+      const p = Math.min(1, c.t / WIND_T);
+      mx = c.impactX + (W * 1.14 - c.impactX) * p;
+      my = c.impactY - (c.impactY + c.r * 1.6) * p;
     }
 
-    ctx.save();
-    /* 尾焰 */
-    ctx.fillStyle = "#ff8a4d";
-    ctx.globalAlpha = 0.75;
-    ctx.fillRect(Math.round(mx + 4), Math.round(my - 14), 3, 12);
-    ctx.globalAlpha = 0.45;
-    ctx.fillRect(Math.round(mx + 7), Math.round(my - 24), 2, 18);
-    ctx.globalAlpha = 1;
+    const r = c.r;
+    /* 来路在右上，尾巴就往右上拖 */
+    const dx = 0.92;
+    const dy = -0.39;
 
-    /* 本体：暗红石核 + 金边 */
-    ctx.fillStyle = "#8c1f1f";
-    ctx.fillRect(Math.round(mx) - 4, Math.round(my) - 4, 9, 9);
-    ctx.fillStyle = palette.gold;
-    ctx.fillRect(Math.round(mx) - 4, Math.round(my) - 4, 9, 1);
-    ctx.fillRect(Math.round(mx) - 4, Math.round(my) - 4, 1, 9);
-    ctx.restore();
+    for (let i = 16; i >= 1; i -= 1) {
+      const k = i / 16;
+      const wobble = Math.sin(clock * 12 + i * 1.7) * r * 0.07;
+      const dist = r * (0.9 + k * 3.4);
+      const size = r * (1.5 - k * 0.95);
+      ctx.globalAlpha = Math.pow(1 - k, 1.4) * 0.5;
+      ctx.drawImage(
+        fireSprite,
+        mx + dx * dist + wobble - size / 2,
+        my + dy * dist - size / 2,
+        size,
+        size
+      );
+    }
+
+    /* 大气摩擦：外圈一层虚火，紧贴石头再裹一层实的，边缘就烧起来了 */
+    ctx.globalAlpha = 0.55;
+    ctx.drawImage(fireSprite, mx - r * 2, my - r * 2, r * 4, r * 4);
+    ctx.globalAlpha = 0.9;
+    ctx.drawImage(fireSprite, mx - r * 1.24, my - r * 1.24, r * 2.48, r * 2.48);
+
+    /* 石核 */
+    ctx.globalAlpha = 1;
+    ctx.drawImage(meteorSprite, mx - r * 0.97, my - r * 0.97, r * 1.94, r * 1.94);
+
+    /* 迎风那一侧再亮一道 */
+    ctx.strokeStyle = "#ffe9c4";
+    ctx.lineCap = "round";
+    ctx.lineWidth = Math.max(1.2, r * 0.03);
+    ctx.globalAlpha = 0.42 + Math.sin(clock * 16) * 0.1;
+    ctx.beginPath();
+    ctx.arc(mx, my, r * 0.965, Math.PI * 0.55, Math.PI * 1.0);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
+  /* 陨石本体烘一次：烧黑的岩壳 + 熔缝，之后只做缩放 */
+  function buildMeteor() {
+    const size = 200;
+    const node = document.createElement("canvas");
+    node.width = size;
+    node.height = size;
+    const g = node.getContext("2d");
+    const c = size / 2;
+    const r = c - 2;
+
+    const body = g.createRadialGradient(c - r * 0.3, c - r * 0.35, r * 0.1, c, c, r);
+    body.addColorStop(0, "#8a3a28");
+    body.addColorStop(0.45, "#4a1a14");
+    body.addColorStop(1, "#170806");
+    g.fillStyle = body;
+    g.beginPath();
+    g.arc(c, c, r, 0, Math.PI * 2);
+    g.fill();
+
+    /* 撞击坑 */
+    g.fillStyle = "rgba(18, 6, 4, 0.6)";
+    const pits = [[-0.34, -0.18, 0.16], [0.22, 0.3, 0.12], [0.36, -0.32, 0.09], [-0.1, 0.44, 0.08]];
+    for (let i = 0; i < pits.length; i += 1) {
+      const [px, py, pr] = pits[i];
+      g.beginPath();
+      g.arc(c + r * px, c + r * py, r * pr, 0, Math.PI * 2);
+      g.fill();
+    }
+
+    /* 熔缝：岩壳裂开的地方还在烧 */
+    g.strokeStyle = "rgba(255, 132, 56, 0.9)";
+    g.lineWidth = Math.max(1.5, r * 0.028);
+    g.lineCap = "round";
+    const cracks = [
+      [-0.62, -0.05, -0.28, -0.22, 0.02, 0.12],
+      [-0.05, -0.6, 0.12, -0.24, 0.34, 0.05],
+      [0.1, 0.52, 0.3, 0.28, 0.5, 0.34],
+      [-0.3, 0.28, -0.02, 0.4, 0.24, 0.62]
+    ];
+    for (let i = 0; i < cracks.length; i += 1) {
+      const k = cracks[i];
+      g.beginPath();
+      g.moveTo(c + r * k[0], c + r * k[1]);
+      g.lineTo(c + r * k[2], c + r * k[3]);
+      g.lineTo(c + r * k[4], c + r * k[5]);
+      g.stroke();
+    }
+
+    /* 中心透出来的一点热度 */
+    const core = g.createRadialGradient(c, c, 0, c, c, r * 0.85);
+    core.addColorStop(0, "rgba(255, 120, 48, 0.35)");
+    core.addColorStop(1, "rgba(255, 90, 30, 0)");
+    g.fillStyle = core;
+    g.beginPath();
+    g.arc(c, c, r, 0, Math.PI * 2);
+    g.fill();
+
+    meteorSprite = node;
   }
 
   function loop(now) {
@@ -1579,14 +2313,27 @@
     const rawDt = Math.min(0.05, (now - lastTime) / 1000);
     lastTime = now;
 
+    /* 结局是一帧静止的废墟，隔帧画一次就够，手机省一半电 */
+    if (cine && cine.phase === "ruins") {
+      idleSkip = !idleSkip;
+      if (idleSkip) {
+        raf = window.requestAnimationFrame(loop);
+        return;
+      }
+    }
+
     /* 时间加速：先乘倍率，再切成小步长跑物理，跳弧线不会因为步子大而糊 */
     const scaled = rawDt * (cine ? 1 : timeScale);
     const steps = Math.max(1, Math.ceil(scaled / 0.034));
     const sub = scaled / steps;
+    const tUpdate = performance.now();
     for (let i = 0; i < steps; i += 1) update(sub);
+    perfUpdate = perfUpdate ? perfUpdate * 0.9 + (performance.now() - tUpdate) * 0.1 : performance.now() - tUpdate;
 
     const frame = activated && !reduce.matches ? Math.floor(now / 105) % 2 : 0;
+    const tDraw = performance.now();
     draw(frame);
+    perfDraw = perfDraw ? perfDraw * 0.9 + (performance.now() - tDraw) * 0.1 : performance.now() - tDraw;
 
     raf = window.requestAnimationFrame(loop);
   }
@@ -1629,11 +2376,13 @@
   document.addEventListener("hnyz:stylechange", () => {
     readPalette();
     buildSprites();
+    buildScenery();
   });
 
   new MutationObserver(() => {
     readPalette();
     buildSprites();
+    buildScenery();
   }).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
 
   /* 视口内才跑；离开时暂停，顺便让右下角的校徽让位 */
@@ -1701,11 +2450,25 @@
   const dinoDebug = () => ({
     visible, running, activated, score, dead, mode, W, H, S,
     obs: obstacles.length, coins: coins.length, level, combo, bestCombo, worldX,
-    gameClock, timeScale, starTimer, cine: cine ? cine.phase : null
+    gameClock, timeScale, starTimer, cine: cine ? cine.phase : null,
+    cineT: cine ? Math.round(cine.t * 100) / 100 : 0,
+    perf: { update: Math.round(perfUpdate * 100) / 100, draw: Math.round(perfDraw * 100) / 100 },
+    hideDinos, sparks: sparks.length, smoke: smoke.length, ash: ash.length,
+    meteR: cine ? Math.round(cine.r) : 0,
+    tombs: cine ? cine.tombs.filter((t) => t.rise > 0.5).length : 0
   });
   /* 测试钩子：把里程直接拨到指定分数处（线上无入口，仅供调试用） */
   dinoDebug.seek = (target) => {
     distance = target * 14;
+  };
+  dinoDebug.rewind = () => startRewind();
+  dinoDebug.setClock = (value) => {
+    gameClock = ((value % 1) + 1) % 1;
+  };
+  dinoDebug.extinct = () => {
+    level = LEVEL_CAP - 1;
+    setLevel(LEVEL_CAP);
+    startExtinction();
   };
   window.__HNYZ_DINO__ = dinoDebug;
 
