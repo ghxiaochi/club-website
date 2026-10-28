@@ -312,7 +312,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 |---|---|---|
 | `default` 蓝白科技 | 原来的样子，光斑、角色排、校徽、动效全保留 | 什么都不改 |
 | `minimal` 极简 | 纯黑白灰、直角、去阴影，隐藏光斑 / 装饰图标 / 贴纸 / 校徽 | `html[data-style="minimal"]` 变量 + 隐藏清单 |
-| `hacker` 黑客终端 | 近黑底 + 手绘涂鸦图标平铺 + 扫描线 + 等宽字 + 荧光绿，标题带 `//` 前缀 | `html[data-style="hacker"]` 变量 + SVG `<pattern>` 背景 |
+| `hacker` 黑客终端 | 纯黑底，背景只有一整屏代码雨和一层漂浮的气泡，等宽字 + 荧光绿 | `html[data-style="hacker"]` 变量 + `js/matrix.js` 画布 + `.skin-bubbles` |
 | `bare` 棍木 | 全白空白页，没有内容、颜色和链接，中间一句灰字，右上角只剩风格按钮 | `html[data-style="bare"]` 隐藏 `body` 下所有节点 + 按钮搬到 `body` |
 
 - 选择存在 `localStorage`（key：`hnyz:style`），四个页面共用；`<head>` 里有内联脚本做首帧预置，刷新不会闪一下默认皮肤。
@@ -321,6 +321,8 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 - 键盘 `Esc` 关闭面板；面板打开时背景滚动锁定。
 
 `bare`（棍木）是故意做成「什么都没有」的：`html[data-style="bare"] body > *:not(.style-toggle):not(.style-deck):not(.style-wipe):not(.bare-note)` 一条规则把正文、顶栏、页脚、跑道、校徽、装饰层全部 `display: none`，`html` 与 `body` 锁死一屏并强制白底（深色主题在这里也压成白）。按钮本身在 `<header>` 里，父级一藏它也跟着没了，所以 `skins.js` 在进入这个风格时把 `[data-style-toggle]` 挪到 `body` 下、固定到右上角，切走时再按记下的原位置插回顶栏。
+
+面板里这张卡也遵守同一条规矩：**不写简介**（其余三张都有一句说明），内容整体居中，配色只用白和灰——空出来的那片地方就是它要说的东西。
 
 ### 页脚小恐龙
 
@@ -381,22 +383,33 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 正文用 `--sans`、标题用 `--display`，三套风格只覆盖这两个变量，所以加风格时不用碰具体选择器。
 
-文案在 `js/copy.js` 里集中维护，HTML 只写 `data-copy="键名"`：
+文案在 `js/copy.js` 里集中维护，HTML 只写 `data-copy="键名"`。三套语气都是「让人一眼看出你很装」的路子，只是装的层次不同：
 
-- 蓝白科技：`把想法，写成代码。` / `加入我们`
-- 极简：`少一点，做深一点。` / `加入`
-- 黑客：`编译想法，输出作品。` / `join --now`
+- 蓝白科技：`把想法，写成代码。` / `我们不生产课件，只维护一套可以反复失败的实验环境。`
+- 极简：`少即是，全部。` / `减法，是唯一诚实的语法。`
+- 黑客：`把混沌，编译成秩序。` / `在 0 与 1 的缝隙里重新定义「可被运行」` / `cat ./manifest`
 
 切换风格时 `skins.js` 派发 `hnyz:stylechange`，`copy.js` 收到后重写节点内容；页面加载时按 `localStorage` 里的风格先应用一次，不会闪。
 
 ### 黑客风：从配色到终端
 
-`js/matrix.js` 画一层全屏数字雨（片假名 + 数字 + 符号），只在 `data-style="hacker"` 下启动：
+背景被清到只剩两样东西：**代码雨**和**气泡**。原来的手绘涂鸦底纹（`skin-doodle`）、扫描线（`skin-scanlines`）、工程网格和背景图标阵列（`bg-icons`）全部删掉，理由是它们在深底上只剩一团说不清是什么的灰影。
+
+`js/matrix.js` 画那层代码雨（片假名 + 数字 + 符号），只在 `data-style="hacker"` 下启动：
 
 - 画布 `fixed` 铺满视口，`z-index: 0`，内容在它上面；用 `destination-out` 逐帧擦淡，所以背景是透明的，字能正常读
-- 限制 26fps，页面不可见 / `prefers-reduced-motion` / 切走皮肤立刻停
+- 字符**按格下落**：只有跨过一行（`size × 1.04`）才落一个字。连续坐标会让字形互相压成一团糊，卡在格子里才是清的
+- 三档景深：`depth` 随机，远的细（13px）、暗、慢；近的粗（18px）、接近白色、快；近列的字头带 `shadowBlur` 辉光
+- 字色在荧光绿 `#46ff94` 和近白 `#e8fff2` 之间按 `depth^1.7` 插值，所以雨幕有前后层次，不是一排同色字
+- 限制 30fps；小屏（≤760px）整层压到 `opacity: 0.62`，否则列太密会压住正文；页面不可见 / `prefers-reduced-motion` / 切走皮肤立刻停
 
-配套的终端化细节都在 `skins.css` 末尾：标题前缀从 `//` 换成 `>`，眉标加 `$`，主按钮变成 `> join --now` 并在末尾挂一个闪烁光标，卡片左上角切一道角标。
+气泡在 DOM 里（`skins.js` 生成 16 个 `--r/--x/--dx/--dur/--delay/--a` 全随机的 `<i>`，CSS `skinBubbleRise` 只跑 `transform`）：
+
+- 一颗气泡 = 1px 细边 + 内阴影 + 左上角一点高光（`::after`），才像玻璃泡而不是一块灰斑
+- 从视口下方 14vh 外升起，一路上轻微横向漂移，升到 `-122vh` 淡出；单颗 16–34 秒，负 `delay` 让开局就是满屏
+- 跟画布互不打扰：气泡走合成层，不占 `requestAnimationFrame`
+
+终端质感都在 `skins.css` 末尾的「质感层」：2px 直角、顶栏毛玻璃、导航下划线从左长出、卡片顶部 1px 内高光、分隔线改虚线、`::selection` 荧光绿。眉标保留小写（`$ whoami --verbose` 比 `$ WHOAMI --VERBOSE` 更像真的终端）。
 
 ### 弹性动效
 

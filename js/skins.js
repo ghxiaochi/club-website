@@ -4,7 +4,7 @@
    四个皮肤：
      default  现在的蓝白科技风
      minimal  去装饰的极简风
-     hacker   深色终端黑客风（带涂鸦背景 / 扫描线 / 进度条）
+     hacker   深色终端黑客风（代码雨 / 气泡 / 进度条）
      bare     棍木：整页空白，只留右上角的风格按钮和一句灰字
    顶栏的方块打开一个竖向卡片面板，切换时用整屏向上擦除。
    选择写进 localStorage，四个页面共用。
@@ -49,69 +49,34 @@
   current = readStored();
   root.dataset.style = current;
 
+
   /* -------------------------------------------------------
-     一、涂鸦底纹（黑客风）
+     一、黑客风的背景层：一层漂浮的气泡
+     -------------------------------------------------------
+     代码雨在 js/matrix.js 里画，气泡放在 DOM 里用 CSS 动，
+     只跑 transform，便宜且不会和画布抢帧。
+     尺寸、位置、速度、延迟都写死在行内，刷新也不会变。
      ------------------------------------------------------- */
-  function doodleSVG(id) {
-    return `
-      <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-        <defs>
-          <pattern id="${id}" width="280" height="280" patternUnits="userSpaceOnUse">
-            <g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="22" y="28" width="50" height="28" rx="12"/>
-              <path d="M36 35v14M29 42h14"/>
-              <circle cx="57" cy="37" r="2.4"/><circle cx="64" cy="44" r="2.4"/>
+  const bubbles = document.createElement("div");
+  bubbles.className = "skin-bubbles";
+  bubbles.setAttribute("aria-hidden", "true");
 
-              <path d="M132 16c9 8 12 23 5 36l-11 11-11-11c-7-13-4-28 5-36 4-4 8-4 12 0Z"/>
-              <circle cx="132" cy="34" r="5"/>
-              <path d="m114 47-9 13 13-2M150 47l9 13-13-2"/>
-
-              <path d="m250 18 6 14 15 2-11 10 3 15-13-8-13 8 3-15-11-10 15-2 6-14Z"/>
-
-              <path d="M30 118c0-8 6-14 14-14 2-9 9-15 18-15 10 0 17 6 19 15 8 1 13 6 13 14 0 9-7 15-16 15H46c-9 0-16-6-16-15Z"/>
-              <path d="M46 120c4 0 6 2 6 5M64 120c4 0 6 2 6 5M100 120c4 0 6 2 6 5"/>
-
-              <path d="m112 100-14 16 14 16M144 100l14 16-14 16M134 94l-14 48"/>
-
-              <circle cx="212" cy="110" r="14"/>
-              <ellipse cx="212" cy="110" rx="27" ry="8" transform="rotate(-20 212 110)"/>
-
-              <path d="m58 174-16 30h16l-6 28 26-38H62l10-20H58Z"/>
-
-              <path d="M112 228v-20c0-11 8-19 18-19s18 8 18 19v20l-7-6-7 6-7-6-7 6-8-6Z"/>
-              <circle cx="124" cy="215" r="1.8" fill="currentColor"/>
-              <circle cx="136" cy="215" r="1.8" fill="currentColor"/>
-
-              <rect x="204" y="188" width="36" height="36" rx="3"/>
-              <rect x="212" y="194" width="16" height="12"/>
-              <path d="M216 214h20"/>
-
-              <rect x="112" y="250" width="30" height="30" rx="3"/>
-              <path d="M120 242v8M127 242v8M134 242v8M120 288v8M127 288v8M134 288v8M104 258h8M104 266h8M104 274h8M142 258h8M142 266h8M142 274h8"/>
-
-              <path d="m230 244 18 32h-36l18-32Z"/>
-
-              <circle cx="34" cy="242" r="3"/>
-              <circle cx="190" cy="46" r="2.4"/>
-              <circle cx="262" cy="146" r="2.8"/>
-              <circle cx="82" cy="300" r="2.2"/>
-            </g>
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#${id})"/>
-      </svg>`;
+  const BUBBLE_COUNT = 16;
+  for (let i = 0; i < BUBBLE_COUNT; i += 1) {
+    const bubble = document.createElement("i");
+    const size = 7 + Math.random() * 29;
+    bubble.style.cssText = [
+      `--r:${size.toFixed(1)}px`,
+      `--x:${(Math.random() * 100).toFixed(2)}%`,
+      `--dx:${(Math.random() * 72 - 36).toFixed(0)}px`,
+      `--dur:${(16 + Math.random() * 18).toFixed(1)}s`,
+      `--delay:${(-Math.random() * 34).toFixed(1)}s`,
+      `--a:${(0.18 + Math.random() * 0.28).toFixed(2)}`
+    ].join(";");
+    bubbles.appendChild(bubble);
   }
 
-  const doodle = document.createElement("div");
-  doodle.className = "skin-doodle";
-  doodle.setAttribute("aria-hidden", "true");
-  doodle.innerHTML = doodleSVG("skinDoodlePattern");
-  document.body.appendChild(doodle);
-
-  const scanlines = document.createElement("div");
-  scanlines.className = "skin-scanlines";
-  scanlines.setAttribute("aria-hidden", "true");
-  document.body.appendChild(scanlines);
+  document.body.appendChild(bubbles);
 
   const progress = document.createElement("div");
   progress.className = "skin-progress";
@@ -123,27 +88,6 @@
   bareNote.className = "bare-note";
   bareNote.textContent = "这里什么也没有";
   document.body.appendChild(bareNote);
-
-  /* 鼠标视差：涂鸦层跟着指针偏一点 */
-  let pointerX = 0;
-  let pointerY = 0;
-  let pointerRaf = 0;
-
-  function flushPointer() {
-    pointerRaf = 0;
-    if (current !== "hacker" || reduce.matches) return;
-    doodle.style.setProperty("--dd-x", (pointerX * 16).toFixed(2));
-    doodle.style.setProperty("--dd-y", (pointerY * 12).toFixed(2));
-  }
-
-  if (!reduce.matches) {
-    document.addEventListener("pointermove", (event) => {
-      if (event.pointerType !== "mouse" || current !== "hacker") return;
-      pointerX = event.clientX / window.innerWidth - 0.5;
-      pointerY = event.clientY / window.innerHeight - 0.5;
-      if (!pointerRaf) pointerRaf = window.requestAnimationFrame(flushPointer);
-    }, { passive: true });
-  }
 
   /* 顶部滚动进度 */
   let progressRaf = 0;
@@ -170,7 +114,6 @@
   deck.setAttribute("data-style-deck", "");
   deck.setAttribute("aria-labelledby", "style-deck-title");
   deck.innerHTML = `
-    <div class="style-deck__doodle" aria-hidden="true">${doodleSVG("skinDeckPattern")}</div>
     <div class="style-deck__shell">
       <header class="style-deck__head">
         <p class="style-deck__kicker">HNYZ // STYLE_DECK</p>
@@ -212,7 +155,7 @@
           <div class="style-card__glyph style-card__glyph--hacker" aria-hidden="true">&gt;_</div>
           <p class="style-card__kicker">ROOT_ACCESS</p>
           <h3 class="style-card__title">黑客终端</h3>
-          <p class="style-card__desc">深色终端、荧光绿、扫描线和会漂的涂鸦底纹，科技感拉满。</p>
+          <p class="style-card__desc">纯黑终端、荧光绿和一整屏落下来的代码雨，其余什么都没有。</p>
           <div class="style-card__swatches" aria-hidden="true">
             <i style="--c:#030705"></i><i style="--c:#39ff88"></i><i style="--c:#00e5ff"></i>
           </div>
@@ -224,7 +167,6 @@
           <div class="style-card__glyph style-card__glyph--bare" aria-hidden="true"><span></span></div>
           <p class="style-card__kicker">NOTHING_HERE</p>
           <h3 class="style-card__title">棍木</h3>
-          <p class="style-card__desc">页面清空，没有颜色，没有内容，也没有任何跳转。只剩右上角这个按钮，和中间一句话。</p>
           <div class="style-card__swatches" aria-hidden="true">
             <i style="--c:#ffffff"></i><i style="--c:#f2f2ee"></i><i style="--c:#b9b9b4"></i>
           </div>
@@ -470,7 +412,6 @@
 
     syncCurrentUi();
     flushProgress();
-    flushPointer();
 
     if (trigger) {
       trigger.setAttribute("title", `切换网页风格（当前：${NAMES[next]}）`);

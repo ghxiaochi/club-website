@@ -92,93 +92,96 @@ html[data-style="hacker"] .style-toggle__grid i {
 
 /* ---------------------------------------------------------
    2. 黑客风的背景层
+   ---------------------------------------------------------
+   背景只剩两样：js/matrix.js 画的代码雨，和这里的一层气泡。
+   气泡用 CSS 动画跑 transform，不占画布、不跟数字雨抢帧。
    --------------------------------------------------------- */
-.skin-doodle {
+.skin-bubbles {
   position: fixed;
-  inset: -7%;
+  inset: 0;
   z-index: 0;
+  display: none;
   overflow: hidden;
   pointer-events: none;
   opacity: 0;
-  color: rgba(130, 255, 176, 0.16);
-  transition: opacity 0.6s ease;
-  transform: translate3d(calc(var(--dd-x, 0) * 1px), calc(var(--dd-y, 0) * 1px), 0);
-  will-change: transform;
+  transition: opacity 0.8s ease;
 }
 
-.skin-doodle svg {
+html[data-style="hacker"] .skin-bubbles {
   display: block;
-  width: 100%;
-  height: 100%;
-  animation: skinDoodlePan 52s ease-in-out infinite alternate;
-}
-
-html[data-style="hacker"] .skin-doodle {
   opacity: 1;
 }
 
-html[data-style="hacker"][data-theme="light"] .skin-doodle {
-  color: rgba(8, 110, 52, 0.14);
-}
-
-@keyframes skinDoodlePan {
-  from { transform: translate3d(-1.4%, -0.8%, 0) scale(1.02); }
-  to { transform: translate3d(1.6%, 1.2%, 0) scale(1.05); }
-}
-
-.skin-scanlines {
-  position: fixed;
-  inset: 0;
-  z-index: 82;
-  pointer-events: none;
-  opacity: 0;
-  background: repeating-linear-gradient(
-    180deg,
-    rgba(57, 255, 136, 0.07) 0,
-    rgba(57, 255, 136, 0.07) 1px,
-    transparent 1px,
-    transparent 4px
+.skin-bubbles i {
+  position: absolute;
+  left: var(--x);
+  bottom: -14vh;
+  width: var(--r);
+  height: var(--r);
+  border: 1px solid rgba(118, 255, 172, 0.5);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 34% 26%,
+    rgba(198, 255, 222, 0.1) 0 14%,
+    rgba(57, 255, 136, 0.05) 40%,
+    transparent 66%
   );
-  mix-blend-mode: screen;
-  transition: opacity 0.5s ease;
+  box-shadow:
+    inset 0 0 18px rgba(57, 255, 136, 0.12),
+    inset -2px -4px 10px rgba(57, 255, 136, 0.06),
+    0 0 18px rgba(57, 255, 136, 0.06);
+  opacity: 0;
+  animation: skinBubbleRise var(--dur) linear infinite;
+  animation-delay: var(--delay);
+  will-change: transform, opacity;
 }
 
-.skin-scanlines::after {
+/* 左上角的一点高光：有它才像一颗玻璃泡，而不是一块灰斑 */
+.skin-bubbles i::after {
   content: "";
   position: absolute;
-  left: 0;
-  right: 0;
-  top: -20%;
+  left: 20%;
+  top: 16%;
+  width: 30%;
   height: 22%;
-  background: linear-gradient(
-    180deg,
-    transparent,
-    rgba(57, 255, 136, 0.09) 45%,
-    rgba(57, 255, 136, 0.02) 55%,
-    transparent
+  border-radius: 50%;
+  background: rgba(224, 255, 238, 0.4);
+  filter: blur(1px);
+}
+
+html[data-style="hacker"][data-theme="light"] .skin-bubbles i {
+  border-color: rgba(10, 143, 74, 0.32);
+  background: radial-gradient(
+    circle at 34% 26%,
+    rgba(10, 143, 74, 0.1) 0 14%,
+    rgba(10, 143, 74, 0.04) 40%,
+    transparent 66%
   );
-  animation: skinScanBeam 9s linear infinite;
+  box-shadow: inset 0 0 18px rgba(10, 143, 74, 0.08);
 }
 
-html[data-style="hacker"] .skin-scanlines {
-  opacity: 0.6;
+html[data-style="hacker"][data-theme="light"] .skin-bubbles i::after {
+  background: rgba(255, 255, 255, 0.75);
 }
 
-html[data-style="hacker"][data-theme="light"] .skin-scanlines {
-  background: repeating-linear-gradient(
-    180deg,
-    rgba(8, 90, 44, 0.08) 0,
-    rgba(8, 90, 44, 0.08) 1px,
-    transparent 1px,
-    transparent 4px
-  );
-  mix-blend-mode: multiply;
-  opacity: 0.55;
-}
-
-@keyframes skinScanBeam {
-  from { transform: translateY(0); }
-  to { transform: translateY(620%); }
+@keyframes skinBubbleRise {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.86);
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--a);
+  }
+  50% {
+    transform: translate3d(calc(var(--dx) * 0.55), -62vh, 0) scale(1);
+  }
+  88% {
+    opacity: calc(var(--a) * 0.55);
+  }
+  100% {
+    transform: translate3d(var(--dx), -122vh, 0) scale(1.1);
+    opacity: 0;
+  }
 }
 
 .skin-progress {
@@ -271,8 +274,7 @@ html[data-style="minimal"] .hnyz-avatar,
 html[data-style="minimal"] .pet-summon,
 html[data-style="minimal"] .pet-tomb-veil,
 html[data-style="minimal"] .click-fx,
-html[data-style="minimal"] .skin-doodle,
-html[data-style="minimal"] .skin-scanlines,
+html[data-style="minimal"] .skin-bubbles,
 html[data-style="minimal"] .hero-tags,
 html[data-style="minimal"] .eyebrow-dot,
 html[data-style="minimal"] .hero-rotator,
@@ -478,24 +480,30 @@ html[data-style="hacker"][data-theme="light"] {
 }
 
 html[data-style="hacker"] body {
-  background-color: var(--bg);
-  background-image:
-    radial-gradient(ellipse 60% 40% at 50% -10%, rgba(57, 255, 136, 0.12), transparent 65%),
-    linear-gradient(rgba(57, 255, 136, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(57, 255, 136, 0.045) 1px, transparent 1px);
-  background-size: auto, 42px 42px, 42px 42px;
+  /* 纯黑底，只留一点顶部冷光。没有网格、没有贴图 */
+  background-color: #010403;
+  background-image: radial-gradient(
+    ellipse 120% 70% at 50% -18%,
+    rgba(24, 92, 52, 0.38),
+    transparent 68%
+  );
+  background-size: auto;
   background-attachment: fixed;
 }
 
 html[data-style="hacker"][data-theme="light"] body {
-  background-image:
-    radial-gradient(ellipse 60% 40% at 50% -10%, rgba(10, 143, 74, 0.1), transparent 65%),
-    linear-gradient(rgba(10, 143, 74, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(10, 143, 74, 0.06) 1px, transparent 1px);
+  background-color: #f3faf5;
+  background-image: radial-gradient(
+    ellipse 120% 70% at 50% -18%,
+    rgba(10, 143, 74, 0.14),
+    transparent 68%
+  );
 }
 
-html[data-style="hacker"] .bg-orbs {
-  display: none;
+/* 背景里只留代码雨和气泡：光斑和图标阵列都不出现在黑客风 */
+html[data-style="hacker"] .bg-orbs,
+html[data-style="hacker"] .bg-icons {
+  display: none !important;
 }
 
 /* 右下角校徽的浅蓝底板在黑客风里改成暗绿终端 */
@@ -710,6 +718,12 @@ html[data-style="hacker"] .join-qr {
   background: rgba(6, 16, 9, 0.8);
 }
 
+/* 亮色终端里，这两行不能还是黑的，否则字和底一样深 */
+html[data-style="hacker"][data-theme="light"] .quick-line,
+html[data-style="hacker"][data-theme="light"] .join-qr {
+  background: rgba(255, 255, 255, 0.66);
+}
+
 html[data-style="hacker"] .dino-run {
   --dino-ink: #baffd0;
   --dino-accent: #39ff88;
@@ -786,18 +800,6 @@ body.is-dino-visible .hnyz-pet {
   background: rgba(2, 5, 3, 0.72);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-}
-
-.style-deck__doodle {
-  position: absolute;
-  inset: -6%;
-  color: rgba(255, 255, 255, 0.095);
-  pointer-events: none;
-}
-
-.style-deck__doodle svg {
-  width: 100%;
-  height: 100%;
 }
 
 .style-deck__shell {
@@ -1066,6 +1068,20 @@ body.is-dino-visible .hnyz-pet {
   box-shadow: 0 12px 30px rgba(57, 255, 136, 0.24);
 }
 
+/* 棍木这张卡没有简介，内容整体居中，空出来的地方正好是它要说的 */
+.style-card[data-style-option="bare"] {
+  --card-accent: rgba(255, 255, 255, 0.36);
+  justify-content: center;
+  gap: 12px;
+}
+
+.style-card[data-style-option="bare"] .style-card__apply {
+  margin-top: 24px;
+  background: #f7f7f3;
+  color: #1a1a18;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.26);
+}
+
 .style-card__apply:hover {
   filter: brightness(1.08);
   transform: translateY(-1px);
@@ -1243,14 +1259,17 @@ body.is-dino-visible .hnyz-pet {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .skin-doodle,
-  .skin-doodle svg,
-  .skin-scanlines::after,
+  .skin-bubbles i,
   .style-card,
   .style-card__glyph,
   .style-wipe {
     animation: none !important;
     transition: none !important;
+  }
+
+  /* 关掉动效后气泡直接不画，免得定在半空 */
+  .skin-bubbles {
+    display: none !important;
   }
 
   .style-wipe {
@@ -1461,4 +1480,187 @@ html[data-style="bare"] .bare-note {
   width: 26%;
   height: 1px;
   background: #c9c9c3;
+}
+
+/* =========================================================
+   黑客风 · 质感层
+   ---------------------------------------------------------
+   背景清空之后，剩下的高级感只能靠“准”：
+   0.5px 的高光、等比的字距、只在需要时亮起来的一点点绿。
+   这一段落写在最后，专门覆盖前面黑客风的分支。
+   ========================================================= */
+
+html[data-style="hacker"] {
+  /* 所有的圆角都只留 2px，像终端窗口 */
+  --radius-sm: 1px;
+  --radius: 2px;
+  --radius-lg: 2px;
+}
+
+html[data-style="hacker"] ::selection {
+  background: rgba(57, 255, 136, 0.26);
+  color: #f2fff7;
+}
+
+html[data-style="hacker"] .site-header,
+html[data-style="hacker"] .site-header.is-scrolled {
+  background: rgba(2, 6, 4, 0.72);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  border-bottom-color: rgba(57, 255, 136, 0.14);
+  box-shadow: none;
+}
+
+html[data-style="hacker"][data-theme="light"] .site-header,
+html[data-style="hacker"][data-theme="light"] .site-header.is-scrolled {
+  background: rgba(243, 250, 245, 0.78);
+  border-bottom-color: rgba(10, 143, 74, 0.16);
+}
+
+/* 顶栏里的字，全部往等宽和字距那边靠 */
+html[data-style="hacker"] .brand-copy span,
+html[data-style="hacker"] .nav-links a,
+html[data-style="hacker"] .nav-cta {
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+}
+
+html[data-style="hacker"] .nav-links a {
+  position: relative;
+}
+
+/* 导航悬停：一条从左边长出来的下划线，而不是换颜色 */
+html[data-style="hacker"] .nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2px;
+  height: 1px;
+  background: #39ff88;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html[data-style="hacker"] .nav-links a:hover::after,
+html[data-style="hacker"] .nav-links a[aria-current="page"]::after {
+  transform: scaleX(1);
+}
+
+/* 卡片：一条 1px 的顶部高光，比加一圈发光更干净 */
+html[data-style="hacker"] .quick-card,
+html[data-style="hacker"] .do-card,
+html[data-style="hacker"] .project-card,
+html[data-style="hacker"] .agenda-card,
+html[data-style="hacker"] .wall-card,
+html[data-style="hacker"] .join-panel,
+html[data-style="hacker"] .join-contact,
+html[data-style="hacker"] .faq-item,
+html[data-style="hacker"] .member-profile,
+html[data-style="hacker"] .archive-group,
+html[data-style="hacker"] .gallery-card,
+html[data-style="hacker"] .project-group {
+  border-color: rgba(57, 255, 136, 0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(57, 255, 136, 0.07),
+    0 18px 44px rgba(0, 0, 0, 0.5);
+}
+
+html[data-style="hacker"] .quick-card:hover,
+html[data-style="hacker"] .do-card:hover,
+html[data-style="hacker"] .project-card:hover {
+  border-color: rgba(57, 255, 136, 0.42);
+  box-shadow:
+    inset 0 1px 0 rgba(57, 255, 136, 0.14),
+    0 0 0 1px rgba(57, 255, 136, 0.1),
+    0 24px 54px rgba(0, 0, 0, 0.55);
+}
+
+/* 小标签：`$ 名称` 的终端注释口吻，字距拉开。
+   eyebrow 里可能是一条命令，所以不强制大写 */
+html[data-style="hacker"] .eyebrow,
+html[data-style="hacker"] .card-label,
+html[data-style="hacker"] .section-label {
+  letter-spacing: 0.22em;
+  font-size: 0.66rem;
+}
+
+html[data-style="hacker"] .eyebrow {
+  text-transform: none;
+  font-weight: 400;
+}
+
+html[data-style="hacker"] .card-label,
+html[data-style="hacker"] .section-label {
+  text-transform: uppercase;
+}
+
+html[data-style="hacker"] .section-head h2::before,
+html[data-style="hacker"] .eyebrow::before {
+  font-weight: 400;
+}
+
+/* 正文里的链接：一条虚线，像 man page 里的交叉引用 */
+html[data-style="hacker"] main a:not(.button):not(.nav-cta):not(.project-card):not(.gallery-card):not(.wall-card) {
+  text-decoration: underline;
+  text-decoration-color: rgba(57, 255, 136, 0.4);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+html[data-style="hacker"] main a:not(.button):not(.nav-cta):hover {
+  text-decoration-color: #39ff88;
+}
+
+/* 分隔线：短划线，不是整条实线 */
+html[data-style="hacker"] .quick-line,
+html[data-style="hacker"] hr {
+  border-color: rgba(57, 255, 136, 0.16);
+  border-style: dashed;
+}
+
+/* 风格面板在黑客风里也换成终端窗口：直角、细边、一点点内发光 */
+html[data-style="hacker"] .style-deck {
+  background: rgba(2, 6, 4, 0.94);
+}
+
+html[data-style="hacker"] .style-card {
+  border-radius: 2px;
+  background:
+    radial-gradient(ellipse 90% 46% at 50% 0%, rgba(57, 255, 136, 0.06), transparent 70%),
+    linear-gradient(180deg, rgba(8, 15, 10, 0.97), rgba(3, 7, 5, 0.98));
+}
+
+html[data-style="hacker"] .style-card.is-active {
+  box-shadow: 0 0 0 1px rgba(57, 255, 136, 0.55), 0 30px 70px rgba(0, 0, 0, 0.6);
+}
+
+html[data-style="hacker"] .style-card__glyph--hacker {
+  border-radius: 2px;
+}
+
+/* 小屏上列更密，雨会压到正文上：整体压低一档，字还是看得清 */
+@media (max-width: 760px) {
+  html[data-style="hacker"] .matrix-rain.is-on {
+    opacity: 0.62;
+  }
+}
+
+/* 首屏大标题末尾挂一个方块光标：整页最像终端的一笔 */
+html[data-style="hacker"] .hero h1::after {
+  content: "";
+  display: inline-block;
+  width: 0.46em;
+  height: 0.78em;
+  margin-left: 0.12em;
+  background: #39ff88;
+  vertical-align: -0.02em;
+  animation: hackerCaret 1.15s steps(1, end) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-style="hacker"] .hero h1::after {
+    animation: none;
+  }
 }
