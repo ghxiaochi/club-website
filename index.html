@@ -58,30 +58,30 @@
 
   <!-- 站点图标与样式。全部使用本地文件，无外部依赖。 -->
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/style.css?v=20261085">
+  <link rel="stylesheet" href="css/style.css?v=20261086">
   <link rel="stylesheet" href="css/pet.css?v=20261025b">
-  <link rel="stylesheet" href="css/personal.css?v=20261085">
+  <link rel="stylesheet" href="css/personal.css?v=20261086">
   <link rel="stylesheet" href="css/avatar-pet.css?v=20261057">
-  <link rel="stylesheet" href="css/skins.css?v=20261085">
-  <link rel="stylesheet" href="css/type.css?v=20261085">
-  <link rel="stylesheet" href="css/motion.css?v=20261085">
-  <link rel="stylesheet" href="css/dino.css?v=20261085">
+  <link rel="stylesheet" href="css/skins.css?v=20261086">
+  <link rel="stylesheet" href="css/type.css?v=20261086">
+  <link rel="stylesheet" href="css/motion.css?v=20261086">
+  <link rel="stylesheet" href="css/dino.css?v=20261086">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <!-- 项目卡片、全部项目折叠页和复制按钮由 js/main.js 驱动 -->
   <script src="js/sfx.js?v=20261072" defer></script>
   <script src="js/theme.js?v=20261060" defer></script>
-  <script src="js/theme-icon.js?v=20261085" defer></script>
+  <script src="js/theme-icon.js?v=20261086" defer></script>
   <script src="js/members.js?v=20261034" defer></script>
   <script src="js/main.js?v=20261058" defer></script>
   <script src="js/pet.js?v=20261025c" defer></script>
   <script src="js/avatar-pet.js?v=20261057" defer></script>
   <script src="js/personal.js?v=20261084" defer></script>
   <script src="js/click-fx.js?v=20261058" defer></script>
-  <script src="js/skins.js?v=20261085" defer></script>
-  <script src="js/matrix.js?v=20261085" defer></script>
-  <script src="js/copy.js?v=20261085" defer></script>
-  <script src="js/dino.js?v=20261085" defer></script>
+  <script src="js/skins.js?v=20261086" defer></script>
+  <script src="js/matrix.js?v=20261086" defer></script>
+  <script src="js/copy.js?v=20261086" defer></script>
+  <script src="js/dino.js?v=20261086" defer></script>
 </head>
 <body>
 
@@ -245,7 +245,7 @@
               </div>
             </div>
 
-            <p class="quick-note">加群请备注「班级 + 姓名」。零基础、非技术方向的同学都欢迎。</p>
+            <p class="quick-note" data-copy="quick-note">加群请备注「班级 + 姓名」。零基础、非技术方向的同学都欢迎。</p>
           </div>
         </aside>
       </div>
@@ -273,8 +273,8 @@
       <div class="container">
         <div class="section-head">
           <p class="section-label">01 / 关于社团</p>
-          <h2 id="about-title">一个把好奇心<br>变成作品的地方。</h2>
-          <p class="section-intro">
+          <h2 id="about-title" data-copy="about-title">一个把好奇心<br>变成作品的地方。</h2>
+          <p class="section-intro" data-copy="about-intro">
             我们不只是讨论技术，也会把东西真正做出来。可能是一个校园小工具，一段硬件程序，
             或者一个只是觉得好玩的硬件小装置。
           </p>
@@ -282,17 +282,17 @@
 
         <div class="about-layout">
           <div class="about-text">
-            <p>
+            <p data-copy="about-p1">
               衡南一中编程社（HNYZ）是一个面向全校学生的技术类社团，教学围绕 Arduino 展开。
               成员里有写代码的、做设计的、研究硬件的，也有刚让第一颗 LED
               亮起来的新朋友。
             </p>
-            <p>
+            <p data-copy="about-p2">
               我们不要求你先会写代码，也不要求你一开始就有完整的项目。
               比起“准备好了再来”，我们更相信在做的过程中学会。
               每周留一点时间，把手上的东西往前推一步，有问题就在群里问。
             </p>
-            <blockquote class="about-quote">
+            <blockquote class="about-quote" data-copy="about-quote">
               先做一个能跑起来的小东西，再慢慢把它做得更好。
             </blockquote>
           </div>
@@ -328,8 +328,8 @@
       <div class="container">
         <div class="section-head">
           <p class="section-label">02 / 我们做什么</p>
-          <h2 id="doing-title">从第一行代码，<br>到第一个作品。</h2>
-          <p class="section-intro">
+          <h2 id="doing-title" data-copy="doing-title">从第一行代码，<br>到第一个作品。</h2>
+          <p class="section-intro" data-copy="doing-intro">
             不管你现在会多少，都可以从适合自己的位置开始。技术不是唯一入口，
             把一件事做好需要不同的角色。
           </p>
@@ -365,8 +365,8 @@
       <div class="container">
         <div class="section-head">
           <p class="section-label">03 / GITHUB_REPOS</p>
-          <h2 id="projects-title">从仓库里，<br>长出来的作品。</h2>
-          <p class="section-intro">
+          <h2 id="projects-title" data-copy="projects-title">从仓库里，<br>长出来的作品。</h2>
+          <p class="section-intro" data-copy="projects-intro">
             项目卡片通过 GitHub API 实时读取。想换项目，只要修改
             <code>js/members.js</code> 里的 <code>HNYZ_MEMBERS</code> 数组；
             想换封面，就填 <code>coverImg</code>，留空会自动生成科技网格占位图。
@@ -414,8 +414,8 @@
       <div class="container">
         <div class="section-head">
           <p class="section-label">04 / ACTIVITY_RHYTHM</p>
-          <h2 id="schedule-title">每周两次，<br>每次一小时。</h2>
-          <p class="section-intro">
+          <h2 id="schedule-title" data-copy="schedule-title">每周两次，<br>每次一小时。</h2>
+          <p class="section-intro" data-copy="schedule-intro">
             社团常规活动一周两次，每次 60 分钟：一次偏分享和结对，一次偏自由开发和问题排查。
             时间紧凑，但每次都能带走一个能跑的小进展。具体时间、地点以 QQ 群公告为准。
           </p>
@@ -466,8 +466,8 @@
       <div class="container">
         <div class="section-head">
           <p class="section-label">05 / RESOURCE_WALL</p>
-          <h2 id="wall-title">墙上的<br>学习入口。</h2>
-          <p class="section-intro">
+          <h2 id="wall-title" data-copy="wall-title">墙上的<br>学习入口。</h2>
+          <p class="section-intro" data-copy="wall-intro">
             不知道从哪里开始的时候，先从资源墙上的链接点进去。
             C++ 基础可以配合 Arduino 项目一起看，ESP32 部分统一看微雪的 Wiki。
           </p>
@@ -504,7 +504,7 @@
       <div class="container">
         <div class="section-head faq-head">
           <p class="section-label">06 / FAQ</p>
-          <h2 id="faq-title">加入之前，<br>你可能想知道。</h2>
+          <h2 id="faq-title" data-copy="faq-title">加入之前，<br>你可能想知道。</h2>
         </div>
 
         <div class="faq-list">
@@ -577,8 +577,8 @@
         <div class="join-panel">
           <div class="join-copy">
             <p class="section-label section-label--light">07 / JOIN_US</p>
-            <h2 id="join-title">下一次活动，<br>来坐坐。</h2>
-            <p class="join-lead">
+            <h2 id="join-title" data-copy="join-title">下一次活动，<br>来坐坐。</h2>
+            <p class="join-lead" data-copy="join-lead">
               不限年级与班级，零基础也欢迎。先进群看看大家在做什么，
               再决定要不要一起做点什么。
             </p>

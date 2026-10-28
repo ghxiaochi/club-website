@@ -57,7 +57,10 @@
 
     const desc = document.createElement("p");
     desc.className = "member-hero__desc";
-    desc.textContent = profile.intro || profile.desc || "还没有写简介。";
+    const fallback = "还没有写简介。";
+    const intro = profile.intro || profile.desc;
+    desc.textContent = intro || fallback;
+    if (!intro) desc.dataset.copy = "member-desc-fallback";
 
     copy.appendChild(desc);
 
@@ -95,12 +98,14 @@
     gh.target = "_blank";
     gh.rel = "noopener noreferrer";
     gh.textContent = "GitHub 主页 ↗";
+    gh.dataset.copy = "member-github";
     actions.appendChild(gh);
 
     const back = document.createElement("a");
     back.className = "button button--secondary";
     back.href = "projects.html";
     back.textContent = "← 返回全部项目";
+    back.dataset.copy = "member-back";
     actions.appendChild(back);
 
     copy.appendChild(actions);
