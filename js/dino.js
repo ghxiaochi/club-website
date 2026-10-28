@@ -1264,9 +1264,8 @@
       score0: score,
       impactX: Math.max(W * 0.34, Math.min(W * 0.66, startX + 110 * S)),
       impactY: groundY - 2,
-      mx: W * 1.06,
-      my: -r * 1.2,
-      shock: 0,
+      mx: W * 1.12,
+      my: -r * 1.05,
       fire: 0,
       tombs: [],
       rubble: []
@@ -1312,8 +1311,7 @@
         vy: Math.sin(angle) * power * 0.72 - 130,
         life: 0.5 + Math.random() * 0.8,
         max: 1.3,
-        size: Math.random() < 0.35 ? 3 : 2,
-        heat: 0.7 + Math.random() * 0.3
+        size: Math.random() < 0.35 ? 3 : 2
       });
     }
 
@@ -1448,8 +1446,7 @@
           vy: -50 - Math.random() * 70,
           life: 0.4 + Math.random() * 0.4,
           max: 0.8,
-          size: Math.random() < 0.5 ? 3 : 2,
-          heat: 0.85
+          size: Math.random() < 0.5 ? 3 : 2
         });
       }
 
@@ -1458,8 +1455,6 @@
     }
 
     if (c.phase === "blast") {
-      c.shock = Math.min(1, c.t / 0.7);
-      c.fire = Math.min(1, c.t / 0.32);
       c.tombs.forEach((tomb, i) => {
         tomb.rise = Math.min(1, Math.max(0, (c.t - 0.45 - i * 0.09) / 0.55));
       });
@@ -1848,6 +1843,7 @@
   }
 
   function drawSky(phases) {
+    if (!skyGrad) return;
     const { nightAmt, duskAmt } = phases;
 
     if (nightAmt > 0.01) {
