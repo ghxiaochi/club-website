@@ -1646,3 +1646,57 @@ html[data-style="hacker"] .style-card__glyph--hacker {
     opacity: 0.62;
   }
 }
+
+/* 日间的黑客风：荧光绿放在白底上会糊掉，按钮全部换成深绿 */
+html[data-style="hacker"][data-theme="light"] .button--primary {
+  border-color: #0a8f4a;
+  background: #0a8f4a;
+  color: #f4fff8;
+  box-shadow: 0 10px 24px rgba(10, 143, 74, 0.22);
+}
+
+html[data-style="hacker"][data-theme="light"] .button--primary:hover {
+  border-color: #08753d;
+  background: #08753d;
+  color: #ffffff;
+}
+
+html[data-style="hacker"][data-theme="light"] .button--secondary {
+  border-color: rgba(10, 143, 74, 0.42);
+  background: rgba(255, 255, 255, 0.72);
+  color: #0a6b3a;
+}
+
+html[data-style="hacker"][data-theme="light"] .button--secondary:hover {
+  border-color: #0a8f4a;
+  background: rgba(10, 143, 74, 0.08);
+  color: #064f2b;
+}
+
+html[data-style="hacker"][data-theme="light"] .nav-cta {
+  border-color: rgba(10, 143, 74, 0.45);
+  background: rgba(10, 143, 74, 0.08);
+  color: #0a6b3a;
+}
+
+html[data-style="hacker"][data-theme="light"] .nav-cta:hover {
+  border-color: #0a8f4a;
+  background: rgba(10, 143, 74, 0.16);
+  color: #054427;
+}
+
+html[data-style="hacker"][data-theme="light"] .nav-toggle {
+  border-color: rgba(10, 143, 74, 0.35);
+  background: #ffffff;
+}
+
+html[data-style="hacker"][data-theme="light"] .nav-toggle span {
+  background: #0a6b3a;
+}
+
+html[data-style="hacker"][data-theme="light"] .theme-toggle,
+html[data-style="hacker"][data-theme="light"] .sound-toggle {
+  border-color: rgba(10, 143, 74, 0.3);
+  background: #ffffff;
+  color: #0a6b3a;
+}
