@@ -391,6 +391,8 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 切换风格时 `skins.js` 派发 `hnyz:stylechange`，`copy.js` 收到后重写节点内容；页面加载时按 `localStorage` 里的风格先应用一次，不会闪。
 
+首屏那句打字机标语（`[data-rotator]`）也备了三套，写在 `js/personal.js` 的 `ROTATOR` 里：蓝白科技是「零基础也能进来」，极简是「删到只剩必要的那一行」，黑客是「教不是输入，是接口对齐」。切风格时会清掉正在打的那一句、从新的第一句重新打，用一个自增的 `token` 让旧定时器自己作废。
+
 ### 黑客风：从配色到终端
 
 背景被清到只剩两样东西：**代码雨**和**气泡**。原来的手绘涂鸦底纹（`skin-doodle`）、扫描线（`skin-scanlines`）、工程网格和背景图标阵列（`bg-icons`）全部删掉，理由是它们在深底上只剩一团说不清是什么的灰影。

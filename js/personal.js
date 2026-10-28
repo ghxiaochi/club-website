@@ -69,56 +69,89 @@
     return "夜里好";
   }
 
+  /* 三种风格三套说法：同一句话，换一种人设 */
+  const ROTATOR = {
+    default: () => [
+      `${greeting()}，这里是衡南一中编程社。`,
+      "零基础也能进来，先从点亮一颗 LED 开始。",
+      "每周两次，每次一小时，把抽象的东西跑起来。",
+      "做完，比完美更重要。"
+    ],
+    minimal: () => [
+      "少一点，做深一点。",
+      "删到只剩必要的那一行。",
+      "留白不是空，是还没说完的部分。",
+      "我们只做减法。"
+    ],
+    hacker: () => [
+      `${greeting()}。握手完成，欢迎接入。`,
+      "在 0 与 1 的缝隙里，重新定义「可被运行」。",
+      "教不是输入，是接口对齐。",
+      "所有范式都是临时的，只有 commit 是真的。"
+    ]
+  };
+
   function initRotator() {
     const target = document.querySelector("[data-rotator]");
     if (!target) return;
 
-    const phrases = [
-      `${greeting()}，这里是衡南一中编程社。`,
-      "零基础也能进来，先从点亮一颗 LED 开始。",
-      "每周两次，每次一小时，一起做点真东西。",
-      "做完比完美更重要。",
-      "把想法，写成代码。"
-    ];
+    let token = 0;
+    let timer = 0;
 
-    if (reduceMotion.matches) {
-      target.textContent = phrases[0];
-      return;
-    }
+    function start() {
+      token += 1;
+      const mine = token;
+      window.clearTimeout(timer);
 
-    let phraseIndex = 0;
-    let charIndex = 0;
-    let deleting = false;
+      const style = document.documentElement.dataset.style || "default";
+      const phrases = (ROTATOR[style] || ROTATOR.default)();
 
-    function tick() {
-      const phrase = phrases[phraseIndex];
+      if (reduceMotion.matches) {
+        target.textContent = phrases[0];
+        return;
+      }
 
-      if (!deleting) {
-        charIndex += 1;
-        target.textContent = phrase.slice(0, charIndex);
+      let phraseIndex = 0;
+      let charIndex = 0;
+      let deleting = false;
 
-        if (charIndex >= phrase.length) {
-          deleting = true;
-          window.setTimeout(tick, 2200);
+      function tick() {
+        /* 切过风格就作废，避免两套标语叠在一起打字 */
+        if (mine !== token) return;
+
+        const phrase = phrases[phraseIndex];
+
+        if (!deleting) {
+          charIndex += 1;
+          target.textContent = phrase.slice(0, charIndex);
+
+          if (charIndex >= phrase.length) {
+            deleting = true;
+            timer = window.setTimeout(tick, 2200);
+            return;
+          }
+          timer = window.setTimeout(tick, 58);
           return;
         }
-        window.setTimeout(tick, 58);
-        return;
+
+        charIndex -= 1;
+        target.textContent = phrase.slice(0, Math.max(charIndex, 0));
+
+        if (charIndex <= 0) {
+          deleting = false;
+          phraseIndex = (phraseIndex + 1) % phrases.length;
+          timer = window.setTimeout(tick, 380);
+          return;
+        }
+        timer = window.setTimeout(tick, 26);
       }
 
-      charIndex -= 1;
-      target.textContent = phrase.slice(0, Math.max(charIndex, 0));
-
-      if (charIndex <= 0) {
-        deleting = false;
-        phraseIndex = (phraseIndex + 1) % phrases.length;
-        window.setTimeout(tick, 380);
-        return;
-      }
-      window.setTimeout(tick, 26);
+      target.textContent = "";
+      timer = window.setTimeout(tick, 420);
     }
 
-    window.setTimeout(tick, 700);
+    start();
+    document.addEventListener("hnyz:stylechange", start);
   }
 
   /* =======================================================
