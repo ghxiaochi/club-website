@@ -44,7 +44,7 @@
     },
     "quick-title": {
       default: "先加群<br>再一起做点东西",
-      minimal: "加群。",
+      minimal: "加群",
       hacker: "ssh club@hnyz<br># 先握手 再动手"
     },
 
