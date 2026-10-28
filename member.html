@@ -62,12 +62,14 @@
   <link rel="stylesheet" href="css/personal.css?v=20261060">
   <link rel="stylesheet" href="css/member.css?v=20261035">
   <link rel="stylesheet" href="css/avatar-pet.css?v=20261057">
-  <link rel="stylesheet" href="css/skins.css?v=20261074">
-  <link rel="stylesheet" href="css/dino.css?v=20261074">
+  <link rel="stylesheet" href="css/skins.css?v=20261075">
+  <link rel="stylesheet" href="css/motion.css?v=20261075">
+  <link rel="stylesheet" href="css/dino.css?v=20261075">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <script src="js/sfx.js?v=20261072" defer></script>
   <script src="js/theme.js?v=20261060" defer></script>
+  <script src="js/theme-icon.js?v=20261075" defer></script>
   <script src="js/members.js?v=20261034" defer></script>
   <script src="js/main.js?v=20261058" defer></script>
   <script src="js/pet.js?v=20261025c" defer></script>
@@ -75,8 +77,8 @@
   <script src="js/avatar-pet.js?v=20261057" defer></script>
   <script src="js/personal.js?v=20261043" defer></script>
   <script src="js/click-fx.js?v=20261058" defer></script>
-  <script src="js/skins.js?v=20261074" defer></script>
-  <script src="js/dino.js?v=20261074" defer></script>
+  <script src="js/skins.js?v=20261075" defer></script>
+  <script src="js/dino.js?v=20261075" defer></script>
 </head>
 <body id="top">
   <div class="bg-orbs" aria-hidden="true">
@@ -134,13 +136,7 @@
           <span class="style-toggle__grid" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
         </button>
         <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换到深色模式" aria-pressed="false" title="切换到深色模式">
-          <svg class="theme-toggle__icon theme-toggle__icon--sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/>
-            <path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.4 5.4l1.6 1.6M17 17l1.6 1.6M18.6 5.4 17 7M7 17l-1.6 1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-          </svg>
-          <svg class="theme-toggle__icon theme-toggle__icon--moon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M20 13.4A8.4 8.4 0 0 1 10.6 4a8.4 8.4 0 1 0 9.4 9.4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-          </svg>
+          <span class="theme-toggle__flip" aria-hidden="true"></span>
         </button>
         <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="打开导航菜单" data-nav-toggle>
           <span></span>

@@ -205,6 +205,27 @@
   height: 17px;
 }
 
+/* 月亮 / 太阳雪碧图：显示 18px，源图每帧 54px，留 3 倍余量给高分屏 */
+.theme-toggle__flip {
+  display: block;
+  width: 18px;
+  height: 18px;
+  background-image: url("../assets/moon-sun-sprite.png");
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-size: 1080px 18px;
+  pointer-events: none;
+}
+
+html[data-style="minimal"] .theme-toggle__flip {
+  filter: grayscale(1) contrast(1.1);
+}
+
+html[data-style="hacker"] .theme-toggle__flip {
+  /* 蓝色 210° 转到荧光绿 120°，顺时针退回 90° */
+  filter: hue-rotate(-90deg) saturate(1.45) brightness(1.06);
+}
+
 /* ---------- 2.5 主题切换：从按钮长出的圆 ---------- */
 /* View Transitions 默认会交叉淡入淡出，这里关掉，只保留新界面的圆形遮罩 */
 ::view-transition-old(root) {

@@ -50,9 +50,12 @@ club-website/
 │   ├── style.css           # 全站样式（蓝白科技风）
 │   ├── personal.css        # 深色主题、动效、彩蛋样式（在 style.css 之后加载）
 │   ├── skins.css           # 三套网页风格（默认 / 极简 / 黑客）的皮肤层
-│   ├── dino.css            # 页脚小恐龙跑道、竖排模式按钮
+│   ├── dino.css            # 页脚小恐龙跑道、竖排模式按钮、日间/夜间配色
+│   ├── motion.css          # 弹性动效层（统一回弹曲线，最后加载）
 │   ├── pet.css             # 右下角校徽背景板样式
 │   └── avatar-pet.css      # 左下角像素头像彩蛋样式
+├── assets/
+│   └── moon-sun-sprite.png # 60 帧月亮/太阳雪碧图（3240×54）
 ├── fonts/                  # 游戏原版像素字体（来自 assets.7z）
 │   ├── anim-title.ttf      # 大标题
 │   └── anim-pixel.ttf      # 副标题 / 小字
@@ -68,6 +71,7 @@ club-website/
 │   ├── theme.js            # 深浅色主题切换与记忆
 │   ├── skins.js            # 网页风格切换面板、竖向卡片、擦除转场
 │   ├── dino.js             # 页脚像素小恐龙（自动跳 / 手动操控）
+│   ├── theme-icon.js       # 主题按钮的月亮 / 太阳雪碧图帧动画
 │   ├── personal.js         # 打字机标语、滚动渐显、卡片倾斜、彩蛋
 │   ├── pet.js              # 校徽滚动旋转、点击说话
 │   └── avatar-pet.js       # 头像点击台词与彩蛋
@@ -323,8 +327,36 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 - 小恐龙是 **44×47 的字符串点阵**（`DINO_FRAMES`，按 Chrome 官方 sprite 逐像素提取），逐格 `fillRect` 预渲染成离屏 canvas，主循环只 `drawImage`；换肤 / 换主题时重新着色，不重算形状。两帧只差一条腿的抬起，跑起来是踏步。
 - 后面三只按「领头龙 `间距 ÷ 速度` 秒前的高度」取样，所以看起来是波浪式跟跳，而不是四只黏在一起同时起跳。
-- 跑道只在进入视口时跑 `requestAnimationFrame`，离开就停；同时在视口内时右下角校徽会让位（`body.is-dino-visible`）。
+- 跑道只在进入视口时跑 `requestAnimationFrame`，离开就停；同时在视口内时右下角校徽整组让位（`body.is-dino-visible`，`.hnyz-pet` 和独立的 `.hnyz-pet__board` 都要隐藏，否则板子会压住 AUTO 按钮）。
+- 跑道配色跟随主题：日间是浅蓝白底 + 深蓝恐龙，夜间是深底 + 亮恐龙，黑客风是绿色终端，极简风纯黑白。
 - 尊重 `prefers-reduced-motion`：开启减少动效时默认停在手动模式，不自动跑。
+
+### 主题按钮：月亮 / 太阳的变形
+
+顶栏那颗按钮不再是两张静态 SVG，而是一张 60 帧雪碧图（`assets/moon-sun-sprite.png`，3240×54，每帧 54px，显示 18px）：
+
+- 动效本身是「月亮 → 收缩成圆 → 张开成太阳 → 再收回去」，原素材两秒一循环
+- 静止时**不空转**：浅色主题停在第 40 帧（太阳），深色主题停在第 0 帧（月亮）
+- 点击切换时沿雪碧图走最近的一头——月 → 日正放，日 → 月倒放，约 0.9 秒走完，中途能看见收缩和张开
+- 极简风加 `grayscale`，黑客风用 `hue-rotate(-90deg)` 把蓝转到荧光绿
+- 帧号由 `js/theme-icon.js` 用 `requestAnimationFrame` 推进；主题变更来自按钮、系统偏好或风格脚本都能接住（监听 `data-theme`）
+
+### 弹性动效
+
+`css/motion.css` 用一条统一曲线 `cubic-bezier(0.34, 1.56, 0.64, 1)`——第二控制点大于 1，位移会先冲过头再落回来，所以是「弹」的，不是「滑」的。
+
+| 位置 | 效果 |
+|---|---|
+| 主按钮 `.button` / `.mini-button` | 悬停抬起 3px，按下压到 `scale(0.975)` |
+| 卡片 `.do-card` / `.wall-card` | 悬停抬 6px |
+| 顶栏主题按钮 | 悬停转 12° 放大 1.08，按下缩回 |
+| 顶栏风格方块 | 悬停抬 2px 转 6° |
+| 滚动入场 | 从 22px 收到 20px 并带轻微过冲 |
+| 跑道 AUTO / MANUAL | 悬停抬 2px，按下缩到 0.94 |
+
+卡片悬停用的是独立 `translate` 属性而不是 `transform`：滚动入场的 `.is-revealed` 会写 `transform: none`，优先级比 `:hover` 高，用 `transform` 会被压掉。
+
+开启「减少动效」时全部退化为瞬时。
 
 ### 深色主题
 

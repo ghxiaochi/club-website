@@ -13,7 +13,8 @@
   --dino-dim: #3a5a80;
   --dino-ground: rgba(125, 211, 252, 0.42);
   position: relative;
-  z-index: 1;
+  /* 高于右下角校徽（z=35），跑道上的按钮才点得到 */
+  z-index: 36;
   padding: 16px 0 20px;
   border-top: 1px solid rgba(125, 211, 252, 0.18);
   color: var(--dino-ink);
@@ -115,7 +116,7 @@
 .dino-run__hint {
   position: absolute;
   left: 12px;
-  bottom: 9px;
+  bottom: 22px;
   margin: 0;
   color: var(--dino-dim);
   font-family: var(--mono);
@@ -216,9 +217,52 @@
   outline-offset: 2px;
 }
 
-/* 极简风：去掉发光与网格 */
+/* 日间模式：跑道不再是一块黑，跟着页面一起亮起来 */
+html[data-theme="light"]:not([data-style="hacker"]):not([data-style="minimal"]) .dino-run {
+  --dino-ink: #10233c;
+  --dino-accent: #0a84ff;
+  --dino-dim: #6b86a6;
+  --dino-ground: rgba(24, 82, 150, 0.34);
+  border-top-color: rgba(24, 82, 150, 0.14);
+  background-color: #eef4fd;
+  background-image:
+    radial-gradient(ellipse 70% 120% at 50% 110%, rgba(37, 99, 235, 0.12), transparent 70%),
+    linear-gradient(rgba(24, 82, 150, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(24, 82, 150, 0.05) 1px, transparent 1px);
+  background-size: auto, 24px 24px, 24px 24px;
+}
+
+html[data-theme="light"]:not([data-style="hacker"]):not([data-style="minimal"]) .dino-run__stage {
+  border-color: rgba(24, 82, 150, 0.16);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.75), transparent 46%),
+    rgba(255, 255, 255, 0.52);
+}
+
+html[data-theme="light"]:not([data-style="hacker"]):not([data-style="minimal"]) .dino-run__mode {
+  border-color: rgba(24, 82, 150, 0.18);
+  background: rgba(255, 255, 255, 0.66);
+  color: #3c5a7e;
+}
+
+html[data-theme="light"]:not([data-style="hacker"]):not([data-style="minimal"]) .dino-run__mode:hover {
+  color: #0a84ff;
+  border-color: rgba(10, 132, 255, 0.42);
+}
+
+html[data-theme="light"]:not([data-style="hacker"]):not([data-style="minimal"]) .dino-run__mode[aria-pressed="true"] {
+  color: #0a84ff;
+  border-color: rgba(10, 132, 255, 0.5);
+  background: rgba(10, 132, 255, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(10, 132, 255, 0.35), 0 6px 18px rgba(10, 132, 255, 0.12);
+}
+
+/* 极简风：纯白，去掉渐变与网格 */
 html[data-style="minimal"] .dino-run {
   padding: 14px 0 18px;
+  background-color: var(--bg, #fff);
+  background-image: none;
+  border-top-color: #e8e8e2;
 }
 
 html[data-style="minimal"] .dino-run__stage {
@@ -321,4 +365,20 @@ html[data-style="hacker"][data-theme="light"] .dino-run__mode {
   .dino-run__led {
     animation: none;
   }
+}
+
+/* =========================================================
+   跑道出现时，右下角校徽整组让位
+   ---------------------------------------------------------
+   .hnyz-pet__board 是单独定位的元素，父级 opacity:0 管不到它，
+   之前只有 .hnyz-pet 淡出，板子还压着 AUTO 按钮，点不动。
+   ========================================================= */
+body.is-dino-visible .hnyz-pet,
+body.is-dino-visible .hnyz-pet__board,
+body.is-dino-visible .hnyz-pet__speech,
+body.is-dino-visible .pet-summon {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
 }
