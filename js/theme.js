@@ -77,7 +77,7 @@
     button.classList.remove("is-switching");
     void button.offsetWidth;
     button.classList.add("is-switching");
-    window.setTimeout(() => button.classList.remove("is-switching"), 760);
+    window.setTimeout(() => button.classList.remove("is-switching"), 420);
   }
 
   /* 转场期间暂停持续动画和鼠标光晕，圆推得更顺 */

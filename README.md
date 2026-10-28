@@ -51,6 +51,7 @@ club-website/
 │   ├── personal.css        # 深色主题、动效、彩蛋样式（在 style.css 之后加载）
 │   ├── skins.css           # 三套网页风格（默认 / 极简 / 黑客）的皮肤层
 │   ├── dino.css            # 页脚小恐龙跑道、日间/夜间配色
+│   ├── type.css            # 三套风格的字体栈（标题衬线 / 等宽 / 几何无衬线）
 │   ├── motion.css          # 弹性动效层（统一回弹曲线，最后加载）
 │   ├── pet.css             # 右下角校徽背景板样式
 │   └── avatar-pet.css      # 左下角像素头像彩蛋样式
@@ -70,7 +71,9 @@ club-website/
 │   ├── gallery.js          # 图集渲染与灯箱
 │   ├── theme.js            # 深浅色主题切换与记忆
 │   ├── skins.js            # 网页风格切换面板、竖向卡片、擦除转场
-│   ├── dino.js             # 页脚像素小恐龙（自动起跳，点跑道 / 空格也能跳）
+│   ├── dino.js             # 页脚像素小恐龙（金币 / 连击 / 档位 / 星空）
+│   ├── matrix.js           # 黑客风的数字雨（只在 hacker 皮肤下启动）
+│   ├── copy.js             # 三套文案，按风格替换 data-copy 节点
 │   ├── theme-icon.js       # 主题按钮的月亮 / 太阳雪碧图帧动画
 │   ├── personal.js         # 打字机标语、滚动渐显、卡片倾斜、彩蛋
 │   ├── pet.js              # 校徽滚动旋转、点击说话
@@ -324,6 +327,18 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 - 想自己玩也可以：点跑道、空格、↑ 都能让它跳一下，撞到仙人掌会显示 `SIGNAL LOST // REBOOT`，1.4 秒后自动重开
 - 按钮去掉后 `js/dino.js` 用 `hasControls` 判断：没有 `[data-dino-mode]` 就不读 `localStorage` 里的旧模式，避免之前存过 `manual` 导致恐龙站着不动
 
+跑道上的玩法：
+
+| 元素 | 规则 |
+|---|---|
+| 金币 | 六成的仙人掌上方挂一道三枚的金币拱门（`lift` 26 / 46 / 26），跳过仙人掌正好穿过；每枚 +20 分，并炸出五粒金屑 |
+| 连击 | 每吃一枚 `combo +1`，每满 5 连飘一次 `COMBO xN` 并响一声，音高随连击往上抬 |
+| 档位 | 每 320 分升一档（`LV.1` → `LV.5`），HUD 左上角徽章弹一下并飘 `SPEED UP`；速度本来就随 `worldX` 增长，档位是它的可视化 |
+| 星空 | 画布背景撒了一层星点，夜间 / 黑客风更亮，随 `worldX` 有轻微视差，昼夜切换时重着色 |
+| 死亡 | 爆 18 粒碎片 + 0.34 秒震屏，1.45 秒后自动重开 |
+
+- 金币是四帧（宽 8 / 6 / 3 / 6）的旋转循环，`--dino-gold` / `--dino-gold-lit` 跟着风格走：日间暗金、夜间亮金、极简黑白、黑客风琥珀（不跟着变绿，否则和仙人掌糊在一起）
+
 - 小恐龙是 **44×47 的字符串点阵**（`DINO_FRAMES`，按 Chrome 官方 sprite 逐像素提取），逐格 `fillRect` 预渲染成离屏 canvas，主循环只 `drawImage`；换肤 / 换主题时重新着色，不重算形状。两帧只差一条腿的抬起，跑起来是踏步。
 - 后面三只按「领头龙 `间距 ÷ 速度` 秒前的高度」取样，所以看起来是波浪式跟跳，而不是四只黏在一起同时起跳。
 - 跑道只在进入视口时跑 `requestAnimationFrame`，离开就停；同时在视口内时右下角校徽整组让位（`body.is-dino-visible`，`.hnyz-pet` 和独立的 `.hnyz-pet__board` 都要隐藏，否则板子会压住跑道右端）。
@@ -336,7 +351,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 - 动效本身是「月亮 → 收缩成圆 → 张开成太阳 → 再收回去」，原素材两秒一循环
 - 静止时**不空转**：浅色主题停在第 40 帧（太阳），深色主题停在第 0 帧（月亮）
-- 点击切换时沿雪碧图走最近的一头——月 → 日正放，日 → 月倒放，约 0.9 秒走完，中途能看见收缩和张开
+- 点击切换时沿雪碧图走最近的一头——月 → 日正放，日 → 月倒放，约 0.36 秒走完（40 帧 × 9ms，帧号按 ease-out 走，收尾慢下来），中途能看见收缩和张开
 - 极简风加 `grayscale`，黑客风用 `hue-rotate(-90deg)` 把蓝转到荧光绿
 - 帧号由 `js/theme-icon.js` 用 `requestAnimationFrame` 推进；主题变更来自按钮、系统偏好或风格脚本都能接住（监听 `data-theme`）
 
@@ -344,7 +359,38 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 - 快照层显式写成 `width/height: 100%` + `object-fit: fill`，并关掉浏览器给 `::view-transition-group(root)` 的默认动画。默认实现会拿快照尺寸和容器尺寸做一次等比缩放，差一两个像素就会让整页看起来「缩一下再弹回去」
 - `html { scrollbar-gutter: stable }` 常驻滚动条位置，切换主题、弹层出现时内容宽度不会突然变一下
-- 按钮周围不再有放射状光芒（原来的 `themeRays` 一圈竖线已删掉），切换完只剩按钮自己弹一下
+- 按钮周围不再有放射状光芒（原来的 `themeRays` 一圈竖线已删掉）
+
+按钮自己的反馈也收敛过：原来 `themeBtnPop` 是 0.58 秒放大到 1.16，太抢眼；现在是 0.34 秒、峰值 1.04，配一圈 `box-shadow` 光晕（`0 0 0 7px var(--blue-soft)`），图标在变形中途收到 0.88 再落回 1，整体像「按下去、亮一下」，而不是「弹出来」。
+
+### 三种风格的字体与文案
+
+同一套版式，三种语气。字体在 `css/type.css` 里只换字体栈，不动字号和布局：
+
+| 风格 | 标题 | 正文 | 细节 |
+|---|---|---|---|
+| 蓝白科技 | 几何无衬线（Inter / SF Pro / Segoe Variable），字距 -0.028em | 系统黑体 | 数字用 tabular-nums，跳动时不抖 |
+| 极简 | 衬线（Songti SC / 思源宋体 / SimSun），字重 500，字距 +0.012em | 仍是黑体（小字宋体太糊） | 眉标、标签也换成衬线，不再用等宽 |
+| 黑客终端 | 等宽（JetBrains Mono / Cascadia / Sarasa Mono SC） | 同样等宽，中文走等宽回退 | 字距 +0.01em，行高收紧 |
+
+正文用 `--sans`、标题用 `--display`，三套风格只覆盖这两个变量，所以加风格时不用碰具体选择器。
+
+文案在 `js/copy.js` 里集中维护，HTML 只写 `data-copy="键名"`：
+
+- 蓝白科技：`把想法，写成代码。` / `加入我们`
+- 极简：`少一点，做深一点。` / `加入`
+- 黑客：`编译想法，输出作品。` / `join --now`
+
+切换风格时 `skins.js` 派发 `hnyz:stylechange`，`copy.js` 收到后重写节点内容；页面加载时按 `localStorage` 里的风格先应用一次，不会闪。
+
+### 黑客风：从配色到终端
+
+`js/matrix.js` 画一层全屏数字雨（片假名 + 数字 + 符号），只在 `data-style="hacker"` 下启动：
+
+- 画布 `fixed` 铺满视口，`z-index: 0`，内容在它上面；用 `destination-out` 逐帧擦淡，所以背景是透明的，字能正常读
+- 限制 26fps，页面不可见 / `prefers-reduced-motion` / 切走皮肤立刻停
+
+配套的终端化细节都在 `skins.css` 末尾：标题前缀从 `//` 换成 `>`，眉标加 `$`，主按钮变成 `> join --now` 并在末尾挂一个闪烁光标，卡片左上角切一道角标，页脚收 `// EOF`。
 
 ### 弹性动效
 

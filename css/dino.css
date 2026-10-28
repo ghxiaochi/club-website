@@ -10,6 +10,8 @@
   --dino-accent: #7dd3fc;
   --dino-dim: #3a5a80;
   --dino-ground: rgba(125, 211, 252, 0.42);
+  --dino-gold: #fbbf24;
+  --dino-gold-lit: #ffe9a8;
   position: relative;
   /* 高于右下角校徽（z=35），跑道不会被徽章压住 */
   z-index: 36;
@@ -79,6 +81,39 @@
   letter-spacing: 0.12em;
 }
 
+.dino-run__hud {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dino-run__level {
+  display: inline-flex;
+  align-items: center;
+  height: 17px;
+  padding: 0 6px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  color: var(--dino-accent);
+  opacity: 0.85;
+  transform-origin: 50% 50%;
+}
+
+/* 升档时轻轻一跳，不闪不炸 */
+.dino-run__level.is-bump {
+  animation: dinoLevelBump 0.5s var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1));
+}
+
+@keyframes dinoLevelBump {
+  0% { transform: scale(1); }
+  38% { transform: scale(1.22); }
+  100% { transform: scale(1); }
+}
+
 .dino-run__stage {
   position: relative;
   height: clamp(186px, 13.5vw, 196px);
@@ -126,6 +161,54 @@
   opacity: 0.48;
 }
 
+/* 吃到金币 / 升档时从右上角飘起来的一行字 */
+.dino-run__pop {
+  position: absolute;
+  right: 14px;
+  top: 44px;
+  margin: 0;
+  color: var(--orange, #fbbf24);
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-align: right;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.dino-run__pop[data-tone="combo"] {
+  color: var(--dino-accent);
+}
+
+.dino-run__pop[data-tone="level"] {
+  color: var(--dino-ink);
+}
+
+.dino-run__pop.is-on {
+  animation: dinoPopRise 0.9s cubic-bezier(0.22, 0.68, 0.32, 1) both;
+}
+
+@keyframes dinoPopRise {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.86);
+  }
+  22% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  70% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-16px) scale(1);
+  }
+}
+
 .dino-run__toast {
   position: absolute;
   pointer-events: none;
@@ -163,6 +246,8 @@ html[data-theme="light"]:not([data-style="hacker"]):not([data-style="minimal"]) 
   --dino-accent: #0a84ff;
   --dino-dim: #6b86a6;
   --dino-ground: rgba(24, 82, 150, 0.34);
+  --dino-gold: #c2820b;
+  --dino-gold-lit: #f0b429;
   border-top-color: rgba(24, 82, 150, 0.14);
   background-color: #eef4fd;
   background-image:
@@ -181,6 +266,8 @@ html[data-theme="light"]:not([data-style="hacker"]):not([data-style="minimal"]) 
 
 /* 极简风：纯白，去掉渐变与网格 */
 html[data-style="minimal"] .dino-run {
+  --dino-gold: #171715;
+  --dino-gold-lit: #6f6f66;
   padding: 14px 0 18px;
   background-color: var(--bg, #fff);
   background-image: none;
@@ -198,6 +285,16 @@ html[data-style="minimal"] .dino-run__led {
 }
 
 /* 黑客风：绿色终端 */
+html[data-style="hacker"] .dino-run {
+  /* 金币保持琥珀色：跟满屏的绿区分开，不然和仙人掌糊在一起 */
+  --dino-gold: #ffd166;
+  --dino-gold-lit: #fff3c4;
+  --dino-ink: #d9ffe5;
+  --dino-accent: #39ff88;
+  --dino-dim: #3f7a56;
+  --dino-ground: rgba(57, 255, 136, 0.4);
+}
+
 html[data-style="hacker"] .dino-run__stage {
   border-color: rgba(57, 255, 136, 0.22);
   background:

@@ -58,27 +58,30 @@
 
   <!-- 站点图标与样式。全部使用本地文件，无外部依赖。 -->
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/style.css?v=20261077">
+  <link rel="stylesheet" href="css/style.css?v=20261078">
   <link rel="stylesheet" href="css/pet.css?v=20261025b">
-  <link rel="stylesheet" href="css/personal.css?v=20261077">
+  <link rel="stylesheet" href="css/personal.css?v=20261078">
   <link rel="stylesheet" href="css/avatar-pet.css?v=20261057">
-  <link rel="stylesheet" href="css/skins.css?v=20261077">
-  <link rel="stylesheet" href="css/motion.css?v=20261077">
-  <link rel="stylesheet" href="css/dino.css?v=20261077">
+  <link rel="stylesheet" href="css/skins.css?v=20261078">
+  <link rel="stylesheet" href="css/type.css?v=20261078">
+  <link rel="stylesheet" href="css/motion.css?v=20261078">
+  <link rel="stylesheet" href="css/dino.css?v=20261078">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <!-- 项目卡片、全部项目折叠页和复制按钮由 js/main.js 驱动 -->
   <script src="js/sfx.js?v=20261072" defer></script>
   <script src="js/theme.js?v=20261060" defer></script>
-  <script src="js/theme-icon.js?v=20261077" defer></script>
+  <script src="js/theme-icon.js?v=20261078" defer></script>
   <script src="js/members.js?v=20261034" defer></script>
   <script src="js/main.js?v=20261058" defer></script>
   <script src="js/pet.js?v=20261025c" defer></script>
   <script src="js/avatar-pet.js?v=20261057" defer></script>
   <script src="js/personal.js?v=20261043" defer></script>
   <script src="js/click-fx.js?v=20261058" defer></script>
-  <script src="js/skins.js?v=20261077" defer></script>
-  <script src="js/dino.js?v=20261077" defer></script>
+  <script src="js/skins.js?v=20261078" defer></script>
+  <script src="js/matrix.js?v=20261078" defer></script>
+  <script src="js/copy.js?v=20261078" defer></script>
+  <script src="js/dino.js?v=20261078" defer></script>
 </head>
 <body>
 
@@ -164,15 +167,15 @@
         <div class="hero-copy">
           <p class="eyebrow">
             <span class="eyebrow-dot" aria-hidden="true"></span>
-            HNYZ // 衡南一中 · 学生编程社团
+            <span data-copy="hero-eyebrow">HNYZ // 衡南一中 · 学生编程社团</span>
           </p>
 
-          <h1 id="hero-title">
+          <h1 id="hero-title" data-copy="hero-title">
             把想法，<br>
             <span class="accent-text">写成代码。</span>
           </h1>
 
-          <p class="hero-lead">
+          <p class="hero-lead" data-copy="hero-lead">
             衡南一中编程社（HNYZ）是一个面向全校学生的极客技术社团，教学内容以 Arduino 为主线。
             我们从点亮第一颗 LED 开始，组队做项目、一起学习，把脑子里的点子变成真正能运行的作品。
           </p>
@@ -184,11 +187,11 @@
           </p>
 
           <div class="hero-actions">
-            <a class="button button--primary" href="#join">
+            <a class="button button--primary" href="#join" data-copy="cta-primary">
               加入我们
               <span aria-hidden="true">→</span>
             </a>
-            <a class="button button--secondary" href="#projects">看看我们的项目</a>
+            <a class="button button--secondary" href="#projects" data-copy="cta-secondary">看看我们的项目</a>
           </div>
 
           <dl class="hero-stats" aria-label="社团概况">
@@ -222,7 +225,7 @@
           <p class="quick-path"><span class="quick-dots" aria-hidden="true"><i></i><i></i><i></i></span> ~/hnyz/contact.sh</p>
           <div class="quick-body">
             <p class="card-label">// QUICK_CONTACT</p>
-            <h2 id="quick-title">先加群，<br>再一起做点东西。</h2>
+            <h2 id="quick-title" data-copy="quick-title">先加群，<br>再一起做点东西。</h2>
 
             <div class="quick-lines">
               <div class="quick-line">
@@ -699,7 +702,7 @@
             <span>衡南一中编程社</span>
           </span>
         </a>
-        <p>把想法，写成代码。</p>
+        <p data-copy="footer-tagline">把想法，写成代码。</p>
       </div>
 
       <nav class="footer-nav" aria-label="页脚导航">
@@ -730,11 +733,15 @@
             DINO_RUN
             <span class="dino-run__ver">// 08-BIT</span>
           </h2>
-          <p class="dino-run__score" data-dino-score>HI 00000  00000</p>
+          <div class="dino-run__hud">
+            <span class="dino-run__level" data-dino-level>LV.1</span>
+            <p class="dino-run__score" data-dino-score>HI 00000  00000</p>
+          </div>
         </div>
         <div class="dino-run__stage" data-dino-stage tabindex="-1">
           <canvas class="dino-run__canvas" data-dino-canvas aria-hidden="true"></canvas>
           <p class="dino-run__hint" data-dino-hint>AUTO_PILOT // ON</p>
+          <p class="dino-run__pop" data-dino-pop aria-live="polite"></p>
           <p class="dino-run__toast" data-dino-toast hidden>SIGNAL LOST // REBOOT</p>
         </div>
       </div>

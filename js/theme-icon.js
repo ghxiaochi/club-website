@@ -16,7 +16,7 @@
   const MOON = 0;        /* 第 0 帧：月亮 */
   const SUN = 40;        /* 第 40 帧：太阳 */
   const SIZE = 18;       /* 页面上的图标尺寸，与 CSS 的 background-size 对应 */
-  const STEP_MS = 15;    /* 每帧停留时间，60 帧约 0.9 秒 */
+  const STEP_MS = 9;     /* 每帧停留时间；走 40 帧约 0.36 秒，利落但不生硬 */
 
   const root = document.documentElement;
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -49,11 +49,16 @@
 
     const from = frame;
     const started = performance.now();
+    const total = steps * STEP_MS;
 
+    /* 帧号按 ease-out 走：开头快、最后几帧慢下来，
+       收尾落在太阳/月亮上时不会「啪」地停住 */
     const tick = (now) => {
-      const done = Math.min(steps, Math.floor((now - started) / STEP_MS));
-      setFrame(from + dir * done);
-      if (done < steps) raf = window.requestAnimationFrame(tick);
+      const p = Math.min(1, (now - started) / total);
+      const eased = 1 - Math.pow(1 - p, 2.4);
+      setFrame(from + dir * Math.round(steps * eased));
+      if (p < 1) raf = window.requestAnimationFrame(tick);
+      else setFrame(target);
     };
 
     raf = window.requestAnimationFrame(tick);

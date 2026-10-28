@@ -17,6 +17,8 @@
   const stage = strip.querySelector("[data-dino-stage]");
   const canvas = strip.querySelector("[data-dino-canvas]");
   const scoreEl = strip.querySelector("[data-dino-score]");
+  const levelEl = strip.querySelector("[data-dino-level]");
+  const popEl = strip.querySelector("[data-dino-pop]");
   const hintEl = strip.querySelector("[data-dino-hint]");
   const toastEl = strip.querySelector("[data-dino-toast]");
   const modeButtons = Array.from(strip.querySelectorAll("[data-dino-mode]"));
@@ -67,22 +69,35 @@
   let worldX = 0;
 
   let obstacles = [];
+  let coins = [];
   let clouds = [];
+  let stars = [];
   let dust = [];
   /* 领头龙的高度历史：后面几只按“晚一点起跳”取样，视觉上像波浪跟跳 */
   let trail = [];
   let clock = 0;
 
+  /* 玩法状态：档位、连击、飘字、震屏 */
+  let level = 1;
+  let combo = 0;
+  let bestCombo = 0;
+  let nextLevelAt = 320;
+  let popTimer = 0;
+  let shake = 0;
+
   let palette = {
     ink: "#e8f1ff",
     accent: "#7dd3fc",
     dim: "#3a5a80",
-    ground: "rgba(125, 211, 252, 0.42)"
+    ground: "rgba(125, 211, 252, 0.42)",
+    gold: "#fbbf24",
+    goldLit: "#ffe9a8"
   };
 
   let sprites = {
     dino: [],
-    cacti: []
+    cacti: [],
+    coin: []
   };
 
   try {
@@ -109,7 +124,9 @@
       ink: read("--dino-ink", "#e8f1ff"),
       accent: read("--dino-accent", "#7dd3fc"),
       dim: read("--dino-dim", "#3a5a80"),
-      ground: read("--dino-ground", "rgba(125, 211, 252, 0.42)")
+      ground: read("--dino-ground", "rgba(125, 211, 252, 0.42)"),
+      gold: read("--dino-gold", "#fbbf24"),
+      goldLit: read("--dino-gold-lit", "#ffe9a8")
     };
   }
 
@@ -271,6 +288,26 @@
     }
   }
 
+  /* 8×8 的金币：按宽度收放模拟旋转，左上留高光、中间一道暗缝当币面 */
+  function paintCoin(g, s, width) {
+    const w = Math.max(2, width);
+    const inset = Math.round((8 - w) / 2);
+
+    g.fillStyle = palette.gold;
+    g.fillRect(inset * s, 1 * s, w * s, 6 * s);
+    g.fillRect((inset + 1) * s, 0, Math.max(1, w - 2) * s, 8 * s);
+
+    if (w >= 6) {
+      /* 顶部一行提亮，像被光扫到的币齿 */
+      g.fillStyle = palette.goldLit;
+      g.fillRect((inset + 1) * s, 0, Math.max(1, w - 2) * s, s);
+      g.fillRect(inset * s, 1 * s, s, 2 * s);
+
+      g.fillStyle = palette.dim;
+      g.fillRect((inset + Math.floor(w / 2)) * s, 2 * s, s, 4 * s);
+    }
+  }
+
   function buildSprites() {
     sprites.dino = [
       makeSprite(W_UNITS, H_UNITS, S, (g, s) => paintDino(g, s, 0)),
@@ -278,6 +315,10 @@
     ];
     sprites.cacti = [0, 1, 2].map((variant) =>
       makeSprite(10, 13, S, (g, s) => paintCactus(g, s, variant))
+    );
+    /* 金币四帧：宽 → 窄 → 最窄 → 宽，转起来像翻面 */
+    sprites.coin = [8, 6, 3, 6].map((width) =>
+      makeSprite(8, 8, S, (g, s) => paintCoin(g, s, width))
     );
   }
 
@@ -311,6 +352,7 @@
 
     buildSprites();
     buildClouds();
+    buildStars();
     return true;
   }
 
@@ -319,6 +361,16 @@
       x: (W / (W < 430 ? 2 : 3)) * i + (i % 2 ? 40 : 12),
       y: 10 + (i % 2) * 14 + (H > 120 ? 4 : 0),
       s: S
+    }));
+  }
+
+  function buildStars() {
+    const n = Math.max(6, Math.round(W / 24));
+    stars = Array.from({ length: n }, () => ({
+      x: Math.random() * W,
+      y: 6 + Math.random() * Math.max(10, H - 78),
+      s: Math.random() < 0.28 ? 2 : 1,
+      tw: Math.random() * Math.PI * 2
     }));
   }
 
@@ -334,9 +386,21 @@
     spawnIn = 1.1;
     worldX = 0;
     obstacles = [];
+    coins = [];
     dust = [];
     trail = [];
     clock = 0;
+    level = 1;
+    combo = 0;
+    bestCombo = 0;
+    nextLevelAt = 320;
+    popTimer = 0;
+    shake = 0;
+    if (levelEl) levelEl.textContent = "LV.1";
+    if (popEl) {
+      popEl.textContent = "";
+      popEl.classList.remove("is-on");
+    }
     if (toastEl) toastEl.hidden = true;
     if (hintEl) hintEl.style.opacity = "";
     updateScore(true);
@@ -414,6 +478,7 @@
     vy = JUMP_V;
     grounded = false;
     burstDust(3);
+    playSfx("hover", 0.08, 1.25);
   }
 
   function burstDust(n) {
@@ -438,6 +503,20 @@
       h: sprite.height,
       variant
     });
+
+    /* 六成的仙人掌上方挂一道金币拱门：跳得准就一路吃过去 */
+    if (Math.random() < 0.62) {
+      const cx = W + 24 + sprite.width / 2;
+      [[-46, 26], [0, 46], [46, 26]].forEach(([dx, lift]) => {
+        coins.push({
+          x: cx + dx,
+          lift,
+          frame: 0,
+          spin: Math.random() * 0.5,
+          got: false
+        });
+      });
+    }
   }
 
   function obstacleGap() {
@@ -470,8 +549,112 @@
   function die() {
     dead = true;
     deadTimer = 1.45;
+    shake = 0.34;
+    burstDebris(18);
+    playSfx("locked", 0.22, 0.9);
     if (toastEl) toastEl.hidden = false;
     if (hintEl) hintEl.style.opacity = "0";
+  }
+
+  /* -------------------------------------------------------
+     三之二、金币 / 档位 / 连击
+     ------------------------------------------------------- */
+  function playSfx(name, volume, rate) {
+    if (!window.HNYZ_SFX || typeof window.HNYZ_SFX.play !== "function") return;
+    try {
+      window.HNYZ_SFX.play(name, { volume, rate });
+    } catch (error) {
+      /* 音效没初始化就算了 */
+    }
+  }
+
+  function pop(text, tone) {
+    if (!popEl) return;
+    popEl.textContent = text;
+    popEl.dataset.tone = tone || "gold";
+    popEl.classList.remove("is-on");
+    void popEl.offsetWidth;
+    popEl.classList.add("is-on");
+    popTimer = 0.9;
+  }
+
+  function setLevel(next) {
+    level = next;
+    if (levelEl) {
+      levelEl.textContent = `LV.${level}`;
+      levelEl.classList.remove("is-bump");
+      void levelEl.offsetWidth;
+      levelEl.classList.add("is-bump");
+    }
+  }
+
+  function collectCoins() {
+    const hitX = startX + 2 * S;
+    const hitW = 34 * S;
+    const top = groundY + jumpY - 44 * S;
+    const bottom = groundY + jumpY;
+
+    /* 每一帧只吃最近的，避免一帧内连吃三枚把连击算成三连 */
+    for (let i = 0; i < coins.length; i += 1) {
+      const coin = coins[i];
+      if (coin.got) continue;
+
+      const size = 8 * S;
+      const cy = groundY - coin.lift - size;
+      if (hitX + hitW < coin.x || hitX > coin.x + size) continue;
+      if (bottom < cy || top > cy + size) continue;
+
+      coin.got = true;
+      burstCoin(coin);
+      combo += 1;
+      bestCombo = Math.max(bestCombo, combo);
+      score += 20;
+      distance += 20 * 14; /* 分数是 distance/14，这里补回去让 HUD 一起涨 */
+      updateScore(true);
+
+      const milestone = combo >= 5 && combo % 5 === 0;
+      const label = milestone ? `COMBO x${combo}` : "+20";
+      pop(label, milestone ? "combo" : "gold");
+
+      /* 每枚都响会太吵：只在连击节点给一声，音高随连击抬高 */
+      if (milestone) playSfx("view", 0.14, 1.3 + Math.min(0.6, combo * 0.03));
+      break;
+    }
+
+    coins = coins.filter((coin) => !coin.got);
+  }
+
+  /* 金币被吃掉时炸出几粒金屑，给一点「拿到手」的实感 */
+  function burstCoin(coin) {
+    const cx = coin.x + 4 * S;
+    const cy = groundY - coin.lift - 4 * S;
+    for (let i = 0; i < 5; i += 1) {
+      dust.push({
+        x: cx,
+        y: cy,
+        vx: -60 + Math.random() * 120,
+        vy: -120 + Math.random() * 90,
+        life: 0.3 + Math.random() * 0.2,
+        max: 0.5,
+        size: 2,
+        tone: "gold"
+      });
+    }
+  }
+
+  function burstDebris(n) {
+    for (let i = 0; i < n; i += 1) {
+      dust.push({
+        x: startX + 14 * S + (Math.random() - 0.5) * 16,
+        y: groundY + jumpY - 24 * S,
+        vx: -120 + Math.random() * 260,
+        vy: -240 + Math.random() * 180,
+        life: 0.5 + Math.random() * 0.4,
+        max: 0.9,
+        size: Math.random() < 0.4 ? 3 : 2,
+        tone: "accent"
+      });
+    }
   }
 
   /* -------------------------------------------------------
@@ -496,6 +679,13 @@
     score = distance / 14;
     updateScore(false);
 
+    /* 每跨过一个分数门槛升一档：恐龙快一点，HUD 亮一下 */
+    if (score >= nextLevelAt && level < 5) {
+      setLevel(level + 1);
+      pop(`LV.${level} // SPEED UP`, "level");
+      nextLevelAt += 320;
+    }
+
     if (mode === "auto") autoJump();
 
     if (!grounded) {
@@ -518,6 +708,13 @@
     obstacles.forEach((item) => { item.x -= speed * dt; });
     obstacles = obstacles.filter((item) => item.x + item.w > -30);
 
+    coins.forEach((coin) => {
+      coin.x -= speed * dt;
+      coin.spin += dt * 5;
+    });
+    coins = coins.filter((coin) => coin.x + 8 * S > -20 && coin.x < W + 80);
+    collectCoins();
+
     dust.forEach((particle) => {
       particle.x += particle.vx * dt;
       particle.y += particle.vy * dt;
@@ -525,6 +722,12 @@
       particle.life -= dt;
     });
     dust = dust.filter((particle) => particle.life > 0);
+
+    if (popTimer > 0) popTimer -= dt;
+    if (popEl && popTimer <= 0 && popEl.classList.contains("is-on")) {
+      popEl.classList.remove("is-on");
+    }
+    if (shake > 0) shake = Math.max(0, shake - dt);
 
     if (collide()) die();
   }
@@ -539,6 +742,23 @@
     for (let x = -offset; x < W; x += gap) {
       ctx.fillRect(x, groundY + 4, 9 * S, 1.5);
     }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawStars() {
+    if (!stars.length) return;
+
+    const night = root.dataset.theme === "dark" || root.dataset.style === "hacker";
+    const base = night ? 0.5 : 0.16;
+
+    ctx.fillStyle = palette.ink;
+    stars.forEach((star) => {
+      const drift = (star.x - worldX * 0.04) % (W + 40);
+      const x = drift < 0 ? drift + W + 40 : drift;
+      const twinkle = 0.6 + 0.4 * Math.sin(clock * 1.7 + star.tw);
+      ctx.globalAlpha = base * twinkle;
+      ctx.fillRect(Math.round(x), Math.round(star.y), star.s, star.s);
+    });
     ctx.globalAlpha = 1;
   }
 
@@ -558,6 +778,20 @@
     });
 
     ctx.globalAlpha = 1;
+  }
+
+  function drawCoins() {
+    coins.forEach((coin) => {
+      const frame = Math.floor(coin.spin) % sprites.coin.length;
+      const sprite = sprites.coin[frame];
+      if (!sprite) return;
+
+      const size = 8 * S;
+      const y = groundY - coin.lift - size;
+      /* 金币上下浮一点，像悬在那儿 */
+      const bob = Math.sin(clock * 3 + coin.x * 0.05) * 1.5;
+      ctx.drawImage(sprite, Math.round(coin.x), Math.round(y + bob));
+    });
   }
 
   function drawObstacles() {
@@ -610,21 +844,36 @@
   }
 
   function drawDust() {
-    ctx.fillStyle = palette.dim;
     dust.forEach((particle) => {
+      ctx.fillStyle =
+        particle.tone === "accent" ? palette.accent
+          : particle.tone === "gold" ? palette.gold
+            : palette.dim;
       ctx.globalAlpha = Math.max(0, particle.life / particle.max) * 0.7;
-      ctx.fillRect(Math.round(particle.x), Math.round(particle.y), 2, 2);
+      const size = particle.size || 2;
+      ctx.fillRect(Math.round(particle.x), Math.round(particle.y), size, size);
     });
     ctx.globalAlpha = 1;
   }
 
   function draw(frame) {
     ctx.clearRect(0, 0, W, H);
+
+    ctx.save();
+    if (shake > 0) {
+      const amp = shake * 9;
+      ctx.translate((Math.random() - 0.5) * amp, (Math.random() - 0.5) * amp);
+    }
+
+    drawStars();
     drawClouds();
     drawGround();
     drawObstacles();
+    drawCoins();
     drawDinos(frame);
     drawDust();
+
+    ctx.restore();
   }
 
   function loop(now) {
@@ -749,7 +998,10 @@
   setMode(mode, false);
   updateScore(true);
 
-  window.__HNYZ_DINO__ = () => ({ visible, running, activated, score, dead, mode, W, H, S, obs: obstacles.length, worldX });
+  window.__HNYZ_DINO__ = () => ({
+    visible, running, activated, score, dead, mode, W, H, S,
+    obs: obstacles.length, coins: coins.length, level, combo, bestCombo, worldX
+  });
 
   if (visible) startLoop();
 })();

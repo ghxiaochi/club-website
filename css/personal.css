@@ -273,44 +273,32 @@ html.is-theme-swap .hnyz-glow {
   transition: none !important;
 }
 
-/* 图标切换：按钮本身弹一下 */
+/* 图标切换：按钮只轻轻一收一放，光晕代替以前的放射线 */
 .theme-toggle {
   position: relative;
 }
 
 .theme-toggle.is-switching {
-  animation: themeBtnPop 0.58s cubic-bezier(0.22, 1.1, 0.36, 1);
-  /* 去掉 hover 的 4px 光晕，别和太阳光芒叠成一个厚圈 */
-  box-shadow: none;
+  animation: themeBtnPop 0.34s cubic-bezier(0.22, 0.9, 0.28, 1);
+  box-shadow:
+    0 0 0 1px var(--blue),
+    0 0 0 7px var(--blue-soft);
 }
 
 @keyframes themeBtnPop {
-  0%, 100% { scale: 1; }
-  35% { scale: 1.16; }
-  70% { scale: 0.96; }
+  0% { scale: 1; }
+  32% { scale: 1.04; }
+  100% { scale: 1; }
 }
 
-.theme-toggle.is-switching .theme-toggle__icon--sun,
-.theme-toggle.is-switching .theme-toggle__icon--moon {
-  animation: themeIconPop 0.66s cubic-bezier(0.22, 1.1, 0.36, 1) both;
+.theme-toggle.is-switching .theme-toggle__flip {
+  animation: themeFlipPop 0.44s cubic-bezier(0.22, 0.9, 0.28, 1);
 }
 
-@keyframes themeIconPop {
-  0% {
-    opacity: 0;
-    transform: rotate(-140deg) scale(0.22);
-  }
-  45% {
-    opacity: 1;
-    transform: rotate(12deg) scale(1.22);
-  }
-  68% {
-    transform: rotate(-6deg) scale(0.94);
-  }
-  100% {
-    opacity: 1;
-    transform: rotate(0) scale(1);
-  }
+@keyframes themeFlipPop {
+  0% { scale: 1; }
+  46% { scale: 0.88; }
+  100% { scale: 1; }
 }
 
 .theme-toggle__icon--moon,

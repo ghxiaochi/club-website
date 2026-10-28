@@ -1265,3 +1265,109 @@ body.is-dino-visible .hnyz-pet {
     visibility: hidden;
   }
 }
+
+/* =========================================================
+   黑客风 · 终端化增强
+   ---------------------------------------------------------
+   1. 背景数字雨（js/matrix.js 画在 #matrix-rain 画布上）
+   2. 标题改成 `>` 提示符，按钮加方括号，链接带光标
+   3. 卡片左上角切一个小角标，像终端里的分屏
+   ========================================================= */
+
+.matrix-rain {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+
+.matrix-rain.is-on {
+  opacity: 1;
+}
+
+html[data-style="hacker"] main,
+html[data-style="hacker"] .site-footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* 标题前的提示符：从 // 换成 > */
+html[data-style="hacker"] .section-head h2::before {
+  content: "> ";
+  color: rgba(57, 255, 136, 0.75);
+}
+
+html[data-style="hacker"] .eyebrow::before {
+  content: "$ ";
+  color: rgba(57, 255, 136, 0.62);
+}
+
+/* 主按钮做成一条命令，末尾跟一个会闪的光标 */
+html[data-style="hacker"] .button--primary::before {
+  content: "> ";
+  opacity: 0.72;
+}
+
+html[data-style="hacker"] .button--primary::after {
+  content: "";
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  margin-left: 2px;
+  background: currentColor;
+  vertical-align: -0.12em;
+  animation: hackerCaret 1.15s steps(1, end) infinite;
+}
+
+@keyframes hackerCaret {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+
+/* 卡片左上角切一个角，像终端分屏的边框 */
+html[data-style="hacker"] .quick-card,
+html[data-style="hacker"] .do-card,
+html[data-style="hacker"] .faq-item,
+html[data-style="hacker"] .join-panel {
+  position: relative;
+}
+
+html[data-style="hacker"] .quick-card::before,
+html[data-style="hacker"] .do-card::before,
+html[data-style="hacker"] .faq-item::before,
+html[data-style="hacker"] .join-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  border-top: 1px solid rgba(57, 255, 136, 0.55);
+  border-left: 1px solid rgba(57, 255, 136, 0.55);
+  pointer-events: none;
+}
+
+/* 页脚收尾写成 EOF，别再有别的花样 */
+html[data-style="hacker"] .site-footer::after {
+  content: "// EOF";
+  display: block;
+  padding: 0 clamp(18px, 4.4vw, 56px);
+  color: rgba(57, 255, 136, 0.35);
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .matrix-rain {
+    display: none;
+  }
+
+  html[data-style="hacker"] .button--primary::after {
+    animation: none;
+  }
+}

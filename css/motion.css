@@ -72,11 +72,11 @@
 }
 
 .theme-toggle:hover {
-  transform: rotate(12deg) scale(1.08);
+  transform: rotate(8deg) scale(1.04);
 }
 
 .theme-toggle:active {
-  transform: rotate(0deg) scale(0.92);
+  transform: rotate(0deg) scale(0.95);
 }
 
 .theme-toggle__flip {
@@ -84,7 +84,7 @@
 }
 
 .theme-toggle:hover .theme-toggle__flip {
-  transform: scale(1.06);
+  transform: scale(1.03);
 }
 
 .style-toggle {
