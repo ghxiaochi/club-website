@@ -362,3 +362,73 @@ body.is-dino-visible .pet-summon {
   pointer-events: none !important;
   transition: opacity 0.3s ease, visibility 0s linear 0.3s;
 }
+
+/* =========================================================
+   TIME ×N · 时间加速按钮
+   ---------------------------------------------------------
+   与 LV 徽章同族：等宽字、细边框、大写、1/2/4 循环。
+   加速时呼吸发光；灭绝演出期间置灰锁死。
+   ========================================================= */
+
+.dino-run__time {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  height: 22px;
+  padding: 0 9px;
+  border: 1px solid var(--dino-dim);
+  border-radius: 3px;
+  background: transparent;
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  color: var(--dino-dim);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dino-run__time:hover {
+  color: var(--dino-accent);
+  border-color: var(--dino-accent);
+}
+
+.dino-run__time.is-hot {
+  color: var(--dino-accent);
+  border-color: var(--dino-accent);
+  animation: dinoTimeGlow 1.3s ease-in-out infinite;
+}
+
+.dino-run__time.is-locked {
+  opacity: 0.35;
+  pointer-events: none;
+  animation: none;
+  box-shadow: none;
+}
+
+@keyframes dinoTimeGlow {
+  0%, 100% { box-shadow: 0 0 3px var(--dino-accent); }
+  50% { box-shadow: 0 0 12px var(--dino-accent); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dino-run__time.is-hot {
+    animation: none;
+    box-shadow: 0 0 6px var(--dino-accent);
+  }
+}
+
+@media (max-width: 520px) {
+  .dino-run__hud {
+    gap: 6px;
+  }
+
+  .dino-run__time {
+    padding: 0 6px;
+    letter-spacing: 0.06em;
+  }
+}

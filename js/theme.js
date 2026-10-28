@@ -245,7 +245,7 @@
     { text: "exit code 13 — access denied", cls: "dim" }
   ];
   const TERM_CMD = "themectl set-mode light --force";
-  const TERM_FINAL = "黑客的世界，隐藏于暗网之下。";
+  const TERM_FINAL = "黑调的低客，拒绝光明";
 
   function termSleep(ms) {
     return new Promise((resolve) => window.setTimeout(resolve, ms));
@@ -332,20 +332,20 @@
       return;
     }
 
-    await termSleep(420);
-    await typeLine(`$ ${TERM_CMD}`, "cmd", 38);
+    await termSleep(300);
+    await typeLine(`$ ${TERM_CMD}`, "cmd", 26);
 
     for (const item of TERM_LINES) {
       if (closed) return;
       /* 报错行之间留点不均匀的间隔，像真的在跑东西 */
-      await termSleep(item.cls === "err" ? 200 + Math.random() * 160 : 90 + Math.random() * 150);
+      await termSleep(item.cls === "err" ? 130 + Math.random() * 110 : 60 + Math.random() * 100);
       appendLine(item.text, item.cls);
     }
 
-    await termSleep(560);
-    await typeLine(TERM_FINAL, "final", 105);
+    await termSleep(420);
+    await typeLine(TERM_FINAL, "final", 72);
 
-    await termSleep(2100);
+    await termSleep(1900);
     close();
   }
 
