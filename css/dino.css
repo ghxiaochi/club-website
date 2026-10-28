@@ -272,11 +272,20 @@ html[data-style="minimal"] .dino-run__stage {
 
 html[data-style="minimal"] .dino-run__mode {
   border-radius: 2px;
+  border-color: #cfcfc7;
   background: transparent;
+  color: #6f6f66;
+}
+
+html[data-style="minimal"] .dino-run__mode:hover {
+  border-color: #171715;
+  color: #171715;
 }
 
 html[data-style="minimal"] .dino-run__mode[aria-pressed="true"] {
+  border-color: #171715;
   background: transparent;
+  color: #171715;
   box-shadow: inset 0 0 0 1px currentColor;
 }
 
