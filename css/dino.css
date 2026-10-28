@@ -443,10 +443,6 @@ body.is-dino-visible .pet-summon {
 .dino-run__extinct {
   position: absolute;
   inset: 0;
-  display: grid;
-  align-items: start;
-  justify-items: center;
-  padding-top: 10px;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.55s ease;
@@ -463,6 +459,9 @@ body.is-dino-visible .pet-summon {
 
 .dino-run__extinct-text {
   box-sizing: border-box;
+  position: absolute;
+  left: 50%;
+  top: 9px;
   width: 66.6%;
   height: 66.6%;
   margin: 0;
@@ -486,12 +485,12 @@ body.is-dino-visible .pet-summon {
   letter-spacing: 0.16em;
   text-align: center;
   text-shadow: 0 1px 14px rgba(255, 92, 40, 0.32);
-  transform: translateY(8px) scale(0.975);
+  transform: translate(-50%, 8px) scale(0.975);
   transition: transform 0.7s cubic-bezier(0.22, 0.68, 0.32, 1);
 }
 
 .dino-run__extinct.is-on .dino-run__extinct-text {
-  transform: translateY(0) scale(1);
+  transform: translate(-50%, 0) scale(1);
 }
 
 /* 左边那颗按钮：从画面外滑进来，像挂在结局旁边的一枚书签 */
@@ -547,8 +546,8 @@ body.is-dino-visible .pet-summon {
 }
 
 @media (max-width: 520px) {
-  .dino-run__extinct {
-    padding-top: 6px;
+  .dino-run__extinct-text {
+    top: 6px;
   }
 
   .dino-run__rewind {
@@ -573,7 +572,7 @@ body.is-dino-visible .pet-summon {
   }
 
   .dino-run__extinct-text {
-    transform: none;
+    transform: translate(-50%, 0);
   }
 
   .dino-run__extinct.is-on .dino-run__rewind {

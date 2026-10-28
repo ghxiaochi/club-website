@@ -1693,7 +1693,9 @@
     if (c.phase !== "blast" || c.t > 0.08) {
       const rx = r * 0.95;
       const pit = c.pit || [1, 1, 1, 1, 1, 1, 1, 1, 1];
-      const depth = Math.max(10, r * 0.3);
+      /* 坑再深就掉出画布了，按剩给地面的高度收口 */
+      const maxDepth = Math.max(8, H - groundY - 3);
+      const depth = Math.min(maxDepth, Math.max(8, r * 0.26));
 
       ctx.globalAlpha = fade * 0.32;
       ctx.fillStyle = "rgba(9, 5, 4, 0.9)";
@@ -1708,7 +1710,7 @@
       ctx.moveTo(c.impactX - rx, groundY + 1);
       for (let i = 0; i < pit.length; i += 1) {
         const t = i / (pit.length - 1);
-        const dip = Math.sin(t * Math.PI) * depth * pit[i];
+        const dip = Math.min(maxDepth, Math.sin(t * Math.PI) * depth * pit[i]);
         ctx.lineTo(c.impactX - rx + rx * 2 * t, groundY + 1 + dip);
       }
       ctx.lineTo(c.impactX + rx, groundY + 13);
@@ -1718,14 +1720,17 @@
 
       /* 坑口那圈还没冷透的红光 */
       const cool = c.phase === "blast" ? Math.max(0, 1 - c.t / 1.8) : 0.18;
-      ctx.globalAlpha = fade * (0.16 + cool * 0.55);
+      ctx.globalAlpha = fade * (0.3 + cool * 0.5);
       ctx.strokeStyle = "#ff7b3a";
       ctx.lineWidth = Math.max(1, r * 0.03);
       ctx.beginPath();
       ctx.moveTo(c.impactX - rx, groundY + 1);
       for (let i = 0; i < pit.length; i += 1) {
         const t = i / (pit.length - 1);
-        ctx.lineTo(c.impactX - rx + rx * 2 * t, groundY + 1 + Math.sin(t * Math.PI) * depth * pit[i]);
+        ctx.lineTo(
+          c.impactX - rx + rx * 2 * t,
+          groundY + 1 + Math.min(maxDepth, Math.sin(t * Math.PI) * depth * pit[i])
+        );
       }
       ctx.stroke();
 
@@ -1746,9 +1751,9 @@
         ctx.globalAlpha = fade * flick;
         ctx.fillRect(
           Math.round(c.impactX - r * 0.3 + i * r * 0.26),
-          Math.round(groundY + 5 + (i % 2) * 3),
-          2 + (i % 2),
-          2
+          Math.round(groundY + 4 + (i % 2) * 3),
+          3,
+          2 + (i % 2)
         );
       }
     }
@@ -1943,7 +1948,7 @@
 
     const nightSky = phases.nightAmt;
     /* 夜里满星；白天（尤其是暗色主题）留一层几乎看不见的底噪 */
-    const base = Math.max(nightSky * 0.95, (isNight() ? 0.16 : 0.08) * (1 - nightSky))
+    const base = Math.max(nightSky * 0.95, (isNight() ? 0.09 : 0.06) * (1 - nightSky))
       * (1 - Math.min(1, phases.duskAmt * 0.85));
     /* 演出的天塌下来：星星先一颗颗灭 */
     const kill = 1 - bloodAmt();
@@ -2238,8 +2243,8 @@
     /* 迎风那一侧再亮一道 */
     ctx.strokeStyle = "#ffe9c4";
     ctx.lineCap = "round";
-    ctx.lineWidth = Math.max(1.2, r * 0.03);
-    ctx.globalAlpha = 0.42 + Math.sin(clock * 16) * 0.1;
+    ctx.lineWidth = Math.max(1, r * 0.018);
+    ctx.globalAlpha = 0.26 + Math.sin(clock * 16) * 0.08;
     ctx.beginPath();
     ctx.arc(mx, my, r * 0.965, Math.PI * 0.55, Math.PI * 1.0);
     ctx.stroke();
