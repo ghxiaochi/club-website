@@ -1654,26 +1654,17 @@
       );
     }
 
-    /* 冲击波：两圈贴着地面荡开，别飞上天；环本身是带状尘，不是一圈铁丝 */
+    /* 冲击波：两圈贴着地面荡开，别飞上天 */
     for (let i = 0; i < 2; i += 1) {
       const p = Math.min(1, Math.max(0, (c.t - i * 0.1) / (0.66 + i * 0.18)));
       if (p <= 0) continue;
       const rr = c.r * (0.55 + p * (1.4 + i * 0.5));
-      const band = Math.max(2, c.r * 0.1 * (0.4 + (1 - p)));
+      ctx.globalAlpha = (1 - p) * (0.5 - i * 0.2);
+      ctx.strokeStyle = i ? "#ff9a4d" : "#ffd2a0";
+      ctx.lineWidth = Math.max(1, (1 - p) * 3.5);
       ctx.save();
       ctx.translate(cx, cy);
       ctx.scale(1, 0.2);
-      for (let k = 0; k < 3; k += 1) {
-        ctx.globalAlpha = (1 - p) * (0.2 - i * 0.06) * (1 - k * 0.26);
-        ctx.strokeStyle = "#ff9a52";
-        ctx.lineWidth = band * (1 + k * 0.9);
-        ctx.beginPath();
-        ctx.arc(0, 0, rr, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-      ctx.globalAlpha = (1 - p) * (0.34 - i * 0.14);
-      ctx.strokeStyle = "#ffe0b4";
-      ctx.lineWidth = Math.max(1, (1 - p) * 2.2);
       ctx.beginPath();
       ctx.arc(0, 0, rr, 0, Math.PI * 2);
       ctx.stroke();
