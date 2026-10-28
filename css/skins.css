@@ -1351,17 +1351,6 @@ html[data-style="hacker"] .join-panel::before {
   pointer-events: none;
 }
 
-/* 页脚收尾写成 EOF，别再有别的花样 */
-html[data-style="hacker"] .site-footer::after {
-  content: "// EOF";
-  display: block;
-  margin-left: clamp(18px, 4.4vw, 56px);
-  color: rgba(57, 255, 136, 0.35);
-  font-family: var(--mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.2em;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .matrix-rain {
     display: none;

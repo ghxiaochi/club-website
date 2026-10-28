@@ -390,7 +390,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 - 画布 `fixed` 铺满视口，`z-index: 0`，内容在它上面；用 `destination-out` 逐帧擦淡，所以背景是透明的，字能正常读
 - 限制 26fps，页面不可见 / `prefers-reduced-motion` / 切走皮肤立刻停
 
-配套的终端化细节都在 `skins.css` 末尾：标题前缀从 `//` 换成 `>`，眉标加 `$`，主按钮变成 `> join --now` 并在末尾挂一个闪烁光标，卡片左上角切一道角标，页脚收 `// EOF`。
+配套的终端化细节都在 `skins.css` 末尾：标题前缀从 `//` 换成 `>`，眉标加 `$`，主按钮变成 `> join --now` 并在末尾挂一个闪烁光标，卡片左上角切一道角标。
 
 ### 弹性动效
 
