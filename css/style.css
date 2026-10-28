@@ -63,6 +63,8 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 88px;
+  /* 让滚动条的位置一直留着：切换主题、弹出层出现时内容宽度不会突然变一下 */
+  scrollbar-gutter: stable;
 }
 
 body {

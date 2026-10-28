@@ -20,6 +20,8 @@
   const hintEl = strip.querySelector("[data-dino-hint]");
   const toastEl = strip.querySelector("[data-dino-toast]");
   const modeButtons = Array.from(strip.querySelectorAll("[data-dino-mode]"));
+  /* 带模式按钮时听用户的；按钮已经拿掉，就恒定自动跑 */
+  const hasControls = modeButtons.length > 0;
 
   if (!stage || !canvas) return;
 
@@ -86,12 +88,15 @@
   try {
     hiScore = Number(window.localStorage.getItem(HI_KEY)) || 0;
     const saved = window.localStorage.getItem(MODE_KEY);
-    if (!reduce.matches && (saved === "auto" || saved === "manual")) mode = saved;
+    if (hasControls && !reduce.matches && (saved === "auto" || saved === "manual")) {
+      mode = saved;
+    }
   } catch (error) {
     /* 隐私模式 */
   }
 
   if (reduce.matches) mode = "manual";
+  else if (!hasControls) mode = "auto";
 
   function readPalette() {
     const cs = window.getComputedStyle(strip);
@@ -653,12 +658,14 @@
      五、交互
      ------------------------------------------------------- */
   stage.addEventListener("pointerdown", (event) => {
-    if (mode !== "manual") return;
+    /* 有按钮时只认手动模式；没按钮了，点一下画布也能让它蹦一下 */
+    if (hasControls && mode !== "manual") return;
     event.preventDefault();
     jump();
   });
 
   document.addEventListener("keydown", (event) => {
+    /* 空格只在自己切换到手动模式时才接管，不去抢页面的滚动键 */
     if (!visible || mode !== "manual") return;
     if (event.key !== " " && event.key !== "ArrowUp" && event.code !== "Space") return;
     if (root.classList.contains("is-style-deck-open")) return;

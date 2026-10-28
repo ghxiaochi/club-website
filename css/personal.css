@@ -227,21 +227,35 @@ html[data-style="hacker"] .theme-toggle__flip {
 }
 
 /* ---------- 2.5 主题切换：从按钮长出的圆 ---------- */
-/* View Transitions 默认会交叉淡入淡出，这里关掉，只保留新界面的圆形遮罩 */
+/* View Transitions 默认会交叉淡入淡出，这里关掉，只保留新界面的圆形遮罩。
+   快照层要按视口尺寸铺满：浏览器默认会拿快照尺寸和容器尺寸对比，
+   差一点点就把整页做一次等比缩放——看起来就是「切换时页面缩一下」。 */
+::view-transition-group(root) {
+  animation: none;
+}
+
 ::view-transition-old(root) {
   animation: none;
   z-index: 1;
   mix-blend-mode: normal;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
 }
 
 ::view-transition-new(root) {
   animation: none;
   z-index: 2;
   mix-blend-mode: normal;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
 }
 
 ::view-transition-image-pair(root) {
   isolation: auto;
+  width: 100%;
+  height: 100%;
 }
 
 /* 转场的一瞬间先暂停持续动画和鼠标光晕，圆推得更顺 */
@@ -259,7 +273,7 @@ html.is-theme-swap .hnyz-glow {
   transition: none !important;
 }
 
-/* 图标切换：新图标带旋转弹一下，外圈再放一圈太阳光芒 */
+/* 图标切换：按钮本身弹一下 */
 .theme-toggle {
   position: relative;
 }
@@ -296,37 +310,6 @@ html.is-theme-swap .hnyz-glow {
   100% {
     opacity: 1;
     transform: rotate(0) scale(1);
-  }
-}
-
-/* 太阳光芒：只在切换的一瞬间出现 */
-.theme-toggle.is-switching::after {
-  content: "";
-  position: absolute;
-  inset: -8px;
-  border-radius: 50%;
-  background: repeating-conic-gradient(
-    from 0deg,
-    var(--blue) 0deg 1.5deg,
-    transparent 1.5deg 30deg
-  );
-  -webkit-mask-image: radial-gradient(circle, transparent 58%, #000 64%, #000 92%, transparent 100%);
-  mask-image: radial-gradient(circle, transparent 58%, #000 64%, #000 92%, transparent 100%);
-  animation: themeRays 0.55s ease-out both;
-  pointer-events: none;
-}
-
-@keyframes themeRays {
-  0% {
-    opacity: 0;
-    transform: scale(0.5) rotate(-18deg);
-  }
-  30% {
-    opacity: 0.85;
-  }
-  100% {
-    opacity: 0;
-    transform: scale(1.35) rotate(10deg);
   }
 }
 

@@ -50,7 +50,7 @@ club-website/
 │   ├── style.css           # 全站样式（蓝白科技风）
 │   ├── personal.css        # 深色主题、动效、彩蛋样式（在 style.css 之后加载）
 │   ├── skins.css           # 三套网页风格（默认 / 极简 / 黑客）的皮肤层
-│   ├── dino.css            # 页脚小恐龙跑道、竖排模式按钮、日间/夜间配色
+│   ├── dino.css            # 页脚小恐龙跑道、日间/夜间配色
 │   ├── motion.css          # 弹性动效层（统一回弹曲线，最后加载）
 │   ├── pet.css             # 右下角校徽背景板样式
 │   └── avatar-pet.css      # 左下角像素头像彩蛋样式
@@ -70,7 +70,7 @@ club-website/
 │   ├── gallery.js          # 图集渲染与灯箱
 │   ├── theme.js            # 深浅色主题切换与记忆
 │   ├── skins.js            # 网页风格切换面板、竖向卡片、擦除转场
-│   ├── dino.js             # 页脚像素小恐龙（自动跳 / 手动操控）
+│   ├── dino.js             # 页脚像素小恐龙（自动起跳，点跑道 / 空格也能跳）
 │   ├── theme-icon.js       # 主题按钮的月亮 / 太阳雪碧图帧动画
 │   ├── personal.js         # 打字机标语、滚动渐显、卡片倾斜、彩蛋
 │   ├── pet.js              # 校徽滚动旋转、点击说话
@@ -318,18 +318,17 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 ### 页脚小恐龙
 
-每个页面最下方（页脚之后）有一条 `DINO_RUN` 跑道：四只像素小恐龙排队往前跑（窄屏两只），右侧竖排两个按钮。
+每个页面最下方（页脚之后）有一条 `DINO_RUN` 跑道：四只像素小恐龙排队往前跑（窄屏两只），跑道占满整行，右侧不再挂按钮。
 
-| 按钮 | 行为 |
-|---|---|
-| `AUTO` | 按仙人掌距离自己起跳，不用管；分数最高值存 `localStorage`（key：`hnyz:dino-hi`） |
-| `MANUAL` | 点跑道 / 空格 / ↑ 起跳，撞到仙人掌会显示 `SIGNAL LOST // REBOOT`，1.4 秒后自动重开 |
+- 恐龙恒定自动跑：按仙人掌距离自己起跳；最高分存 `localStorage`（key：`hnyz:dino-hi`）
+- 想自己玩也可以：点跑道、空格、↑ 都能让它跳一下，撞到仙人掌会显示 `SIGNAL LOST // REBOOT`，1.4 秒后自动重开
+- 按钮去掉后 `js/dino.js` 用 `hasControls` 判断：没有 `[data-dino-mode]` 就不读 `localStorage` 里的旧模式，避免之前存过 `manual` 导致恐龙站着不动
 
 - 小恐龙是 **44×47 的字符串点阵**（`DINO_FRAMES`，按 Chrome 官方 sprite 逐像素提取），逐格 `fillRect` 预渲染成离屏 canvas，主循环只 `drawImage`；换肤 / 换主题时重新着色，不重算形状。两帧只差一条腿的抬起，跑起来是踏步。
 - 后面三只按「领头龙 `间距 ÷ 速度` 秒前的高度」取样，所以看起来是波浪式跟跳，而不是四只黏在一起同时起跳。
-- 跑道只在进入视口时跑 `requestAnimationFrame`，离开就停；同时在视口内时右下角校徽整组让位（`body.is-dino-visible`，`.hnyz-pet` 和独立的 `.hnyz-pet__board` 都要隐藏，否则板子会压住 AUTO 按钮）。
+- 跑道只在进入视口时跑 `requestAnimationFrame`，离开就停；同时在视口内时右下角校徽整组让位（`body.is-dino-visible`，`.hnyz-pet` 和独立的 `.hnyz-pet__board` 都要隐藏，否则板子会压住跑道右端）。
 - 跑道配色跟随主题：日间是浅蓝白底 + 深蓝恐龙，夜间是深底 + 亮恐龙，黑客风是绿色终端，极简风纯黑白。
-- 尊重 `prefers-reduced-motion`：开启减少动效时默认停在手动模式，不自动跑。
+- 尊重 `prefers-reduced-motion`：开启减少动效时不自动跑，点跑道 / 空格才跳。
 
 ### 主题按钮：月亮 / 太阳的变形
 
@@ -340,6 +339,12 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 - 点击切换时沿雪碧图走最近的一头——月 → 日正放，日 → 月倒放，约 0.9 秒走完，中途能看见收缩和张开
 - 极简风加 `grayscale`，黑客风用 `hue-rotate(-90deg)` 把蓝转到荧光绿
 - 帧号由 `js/theme-icon.js` 用 `requestAnimationFrame` 推进；主题变更来自按钮、系统偏好或风格脚本都能接住（监听 `data-theme`）
+
+切换本身用 View Transitions：新界面从按钮中心长成一个盖住视口的圆（`clip-path: circle()`，半径按视口对角线算）。两个细节是为了让画面「稳」：
+
+- 快照层显式写成 `width/height: 100%` + `object-fit: fill`，并关掉浏览器给 `::view-transition-group(root)` 的默认动画。默认实现会拿快照尺寸和容器尺寸做一次等比缩放，差一两个像素就会让整页看起来「缩一下再弹回去」
+- `html { scrollbar-gutter: stable }` 常驻滚动条位置，切换主题、弹层出现时内容宽度不会突然变一下
+- 按钮周围不再有放射状光芒（原来的 `themeRays` 一圈竖线已删掉），切换完只剩按钮自己弹一下
 
 ### 弹性动效
 
@@ -352,7 +357,6 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 | 顶栏主题按钮 | 悬停转 12° 放大 1.08，按下缩回 |
 | 顶栏风格方块 | 悬停抬 2px 转 6° |
 | 滚动入场 | 从 22px 收到 20px 并带轻微过冲 |
-| 跑道 AUTO / MANUAL | 悬停抬 2px，按下缩到 0.94 |
 
 卡片悬停用的是独立 `translate` 属性而不是 `transform`：滚动入场的 `.is-revealed` 会写 `transform: none`，优先级比 `:hover` 高，用 `transform` 会被压掉。
 
@@ -464,7 +468,7 @@ Pages 会自动重新构建。如果页面还是旧版本，先强制刷新（`C
 - [ ] 头部太阳/月亮按钮能切换深浅色，刷新后选择仍然保留
 - [ ] 顶栏四格方块能打开风格面板，三张竖卡上下滑动、点「切换」整屏擦除后换肤
 - [ ] 切到极简风后没有光斑 / 贴纸 / 发光；切到黑客风整屏变深绿终端，刷新后保持
-- [ ] 页脚小恐龙会跑，`AUTO` 能自己跳过仙人掌，`MANUAL` 下点跑道 / 空格能跳，撞到会重开
+- [ ] 页脚小恐龙会跑，能自己跳过仙人掌，点跑道 / 空格也能跳，撞到会重开
 - [ ] 首屏标语会打字轮播，输入 ↑↑↓↓←→←→BA 能进入黑客模式并自动退出
 - [ ] 系统开启「减少动态效果」时，所有内容立即可见、无动画
 - [ ] 不依赖任何后端

@@ -103,26 +103,7 @@
   transform: scale(0.94);
 }
 
-/* ---------- 4. 跑道右侧的模式按钮 ---------- */
-.dino-run__mode {
-  transition:
-    transform 0.4s var(--ease-spring),
-    background-color 0.25s ease,
-    border-color 0.25s ease,
-    box-shadow 0.3s ease,
-    color 0.25s ease;
-}
-
-.dino-run__mode:hover {
-  transform: translateY(-2px);
-}
-
-.dino-run__mode:active {
-  transform: scale(0.94);
-  transition-duration: 0.1s;
-}
-
-/* ---------- 5. 滚动入场：落下来的时候带一点过冲 ---------- */
+/* ---------- 4. 滚动入场：落下来的时候带一点过冲 ---------- */
 html.reveal-ready [data-reveal] {
   transform: translateY(20px) scale(0.985);
   transition:
@@ -139,7 +120,7 @@ html.reveal-ready .project-card[data-reveal] {
   transform: none;
 }
 
-/* ---------- 6. 面板与对话框的出场 ---------- */
+/* ---------- 5. 面板与对话框的出场 ---------- */
 .style-card {
   transition:
     transform 0.5s var(--ease-spring),
@@ -151,7 +132,7 @@ html.reveal-ready .project-card[data-reveal] {
   transform: scale(0.985);
 }
 
-/* ---------- 7. 尊重「减少动效」 ---------- */
+/* ---------- 6. 尊重「减少动效」 ---------- */
 @media (prefers-reduced-motion: reduce) {
   .button,
   .mini-button,
@@ -160,7 +141,6 @@ html.reveal-ready .project-card[data-reveal] {
   .theme-toggle,
   .theme-toggle__flip,
   .style-toggle,
-  .dino-run__mode,
   .style-card,
   html.reveal-ready [data-reveal] {
     transition-duration: 0.01ms !important;
