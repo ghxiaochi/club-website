@@ -21,6 +21,8 @@
         var theme = saved === "light" || saved === "dark"
           ? saved
           : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        /* 黑客风没有白天：预置阶段就锁成深色，避免首帧闪浅色 */
+        if (localStorage.getItem("hnyz:style") === "hacker") theme = "dark";
         document.documentElement.dataset.theme = theme;
       } catch (error) { /* 隐私模式下忽略 */ }
     })();
@@ -59,21 +61,21 @@
   <link rel="preload" href="fonts/anim-title.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="fonts/anim-pixel.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/style.css?v=20261086">
+  <link rel="stylesheet" href="css/style.css?v=20261087">
   <link rel="stylesheet" href="css/pet.css?v=20261025b">
   <link rel="stylesheet" href="css/avatar-pet.css?v=20261057">
-  <link rel="stylesheet" href="css/skins.css?v=20261086">
-  <link rel="stylesheet" href="css/type.css?v=20261086">
-  <link rel="stylesheet" href="css/motion.css?v=20261086">
-  <link rel="stylesheet" href="css/dino.css?v=20261086">
-  <link rel="stylesheet" href="css/personal.css?v=20261086">
+  <link rel="stylesheet" href="css/skins.css?v=20261087">
+  <link rel="stylesheet" href="css/type.css?v=20261087">
+  <link rel="stylesheet" href="css/motion.css?v=20261087">
+  <link rel="stylesheet" href="css/dino.css?v=20261087">
+  <link rel="stylesheet" href="css/personal.css?v=20261087">
   <link rel="stylesheet" href="css/member.css?v=20261035">
   <link rel="stylesheet" href="css/characters.css?v=20261052">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <script src="js/sfx.js?v=20261072" defer></script>
-  <script src="js/theme.js?v=20261060" defer></script>
-  <script src="js/theme-icon.js?v=20261086" defer></script>
+  <script src="js/theme.js?v=20261087" defer></script>
+  <script src="js/theme-icon.js?v=20261087" defer></script>
   <script src="js/members.js?v=20261034" defer></script>
   <script src="js/main.js?v=20261058" defer></script>
   <script src="js/pet.js?v=20261025c" defer></script>
@@ -82,10 +84,10 @@
   <script src="js/characters.js?v=20261072" defer></script>
   <script src="js/personal.js?v=20261084" defer></script>
   <script src="js/click-fx.js?v=20261058" defer></script>
-  <script src="js/skins.js?v=20261086" defer></script>
-  <script src="js/matrix.js?v=20261086" defer></script>
-  <script src="js/copy.js?v=20261086" defer></script>
-  <script src="js/dino.js?v=20261086" defer></script>
+  <script src="js/skins.js?v=20261087" defer></script>
+  <script src="js/matrix.js?v=20261087" defer></script>
+  <script src="js/copy.js?v=20261087" defer></script>
+  <script src="js/dino.js?v=20261087" defer></script>
 </head>
 <body id="top">
   <div class="bg-orbs" aria-hidden="true">
@@ -161,7 +163,7 @@
             <span class="eyebrow-dot" aria-hidden="true"></span>
             <span data-copy="archive-eyebrow">PROJECT_ARCHIVE // ALL_MEMBERS</span>
           </p>
-          <h1 id="archive-title" data-copy="archive-title">全部项目，<br><span class="accent-text">按人折叠。</span></h1>
+          <h1 id="archive-title" data-copy="archive-title">全部项目<br><span class="accent-text">按人折叠</span></h1>
           <p class="section-intro" data-copy="archive-intro">
             这里不会限制卡片数量。每个成员是一组折叠面板，点开才加载该组的仓库卡片；
             即使以后写进很多人的很多项目，页面也不会一次铺满。

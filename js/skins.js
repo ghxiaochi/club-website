@@ -394,15 +394,8 @@
     root.dataset.style = next;
     setBareMode(next === "bare");
 
-    /* 黑客风默认是暗色终端；从浅色切过去时顺手把主题也带到深色 */
-    if (next === "hacker" && root.dataset.theme !== "dark" && window.HNYZ_THEME) {
-      window.HNYZ_THEME.apply("dark");
-      try {
-        window.localStorage.setItem("hnyz:theme", "dark");
-      } catch (error) {
-        /* 忽略 */
-      }
-    }
+    /* 黑客风固定深夜：主题由 theme.js 监听 hnyz:stylechange 统一处理，
+       这里不写 localStorage，用户原来选的深浅色在离开黑客风后还能回来 */
 
     try {
       window.localStorage.setItem(KEY, next);

@@ -385,9 +385,11 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 文案在 `js/copy.js` 里集中维护，HTML 只写 `data-copy="键名"`。首页六个区块、项目页、图集页、成员页的标题 / 简介 / 按钮 / 页尾都挂了键名，不再只改首屏：
 
-- 蓝白科技：`把想法，写成代码。` / `我们不生产课件，只维护一套可以反复失败的实验环境。`
-- 极简：`少，即是多。` / `做硬件。删到最少。能跑就行。` / 区块标题只留两三个字
-- 黑客：`把混沌，编译成秩序。` / `在 0 与 1 的缝隙里重新定义「可被运行」` / `cat ./manifest`，联系卡片保留 `ssh club@hnyz` + `# 先握手，再动手`
+- 蓝白科技：`把想法 写成代码` / `我们不生产课件，只维护一套可以反复失败的实验环境。`
+- 极简：`少 即是多` / `做硬件。删到最少。能跑就行。` / 区块标题只留两三个字
+- 黑客：`把混沌 编译成秩序` / `在 0 与 1 的缝隙里重新定义「可被运行」` / `cat ./manifest`，联系卡片保留 `ssh club@hnyz` + `# 先握手 再动手`
+
+**所有风格的标题一律不带标点**：句号、逗号都不出现在 `<h1>` / `<h2>` 里，停顿交给换行（`<br>`）或空格；正文、简介、页尾不受这条约束。
 
 某个风格没写文案时，`copy.js` 会回退 HTML 原文（首次运行时存进 `original` Map），所以新增页面只写 `minimal` / `hacker` 两套也能正常往返默认风格。
 
@@ -415,7 +417,13 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 终端质感都在 `skins.css` 末尾的「质感层」：2px 直角、顶栏毛玻璃、导航下划线从左长出、卡片顶部 1px 内高光、分隔线改虚线、`::selection` 荧光绿。眉标保留小写（`$ whoami --verbose` 比 `$ WHOAMI --VERBOSE` 更像真的终端）。
 
-日间模式另有一套覆盖（`skins.css` 最后一段）：`section--soft` 和页脚翻回浅绿纸面，卡片阴影改成浅色，顶栏和页脚的 `HNYZ` 换成深绿，代码雨压到 `opacity: 0.82`。深色皮肤里「近黑底 + 荧光字」的写法不能直接带到白底上，否则正文会和背景一起消失。
+**黑客风没有白天**：主题被锁死在深色，日间那套浅色覆盖只作为兜底留在 `skins.css` 里。锁定分三处，任何一条路径进来都逃不掉——
+
+- 四个页面 `<head>` 的预置内联脚本：`localStorage` 里风格是 `hacker` 就直接把 `data-theme` 写成 `dark`，首帧不会闪浅色
+- `theme.js` 初始化兜底：内联脚本被拦时再压一次
+- `theme.js` 监听 `hnyz:stylechange`：切进黑客风立刻 `apply("dark")`；切出去时读回 `localStorage` 里用户自己选的那档深浅色（黑客风不覆盖这个偏好）
+
+在黑客风里点主题按钮不会切换，而是弹一个**拒绝终端**（`theme.js` 的 `openDeniedTerminal` + `skins.css` 的 `.hacker-term*`）：外观对齐真实终端——标题栏红黄绿三个圆点、`guest@hnyz-darknet: ~/theme` 路径、近黑底等宽字。第一行 `$ themectl set-mode light --force` 逐字敲出，然后十四行全英文报错按不均匀的间隔一行一行滚出（`permission denied`、`kernel: ioctl(THEME_SET_LIGHT) failed`、`fatal: the dark does not negotiate`……），最后逐字打出「黑客的世界，隐藏于暗网之下。」，停两秒自动关窗；Esc 或点击任意处也能提前关。期间 `overflow` 锁滚动，关窗时恢复，主题始终没变。
 
 ### 弹性动效
 

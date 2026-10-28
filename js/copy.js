@@ -20,9 +20,9 @@
       hacker: "whoami --verbose"
     },
     "hero-title": {
-      default: '把想法，<br><span class="accent-text">写成代码。</span>',
-      minimal: '少，<br><span class="accent-text">即是多。</span>',
-      hacker: '把混沌，<br><span class="accent-text">编译成秩序。</span>'
+      default: '把想法<br><span class="accent-text">写成代码</span>',
+      minimal: '少<br><span class="accent-text">即是多</span>',
+      hacker: '把混沌<br><span class="accent-text">编译成秩序</span>'
     },
     "hero-lead": {
       default:
@@ -43,15 +43,15 @@
       hacker: "cat ./manifest"
     },
     "quick-title": {
-      default: "先加群，<br>再一起做点东西。",
+      default: "先加群<br>再一起做点东西",
       minimal: "加群。",
-      hacker: "ssh club@hnyz<br># 先握手，再动手"
+      hacker: "ssh club@hnyz<br># 先握手 再动手"
     },
 
     /* ---------- 首页 · 各区块 ---------- */
     "about-title": {
-      minimal: "做东西。",
-      hacker: "关于我们，<br>一段可执行的自述。"
+      minimal: "做东西",
+      hacker: "关于我们<br>一段可执行的自述"
     },
     "about-intro": {
       minimal: "仅此。",
@@ -78,8 +78,8 @@
         "// 加群请备注「班级 + 姓名」。零基础与非技术方向同样开放，准入不设白名单。"
     },
     "doing-title": {
-      minimal: "从零，<br>到一。",
-      hacker: "从第一行，<br>到可运行。"
+      minimal: "从零<br>到一",
+      hacker: "从第一行<br>到可运行"
     },
     "doing-intro": {
       minimal: "一步一步。",
@@ -88,7 +88,7 @@
     },
     "projects-title": {
       minimal: "作品。",
-      hacker: "所有产出，<br>皆有 commit。"
+      hacker: "所有产出<br>皆有 commit"
     },
     "projects-intro": {
       minimal: "在 GitHub 上。",
@@ -96,8 +96,8 @@
         "// 仓库是唯一可信的叙事。元数据由 API 实时拉取，本地缓存只负责降级；首页暴露前 6 个入口，其余按作者归档，等待被索引。"
     },
     "schedule-title": {
-      minimal: "每周两次。",
-      hacker: "每周 2 × 1h，<br>固定调度。"
+      minimal: "每周两次",
+      hacker: "每周 2 × 1h<br>固定调度"
     },
     "schedule-intro": {
       minimal: "一次分享，一次写。",
@@ -105,8 +105,8 @@
         "// 两个固定窗口：一次对齐上下文，一次消解阻塞。时间盒是硬约束，产出可以软着陆；具体时区与物理坐标以群公告为准。"
     },
     "wall-title": {
-      minimal: "入口。",
-      hacker: "外部依赖，<br>已列入白名单。"
+      minimal: "入口",
+      hacker: "外部依赖<br>已列入白名单"
     },
     "wall-intro": {
       minimal: "从这进。",
@@ -114,12 +114,12 @@
         "// 不重复造文档。语法层交给菜鸟教程，硬件层指向微雪 Wiki；其余入口按需增量接入，不做无意义的镜像。"
     },
     "faq-title": {
-      minimal: "问题。",
-      hacker: "接入之前，<br>先读文档。"
+      minimal: "问题",
+      hacker: "接入之前<br>先读文档"
     },
     "join-title": {
-      minimal: "来。",
-      hacker: "下一次调度，<br>留了你的位置。"
+      minimal: "来",
+      hacker: "下一次调度<br>留了你的位置"
     },
     "join-lead": {
       minimal: "零基础也行。",
@@ -138,8 +138,8 @@
       hacker: "find ./projects -maxdepth 2"
     },
     "archive-title": {
-      minimal: "全部。<br>按人分。",
-      hacker: "所有仓库，<br>皆可追溯。"
+      minimal: "全部<br>按人分",
+      hacker: "所有仓库<br>皆可追溯"
     },
     "archive-intro": {
       minimal: "一人一组。点开再看。",
@@ -170,8 +170,8 @@
       hacker: "ls -la ~/hnyz/gallery"
     },
     "gallery-title": {
-      minimal: "图。",
-      hacker: "未索引的<br>视觉残留。"
+      minimal: "图",
+      hacker: "未索引的<br>视觉残留"
     },
     "gallery-intro": {
       minimal: "点开看。",
