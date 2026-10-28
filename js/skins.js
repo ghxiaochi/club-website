@@ -1,10 +1,11 @@
 /* =========================================================
    HNYZ · 风格系统
    ---------------------------------------------------------
-   三个皮肤：
+   四个皮肤：
      default  现在的蓝白科技风
      minimal  去装饰的极简风
      hacker   深色终端黑客风（带涂鸦背景 / 扫描线 / 进度条）
+     bare     棍木：整页空白，只留右上角的风格按钮和一句灰字
    顶栏的方块打开一个竖向卡片面板，切换时用整屏向上擦除。
    选择写进 localStorage，四个页面共用。
    ========================================================= */
@@ -13,21 +14,25 @@
   "use strict";
 
   const KEY = "hnyz:style";
-  const STYLES = ["default", "minimal", "hacker"];
+  const STYLES = ["default", "minimal", "hacker", "bare"];
   const LABELS = {
     default: "DEFAULT",
     minimal: "MINIMAL",
-    hacker: "HACKER"
+    hacker: "HACKER",
+    bare: "BARE"
   };
   const NAMES = {
     default: "蓝白科技",
     minimal: "极简",
-    hacker: "黑客终端"
+    hacker: "黑客终端",
+    bare: "棍木"
   };
 
   const root = document.documentElement;
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
   const trigger = document.querySelector("[data-style-toggle]");
+  /* 记住按钮原本在顶栏的位置，从棍木切回来时要放回去 */
+  const triggerHome = trigger ? { parent: trigger.parentNode, next: trigger.nextSibling } : null;
 
   let current = "default";
   let busy = false;
@@ -112,6 +117,12 @@
   progress.className = "skin-progress";
   progress.setAttribute("aria-hidden", "true");
   document.body.appendChild(progress);
+
+  /* 棍木：整页清空后，中间只剩这一行灰字 */
+  const bareNote = document.createElement("p");
+  bareNote.className = "bare-note";
+  bareNote.textContent = "这里什么也没有";
+  document.body.appendChild(bareNote);
 
   /* 鼠标视差：涂鸦层跟着指针偏一点 */
   let pointerX = 0;
@@ -207,12 +218,25 @@
           </div>
           <button class="style-card__apply" type="button" data-style-pick="hacker">应用此风格</button>
         </article>
+
+        <article class="style-card" data-style-option="bare">
+          <div class="style-card__top"><span>04 / BARE</span><span class="style-card__current">当前风格</span></div>
+          <div class="style-card__glyph style-card__glyph--bare" aria-hidden="true"><span></span></div>
+          <p class="style-card__kicker">NOTHING_HERE</p>
+          <h3 class="style-card__title">棍木</h3>
+          <p class="style-card__desc">页面清空，没有颜色，没有内容，也没有任何跳转。只剩右上角这个按钮，和中间一句话。</p>
+          <div class="style-card__swatches" aria-hidden="true">
+            <i style="--c:#ffffff"></i><i style="--c:#f2f2ee"></i><i style="--c:#b9b9b4"></i>
+          </div>
+          <button class="style-card__apply" type="button" data-style-pick="bare">应用此风格</button>
+        </article>
       </div>
 
       <div class="style-deck__dots" data-style-dots role="group" aria-label="选择风格">
         <button class="style-deck__dot" type="button" data-style-dot="0" aria-label="第 1 个：蓝白科技" aria-current="true"></button>
         <button class="style-deck__dot" type="button" data-style-dot="1" aria-label="第 2 个：极简"></button>
         <button class="style-deck__dot" type="button" data-style-dot="2" aria-label="第 3 个：黑客终端"></button>
+        <button class="style-deck__dot" type="button" data-style-dot="3" aria-label="第 4 个：棍木"></button>
       </div>
 
       <p class="style-deck__hint">上下滑动 / ↑ ↓ 切换 · Esc 关闭</p>
@@ -404,9 +428,29 @@
   document.body.appendChild(wipe);
   const wipeLabel = wipe.querySelector("[data-style-wipe-label]");
 
+  /* -------------------------------------------------------
+     三之二、棍木：把风格按钮搬到右上角
+     -------------------------------------------------------
+     空白页要把 <header> 整个藏掉，按钮又在 header 里，
+     父级 display:none 管不到子元素，所以直接把它挪到 body 下，
+     切走时按当初记下的位置插回顶栏。 */
+  let bareMounted = false;
+
+  function setBareMode(on) {
+    if (!trigger || bareMounted === on) return;
+    bareMounted = on;
+
+    if (on) {
+      document.body.appendChild(trigger);
+    } else if (triggerHome && triggerHome.parent) {
+      triggerHome.parent.insertBefore(trigger, triggerHome.next);
+    }
+  }
+
   function commit(next) {
     current = next;
     root.dataset.style = next;
+    setBareMode(next === "bare");
 
     /* 黑客风默认是暗色终端；从浅色切过去时顺手把主题也带到深色 */
     if (next === "hacker" && root.dataset.theme !== "dark" && window.HNYZ_THEME) {
@@ -483,6 +527,7 @@
   }
 
   /* 初始同步 */
+  setBareMode(current === "bare");
   syncCurrentUi();
   flushProgress();
   if (trigger) {

@@ -12,6 +12,8 @@
   --dino-ground: rgba(125, 211, 252, 0.42);
   --dino-gold: #fbbf24;
   --dino-gold-lit: #ffe9a8;
+  /* 夜间右上角那弯月亮的颜色 */
+  --dino-moon: #eaf3ff;
   position: relative;
   /* 高于右下角校徽（z=35），跑道不会被徽章压住 */
   z-index: 36;
@@ -248,6 +250,7 @@ html[data-theme="light"]:not([data-style="hacker"]):not([data-style="minimal"]) 
   --dino-ground: rgba(24, 82, 150, 0.34);
   --dino-gold: #c2820b;
   --dino-gold-lit: #f0b429;
+  --dino-moon: #7d9bc4;
   border-top-color: rgba(24, 82, 150, 0.14);
   background-color: #eef4fd;
   background-image:
@@ -268,6 +271,7 @@ html[data-theme="light"]:not([data-style="hacker"]):not([data-style="minimal"]) 
 html[data-style="minimal"] .dino-run {
   --dino-gold: #171715;
   --dino-gold-lit: #6f6f66;
+  --dino-moon: #f4f4ef;
   padding: 14px 0 18px;
   background-color: var(--bg, #fff);
   background-image: none;
@@ -289,6 +293,7 @@ html[data-style="hacker"] .dino-run {
   /* 金币保持琥珀色：跟满屏的绿区分开，不然和仙人掌糊在一起 */
   --dino-gold: #ffd166;
   --dino-gold-lit: #fff3c4;
+  --dino-moon: #c9ffdf;
   --dino-ink: #d9ffe5;
   --dino-accent: #39ff88;
   --dino-dim: #3f7a56;

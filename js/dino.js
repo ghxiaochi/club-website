@@ -91,7 +91,8 @@
     dim: "#3a5a80",
     ground: "rgba(125, 211, 252, 0.42)",
     gold: "#fbbf24",
-    goldLit: "#ffe9a8"
+    goldLit: "#ffe9a8",
+    moon: "#eaf3ff"
   };
 
   let sprites = {
@@ -99,6 +100,8 @@
     cacti: [],
     coin: []
   };
+  /* 月亮预渲染成一张小图：两圆相减必须用合成模式，逐帧做太浪费 */
+  let moonSprite = null;
 
   try {
     hiScore = Number(window.localStorage.getItem(HI_KEY)) || 0;
@@ -126,7 +129,8 @@
       dim: read("--dino-dim", "#3a5a80"),
       ground: read("--dino-ground", "rgba(125, 211, 252, 0.42)"),
       gold: read("--dino-gold", "#fbbf24"),
-      goldLit: read("--dino-gold-lit", "#ffe9a8")
+      goldLit: read("--dino-gold-lit", "#ffe9a8"),
+      moon: read("--dino-moon", "#eaf3ff")
     };
   }
 
@@ -320,6 +324,38 @@
     sprites.coin = [8, 6, 3, 6].map((width) =>
       makeSprite(8, 8, S, (g, s) => paintCoin(g, s, width))
     );
+    moonSprite = buildMoonSprite();
+  }
+
+  /* 画一个正确的弯月：先填整圆，再用 destination-out 啃掉偏心的一个圆。
+     直接拿两个 arc 走 evenodd 会在两圆不互相包含时多填一块，形状会歪。 */
+  function buildMoonSprite() {
+    const r = H > 150 ? 14 : 11;
+    const box = Math.ceil(r * 2 + 6);
+    const scale = 2;
+
+    const node = document.createElement("canvas");
+    node.width = box * scale;
+    node.height = box * scale;
+
+    const g = node.getContext("2d");
+    g.scale(scale, scale);
+    g.fillStyle = palette.moon;
+
+    const cx = box / 2;
+    const cy = box / 2;
+
+    g.beginPath();
+    g.arc(cx, cy, r, 0, Math.PI * 2);
+    g.fill();
+
+    g.globalCompositeOperation = "destination-out";
+    g.beginPath();
+    g.arc(cx + r * 0.55, cy - r * 0.36, r, 0, Math.PI * 2);
+    g.fill();
+    g.globalCompositeOperation = "source-over";
+
+    return { node, box };
   }
 
   /* -------------------------------------------------------
@@ -365,13 +401,21 @@
   }
 
   function buildStars() {
-    const n = Math.max(6, Math.round(W / 24));
-    stars = Array.from({ length: n }, () => ({
-      x: Math.random() * W,
-      y: 6 + Math.random() * Math.max(10, H - 78),
-      s: Math.random() < 0.28 ? 2 : 1,
-      tw: Math.random() * Math.PI * 2
-    }));
+    const n = Math.max(13, Math.round(W / 12));
+    stars = Array.from({ length: n }, () => {
+      const big = Math.random() < 0.32;
+      return {
+        x: Math.random() * W,
+        /* 星星只铺在地面线以上，别跑到土里 */
+        y: 5 + Math.random() * Math.max(8, H - 88),
+        s: big ? 2 : 1,
+        big,
+        /* 每颗自己的闪烁节奏，亮的那几颗慢一点，像在「呼吸」 */
+        tw: Math.random() * Math.PI * 2,
+        twSpeed: 1.6 + Math.random() * 2.4,
+        depth: 0.02 + Math.random() * 0.05
+      };
+    });
   }
 
   function resetRun() {
@@ -478,7 +522,6 @@
     vy = JUMP_V;
     grounded = false;
     burstDust(3);
-    playSfx("hover", 0.08, 1.25);
   }
 
   function burstDust(n) {
@@ -551,7 +594,6 @@
     deadTimer = 1.45;
     shake = 0.34;
     burstDebris(18);
-    playSfx("locked", 0.22, 0.9);
     if (toastEl) toastEl.hidden = false;
     if (hintEl) hintEl.style.opacity = "0";
   }
@@ -559,15 +601,6 @@
   /* -------------------------------------------------------
      三之二、金币 / 档位 / 连击
      ------------------------------------------------------- */
-  function playSfx(name, volume, rate) {
-    if (!window.HNYZ_SFX || typeof window.HNYZ_SFX.play !== "function") return;
-    try {
-      window.HNYZ_SFX.play(name, { volume, rate });
-    } catch (error) {
-      /* 音效没初始化就算了 */
-    }
-  }
-
   function pop(text, tone) {
     if (!popEl) return;
     popEl.textContent = text;
@@ -616,8 +649,7 @@
       const label = milestone ? `COMBO x${combo}` : "+20";
       pop(label, milestone ? "combo" : "gold");
 
-      /* 每枚都响会太吵：只在连击节点给一声，音高随连击抬高 */
-      if (milestone) playSfx("view", 0.14, 1.3 + Math.min(0.6, combo * 0.03));
+      /* 只飘字，不出声：整条跑道是静音的 */
       break;
     }
 
@@ -745,24 +777,101 @@
     ctx.globalAlpha = 1;
   }
 
+  function isNight() {
+    return root.dataset.theme === "dark" || root.dataset.style === "hacker";
+  }
+
+  /* 把 #rrggbb 变成带透明度的 rgba，给月晕和星芒用 */
+  function withAlpha(color, alpha) {
+    const value = String(color).trim();
+    if (value[0] !== "#") return value;
+    const hex = value.length === 4
+      ? "#" + value[1] + value[1] + value[2] + value[2] + value[3] + value[3]
+      : value;
+    if (hex.length !== 7) return value;
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
   function drawStars() {
     if (!stars.length) return;
 
-    const night = root.dataset.theme === "dark" || root.dataset.style === "hacker";
-    const base = night ? 0.5 : 0.16;
+    const night = isNight();
+    /* 夜间星星是主角，日间只留一层几乎看不见的底噪 */
+    const base = night ? 1 : 0.2;
 
     ctx.fillStyle = palette.ink;
     stars.forEach((star) => {
-      const drift = (star.x - worldX * 0.04) % (W + 40);
+      const drift = (star.x - worldX * star.depth) % (W + 40);
       const x = drift < 0 ? drift + W + 40 : drift;
-      const twinkle = 0.6 + 0.4 * Math.sin(clock * 1.7 + star.tw);
-      ctx.globalAlpha = base * twinkle;
-      ctx.fillRect(Math.round(x), Math.round(star.y), star.s, star.s);
+
+      /* 夜间：把 sin 的峰值削尖，亮一下再暗下去，闪得更明显 */
+      const wave = 0.5 + 0.5 * Math.sin(clock * star.twSpeed + star.tw);
+      const pulse = night ? Math.pow(wave, 1.7) : wave;
+      const twinkle = night ? 0.26 + 0.74 * pulse : 0.72 + 0.28 * pulse;
+      const alpha = base * twinkle;
+
+      const px = Math.round(x);
+      const py = Math.round(star.y);
+
+      /* 小星闪到最亮的那一下会「跳」成 2px，比单纯调透明度更像在眨眼 */
+      const size = star.big || (night && pulse > 0.84) ? 2 : 1;
+      const half = (size - 1) / 2;
+
+      ctx.globalAlpha = alpha;
+
+      /* 亮星带一点点自身的光，才像在发亮而不是贴了白点 */
+      if (night && star.big) {
+        ctx.shadowColor = palette.ink;
+        ctx.shadowBlur = 7 * alpha;
+      }
+
+      ctx.fillRect(px, py, size, size);
+
+      if (night && star.big) {
+        ctx.shadowBlur = 0;
+        /* 十字星芒，跟着闪烁一起呼吸 */
+        ctx.globalAlpha = alpha * 0.55;
+        ctx.fillRect(px - 2, py + half, size + 4, 1);
+        ctx.fillRect(px + half, py - 2, 1, size + 4);
+      }
     });
     ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
+  }
+
+  /* 右上角一弯月亮 */
+  function drawMoon() {
+    if (!isNight() || !moonSprite) return;
+
+    const r = H > 150 ? 14 : 11;
+    const cx = W - r - 22;
+    const cy = r + 18;
+
+    ctx.save();
+
+    /* 一圈很淡的月晕，让月亮从夜色里浮出来 */
+    const halo = ctx.createRadialGradient(cx, cy, r * 0.35, cx, cy, r * 2.9);
+    halo.addColorStop(0, withAlpha(palette.moon, 0.2));
+    halo.addColorStop(0.5, withAlpha(palette.moon, 0.06));
+    halo.addColorStop(1, withAlpha(palette.moon, 0));
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r * 2.9, 0, Math.PI * 2);
+    ctx.fill();
+
+    const half = moonSprite.box / 2;
+    ctx.drawImage(moonSprite.node, cx - half, cy - half, moonSprite.box, moonSprite.box);
+
+    ctx.restore();
   }
 
   function drawClouds() {
+    /* 夜里不画云：留出干净的星空给月亮 */
+    if (isNight()) return;
+
     const s = S;
     ctx.fillStyle = palette.dim;
     ctx.globalAlpha = 0.45;
@@ -866,6 +975,7 @@
     }
 
     drawStars();
+    drawMoon();
     drawClouds();
     drawGround();
     drawObstacles();
