@@ -556,6 +556,24 @@
   }
 
   /* ---------- 火光 / 烟 / 焦痕：陨石尾焰与爆炸全靠这三张图 ---------- */
+  /* 渐变贴图烘完撒一层极淡的噪点：暗底上纯径向渐变会拉出一圈圈等值线 */
+  function ditherSprite(node, amp) {
+    const g = node.getContext("2d");
+    const w = node.width;
+    const h = node.height;
+    const img = g.getImageData(0, 0, w, h);
+    const px = img.data;
+    let seed = 20260117;
+    for (let i = 3; i < px.length; i += 4) {
+      const a = px[i];
+      if (a < 4) continue;
+      seed = (seed * 16807) % 2147483647;
+      const n = ((seed / 2147483647) - 0.5) * amp;
+      px[i] = Math.max(0, Math.min(255, a + n));
+    }
+    g.putImageData(img, 0, 0);
+  }
+
   function buildFxSprites() {
     const make = (size, stops) => {
       const node = document.createElement("canvas");
@@ -567,6 +585,7 @@
       stops.forEach(([at, color]) => ring.addColorStop(at, color));
       g.fillStyle = ring;
       g.fillRect(0, 0, size, size);
+      ditherSprite(node, 10);
       return node;
     };
 
@@ -1247,9 +1266,9 @@
   const BLAST_T = 1.3;
   const WIND_T = 1.9;
 
-  /* 陨石直径按跑道面积算，约占三分之一；再用高度封顶，窄屏也撑得满 */
+  /* 陨石直径按跑道面积算，约四分之一；再用高度封顶，窄屏也撑得满 */
   function meteorRadius() {
-    const d = Math.max(H * 0.74, Math.min(W * 0.34, H * 1.5));
+    const d = Math.max(H * 0.66, Math.min(W * 0.29, H * 1.28));
     return d / 2;
   }
 
@@ -1635,17 +1654,26 @@
       );
     }
 
-    /* 冲击波：两圈贴着地面荡开，别飞上天 */
+    /* 冲击波：两圈贴着地面荡开，别飞上天；环本身是带状尘，不是一圈铁丝 */
     for (let i = 0; i < 2; i += 1) {
       const p = Math.min(1, Math.max(0, (c.t - i * 0.1) / (0.66 + i * 0.18)));
       if (p <= 0) continue;
       const rr = c.r * (0.55 + p * (1.4 + i * 0.5));
-      ctx.globalAlpha = (1 - p) * (0.5 - i * 0.2);
-      ctx.strokeStyle = i ? "#ff9a4d" : "#ffd2a0";
-      ctx.lineWidth = Math.max(1, (1 - p) * 3.5);
+      const band = Math.max(2, c.r * 0.1 * (0.4 + (1 - p)));
       ctx.save();
       ctx.translate(cx, cy);
       ctx.scale(1, 0.2);
+      for (let k = 0; k < 3; k += 1) {
+        ctx.globalAlpha = (1 - p) * (0.2 - i * 0.06) * (1 - k * 0.26);
+        ctx.strokeStyle = "#ff9a52";
+        ctx.lineWidth = band * (1 + k * 0.9);
+        ctx.beginPath();
+        ctx.arc(0, 0, rr, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = (1 - p) * (0.34 - i * 0.14);
+      ctx.strokeStyle = "#ffe0b4";
+      ctx.lineWidth = Math.max(1, (1 - p) * 2.2);
       ctx.beginPath();
       ctx.arc(0, 0, rr, 0, Math.PI * 2);
       ctx.stroke();
@@ -2232,19 +2260,60 @@
     ctx.globalAlpha = 0.9;
     ctx.drawImage(fireSprite, mx - r * 1.24, my - r * 1.24, r * 2.48, r * 2.48);
 
-    /* 石核 */
+    /* 石核：轮廓自己是坑洼的，不再描边——一圈亮线只会像塑料壳 */
+    const rock = r * 0.93;
     ctx.globalAlpha = 1;
-    ctx.drawImage(meteorSprite, mx - r * 0.97, my - r * 0.97, r * 1.94, r * 1.94);
+    ctx.drawImage(meteorSprite, mx - rock, my - rock, rock * 2, rock * 2);
+  }
 
-    /* 迎风那一侧再亮一道 */
-    ctx.strokeStyle = "#ffe9c4";
-    ctx.lineCap = "round";
-    ctx.lineWidth = Math.max(1, r * 0.018);
-    ctx.globalAlpha = 0.26 + Math.sin(clock * 16) * 0.08;
-    ctx.beginPath();
-    ctx.arc(mx, my, r * 0.965, Math.PI * 0.55, Math.PI * 1.0);
-    ctx.stroke();
-    ctx.globalAlpha = 1;
+  /* 陨石轮廓：三组错相的正弦起伏叠一层细碎噪点，再随机啃掉几口。
+     刻意不成周期，免得画出来像花瓣或齿轮 */
+  const METEOR_SHAPE = (() => {
+    const n = 26;
+    const out = [];
+    let seed = 9173;
+    const rnd = () => {
+      seed = (seed * 16807) % 2147483647;
+      return seed / 2147483647;
+    };
+    const phase = [rnd() * 6.283, rnd() * 6.283, rnd() * 6.283];
+    /* 三处咬口，位置随机后固定，避免落在正上方挡住视线 */
+    const bites = [0, 0, 0].map(() => 2 + Math.floor(rnd() * (n - 4)));
+    for (let i = 0; i < n; i += 1) {
+      const angle = (i / n) * Math.PI * 2;
+      let k =
+        1 +
+        0.08 * Math.sin(angle * 2 + phase[0]) +
+        0.055 * Math.sin(angle * 3 + phase[1]) +
+        0.03 * Math.sin(angle * 5 + phase[2]);
+      k += (rnd() - 0.5) * 0.05;
+      bites.forEach((b) => {
+        const d = Math.min(Math.abs(i - b), n - Math.abs(i - b));
+        if (d === 0) k -= 0.17 + rnd() * 0.05;
+        else if (d === 1) k -= 0.05;
+      });
+      out.push({ a: angle, k: Math.max(0.74, Math.min(1.06, k)) });
+    }
+    return out;
+  })();
+
+  function meteorPath(g, cx, cy, r) {
+    const n = METEOR_SHAPE.length;
+    const pt = (i) => {
+      const p = METEOR_SHAPE[((i % n) + n) % n];
+      return { x: cx + Math.cos(p.a) * r * p.k, y: cy + Math.sin(p.a) * r * p.k };
+    };
+    const mid = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+
+    g.beginPath();
+    const start = mid(pt(-1), pt(0));
+    g.moveTo(start.x, start.y);
+    for (let i = 0; i < n; i += 1) {
+      const cur = pt(i);
+      const next = mid(cur, pt(i + 1));
+      g.quadraticCurveTo(cur.x, cur.y, next.x, next.y);
+    }
+    g.closePath();
   }
 
   /* 陨石本体烘一次：烧黑的岩壳 + 熔缝，之后只做缩放 */
@@ -2255,16 +2324,28 @@
     node.height = size;
     const g = node.getContext("2d");
     const c = size / 2;
-    const r = c - 2;
+    /* 轮廓最鼓处约 1.14r，留够边，否则会被贴图边界削平 */
+    const r = c * 0.86;
 
     const body = g.createRadialGradient(c - r * 0.3, c - r * 0.35, r * 0.1, c, c, r);
     body.addColorStop(0, "#8a3a28");
     body.addColorStop(0.45, "#4a1a14");
-    body.addColorStop(1, "#170806");
+    body.addColorStop(0.86, "#2b0f0a");
+    body.addColorStop(1, "#220c08");
     g.fillStyle = body;
-    g.beginPath();
-    g.arc(c, c, r, 0, Math.PI * 2);
+    meteorPath(g, c, c, r);
     g.fill();
+
+    /* 坑、缝、内热都裁进轮廓里，边缘才不会露出来 */
+    g.save();
+    meteorPath(g, c, c, r);
+    g.clip();
+
+    /* 岩壳边缘被大气烧红了一圈，剪影才不会糊进夜空里 */
+    g.strokeStyle = "rgba(150, 54, 24, 0.55)";
+    g.lineWidth = r * 0.1;
+    meteorPath(g, c, c, r * 0.955);
+    g.stroke();
 
     /* 撞击坑 */
     g.fillStyle = "rgba(18, 6, 4, 0.6)";
@@ -2303,6 +2384,7 @@
     g.beginPath();
     g.arc(c, c, r, 0, Math.PI * 2);
     g.fill();
+    g.restore();
 
     meteorSprite = node;
   }

@@ -479,10 +479,10 @@ body.is-dino-visible .pet-summon {
   backdrop-filter: blur(1.5px);
   color: #ffd9c0;
   font-family: inherit;
-  font-size: clamp(0.8rem, 1.5vw, 1.18rem);
+  font-size: clamp(0.95rem, 2.05vw, 1.55rem);
   font-weight: 600;
-  line-height: 1.9;
-  letter-spacing: 0.16em;
+  line-height: 1.7;
+  letter-spacing: 0.2em;
   text-align: center;
   text-shadow: 0 1px 14px rgba(255, 92, 40, 0.32);
   transform: translate(-50%, 8px) scale(0.975);
