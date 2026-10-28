@@ -1646,21 +1646,3 @@ html[data-style="hacker"] .style-card__glyph--hacker {
     opacity: 0.62;
   }
 }
-
-/* 首屏大标题末尾挂一个方块光标：整页最像终端的一笔 */
-html[data-style="hacker"] .hero h1::after {
-  content: "";
-  display: inline-block;
-  width: 0.46em;
-  height: 0.78em;
-  margin-left: 0.12em;
-  background: #39ff88;
-  vertical-align: -0.02em;
-  animation: hackerCaret 1.15s steps(1, end) infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html[data-style="hacker"] .hero h1::after {
-    animation: none;
-  }
-}
