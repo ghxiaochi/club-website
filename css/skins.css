@@ -783,6 +783,7 @@ body.is-dino-visible .hnyz-pet {
   background: rgba(3, 7, 5, 0.9);
   color: #f2f7f4;
   overflow: hidden;
+  transition: background-color 0.16s ease;
 }
 
 .style-deck::before {
@@ -796,10 +797,14 @@ body.is-dino-visible .hnyz-pet {
     linear-gradient(180deg, rgba(0, 0, 0, 0.5), transparent 22%, transparent 78%, rgba(0, 0, 0, 0.5));
 }
 
+/* 面板自己的背景已经够黑（0.9），backdrop 再压一层反而坏事：
+   关闭时 dialog 的 opacity 淡出到 0，露出来的却是这块 backdrop，
+   于是「面板淡出 → 整屏一黑 → 幕布升起」中间夹一帧死黑。
+   把 backdrop 交还给 dialog 自己，关闭就是一次干净的淡出。 */
 .style-deck::backdrop {
-  background: rgba(2, 5, 3, 0.72);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .style-deck__shell {
@@ -1141,8 +1146,36 @@ body.is-dino-visible .hnyz-pet {
   animation: skinCardIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+.style-deck[open] {
+  animation: skinDeckIn 0.26s ease both;
+}
+
+@keyframes skinDeckIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 .style-deck.is-closing {
   animation: skinDeckOut 0.22s ease forwards;
+}
+
+/* 换肤专用退场：不是原地淡出，而是整块向上抽走。
+   幕布在同一刻从下面顶上来，速度和曲线完全一样，
+   面板底边与幕布顶边始终贴着——中间不会漏出旧页面那一下。
+   底色同时收到不透明：0.9 的黑幕在上移时会透出下面 10% 的旧页面，
+   看起来像一块脏玻璃，收成实心才对得起「幕布」这个比喻。 */
+html[data-style] .style-deck.is-handoff {
+  background: #050807;
+  animation: skinDeckHandoff var(--wipe-in) var(--wipe-ease-in) var(--wipe-handoff) forwards;
+}
+
+.style-deck.is-handoff .style-deck__shell {
+  opacity: 0;
+  transition: opacity 0.14s ease;
+}
+
+@keyframes skinDeckHandoff {
+  to { transform: translateY(-100%); }
 }
 
 @keyframes skinCardIn {
@@ -1156,7 +1189,22 @@ body.is-dino-visible .hnyz-pet {
 
 /* ---------------------------------------------------------
    6. 风格切换的竖向擦除
+   ---------------------------------------------------------
+   两层幕布：主体 + 晚 90ms 的薄纱，扫入时边缘错开一条带，
+   比单块纯色平面有厚度。时长写在自定义属性里，JS 读同一份，
+   免得再出现「CSS 还在走、下面已经换完」的半拍。
    --------------------------------------------------------- */
+/* 换肤这一段的时间轴只在这里定义一次：
+   面板上移、幕布上升、揭幕都从这几个值取，
+   三者的速度本来就是同一条曲线，接缝才对得上。 */
+:root {
+  --wipe-in: 0.44s;
+  --wipe-out: 0.44s;
+  --wipe-handoff: 0.1s;
+  --wipe-ease-in: cubic-bezier(0.33, 1, 0.68, 1);
+  --wipe-ease-out: cubic-bezier(0.45, 0, 0.2, 1);
+}
+
 .style-wipe {
   position: fixed;
   inset: 0;
@@ -1166,8 +1214,8 @@ body.is-dino-visible .hnyz-pet {
   overflow: hidden;
   background: #050807;
   color: #baffd0;
-  transform: translateY(101%);
-  transition: transform 0.46s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(100%);
+  transition: transform var(--wipe-in) var(--wipe-ease-in) var(--wipe-delay, 0s);
   pointer-events: none;
 }
 
@@ -1183,10 +1231,28 @@ body.is-dino-visible .hnyz-pet {
 
 .style-wipe.is-out {
   transform: translateY(-101%);
+  transition-duration: var(--wipe-out);
+  transition-delay: 0s;
+  transition-timing-function: var(--wipe-ease-out);
 }
 
+/* 幕布前缘的一道光。它不单独动，只是贴着上沿，
+   把那条生硬的直线化成一小段渐隐——扫过时像布的前缘被灯打亮。 */
+.style-wipe__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 8%),
+    linear-gradient(180deg, color-mix(in srgb, currentColor 7%, transparent), transparent 6%);
+}
+
+/* 幕布不能和落地页同色：极简风底色就是 #fbfbf8，
+   幕布也是它的话，揭开时整块白在白色上滑走，等于没有转场。
+   压低半档色阶，留一条看得见的边。 */
 .style-wipe[data-next="minimal"] {
-  background: #fbfbf8;
+  background: #f2f1eb;
   color: #141414;
 }
 
@@ -1195,16 +1261,46 @@ body.is-dino-visible .hnyz-pet {
   color: #1d4ed8;
 }
 
+/* 棍木是纯白空页，用黑幕切过去会在收尾时闪一下 */
+.style-wipe[data-next="bare"] {
+  background: #f6f5f0;
+  color: #1a1a1a;
+}
+
 .style-wipe__label {
+  position: relative;
+  z-index: 1;
   font-family: var(--mono);
   font-size: clamp(2rem, 8vw, 4.4rem);
   font-weight: 700;
+  letter-spacing: 0.34em;
+  text-indent: 0.34em;
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.32s ease 0.1s,
+    transform 0.62s var(--wipe-ease-in) 0.1s,
+    letter-spacing 0.72s var(--wipe-ease-in) 0.1s;
+}
+
+.style-wipe.is-in .style-wipe__label {
+  opacity: 1;
+  transform: translateY(0);
   letter-spacing: 0.18em;
-  text-indent: 0.18em;
+}
+
+/* 揭幕时字不淡出，跟着幕布一起滑出去。
+   之前让它 0.22s 就散掉，幕布还是白的、页面也是白的，
+   字一没就分不清是「还在揭幕」还是「已经切完了」。 */
+.style-wipe.is-out .style-wipe__label {
+  opacity: 1;
+  transform: none;
+  transition: none;
 }
 
 .style-wipe__bar {
   position: absolute;
+  z-index: 1;
   left: 50%;
   bottom: 16%;
   width: min(240px, 56vw);
@@ -1222,11 +1318,17 @@ body.is-dino-visible .hnyz-pet {
   background: currentColor;
   transform: scaleX(0);
   transform-origin: 0 50%;
-  animation: styleWipeBar 0.42s 0.04s ease forwards;
+  transition: transform 0.52s var(--wipe-ease-in) 0.14s;
 }
 
-@keyframes styleWipeBar {
-  to { transform: scaleX(1); }
+.style-wipe.is-in .style-wipe__bar::after {
+  transform: scaleX(1);
+}
+
+.style-wipe.is-out .style-wipe__bar::after {
+  transform: scaleX(1);
+  transition: none;
+}
 }
 
 /* ---------------------------------------------------------
@@ -1262,10 +1364,16 @@ body.is-dino-visible .hnyz-pet {
   .skin-bubbles i,
   .style-card,
   .style-card__glyph,
-  .style-wipe {
+  .style-wipe,
+  .style-wipe__veil,
+  .style-wipe__label,
+  .style-wipe__bar::after {
     animation: none !important;
     transition: none !important;
   }
+
+  /* 动效全关时幕布要么整块不透明、要么整块透明，不留半截 */
+  .style-wipe__label { opacity: 1; transform: none; letter-spacing: 0.18em; }
 
   /* 关掉动效后气泡直接不画，免得定在半空 */
   .skin-bubbles {

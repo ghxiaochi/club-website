@@ -339,18 +339,27 @@
     }, 80);
   }
 
-  function closeDeck() {
-    if (!deck.open || deck.classList.contains("is-closing")) return;
+  /* mode = "handoff"：换肤专用。面板不原地淡出，而是整块向上抽走，
+     让幕布贴着它的下沿顶上来，两块颜色之间没有一帧空隙。 */
+  function closeDeck(mode) {
+    if (!deck.open || deck.classList.contains("is-closing") || deck.classList.contains("is-handoff")) {
+      return;
+    }
 
-    deck.classList.add("is-closing");
+    const handoff = mode === "handoff";
+    deck.classList.add(handoff ? "is-handoff" : "is-closing");
     trigger && trigger.setAttribute("aria-expanded", "false");
     window.clearTimeout(closeTimer);
+
+    /* handoff：0.1s 等卡片淡掉 + 0.44s 抽走，末尾多留 30ms 余量再真正 close */
+    const life = reduce.matches ? 0 : handoff ? 560 : 200;
+
     closeTimer = window.setTimeout(() => {
       deck.close();
-      deck.classList.remove("is-closing");
+      deck.classList.remove("is-closing", "is-handoff");
       document.documentElement.classList.remove("is-style-deck-open");
       trigger && trigger.focus({ preventScroll: true });
-    }, reduce.matches ? 0 : 200);
+    }, life);
   }
 
   if (trigger) {
@@ -368,6 +377,7 @@
   wipe.hidden = true;
   wipe.setAttribute("aria-hidden", "true");
   wipe.innerHTML = `
+    <span class="style-wipe__veil"></span>
     <span class="style-wipe__label" data-style-wipe-label>MINIMAL</span>
     <span class="style-wipe__bar"></span>`;
   document.body.appendChild(wipe);
@@ -416,7 +426,33 @@
     document.dispatchEvent(new CustomEvent("hnyz:stylechange", { detail: { style: next } }));
   }
 
-  function applyStyle(next) {
+  /* 时长与缓动都写在 CSS 变量里，这里读同一份。
+     原来 JS 写死 430ms、CSS 写 0.46s，幕布还差 30ms 没到位，
+     底下的皮肤就已经换完了，收尾那一截会露出旧内容。 */
+  function cssMs(name, fallback) {
+    const raw = window.getComputedStyle(wipe).getPropertyValue(name).trim();
+    const value = Number.parseFloat(raw);
+    if (!value) return fallback;
+    return /ms$/.test(raw) ? value : value * 1000;
+  }
+
+  const wait = (ms) => new Promise((resolve) => { window.setTimeout(resolve, ms); });
+
+  /* 等 n 帧：让「刚脱掉 hidden」或「刚换完皮肤」的第一次布局先落地。
+     紧接着启动过渡会和这次重排撞在一起，起步那一下就是顿的。 */
+  function frames(count) {
+    return new Promise((resolve) => {
+      let left = count;
+      const step = () => {
+        left -= 1;
+        if (left <= 0) resolve();
+        else window.requestAnimationFrame(step);
+      };
+      window.requestAnimationFrame(step);
+    });
+  }
+
+  async function applyStyle(next) {
     if (!STYLES.includes(next) || busy) return;
 
     if (next === current) {
@@ -432,35 +468,52 @@
 
     busy = true;
 
-    if (deck.open) {
-      deck.close();
-      deck.classList.remove("is-closing");
-      document.documentElement.classList.remove("is-style-deck-open");
-      trigger && trigger.setAttribute("aria-expanded", "false");
-    }
+    try {
+      const durIn = cssMs("--wipe-in", 440);
+      const durOut = cssMs("--wipe-out", 520);
 
-    wipe.dataset.next = next;
-    wipeLabel.textContent = LABELS[next];
-    wipe.hidden = false;
-    wipe.classList.remove("is-out", "is-in");
-    void wipe.offsetWidth;
+      /* 先在屏幕底下把幕布摆好，这会儿它还看不见 */
+      wipe.dataset.next = next;
+      wipeLabel.textContent = LABELS[next];
+      wipe.hidden = false;
+      wipe.classList.remove("is-in", "is-out");
+      void wipe.offsetWidth;
+      await frames(2);
 
-    window.requestAnimationFrame(() => {
+      /* 面板和幕布是一根接力棒：卡片 140ms 淡掉，面板整块开始上移，
+         幕布在同一刻、用同一速度顶上来。两边的延迟都交给同一个
+         CSS 变量，谁先谁后就不看 JS 的定时器脸色了——
+         之前用 await 卡 100ms，实际差一拍（约 16ms），
+         在 ease-out 的陡段上就变成 70 多像素的缝，能看见旧页面。 */
+      const handoff = deck.open;
+      if (handoff) {
+        wipe.style.setProperty("--wipe-delay", "var(--wipe-handoff)");
+        closeDeck("handoff");
+      } else {
+        wipe.style.setProperty("--wipe-delay", "0s");
+      }
+
       wipe.classList.add("is-in");
-    });
+      await wait(durIn + (handoff ? 100 : 0));
 
-    window.setTimeout(() => {
+      /* 幕布盖满，这时候换皮肤：重排、贴图重烘、画布重建全都发生在
+         这块不透明底下，用户看不见，也就不会看到半张旧页面 */
       commit(next);
+
+      /* 再等两帧把新皮肤的首次布局与绘制排空，然后才揭幕。
+         少了这两帧，揭幕动画会和一次几十毫秒的长任务同时起步，
+         表现就是「幕布卡一下才开始走」。 */
+      await frames(2);
+
       wipe.classList.remove("is-in");
       wipe.classList.add("is-out");
-
-      window.setTimeout(() => {
-        wipe.hidden = true;
-        wipe.classList.remove("is-out");
-        busy = false;
-        if (trigger) trigger.focus({ preventScroll: true });
-      }, 480);
-    }, 430);
+      await wait(durOut);
+    } finally {
+      wipe.hidden = true;
+      wipe.classList.remove("is-out");
+      busy = false;
+      if (trigger) trigger.focus({ preventScroll: true });
+    }
   }
 
   /* 初始同步 */
