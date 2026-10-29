@@ -467,6 +467,9 @@
     }
 
     busy = true;
+    /* 转场期间把点击特效收掉：点在「应用此风格」上的那圈涟漪画在 9990 层，
+       会浮在幕布上面，白幕上留一个孤零零的灰圆 */
+    root.classList.add("is-style-switching");
 
     try {
       const durIn = cssMs("--wipe-in", 440);
@@ -511,6 +514,7 @@
     } finally {
       wipe.hidden = true;
       wipe.classList.remove("is-out");
+      root.classList.remove("is-style-switching");
       busy = false;
       if (trigger) trigger.focus({ preventScroll: true });
     }

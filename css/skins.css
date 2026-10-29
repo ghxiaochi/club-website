@@ -783,7 +783,7 @@ body.is-dino-visible .hnyz-pet {
   background: rgba(3, 7, 5, 0.9);
   color: #f2f7f4;
   overflow: hidden;
-  transition: background-color 0.16s ease;
+  transition: background-color 0.08s ease;
 }
 
 .style-deck::before {
@@ -1157,6 +1157,12 @@ body.is-dino-visible .hnyz-pet {
 
 .style-deck.is-closing {
   animation: skinDeckOut 0.22s ease forwards;
+}
+
+/* 转场期间关掉点击涟漪，别让它浮在幕布上 */
+html.is-style-switching .click-fx {
+  opacity: 0;
+  transition: opacity 0.12s ease;
 }
 
 /* 换肤专用退场：不是原地淡出，而是整块向上抽走。
