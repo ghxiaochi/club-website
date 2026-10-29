@@ -663,16 +663,16 @@
 
     /* 夕阳：顶上压一层紫，中间玫瑰，贴地才烧成橙红 */
     const dusk = ctx.createLinearGradient(0, 0, 0, H);
-    dusk.addColorStop(0, "rgba(38, 14, 62, 0.94)");
-    dusk.addColorStop(0.42, "rgba(116, 34, 76, 0.9)");
-    dusk.addColorStop(0.72, "rgba(226, 84, 40, 0.88)");
-    dusk.addColorStop(1, "rgba(255, 158, 72, 0.84)");
+    dusk.addColorStop(0, "rgba(47, 18, 76, 0.99)");
+    dusk.addColorStop(0.42, "rgba(126, 40, 86, 0.97)");
+    dusk.addColorStop(0.72, "rgba(232, 90, 44, 0.96)");
+    dusk.addColorStop(1, "rgba(255, 168, 84, 0.95)");
 
     /* 蓝调时刻：夜与昼之间垫一层冷色，天色才不会从黑直接灰过去 */
     const blue = ctx.createLinearGradient(0, 0, 0, H);
-    blue.addColorStop(0, "rgba(18, 34, 64, 0.92)");
-    blue.addColorStop(0.55, "rgba(34, 60, 104, 0.86)");
-    blue.addColorStop(1, "rgba(74, 108, 150, 0.78)");
+    blue.addColorStop(0, "rgba(14, 26, 52, 0.95)");
+    blue.addColorStop(0.55, "rgba(30, 54, 94, 0.93)");
+    blue.addColorStop(1, "rgba(60, 92, 136, 0.9)");
 
     /* 血色的灭绝天幕 */
     const blood = ctx.createLinearGradient(0, 0, 0, H);
@@ -1835,11 +1835,11 @@
     const s = ring(cyc - 0.5);
 
     /* 日落后 0.03→0.17 压黑，日出前 0.45→0.6 透亮 */
-    const nightAmt = smoothStep(0.03, 0.17, s) * (1 - smoothStep(0.45, 0.6, s));
+    const nightAmt = smoothStep(0, 0.09, s) * (1 - smoothStep(0.45, 0.6, s));
 
     /* 晚霞只挂在日落这一侧：d=0 时最浓，两头平滑归零 */
     const d = Math.min(s, 1 - s);
-    const duskAmt = Math.max(0, 1 - (d / 0.14) ** 2);
+    const duskAmt = Math.max(0, 1 - (d / 0.13) ** 2);
 
     const sunT = cyc < 0.5 ? cyc / 0.5 : -1;
     /* 月亮等晚霞退干净了再从左边升起来，别跟夕阳同框 */
@@ -1891,21 +1891,23 @@
       ctx.fillStyle = "#000000";
       ctx.fillRect(0, 0, W, H);
     } else {
+      /* 先压黑、再铺晚霞：日落那几秒夜色已经到位。晚霞从半透明退场时
+         底下是黑的，天色只会一路暗下去，不会在中间亮回来一块 */
       if (nightAmt > 0.01) {
         ctx.globalAlpha = nightAmt;
         ctx.fillStyle = skyGrad.night;
         ctx.fillRect(0, 0, W, H);
       }
-      /* 夜里最深处不加，昼夜交接处才垫一层冷蓝 */
-      const blueAmt = Math.pow(4 * nightAmt * (1 - nightAmt), 1.2) * 0.62;
+      if (duskAmt > 0.01) {
+        ctx.globalAlpha = Math.min(1, duskAmt * 1.06);
+        ctx.fillStyle = skyGrad.dusk;
+        ctx.fillRect(0, 0, W, H);
+      }
+      /* 冷暖交接处垫一层冷蓝；夜里最深处不加 */
+      const blueAmt = Math.pow(4 * nightAmt * (1 - nightAmt), 1.15) * 0.8 * (1 - duskAmt * 0.9);
       if (blueAmt > 0.01) {
         ctx.globalAlpha = blueAmt;
         ctx.fillStyle = skyGrad.blue;
-        ctx.fillRect(0, 0, W, H);
-      }
-      if (duskAmt > 0.01) {
-        ctx.globalAlpha = Math.min(1, duskAmt * 1.05);
-        ctx.fillStyle = skyGrad.dusk;
         ctx.fillRect(0, 0, W, H);
       }
       ctx.globalAlpha = 1;
