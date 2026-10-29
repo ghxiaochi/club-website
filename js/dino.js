@@ -2274,8 +2274,10 @@
 
     /* 每帧只算一次昼夜，日、月、星、云共用同一份 */
     const phases = skyPhases();
-    /* 暗色主题的恐龙本来就是亮的，不用再提；浅色主题夜里才需要补光 */
-    nightLift = isNight() ? 0 : Math.min(1, Math.max(0, (phases.nightAmt - 0.55) / 0.3)) * phases.nightAmt;
+    /* 暗色主题的恐龙本来就是亮的，不用再提；浅色主题夜里才需要补光。
+       阈值要等天真的黑下来（nightAmt ≈ 0.86 之后）才启动：晚霞刚退、天还是
+       灰紫的时候，深蓝的恐龙本来就看得见，提前补光反而把它洗成一片灰。 */
+    nightLift = isNight() ? 0 : Math.min(1, Math.max(0, (phases.nightAmt - 0.86) / 0.14)) * phases.nightAmt;
     drawSky(phases);
     drawSun(phases);
     drawStars(phases);
