@@ -479,7 +479,7 @@ body.is-dino-visible .pet-summon {
   backdrop-filter: blur(1.5px);
   color: #ffd9c0;
   font-family: inherit;
-  font-size: clamp(0.95rem, 2.05vw, 1.55rem);
+  font-size: clamp(1.1rem, 2.6vw, 1.9rem);
   font-weight: 600;
   line-height: 1.7;
   letter-spacing: 0.2em;
@@ -558,7 +558,7 @@ body.is-dino-visible .pet-summon {
   }
 
   .dino-run__extinct-text {
-    padding: 0 10px;
+    padding: 0 8px;
     letter-spacing: 0.1em;
     line-height: 1.8;
   }

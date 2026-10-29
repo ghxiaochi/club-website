@@ -44,7 +44,7 @@
   const JUMP_V = -540;
   /* 等级上限抽成常量；×1 下一整个昼夜循环的秒数 */
   const LEVEL_CAP = 100;
-  const DAY_CYCLE = 60;
+  const DAY_CYCLE = 34;
 
   let W = 0;
   let H = 0;
@@ -121,6 +121,8 @@
     goldLit: "#ffe9a8",
     moon: "#eaf3ff"
   };
+  /* 天体专用的颜色：只有它跟风格走，金币不跟着变绿 */
+  let skyPal = { sun: "#fbbf24", sunLit: "#ffe9a8", moon: "#eaf3ff" };
 
   let sprites = {
     dino: [],
@@ -171,6 +173,12 @@
       goldLit: read("--dino-gold-lit", "#ffe9a8"),
       moon: read("--dino-moon", "#eaf3ff")
     };
+
+    /* 黑客风：太阳月亮统一荧光绿（金币仍是琥珀色，靠 palette.gold 不受影响） */
+    const hacker = root.dataset.style === "hacker";
+    skyPal = hacker
+      ? { sun: "#39ff88", sunLit: "#c8ffdd", moon: "#8dffb4" }
+      : { sun: palette.gold, sunLit: palette.goldLit, moon: palette.moon };
   }
 
   /* -------------------------------------------------------
@@ -475,7 +483,7 @@
 
     const g = node.getContext("2d");
     g.scale(scale, scale);
-    g.fillStyle = palette.moon;
+    g.fillStyle = skyPal.moon;
 
     const cx = box / 2;
     const cy = box / 2;
@@ -499,9 +507,9 @@
     const hg = halo.getContext("2d");
     hg.scale(scale, scale);
     const ring = hg.createRadialGradient(center, center, r * 0.5, center, center, center);
-    ring.addColorStop(0, withAlpha(palette.moon, 0.22));
-    ring.addColorStop(0.45, withAlpha(palette.moon, 0.07));
-    ring.addColorStop(1, withAlpha(palette.moon, 0));
+    ring.addColorStop(0, withAlpha(skyPal.moon, 0.22));
+    ring.addColorStop(0.45, withAlpha(skyPal.moon, 0.07));
+    ring.addColorStop(1, withAlpha(skyPal.moon, 0));
     hg.fillStyle = ring;
     hg.beginPath();
     hg.arc(center, center, center, 0, Math.PI * 2);
@@ -521,9 +529,9 @@
     g.scale(2, 2);
 
     const ring = g.createRadialGradient(box / 2, box / 2, 3, box / 2, box / 2, box / 2);
-    ring.addColorStop(0, withAlpha(palette.gold, 0.5));
-    ring.addColorStop(0.35, withAlpha(palette.gold, 0.16));
-    ring.addColorStop(1, withAlpha(palette.gold, 0));
+    ring.addColorStop(0, withAlpha(skyPal.sun, 0.5));
+    ring.addColorStop(0.35, withAlpha(skyPal.sun, 0.16));
+    ring.addColorStop(1, withAlpha(skyPal.sun, 0));
 
     g.fillStyle = ring;
     g.beginPath();
@@ -647,17 +655,24 @@
 
   /* ---------- 天空渐变：尺寸不变就一直用同一份 ---------- */
   function buildSkyGradients() {
+    /* 夜色要压到近乎不透明：跑道底是浅色时，半透明的黑只会变成一片灰 */
     const night = ctx.createLinearGradient(0, 0, 0, H);
-    night.addColorStop(0, "rgba(3, 7, 18, 0.62)");
-    night.addColorStop(0.62, "rgba(4, 9, 22, 0.46)");
-    night.addColorStop(1, "rgba(2, 6, 16, 0.34)");
+    night.addColorStop(0, "rgba(1, 3, 8, 0.99)");
+    night.addColorStop(0.58, "rgba(3, 7, 16, 0.97)");
+    night.addColorStop(1, "rgba(7, 12, 22, 0.92)");
 
     /* 夕阳：顶上压一层紫，中间玫瑰，贴地才烧成橙红 */
     const dusk = ctx.createLinearGradient(0, 0, 0, H);
-    dusk.addColorStop(0, "rgba(44, 18, 66, 0.66)");
-    dusk.addColorStop(0.42, "rgba(118, 40, 84, 0.52)");
-    dusk.addColorStop(0.72, "rgba(234, 102, 58, 0.54)");
-    dusk.addColorStop(1, "rgba(255, 170, 92, 0.44)");
+    dusk.addColorStop(0, "rgba(38, 14, 62, 0.94)");
+    dusk.addColorStop(0.42, "rgba(116, 34, 76, 0.9)");
+    dusk.addColorStop(0.72, "rgba(226, 84, 40, 0.88)");
+    dusk.addColorStop(1, "rgba(255, 158, 72, 0.84)");
+
+    /* 蓝调时刻：夜与昼之间垫一层冷色，天色才不会从黑直接灰过去 */
+    const blue = ctx.createLinearGradient(0, 0, 0, H);
+    blue.addColorStop(0, "rgba(18, 34, 64, 0.92)");
+    blue.addColorStop(0.55, "rgba(34, 60, 104, 0.86)");
+    blue.addColorStop(1, "rgba(74, 108, 150, 0.78)");
 
     /* 血色的灭绝天幕 */
     const blood = ctx.createLinearGradient(0, 0, 0, H);
@@ -671,7 +686,7 @@
     dead.addColorStop(0.6, "rgba(15, 10, 11, 0.9)");
     dead.addColorStop(1, "rgba(30, 15, 12, 0.78)");
 
-    skyGrad = { night, dusk, blood, dead };
+    skyGrad = { night, dusk, blue, blood, dead };
   }
 
   /* 一次性把不随等级变的东西全烘出来 */
@@ -1806,26 +1821,30 @@
   }
 
   /* 游戏内昼夜：太阳走 0→0.5 的白天弧，月亮走 0.5→1 的夜弧。
-     两头都贴着地平线淡出，交接时不是「啪」地换个天体，而是天先烧成晚霞，
-     太阳沉下去、月亮跟着浮上来。 */
+     夜色和晚霞都按「离日落多远」来算，绕着 1 点连续，
+     所以月亮沉下去时天只会慢慢变亮，不会再冒出一片夕阳。 */
+  const ring = (v) => ((v % 1) + 1) % 1;
+  const smoothStep = (a, b, v) => {
+    const t = Math.min(1, Math.max(0, (v - a) / (b - a)));
+    return t * t * (3 - 2 * t);
+  };
+
   function skyPhases() {
     const cyc = gameClock;
-    const smooth = (a, b, v) => {
-      const t = Math.min(1, Math.max(0, (v - a) / (b - a)));
-      return t * t * (3 - 2 * t);
-    };
-    const nightAmt = smooth(0.45, 0.55, cyc) * (1 - smooth(0.93, 1, cyc));
+    /* s：以日落为零点绕圈，0 = 太阳刚落，0.5 = 太阳刚升 */
+    const s = ring(cyc - 0.5);
 
-    /* 晚霞/朝霞：两团热压在日落、日出两头，中间连续过渡 */
-    const bump = (c, w) => {
-      const d = Math.abs(cyc - c) / w;
-      return d >= 1 ? 0 : 1 - d * d;
-    };
-    const duskAmt = Math.max(bump(0.47, 0.14), bump(0.97, 0.12));
+    /* 日落后 0.03→0.17 压黑，日出前 0.45→0.6 透亮 */
+    const nightAmt = smoothStep(0.03, 0.17, s) * (1 - smoothStep(0.45, 0.6, s));
+
+    /* 晚霞只挂在日落这一侧：d=0 时最浓，两头平滑归零 */
+    const d = Math.min(s, 1 - s);
+    const duskAmt = Math.max(0, 1 - (d / 0.14) ** 2);
 
     const sunT = cyc < 0.5 ? cyc / 0.5 : -1;
-    const moonT = cyc >= 0.5 ? (cyc - 0.5) / 0.5 : -1;
-    return { cyc, nightAmt, duskAmt, sunT, moonT };
+    /* 月亮等晚霞退干净了再从左边升起来，别跟夕阳同框 */
+    const moonT = cyc >= 0.64 ? (cyc - 0.64) / 0.36 : -1;
+    return { cyc, s, nightAmt, duskAmt, sunT, moonT };
   }
 
   /* 天体走的扁弧：贴地平线升起，中间最高，落到另一头 */
@@ -1864,18 +1883,33 @@
   function drawSky(phases) {
     if (!skyGrad) return;
     const { nightAmt, duskAmt } = phases;
+    const hacker = root.dataset.style === "hacker";
 
-    if (nightAmt > 0.01) {
-      ctx.globalAlpha = nightAmt;
-      ctx.fillStyle = skyGrad.night;
+    if (hacker) {
+      /* 黑客风：天永远纯黑，只剩日月和星星在动 */
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = "#000000";
       ctx.fillRect(0, 0, W, H);
+    } else {
+      if (nightAmt > 0.01) {
+        ctx.globalAlpha = nightAmt;
+        ctx.fillStyle = skyGrad.night;
+        ctx.fillRect(0, 0, W, H);
+      }
+      /* 夜里最深处不加，昼夜交接处才垫一层冷蓝 */
+      const blueAmt = Math.pow(4 * nightAmt * (1 - nightAmt), 1.2) * 0.62;
+      if (blueAmt > 0.01) {
+        ctx.globalAlpha = blueAmt;
+        ctx.fillStyle = skyGrad.blue;
+        ctx.fillRect(0, 0, W, H);
+      }
+      if (duskAmt > 0.01) {
+        ctx.globalAlpha = Math.min(1, duskAmt * 1.05);
+        ctx.fillStyle = skyGrad.dusk;
+        ctx.fillRect(0, 0, W, H);
+      }
+      ctx.globalAlpha = 1;
     }
-    if (duskAmt > 0.01) {
-      ctx.globalAlpha = Math.min(1, duskAmt * 1.05);
-      ctx.fillStyle = skyGrad.dusk;
-      ctx.fillRect(0, 0, W, H);
-    }
-    ctx.globalAlpha = 1;
 
     const blood = bloodAmt();
     if (blood > 0.01) {
@@ -1920,7 +1954,10 @@
     ctx.globalAlpha = alpha * 0.9;
     ctx.drawImage(sunSprite.node, p.x - sunSprite.box / 2, p.y - sunSprite.box / 2, sunSprite.box, sunSprite.box);
     ctx.globalAlpha = alpha;
-    ctx.fillStyle = mixHex("#ff6a3d", palette.goldLit, Math.min(1, alt * 1.7));
+    /* 黑客风：一整颗荧光绿，不做红→金的渐变，免得中途变成土黄 */
+    ctx.fillStyle = root.dataset.style === "hacker"
+      ? mixHex(skyPal.sun, skyPal.sunLit, Math.min(1, alt * 1.2))
+      : mixHex("#ff6a3d", palette.goldLit, Math.min(1, alt * 1.7));
     ctx.beginPath();
     ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
     ctx.fill();
@@ -1962,8 +1999,8 @@
     if (!stars.length || !starSprites) return;
 
     const nightSky = phases.nightAmt;
-    /* 夜里满星；白天（尤其是暗色主题）留一层几乎看不见的底噪 */
-    const base = Math.max(nightSky * 0.95, (isNight() ? 0.09 : 0.06) * (1 - nightSky))
+    /* 夜里满星；天亮时按高次幂收掉，免得灰天里还挂着一片十字 */
+    const base = Math.max(Math.pow(nightSky, 1.7) * 0.95, (isNight() ? 0.07 : 0.04) * (1 - nightSky))
       * (1 - Math.min(1, phases.duskAmt * 0.85));
     /* 演出的天塌下来：星星先一颗颗灭 */
     const kill = 1 - bloodAmt();
