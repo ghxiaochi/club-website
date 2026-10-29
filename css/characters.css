@@ -59,7 +59,7 @@
   gap: clamp(6px, 1.5vw, 20px);
   margin: 14px 0 0;
   padding: 0 18px 12px;
-  min-height: clamp(96px, 13vw, 178px);
+  min-height: clamp(120px, 16.5vw, 220px);
 }
 
 /* 地面：小人站在这条深色边台上 */
@@ -78,7 +78,7 @@
 .char-slot {
   position: relative;
   display: block;
-  width: clamp(38px, 5.4vw, 76px);
+  width: clamp(50px, 7vw, 104px);
   padding: 0;
   border: 0;
   background: none;
@@ -725,12 +725,12 @@ body.is-splash-open {
 @media (max-width: 900px) {
   .char-stage__units {
     gap: 3px;
-    padding: 20px 6px 10px;
-    min-height: 66px;
+    padding: 22px 6px 12px;
+    min-height: 78px;
   }
 
   .char-slot {
-    width: clamp(28px, 9vw, 46px);
+    width: clamp(34px, 10.5vw, 60px);
   }
 }
 

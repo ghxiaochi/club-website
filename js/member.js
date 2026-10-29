@@ -272,8 +272,14 @@
 
   async function fetchRepo(member) {
     const api = `https://api.github.com/repos/${encodeURIComponent(member.user)}/${encodeURIComponent(member.repo)}`;
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), 8000);
     try {
-      const res = await fetch(api, { headers: { Accept: "application/vnd.github+json" }, cache: "no-store" });
+      const res = await fetch(api, {
+        headers: { Accept: "application/vnd.github+json" },
+        cache: "no-store",
+        signal: controller.signal
+      });
       if (!res.ok) throw new Error(String(res.status));
       const d = await res.json();
       return {
@@ -293,6 +299,8 @@
         forks: null,
         url: `https://github.com/${member.user}/${member.repo}`
       };
+    } finally {
+      window.clearTimeout(timer);
     }
   }
 

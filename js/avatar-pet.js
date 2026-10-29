@@ -190,7 +190,7 @@
     pet.style.top = `${Math.min(Math.max(4, drag.baseY + dy), Math.max(4, maxY))}px`;
   });
 
-  window.addEventListener("pointerup", (event) => {
+  function endDrag() {
     if (!drag.active) return;
     drag.active = false;
 
@@ -204,7 +204,11 @@
     } catch (error) {
       /* 忽略 */
     }
-  });
+  }
+
+  window.addEventListener("pointerup", endDrag);
+  /* 指针被系统打断（切标签、来电）时也要松手，否则下次移动还会拖着走 */
+  window.addEventListener("pointercancel", endDrag);
 
   trigger.addEventListener("click", (event) => {
     /* 拖动结束时浏览器也会派发 click，这里吞掉，避免拖一下就说句话 */
@@ -606,7 +610,6 @@
       state.rampage = false;
       state.dead = true;
       document.body.classList.remove("is-pet-boom");
-      sfx.stop("reveal");
       showTomb();
     }, 720);
   }

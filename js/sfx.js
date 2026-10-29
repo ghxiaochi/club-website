@@ -18,6 +18,10 @@
     view: "audio/view.mp3"
   };
 
+  /* 调用处用过几个不在 SRC 里的名字（select / get / boom），
+     统一映射到已有的音频上，免得按下去一点声音都没有。 */
+  const ALIAS = { select: "click", get: "view", boom: "locked" };
+
   const KEY = "hnyz:sound";
   const pools = {};
 
@@ -31,9 +35,8 @@
   function pool(name) {
     if (!pools[name]) {
       const src = SRC[name];
-      /* reveal 是一段小音乐，只留一个；hover 要连续走音阶，多留几个；
-         其余留 4 个用来叠着播 */
-      const size = name === "reveal" ? 1 : name === "hover" ? 6 : 4;
+      /* hover 要连续走音阶，多留几个；其余留 4 个用来叠着播 */
+      const size = name === "hover" ? 6 : 4;
       pools[name] = Array.from({ length: size }, () => {
         const audio = new Audio(src);
         audio.preload = "auto";
@@ -44,10 +47,11 @@
   }
 
   function play(name, options) {
-    if (!enabled || !SRC[name]) return null;
+    const key = ALIAS[name] || name;
+    if (!enabled || !SRC[key]) return null;
 
     const opts = options || {};
-    const list = pool(name);
+    const list = pool(key);
     const audio = list.find((item) => item.paused || item.ended) || list[0];
 
     try {
@@ -65,7 +69,7 @@
   }
 
   function stop(name) {
-    (pools[name] || []).forEach((audio) => {
+    (pools[ALIAS[name] || name] || []).forEach((audio) => {
       try {
         audio.pause();
         audio.currentTime = 0;

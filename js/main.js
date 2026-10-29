@@ -461,10 +461,16 @@
       return normalizeRepo(cached.data, member);
     }
 
+    /* GitHub 偶尔会挂住不返回：8 秒拿不到就放弃，卡片退回本地数据，
+       免得整组一直停在「正在连接」 */
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), 8000);
+
     try {
       const response = await fetch(apiUrl, {
         headers: { Accept: "application/vnd.github+json" },
-        cache: "no-store"
+        cache: "no-store",
+        signal: controller.signal
       });
 
       /* 403：通常是未登录 API 限流（60 次 / 小时 / IP） */
@@ -501,6 +507,8 @@
         return normalizeRepo(cached.data, member);
       }
       return createFallback(member, "network");
+    } finally {
+      window.clearTimeout(timer);
     }
   }
 

@@ -317,11 +317,13 @@
     viewport.focus({ preventScroll: true });
 
     window.requestAnimationFrame(() => {
+      if (!deck.open) return;
       scrollToCard(index, false);
       setActive(index);
     });
 
     window.setTimeout(() => {
+      if (!deck.open || deck.classList.contains("is-closing")) return;
       scrollToCard(index, false);
       setActive(index);
     }, 60);
@@ -330,6 +332,7 @@
     trigger.setAttribute("aria-expanded", "true");
 
     window.setTimeout(() => {
+      if (!deck.open || deck.classList.contains("is-closing")) return;
       const target = deck.querySelector(".style-card.is-active [data-style-pick]");
       if (target && !target.disabled) target.focus({ preventScroll: true });
       else viewport.focus({ preventScroll: true });

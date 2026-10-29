@@ -269,6 +269,9 @@
       card.style.transform = "";
     }
 
+    let lastX = 0;
+    let lastY = 0;
+
     document.addEventListener(
       "pointermove",
       (event) => {
@@ -286,15 +289,21 @@
 
         if (activeCard && activeCard !== card) reset(activeCard);
         activeCard = card;
+        lastX = event.clientX;
+        lastY = event.clientY;
 
-        const rect = card.getBoundingClientRect();
-        const px = (event.clientX - rect.left) / rect.width - 0.5;
-        const py = (event.clientY - rect.top) / rect.height - 0.5;
-
-        window.cancelAnimationFrame(frame);
+        /* 每帧最多读一次布局：把 getBoundingClientRect 放进 rAF，
+           高频 pointermove 时不会每次都强制同步布局 */
+        if (frame) return;
         frame = window.requestAnimationFrame(() => {
-          card.classList.add("is-tilting");
-          card.style.transform = `perspective(900px) rotateX(${(-py * MAX_TILT).toFixed(2)}deg) rotateY(${(px * MAX_TILT).toFixed(2)}deg) translateY(-4px)`;
+          frame = 0;
+          if (!activeCard) return;
+          const rect = activeCard.getBoundingClientRect();
+          if (!rect.width || !rect.height) return;
+          const px = (lastX - rect.left) / rect.width - 0.5;
+          const py = (lastY - rect.top) / rect.height - 0.5;
+          activeCard.classList.add("is-tilting");
+          activeCard.style.transform = `perspective(900px) rotateX(${(-py * MAX_TILT).toFixed(2)}deg) rotateY(${(px * MAX_TILT).toFixed(2)}deg) translateY(-4px)`;
         });
       },
       { passive: true }

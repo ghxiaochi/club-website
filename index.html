@@ -60,30 +60,55 @@
 
   <!-- 站点图标与样式。全部使用本地文件，无外部依赖。 -->
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/style.css?v=20261094">
+  <link rel="stylesheet" href="css/style.css?v=20261095">
   <link rel="stylesheet" href="css/pet.css?v=20261025b">
-  <link rel="stylesheet" href="css/personal.css?v=20261094">
+  <link rel="stylesheet" href="css/personal.css?v=20261095">
   <link rel="stylesheet" href="css/avatar-pet.css?v=20261057">
-  <link rel="stylesheet" href="css/skins.css?v=20261094">
-  <link rel="stylesheet" href="css/type.css?v=20261094">
-  <link rel="stylesheet" href="css/motion.css?v=20261094">
-  <link rel="stylesheet" href="css/dino.css?v=20261094">
+  <link rel="stylesheet" href="css/skins.css?v=20261095">
+  <link rel="stylesheet" href="css/type.css?v=20261095">
+  <link rel="stylesheet" href="css/motion.css?v=20261095">
+  <link rel="stylesheet" href="css/dino.css?v=20261095">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <!-- 项目卡片、全部项目折叠页和复制按钮由 js/main.js 驱动 -->
-  <script src="js/sfx.js?v=20261072" defer></script>
-  <script src="js/theme.js?v=20261094" defer></script>
-  <script src="js/theme-icon.js?v=20261094" defer></script>
+  <script src="js/sfx.js?v=20261095" defer></script>
+  <script src="js/theme.js?v=20261095" defer></script>
+  <script src="js/theme-icon.js?v=20261095" defer></script>
   <script src="js/members.js?v=20261034" defer></script>
-  <script src="js/main.js?v=20261058" defer></script>
+  <script src="js/main.js?v=20261095" defer></script>
   <script src="js/pet.js?v=20261025c" defer></script>
-  <script src="js/avatar-pet.js?v=20261057" defer></script>
-  <script src="js/personal.js?v=20261084" defer></script>
+  <script src="js/avatar-pet.js?v=20261095" defer></script>
+  <script src="js/personal.js?v=20261095" defer></script>
   <script src="js/click-fx.js?v=20261058" defer></script>
-  <script src="js/skins.js?v=20261094" defer></script>
-  <script src="js/matrix.js?v=20261094" defer></script>
-  <script src="js/copy.js?v=20261094" defer></script>
-  <script src="js/dino.js?v=20261094" defer></script>
+  <script src="js/skins.js?v=20261095" defer></script>
+  <script src="js/matrix.js?v=20261095" defer></script>
+  <script src="js/copy.js?v=20261095" defer></script>
+  <script>
+    /* 页脚跑道不参与首屏：等 load 之后浏览器空闲了再拉脚本，
+       用户提前往下滚也会立刻加载。少 80KB 的解析，首屏能早一点可交互。 */
+    (function () {
+      var loaded = false;
+      function loadDino() {
+        if (loaded) return;
+        loaded = true;
+        var script = document.createElement("script");
+        script.src = "js/dino.js?v=20261095";
+        script.async = true;
+        document.body.appendChild(script);
+      }
+      /* 等浏览器真空闲再注入：固定 1.5 秒的定时器很可能正好撞上首屏滚动或点击，
+         解析这 80KB 就变成一次能感觉到的卡顿。idle 回调只在主线程闲下来时才跑。 */
+      function whenIdle() {
+        if ("requestIdleCallback" in window) {
+          window.requestIdleCallback(loadDino, { timeout: 3000 });
+        } else {
+          window.setTimeout(loadDino, 1200);
+        }
+      }
+      window.addEventListener("load", whenIdle, { once: true });
+      window.addEventListener("scroll", loadDino, { once: true, passive: true });
+    })();
+  </script>
 </head>
 <body>
 

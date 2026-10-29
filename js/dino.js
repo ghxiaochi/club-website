@@ -552,22 +552,35 @@
 
   /* ---------- 星星：去掉逐颗 shadowBlur，改成两张预渲染小图 ---------- */
   function buildStarSprites() {
+    /* 星星不能跟正文墨色走：蓝白风的浅色主题里 ink 是深蓝，
+       压在近乎纯黑的夜天上等于隐了形。夜里就该是月光白。 */
+    const ink = root.dataset.style === "hacker"
+      ? mixHex(skyPal.moon, "#ffffff", 0.42)
+      : "#e2ecff";
+
     const dot = document.createElement("canvas");
-    dot.width = 2;
-    dot.height = 2;
+    dot.width = 3;
+    dot.height = 3;
     const dg = dot.getContext("2d");
-    dg.fillStyle = palette.ink;
-    dg.fillRect(0, 0, 2, 2);
+    dg.fillStyle = ink;
+    /* 一像素的核心 + 四向很淡的呼吸，夜里是星点，不是雪 */
+    dg.globalAlpha = 0.3;
+    dg.fillRect(1, 0, 1, 1);
+    dg.fillRect(0, 1, 1, 1);
+    dg.fillRect(2, 1, 1, 1);
+    dg.fillRect(1, 2, 1, 1);
+    dg.globalAlpha = 1;
+    dg.fillRect(1, 1, 1, 1);
 
     const big = document.createElement("canvas");
     big.width = 9;
     big.height = 9;
     const bg = big.getContext("2d");
-    bg.fillStyle = palette.ink;
-    bg.fillRect(3, 3, 3, 3);
-    bg.globalAlpha = 0.5;
-    bg.fillRect(0, 4, 9, 1);
-    bg.fillRect(4, 0, 1, 9);
+    bg.fillStyle = ink;
+    bg.fillRect(4, 4, 2, 2);
+    bg.globalAlpha = 0.34;
+    bg.fillRect(1, 4, 7, 1);
+    bg.fillRect(4, 1, 1, 7);
 
     starSprites = { dot, big };
   }
@@ -737,11 +750,23 @@
     const packLeft = 8 + (count - 1) * spacing;
     startX = Math.max(packLeft, Math.min(W * 0.36, W - 260));
 
-    buildSprites();
-    buildScenery();
+    /* 贴图烘焙只在已经烘过（尺寸变化）时重建；第一次交给 ensureBuilt，
+       页脚跑道在首屏之外，没必要和首屏的字体、图片抢主线程 */
+    if (sprites.dino.length) {
+      buildSprites();
+      buildScenery();
+    }
     buildClouds();
     buildStars();
     return true;
+  }
+
+  /* 第一次滚到页脚、或首屏就包含了跑道时，把静态贴图补齐 */
+  function ensureBuilt() {
+    if (sprites.dino.length) return;
+    readPalette();
+    buildSprites();
+    buildScenery();
   }
 
   function buildClouds() {
@@ -753,13 +778,14 @@
   }
 
   function buildStars() {
-    const n = Math.max(13, Math.round(W / 12));
+    const n = Math.max(15, Math.round(W / 14));
+    const skyH = Math.max(12, (groundY || H - 20) - 8);
     stars = Array.from({ length: n }, () => {
-      const big = Math.random() < 0.32;
+      const big = Math.random() < 0.26;
       return {
         x: Math.random() * W,
-        /* 星星只铺在地面线以上，别跑到土里 */
-        y: 5 + Math.random() * Math.max(8, H - 88),
+        /* 铺满整片天，别全挤在最上面一条缝里 */
+        y: 4 + Math.random() * skyH,
         s: big ? 2 : 1,
         big,
         /* 每颗自己的闪烁节奏，亮的那几颗慢一点，像在「呼吸」 */
@@ -814,8 +840,22 @@
     }
     if (toastEl) toastEl.hidden = true;
     if (hintEl) hintEl.style.opacity = "";
-    buildSprites(); /* 羽色复位 */
+    /* 羽色复位：只有已经烘过才重烘。首屏还没进视口时贴图是空的，
+       这里再建一次等于把刚推迟的工作又拉回主线程 */
+    if (sprites.dino.length) buildSprites();
     updateScore(true);
+  }
+
+  /* 最高分落盘节流：跑动时分数每几十毫秒就涨一分，
+     逐分写 localStorage 等于每帧做一次同步 IO，白白拖慢主线程 */
+  let hiSavedAt = 0;
+
+  function flushHi() {
+    try {
+      window.localStorage.setItem(HI_KEY, String(hiScore));
+    } catch (error) {
+      /* 忽略 */
+    }
   }
 
   function updateScore(force) {
@@ -826,10 +866,11 @@
 
     if (next > hiScore) {
       hiScore = next;
-      try {
-        window.localStorage.setItem(HI_KEY, String(hiScore));
-      } catch (error) {
-        /* 忽略 */
+      const now = performance.now();
+      /* force 只负责立刻刷新 HUD，落盘依旧按 2.5 秒节流 */
+      if (now - hiSavedAt > 2500) {
+        hiSavedAt = now;
+        flushHi();
       }
     }
 
@@ -1843,12 +1884,14 @@
     /* s：以日落为零点绕圈，0 = 太阳刚落，0.5 = 太阳刚升 */
     const s = ring(cyc - 0.5);
 
-    /* 日落后 0.03→0.17 压黑，日出前 0.45→0.6 透亮 */
-    const nightAmt = smoothStep(0, 0.09, s) * (1 - smoothStep(0.45, 0.6, s));
+    /* 日落后立刻压黑，日出前 0.45→0.6 透亮 */
+    const nightAmt = smoothStep(0, 0.072, s) * (1 - smoothStep(0.45, 0.6, s));
 
-    /* 晚霞只挂在日落这一侧：d=0 时最浓，两头平滑归零 */
+    /* 晚霞只挂在日落这一侧：d=0 时最浓，边缘平滑归零。
+       用 (1 - d/w)^1.55 而不是抛物线：抛物线中间是一大片饱和的平台，
+       看着像黄昏卡住了；这条曲线在峰值处尖、两侧退得快，约 5 秒收完 */
     const d = Math.min(s, 1 - s);
-    const duskAmt = Math.max(0, 1 - (d / 0.13) ** 2);
+    const duskAmt = Math.pow(Math.max(0, 1 - d / 0.075), 1.55);
 
     const sunT = cyc < 0.5 ? cyc / 0.5 : -1;
     /* 月亮等晚霞退干净了再从左边升起来，别跟夕阳同框 */
@@ -1908,7 +1951,8 @@
         ctx.fillRect(0, 0, W, H);
       }
       if (duskAmt > 0.01) {
-        ctx.globalAlpha = Math.min(1, duskAmt * 1.06);
+        /* 直接用 0~1 的权重，别截断：截断会让峰值附近几秒颜色完全不变 */
+        ctx.globalAlpha = duskAmt;
         ctx.fillStyle = skyGrad.dusk;
         ctx.fillRect(0, 0, W, H);
       }
@@ -1950,12 +1994,14 @@
     if (!sunSprite || phases.sunT < 0) return;
 
     const t = phases.sunT;
-    /* 出地平线、入地平线都淡出，避免凭空出现 */
-    const fade = Math.min(1, t / 0.07) * Math.min(1, (1 - t) / 0.07);
+    /* 出地平线淡入；落山时别急着消失，留一轮贴着地平线的红日，
+       否则晚霞最浓那几秒天上什么都没有 */
+    const fade = Math.min(1, t / 0.07) * Math.min(1, (1 - t) / 0.035);
     if (fade <= 0.01) return;
 
     const alt = Math.sin(t * Math.PI);
-    const r = sunSprite.r;
+    /* 贴地时按大气折射放大一点，落日才有一颗能看见的圆 */
+    const r = sunSprite.r * (1 + (1 - alt) * 0.3);
     const p = arcPos(t, r);
     const kill = celestialKill();
     if (kill <= 0.02) return;
@@ -1972,6 +2018,16 @@
     ctx.beginPath();
     ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
     ctx.fill();
+
+    /* 贴地时补一颗亮核：橙红的落日压在同色晚霞上会整个糊掉 */
+    if (alt < 0.4) {
+      const k = 1 - alt / 0.4;
+      ctx.globalAlpha = alpha * k * 0.92;
+      ctx.fillStyle = "#fff4d2";
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, r * (0.4 + 0.24 * k), 0, Math.PI * 2);
+      ctx.fill();
+    }
     ctx.restore();
   }
 
@@ -2012,7 +2068,7 @@
     const nightSky = phases.nightAmt;
     /* 夜里满星；天亮时按高次幂收掉，免得灰天里还挂着一片十字 */
     const base = Math.max(Math.pow(nightSky, 1.7) * 0.95, (isNight() ? 0.07 : 0.04) * (1 - nightSky))
-      * (1 - Math.min(1, phases.duskAmt * 0.85));
+      * (1 - Math.min(1, phases.duskAmt * 1.3));
     /* 演出的天塌下来：星星先一颗颗灭 */
     const kill = 1 - bloodAmt();
     const strength = base * kill;
@@ -2219,7 +2275,7 @@
     /* 每帧只算一次昼夜，日、月、星、云共用同一份 */
     const phases = skyPhases();
     /* 暗色主题的恐龙本来就是亮的，不用再提；浅色主题夜里才需要补光 */
-    nightLift = isNight() ? 0 : Math.min(1, Math.max(0, (phases.nightAmt - 0.25) / 0.35)) * phases.nightAmt;
+    nightLift = isNight() ? 0 : Math.min(1, Math.max(0, (phases.nightAmt - 0.55) / 0.3)) * phases.nightAmt;
     drawSky(phases);
     drawSun(phases);
     drawStars(phases);
@@ -2507,25 +2563,40 @@
     jump();
   });
 
-  document.addEventListener("hnyz:stylechange", () => {
-    readPalette();
-    buildSprites();
-    buildScenery();
-  });
+  /* 切风格会同时改 data-style 和 data-theme：两个监听如果各重建一遍，
+     一次切换就要烘两整套贴图。合并到下一帧，只做一次。 */
+  let rebuildQueued = false;
+  function scheduleRebuild() {
+    if (rebuildQueued) return;
+    rebuildQueued = true;
+    window.requestAnimationFrame(() => {
+      rebuildQueued = false;
+      readPalette();
+      /* 还没进过视口就不用烘，等 ensureBuilt 用新配色一次做完 */
+      if (!sprites.dino.length && !visible) return;
+      buildSprites();
+      buildScenery();
+    });
+  }
 
-  new MutationObserver(() => {
-    readPalette();
-    buildSprites();
-    buildScenery();
-  }).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+  document.addEventListener("hnyz:stylechange", scheduleRebuild);
+
+  new MutationObserver(scheduleRebuild).observe(root, {
+    attributes: true,
+    attributeFilter: ["data-theme"]
+  });
 
   /* 视口内才跑；离开时暂停，顺便让右下角的校徽让位 */
   function setVisible(next) {
     if (next === visible) return;
     visible = next;
     document.body.classList.toggle("is-dino-visible", visible);
-    if (visible) startLoop();
-    else stopLoop();
+    if (visible) {
+      ensureBuilt();
+      startLoop();
+    } else {
+      stopLoop();
+    }
   }
 
   if ("IntersectionObserver" in window) {
@@ -2554,11 +2625,18 @@
 
   window.addEventListener("scroll", syncVisibility, { passive: true });
   window.addEventListener("resize", syncVisibility);
-  syncVisibility();
+  /* 初始那次 getBoundingClientRect 会强制整页布局，正好撞在首屏上：
+     交给 IntersectionObserver 的首次回调，或在 load（布局已完成）后再校 */
+  if (document.readyState === "complete") syncVisibility();
+  else window.addEventListener("load", syncVisibility, { once: true });
 
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) stopLoop();
-    else if (visible) startLoop();
+    if (document.hidden) {
+      stopLoop();
+      flushHi();
+    } else if (visible) {
+      startLoop();
+    }
   });
 
   let resizeTimer = 0;
@@ -2575,7 +2653,6 @@
   /* -------------------------------------------------------
      六、启动
      ------------------------------------------------------- */
-  readPalette();
   measure();
   resetRun();
   setMode(mode, false);
@@ -2606,5 +2683,8 @@
   };
   window.__HNYZ_DINO__ = dinoDebug;
 
-  if (visible) startLoop();
+  if (visible) {
+    ensureBuilt();
+    startLoop();
+  }
 })();

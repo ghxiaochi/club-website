@@ -82,6 +82,7 @@
       empty.className = "gallery-empty";
       empty.textContent = "图集还是空的：在 js/gallery-data.js 里加一条，再把图片放进 images/gallery/。";
       grid.appendChild(empty);
+      updateCount();
       return;
     }
 

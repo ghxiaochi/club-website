@@ -138,7 +138,7 @@
       hacker: "find ./projects -maxdepth 2"
     },
     "archive-title": {
-      minimal: "全部<br>按人分",
+      minimal: "项目区",
       hacker: "所有仓库<br>皆可追溯"
     },
     "archive-intro": {

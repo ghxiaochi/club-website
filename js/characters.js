@@ -106,6 +106,7 @@
        音高统一交给下面的「滑动音阶」处理，避免一次划动响两遍 */
     slot.addEventListener("pointerenter", (event) => {
       if (event.pointerType !== "mouse") return;
+      warm(char);
       hop(slot);
     });
 
@@ -153,10 +154,18 @@
   }
 
   /* 指针落在第几个小人身上；在角色排外返回 -1 */
+  /* 舞台位置缓存：pointermove 是高频事件，不必每次都读布局 */
+  let stageRect = null;
+
+  function invalidateStageRect() {
+    stageRect = null;
+  }
+
   function noteAt(x, y) {
     if (noteSpots.length < 2) return -1;
 
-    const rect = stage.getBoundingClientRect();
+    if (!stageRect) stageRect = stage.getBoundingClientRect();
+    const rect = stageRect;
     const lx = x - rect.left;
     const ly = y - rect.top;
 
@@ -193,9 +202,14 @@
 
   measureNoteSpots();
   if (window.ResizeObserver) {
-    new ResizeObserver(measureNoteSpots).observe(stage);
+    new ResizeObserver(() => {
+      measureNoteSpots();
+      invalidateStageRect();
+    }).observe(stage);
   }
   window.addEventListener("load", measureNoteSpots);
+  window.addEventListener("scroll", invalidateStageRect, { passive: true });
+  window.addEventListener("resize", invalidateStageRect);
 
   stage.addEventListener("pointermove", (event) => {
     const index = noteAt(event.clientX, event.clientY);
@@ -265,19 +279,36 @@
      页面加载完就把 8 张高精度立绘拉下来，
      这样第一次点开角色卡不用等网络。
      ======================================================= */
-  function preloadArt() {
-    characters.forEach((char) => {
-      const img = new Image();
-      img.src = `images/characters/art-${char.id}.webp`;
+  const warmed = new Set();
 
-      (char.decor || []).forEach((src) => {
-        const decor = new Image();
-        decor.src = src;
-      });
+  /* 立绘 + 挨打贴图：按角色单独预热，鼠标扫到谁就先拉谁 */
+  function warm(char) {
+    if (!char || warmed.has(char.id)) return;
+    warmed.add(char.id);
+
+    const art = new Image();
+    art.src = `images/characters/art-${char.id}.webp`;
+
+    const hit = new Image();
+    hit.src = `images/characters/unit-${char.id}-hit.webp`;
+
+    (char.decor || []).forEach((src) => {
+      const decor = new Image();
+      decor.src = src;
     });
   }
 
-  /* 脚本是 defer 的，这里直接开始预载，越早越好 */
+  function preloadArt() {
+    /* 8 张立绘一共两百多 KB，刚进页面就全拉会和首屏图片抢带宽；
+       等空闲下来再补，hover 到谁就先拉谁 */
+    const run = () => characters.forEach(warm);
+    if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(run, { timeout: 3000 });
+    } else {
+      window.setTimeout(run, 1800);
+    }
+  }
+
   preloadArt();
 
   /* =======================================================
