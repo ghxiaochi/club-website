@@ -111,6 +111,8 @@
   let ash = [];
   /* 陨石砸完，恐龙就该消失了 */
   let hideDinos = false;
+  /* 夜色里给恐龙补一点月光，0~1 */
+  let nightLift = 0;
 
   let palette = {
     ink: "#e8f1ff",
@@ -126,6 +128,7 @@
 
   let sprites = {
     dino: [],
+    dinoNight: [],
     cacti: [],
     coin: [],
     ptero: [],
@@ -296,9 +299,9 @@
     ],
   ];
 
-  function paintDino(g, s, frame) {
+  function paintDino(g, s, frame, ink) {
     const rows = DINO_FRAMES[frame] || DINO_FRAMES[0];
-    g.fillStyle = dinoTone();
+    g.fillStyle = ink || dinoTone();
 
     for (let y = 0; y < rows.length; y += 1) {
       const line = rows[y];
@@ -456,6 +459,12 @@
     sprites.dino = [
       makeSprite(W_UNITS, H_UNITS, S, (g, s) => paintDino(g, s, 0)),
       makeSprite(W_UNITS, H_UNITS, S, (g, s) => paintDino(g, s, 1))
+    ];
+    /* 夜里天压到纯黑，深色恐龙就看不见了：另烘一套提亮的，按夜色交叉淡入 */
+    const moonlit = mixHex(dinoTone(), "#9db4d6", 0.55);
+    sprites.dinoNight = [
+      makeSprite(W_UNITS, H_UNITS, S, (g, s) => paintDino(g, s, 0, moonlit)),
+      makeSprite(W_UNITS, H_UNITS, S, (g, s) => paintDino(g, s, 1, moonlit))
     ];
     sprites.cacti = [0, 1, 2].map((variant) =>
       makeSprite(10, 13, S, (g, s) => paintCactus(g, s, variant))
@@ -2130,6 +2139,7 @@
   function drawDinos(frame) {
     if (hideDinos) return;
     const sprite = sprites.dino[frame];
+    const moonlit = nightLift > 0.02 ? sprites.dinoNight[frame] : null;
 
     /* 40 级起，跟随龙从波浪跟跳收紧成衔尾式齐冲 */
     const formation = level >= 40;
@@ -2138,7 +2148,8 @@
       const x = Math.round(startX - i * spacing);
       const lag = speed > 0 ? (i * spacing) / speed : 0;
       const y = i === 0 ? jumpY : trailY(formation ? Math.min(lag, 0.07) : lag);
-      ctx.globalAlpha = 1 - i * (formation ? 0.1 : 0.14);
+      const alpha = 1 - i * (formation ? 0.1 : 0.14);
+      ctx.globalAlpha = alpha;
 
       /* 领队辉光：里程碑发亮 / 无敌星金身 */
       if (i === 0 && starTimer > 0) {
@@ -2149,7 +2160,15 @@
         ctx.shadowBlur = 9 * stageGlow;
       }
 
-      ctx.drawImage(sprite, x, Math.round(groundY - H_UNITS * S + y));
+      const py = Math.round(groundY - H_UNITS * S + y);
+      if (moonlit) {
+        ctx.globalAlpha = alpha * (1 - nightLift);
+        ctx.drawImage(sprite, x, py);
+        ctx.globalAlpha = alpha * nightLift;
+        ctx.drawImage(moonlit, x, py);
+      } else {
+        ctx.drawImage(sprite, x, py);
+      }
       ctx.shadowBlur = 0;
     }
 
@@ -2199,6 +2218,8 @@
 
     /* 每帧只算一次昼夜，日、月、星、云共用同一份 */
     const phases = skyPhases();
+    /* 暗色主题的恐龙本来就是亮的，不用再提；浅色主题夜里才需要补光 */
+    nightLift = isNight() ? 0 : Math.min(1, Math.max(0, (phases.nightAmt - 0.25) / 0.35)) * phases.nightAmt;
     drawSky(phases);
     drawSun(phases);
     drawStars(phases);
