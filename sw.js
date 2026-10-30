@@ -21,8 +21,9 @@
 const VERSION = "20261101";
 const CACHE = `hnyz-v${VERSION}`;
 
-/* 站内根路径：GitHub Pages 上站点在 /club-website/ 子目录下，
-   直接用 "./" 解析，换域名或换仓库都不用改这里 */
+/* 站内根路径：用 "./" 就地解析，
+   不管挂在自定义域名的根目录，还是 ghxiaochi.github.io/club-website/ 子目录，
+   都不用改这一行 */
 const ROOT = new URL("./", self.location.href).href;
 
 /* 预缓存的 URL 必须和页面里引用的一模一样（连 ?v= 一起），

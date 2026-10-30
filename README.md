@@ -4,7 +4,7 @@
 
 整体是蓝白科技风：浅蓝底、白色卡片、深海军蓝文字。教学内容以 **Arduino 硬件编程**为主线。右下角有一个不署名的校徽，随页面滚动旋转，点击会说一句社团台词；「全部项目」页左下角还有 ghxiaochi 的像素头像彩蛋，点击若干次会出现隐藏台词。「全部项目」页的 ghxiaochi 分组顶部有个人主页横幅和三张贴纸；成员个人页里也有这只桌宠；独立「图集」页放着社团梗图；背景里还散着一层灰度小图标（校徽 / Arduino / token）缓慢浮动。项目卡片通过 **GitHub API** 读取仓库信息；首页展示前 6 个，完整列表在单独的「全部项目」页按成员折叠。遇到 403 限流、404 或网络异常会自动切换到本地缓存或降级卡片。
 
-- **线上地址**：<https://ghxiaochi.github.io/club-website/>
+- **线上地址**：<https://hnyzbcs.de5.net/>（自定义域名，`ghxiaochi.github.io/club-website/` 会 301 过来）
 - **仓库地址**：<https://github.com/ghxiaochi/club-website>
 - **QQ 群**：`1098931492`
 - **邮箱**：`483677268@qq.com`
@@ -150,7 +150,7 @@ club-website/
 
 ### 方式 B：本地服务器（推荐）
 
-在 `club-website/` 目录执行：
+在站点根目录执行：
 
 ```bash
 # Python 3
@@ -555,11 +555,10 @@ ghxiaochi 的个人主页横幅配置在 `js/members.js` 的 `window.HNYZ_PROFIL
 https://你的用户名.github.io/club-website/
 ```
 
-当前线上地址：
-
-```text
-https://ghxiaochi.github.io/club-website/
-```
+绑定自定义域名：仓库根放一个 `CNAME` 文件（内容是域名，不带协议），
+DNS 那边加一条 CNAME 指向 `你的用户名.github.io`，等 Pages 签好证书即可。
+本站现在是 `hnyzbcs.de5.net`，**根路径变成了 `/`**，
+所以 `404.html` 的 `<base href>` 和所有 `og:url` / `canonical` 都以它为准。
 
 ### 后续更新
 
@@ -594,7 +593,7 @@ Pages 会自动重新构建。如果页面还是旧版本，先强制刷新（`C
 - [ ] 页脚小恐龙会跑，能自己跳过仙人掌，点跑道 / 空格也能跳，撞到会重开
 - [ ] 首屏标语会打字轮播，输入 ↑↑↓↓←→←→BA 能进入黑客模式并自动退出
 - [ ] 系统开启「减少动态效果」时，所有内容立即可见、无动画
-- [ ] 访问一个不存在的路径（如 `/club-website/nope`）会看到终端风 404，回车能回首页
+- [ ] 访问一个不存在的路径（如 `/nope`）会看到终端风 404，回车能回首页
 - [ ] 手机浏览器菜单里有「添加到主屏幕」，装好后打开是无地址栏的独立窗口
 - [ ] 打开过一次之后断网刷新，首页和项目页仍能正常显示（Service Worker）
 - [ ] 首屏项目卡片角标显示 `STATIC`（说明读的是 `data/repos.json`，没打 GitHub API）
@@ -654,9 +653,9 @@ navigator.serviceWorker.getRegistrations().then(list => list.forEach(r => r.unre
 ### 15.2 404 页
 
 `404.html` 会被 GitHub Pages 用在**任意深度**的错误路径上，所以它不能用相对路径
-（`/club-website/foo/bar` 下 `css/style.css` 会被解析到 `/club-website/foo/css/…`）。
-文件开头用一行 `<base href="/club-website/">` 把引用钉在站点根目录——
-**换成自定义域名时改这一行**。
+（`/foo/bar` 下 `css/style.css` 会被解析到 `/foo/css/…`）。
+文件开头用一行 `<base href="/">` 把引用钉在站点根目录——
+站点在自定义域名下，根就是 `/`；**如果哪天退回二级路径部署，这一行要跟着改**。
 
 页面本身不依赖 `style.css`，样式全内联（约 4KB gzip），断网也能立刻打开；
 配色跟随 `localStorage` 里的主题，黑客风下自动切成纯黑 + 荧光绿。

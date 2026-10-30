@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex">
   <!-- 这个页面会被 GitHub Pages 在任意深度下返回，相对路径会失效，
-       所以用 <base> 把所有引用钉在站点根目录。换自定义域名时改这一行。 -->
-  <base href="/club-website/">
+       所以用 <base> 把所有引用钉在站点根目录。
+       站点现在挂在自定义域名（CNAME: hnyzbcs.de5.net）下，根就是 /；
+       以后若退回 ghxiaochi.github.io/club-website/，这一行要跟着改。 -->
+  <base href="/">
   <meta name="theme-color" content="#0b0f16">
   <title>404｜这条路径不存在 · HNYZ</title>
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
@@ -367,8 +369,9 @@
        用户能立刻看出是自己拼错了，还是收藏夹里的链接过期了。 */
     (function () {
       var path = location.pathname || "/";
-      /* 去掉仓库子路径，只留站内那一截；根路径给一个占位 */
-      path = path.replace(/^\/club-website/, "") || "/";
+      /* 站点挂在根路径下，路径本身就是站内的那一截；
+         顺手把结尾的斜杠去掉，免得显示成 "//" */
+      path = path.replace(/\/$/, "") || "/";
       var nodes = document.querySelectorAll("[data-path]");
       for (var i = 0; i < nodes.length; i += 1) nodes[i].textContent = path;
 
