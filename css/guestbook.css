@@ -201,7 +201,10 @@ html[data-style="minimal"][data-theme="dark"] .guestbook { --giscus-canvas: #0d1
 html[data-style="hacker"] .guestbook { --giscus-canvas: #0a0c10; }            /* dark_high_contrast */
 
 .guestbook__body[data-connected="1"] {
-  padding: 0;
+  /* 留一点内边距：giscus 自己的 .gsc-main 没有 padding，容器再归零的话
+     「0 条评论」会直接顶到边框上。这里垫的是 canvas 色（见下），
+     所以这一圈不会露出面板色，只是把内容往里推了一点 */
+  padding: 12px 14px 14px;
   background: var(--giscus-canvas);
 }
 
