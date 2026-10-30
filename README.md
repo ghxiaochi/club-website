@@ -734,4 +734,7 @@ GITHUB_TOKEN=ghp_xxx node scripts/fetch-repos.mjs
   不补这层的话，深色下会从灰蓝控件里透出一块站点的藏蓝，边界像贴歪的纸。
 - 接上之后 `[data-connected]` 会把外框的 padding 收成 0，让 iframe 直接贴住边框；
   iframe 也改成 `display: block`，不然行盒底部会留几像素基线缝。
-- 15 秒还没收到 giscus 的响应就判定为连不上，同样换成降级文案。
+- 20 秒还没收到 giscus 的响应就判定为连不上，换成降级文案。
+  但有两条例外：`Discussion not found`（空站正常状态，giscus 会在第一条评论时自建）
+  不算失败；iframe 高度已经被撑起来时也不算失败——内容都渲染出来了，
+  只是消息迟到，没必要把人推到「连不上」。

@@ -94,6 +94,25 @@
      而且它和 resizeHeight 是抢跑关系，同样一份代码一会儿好一会儿坏。 */
   var lastError = null;
 
+  /* 收到第一条 resizeHeight 就算接上了。抽成函数，
+     因为超时兜底那条路也要走到这里（见 render 里的 timer） */
+  function markAlive() {
+    if (alive) return;
+    alive = true;
+    window.clearTimeout(timer);
+    setState("connected", true);
+
+    var tip = body.querySelector("[data-guestbook-loading]");
+    if (tip) tip.remove();
+
+    /* 标记一下：CSS 靠它把外框的 padding 收掉，
+       让 iframe 贴住边框——不然白底 iframe 外面套一圈面板色，
+       看起来像贴在纸上的一张白纸 */
+    body.setAttribute("data-connected", "1");
+
+    pushTheme();
+  }
+
   window.addEventListener("message", function (event) {
     if (event.origin !== "https://giscus.app") return;
     if (!event.data || !event.data.giscus) return;
@@ -111,20 +130,7 @@
       return;
     }
 
-    if (alive) return;
-    alive = true;
-    window.clearTimeout(timer);
-    setState("connected", true);
-
-    var tip = body.querySelector("[data-guestbook-loading]");
-    if (tip) tip.remove();
-
-    /* 标记一下：CSS 靠它把外框的 padding 收掉，
-       让 iframe 贴住边框——不然白底 iframe 外面套一圈面板色，
-       看起来像贴在纸上的一张白纸 */
-    body.setAttribute("data-connected", "1");
-
-    pushTheme();
+    markAlive();
   });
 
   /* ---------- 未配置 ----------
@@ -210,14 +216,23 @@
 
     script.addEventListener("error", function () { renderUnavailable("client.js 加载失败"); });
 
-    /* 15 秒还没等到 giscus 的消息：多半是网络到不了，
+    /* 20 秒还没等到 giscus 的消息：多半是网络到不了，
        与其让用户盯着一块空白，不如把话说开。
-       前面接住的 error 优先——真配置错了，至少 debug 模式能看到原因 */
+       前面接住的 error 优先——真配置错了，至少 debug 模式能看到原因。
+
+       有一条例外：高度已经被撑起来，说明内容早就渲染了，只是 resize
+       消息迟到或者在路上丢了（弱网、代理、浏览器节流都可能）。
+       这种时候把人推到「连不上」比什么都不做更糟，直接按成功处理。 */
     timer = window.setTimeout(function () {
-      if (!alive && body.querySelector("iframe.giscus-frame")) {
-        renderUnavailable(lastError || "15 秒内没有收到 giscus 的响应");
+      if (alive) return;
+      var frame = body.querySelector("iframe.giscus-frame");
+      if (!frame) return;
+      if (frame.getBoundingClientRect().height > 200) {
+        markAlive();
+        return;
       }
-    }, 15000);
+      renderUnavailable(lastError || "20 秒内没有收到 giscus 的响应");
+    }, 20000);
 
     /* 别急着清空：giscus 的 iframe 要等 client.js 拉回来才注入，
        弱网下这段时间面板是空的，看起来像坏了。留一行 tail 顶着，
