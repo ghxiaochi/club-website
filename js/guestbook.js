@@ -119,10 +119,21 @@
     pushTheme();
   }
 
+  /* 名字要尽早改：giscus 把 iframe 插进来之后还要 4 秒才画好内容，
+     这中间读屏用户摸到留言板，会先听到一句英文的「Comments 框架」。
+     所以盯着 DOM，iframe 一出现就改名，改完就撤掉监听。 */
   function nameFrame() {
     var frame = body.querySelector("iframe.giscus-frame");
-    if (frame && frame.title !== "留言板评论区") frame.title = "留言板评论区";
+    if (!frame) return false;
+    if (frame.title !== "留言板评论区") frame.title = "留言板评论区";
+    return true;
   }
+
+  var frameWatcher = new MutationObserver(function () {
+    if (nameFrame()) frameWatcher.disconnect();
+  });
+  frameWatcher.observe(body, { childList: true, subtree: true });
+  if (nameFrame()) frameWatcher.disconnect();
 
   window.addEventListener("message", function (event) {
     if (event.origin !== "https://giscus.app") return;
