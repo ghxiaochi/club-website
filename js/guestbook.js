@@ -86,7 +86,14 @@
   /* giscus 会往父窗口发两类消息：
        { giscus: { resizeHeight } }  —— 正常渲染，顺手当作「活了」的信号
        { giscus: { error } }         —— 仓库没装 App、分类 ID 不对之类
-     第二种如果不管，访客会在白框里看到一行英文报错，所以接住它换成人话。 */
+     第二种如果不管，访客会在白框里看到一行英文报错，所以接住它换成人话。
+
+     但有一类 error 不是错误：全新仓库还没有任何 discussion 时，
+     giscus 会发 "Discussion not found"，然后等第一条评论时自己建一条。
+     把它当失败，等于给刚接线的留言板判死刑——线上第一次就踩了这个坑，
+     而且它和 resizeHeight 是抢跑关系，同样一份代码一会儿好一会儿坏。 */
+  var lastError = null;
+
   window.addEventListener("message", function (event) {
     if (event.origin !== "https://giscus.app") return;
     if (!event.data || !event.data.giscus) return;
@@ -95,6 +102,9 @@
 
     if (payload.error) {
       if (alive) return;
+      lastError = payload.error;
+      /* 空站的正常状态，放行，等它发 resizeHeight */
+      if (/not found|no discussion/i.test(payload.error)) return;
       alive = true;
       window.clearTimeout(timer);
       renderUnavailable(payload.error);
@@ -201,9 +211,12 @@
     script.addEventListener("error", function () { renderUnavailable("client.js 加载失败"); });
 
     /* 15 秒还没等到 giscus 的消息：多半是网络到不了，
-       与其让用户盯着一块空白，不如把话说开 */
+       与其让用户盯着一块空白，不如把话说开。
+       前面接住的 error 优先——真配置错了，至少 debug 模式能看到原因 */
     timer = window.setTimeout(function () {
-      if (!alive && body.querySelector("iframe.giscus-frame")) renderUnavailable("15 秒内没有收到 giscus 的响应");
+      if (!alive && body.querySelector("iframe.giscus-frame")) {
+        renderUnavailable(lastError || "15 秒内没有收到 giscus 的响应");
+      }
     }, 15000);
 
     /* 别急着清空：giscus 的 iframe 要等 client.js 拉回来才注入，
