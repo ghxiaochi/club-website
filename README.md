@@ -46,6 +46,10 @@ club-website/
 ├── index.html              # 首页
 ├── projects.html           # 全部项目页（按成员折叠）
 ├── gallery.html            # 图集页（瀑布流 + 灯箱）
+├── member.html             # 成员页
+├── 404.html                # 终端风 404（Pages 找不到路径时返回，站内任意深度都能用）
+├── manifest.webmanifest    # PWA 清单（名称、图标、快捷方式）
+├── sw.js                   # Service Worker：页面网络优先、资源缓存优先
 ├── css/
 │   ├── style.css           # 全站样式（蓝白科技风）
 │   ├── personal.css        # 深色主题、动效、彩蛋样式（在 style.css 之后加载）
@@ -54,7 +58,9 @@ club-website/
 │   ├── type.css            # 三套风格的字体栈（标题衬线 / 等宽 / 几何无衬线；棍木只有一行灰字）
 │   ├── motion.css          # 弹性动效层（统一回弹曲线，最后加载）
 │   ├── pet.css             # 右下角校徽背景板样式
-│   └── avatar-pet.css      # 左下角像素头像彩蛋样式
+│   ├── avatar-pet.css      # 左下角像素头像彩蛋样式
+│   ├── characters.css      # 音游角色舞台与立绘
+│   └── guestbook.css       # 留言板外框（终端风的标题条、等待态、降级文案）
 ├── assets/
 │   └── moon-sun-sprite.png # 60 帧月亮/太阳雪碧图（3240×54）
 ├── fonts/                  # 游戏原版像素字体（来自 assets.7z）
@@ -77,10 +83,23 @@ club-website/
 │   ├── theme-icon.js       # 主题按钮的月亮 / 太阳雪碧图帧动画
 │   ├── personal.js         # 打字机标语、滚动渐显、卡片倾斜、彩蛋
 │   ├── pet.js              # 校徽滚动旋转、点击说话
-│   └── avatar-pet.js       # 头像点击台词与彩蛋
+│   ├── avatar-pet.js       # 头像点击台词与彩蛋
+│   ├── guestbook.js        # 留言板：滚动到附近才加载 giscus，并跟随皮肤换主题
+│   └── pwa.js              # Service Worker 注册（load 之后空闲时）
+├── data/
+│   └── repos.json          # 项目快照（每天由 GitHub Actions 重写，前端优先读它）
+├── scripts/
+│   └── fetch-repos.mjs     # 抓取仓库数据 → data/repos.json
+├── .github/
+│   └── workflows/
+│       └── refresh-repos.yml  # 每天 05:17 跑一次上面的脚本
 ├── images/
 │   ├── favicon.svg
-│   ├── og-cover.png        # 1200×630 分享图
+│   ├── icon-192.png        # PWA 图标
+│   ├── icon-512.png
+│   ├── icon-maskable-512.png
+│   ├── apple-touch-icon.png
+│   ├── og-cover.jpg        # 1200×630 分享图（76KB，原来是 305KB 的 PNG）
 │   ├── project-website.svg # 社团官网封面
 │   ├── project-zaco.svg    # Zaco 猜数字封面
 │   ├── characters/          # 角色素材
@@ -575,6 +594,11 @@ Pages 会自动重新构建。如果页面还是旧版本，先强制刷新（`C
 - [ ] 页脚小恐龙会跑，能自己跳过仙人掌，点跑道 / 空格也能跳，撞到会重开
 - [ ] 首屏标语会打字轮播，输入 ↑↑↓↓←→←→BA 能进入黑客模式并自动退出
 - [ ] 系统开启「减少动态效果」时，所有内容立即可见、无动画
+- [ ] 访问一个不存在的路径（如 `/club-website/nope`）会看到终端风 404，回车能回首页
+- [ ] 手机浏览器菜单里有「添加到主屏幕」，装好后打开是无地址栏的独立窗口
+- [ ] 打开过一次之后断网刷新，首页和项目页仍能正常显示（Service Worker）
+- [ ] 首屏项目卡片角标显示 `STATIC`（说明读的是 `data/repos.json`，没打 GitHub API）
+- [ ] 留言板：滚到区块附近才加载；未配置时显示「还在装修 + 群号」，不是白色空框
 - [ ] 不依赖任何后端
 
 ---
@@ -592,3 +616,107 @@ A：成功请求会缓存 10 分钟，所以短时间内看到的是缓存值；
 
 **Q：可以加更多仓库吗？**  
 A：可以，`members` 没有数量上限。首页只展示前 6 个；更多项目会自动进入 `projects.html`，按成员折叠展示。
+
+---
+
+## 15. PWA、404 与项目快照
+
+这一节的三件事都是「补上缺的那块拼图」，彼此独立，可以单独关掉。
+
+### 15.1 添加到主屏幕（manifest + Service Worker）
+
+`manifest.webmanifest` 提供名称、图标和三个快捷方式（项目 / 图集 / 成员）。
+`sw.js` 负责离线，策略按资源类型分工：
+
+| 资源 | 策略 | 为什么 |
+|---|---|---|
+| HTML（`index.html` 等） | **网络优先，3.5 秒超时回退缓存** | 发版后第一次打开就是新的；弱网也不会对着白屏 |
+| 带 `?v=` 的 JS / CSS | **缓存优先** | 版本号是手工打的，URL 变内容必变，缓存不可能拿到错版本，命中就是 0ms |
+| 图片 / 音频 / 字体 / `data/repos.json` | **先给缓存，后台更新** | 下次打开生效；改一张图不用等版本号 |
+| 跨域（giscus、api.github.com） | 直接放行 | 第三方响应头我们控制不了，缓存下来只会制造难查的怪问题 |
+
+`js/pwa.js` 在 `load` 之后的空闲时间注册，四页共用。调试时可以临时关掉：
+
+```text
+https://…/index.html?nosw=1        # 本次不注册
+```
+
+想彻底注销（换域名、或者怀疑 SW 在捣乱）：
+
+```js
+navigator.serviceWorker.getRegistrations().then(list => list.forEach(r => r.unregister()));
+```
+
+**发版清单多了一步**：改四页 `?v=` 的同时，把 `sw.js` 顶部的 `VERSION` 也改掉。
+不改也能用（版本号机制保证不错版），只是旧版本的资源会一直留在缓存里。
+
+### 15.2 404 页
+
+`404.html` 会被 GitHub Pages 用在**任意深度**的错误路径上，所以它不能用相对路径
+（`/club-website/foo/bar` 下 `css/style.css` 会被解析到 `/club-website/foo/css/…`）。
+文件开头用一行 `<base href="/club-website/">` 把引用钉在站点根目录——
+**换成自定义域名时改这一行**。
+
+页面本身不依赖 `style.css`，样式全内联（约 4KB gzip），断网也能立刻打开；
+配色跟随 `localStorage` 里的主题，黑客风下自动切成纯黑 + 荧光绿。
+
+### 15.3 项目数据不再吃 API 额度
+
+匿名 GitHub API 只有 **60 次/小时/IP**，纳新季一个班同时打开页面就能打光。
+现在改成两级：
+
+1. `scripts/fetch-repos.mjs` 每天抓一次仓库元数据，写进 `data/repos.json`；
+2. 前端 `js/main.js` 优先读这份同域文件，**一次 API 都不消耗**；
+   快照里缺某个仓库、或文件读不到时，才回退到 GitHub API 实时请求。
+
+定时任务是 `.github/workflows/refresh-repos.yml`（21:17 UTC / 05:17 北京时间），
+也可以手动触发：仓库 **Actions → refresh-repos → Run workflow**。
+本地想跑一次：
+
+```bash
+node scripts/fetch-repos.mjs
+# 抓不到限流时带上 token
+GITHUB_TOKEN=ghp_xxx node scripts/fetch-repos.mjs
+```
+
+脚本有一条保护：**一个仓库都没抓到时不覆盖旧文件**，宁可数据旧一天，也不要线上突然全部降级。
+卡片的角标会显示 `STATIC`（全部来自快照）/ `CACHE`（本地缓存）/ `GITHUB_API`（实时）/ `DEGRADED`（有降级）。
+
+---
+
+## 16. 留言板（Giscus）
+
+留言数据存在仓库的 **Discussions** 里，没有后端、没有数据库，删库才会消失。
+
+### 16.1 三步接线
+
+1. 仓库 **Settings → General → Features** → 勾上 **Discussions**
+2. 给仓库安装 Giscus App：<https://github.com/apps/giscus>
+3. 打开 <https://giscus.app/zh-CN>，填仓库名 `ghxiaochi/club-website`，
+   映射方式选 **pathname**，挑一个分类，把生成的 `data-category` 与 `data-category-id`
+   抄进 `js/guestbook.js` 顶部的 `CONFIG.category` / `CONFIG.categoryId`
+
+两个值都为空时，留言板保持「装修中」的提示，**线上不会报错、不会出现白色空 iframe**。
+填好之后不需要改别的地方，下次打开自动生效。
+
+> 为什么映射用 `pathname` 而不是官方推荐的 `title`：
+> 本站有三套文案，同一个区块的标题在极简 / 黑客风下是不一样的。
+> 按标题映射的话，同一个人换个皮肤再来留言，会开出第二个 discussion，评论被劈成两半。
+
+### 16.2 它是怎么加载的
+
+- 用 `IntersectionObserver` 盯着留言板，滚到 500px 以内才插 `giscus.app/client.js`；
+  首屏不为它付任何代价。
+- giscus 会往父窗口发两种消息：`{giscus:{resizeHeight}}` 和 `{giscus:{error}}`。
+  后者（没装 App、分类 ID 不对）会被接住，换成一句人话 + 群号，
+  原始错误只在地址后面加 `?debug=1` 时才显示。
+- 皮肤 / 主题切换通过 `MutationObserver` 监听 `data-style` 与 `data-theme`，
+  再 `postMessage` 给 iframe，留言板跟着整站变色：
+
+  | 皮肤 | 浅色 | 深色 |
+  |---|---|---|
+  | 默认（蓝白科技） | `light` | `dark_dimmed` |
+  | 极简 / 棍木 | `light` | `dark` |
+  | 黑客 | — | `dark_high_contrast` |
+
+- 15 秒还没收到 giscus 的响应就判定为连不上，同样换成降级文案。

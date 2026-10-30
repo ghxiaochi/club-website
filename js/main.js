@@ -30,6 +30,12 @@
 
   const API_BASE = "https://api.github.com/repos";
 
+  /* 每天由 GitHub Actions 抓一次的静态快照。
+     为什么要有它：匿名 API 只有 60 次/小时/IP，纳新季一个班同时
+     打开页面就能把额度打光，之后所有人都是降级卡片。
+     读同域文件不受这个限制，断网时 Service Worker 里也有一份。 */
+  const STATIC_DATA_URL = "data/repos.json";
+
   /* 首页最多展示 6 张卡片；完整的项目列表在 projects.html 按成员折叠 */
   const HOME_LIMIT = 6;
 
@@ -70,6 +76,11 @@
 
   /* 这次加载命中了几次 10 分钟缓存；用于把状态显示成 CACHE */
   let cacheHits = 0;
+
+  /* 命中静态快照的次数 / 真正打到 API 的次数 / 那份文件的 Promise */
+  let staticHits = 0;
+  let apiHits = 0;
+  let staticStore = null;
 
   /* =======================================================
      三、工具函数
@@ -450,6 +461,19 @@
      - Promise.all 不会因为单个仓库失败而整体崩掉
      ======================================================= */
 
+  /* 读取 data/repos.json。整页只发一次请求，失败就记成 null，
+     后续所有仓库自动走 GitHub API —— 这条路径坏了不影响主流程。 */
+  function loadStaticStore() {
+    if (staticStore) return staticStore;
+
+    staticStore = fetch(STATIC_DATA_URL, { cache: "no-cache" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => (data && typeof data === "object" && data.repos ? data : null))
+      .catch(() => null);
+
+    return staticStore;
+  }
+
   async function fetchRepo(member) {
     const apiUrl = `${API_BASE}/${encodeURIComponent(member.user)}/${encodeURIComponent(member.repo)}`;
     const cacheKey = `${member.user}/${member.repo}`;
@@ -461,8 +485,20 @@
       return normalizeRepo(cached.data, member);
     }
 
+    /* 静态快照优先：它一天更新一次，stars 之类慢一两天无所谓，
+       换来的是一次请求都不消耗 API 额度。 */
+    const store = await loadStaticStore();
+    const snapshot = store && store.repos ? store.repos[cacheKey] : null;
+    if (snapshot) {
+      staticHits += 1;
+      /* 顺手落进本地缓存：哪一天快照文件缺了这个仓库，还有旧值兜底 */
+      setCachedRepo(cacheKey, snapshot);
+      return normalizeRepo(snapshot, member);
+    }
+
     /* GitHub 偶尔会挂住不返回：8 秒拿不到就放弃，卡片退回本地数据，
        免得整组一直停在「正在连接」 */
+    apiHits += 1;
     const controller = new AbortController();
     const timer = window.setTimeout(() => controller.abort(), 8000);
 
@@ -517,6 +553,8 @@
 
     notices.clear();
     cacheHits = 0;
+    staticHits = 0;
+    apiHits = 0;
 
     try {
       /* 首页只请求前 6 个仓库，避免一次消耗太多 GitHub API 配额 */
@@ -557,7 +595,10 @@
 
   /* 状态角标文案：有降级 > 有缓存 > 实时 API，优先级从高到低 */
   function currentMode() {
-    return notices.size ? "DEGRADED" : cacheHits ? "CACHE" : "GITHUB_API";
+    if (notices.size) return "DEGRADED";
+    /* 全部来自快照才算 STATIC；混着实时 API 的说法不诚实，按 API 标 */
+    if (staticHits && !apiHits) return "STATIC";
+    return cacheHits ? "CACHE" : "GITHUB_API";
   }
 
   /* 成员主页横幅：数据在 js/members.js 的 HNYZ_PROFILES 里，

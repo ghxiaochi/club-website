@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <!-- 这个页面会被 GitHub Pages 在任意深度下返回，相对路径会失效，
+       所以用 <base> 把所有引用钉在站点根目录。换自定义域名时改这一行。 -->
+  <base href="/club-website/">
+  <meta name="theme-color" content="#0b0f16">
+  <title>404｜这条路径不存在 · HNYZ</title>
+  <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preload" href="fonts/anim-pixel.ttf" as="font" type="font/ttf" crossorigin>
+  <script>
+    /* 跟整站一致：首帧前定好深浅色，避免闪一下 */
+    (function () {
+      try {
+        var saved = localStorage.getItem("hnyz:theme");
+        var theme = saved === "light" || saved === "dark"
+          ? saved
+          : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        if (localStorage.getItem("hnyz:style") === "hacker") theme = "dark";
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.dataset.style = localStorage.getItem("hnyz:style") || "default";
+      } catch (error) { /* 隐私模式 */ }
+    })();
+  </script>
+
+  <style>
+    @font-face {
+      font-family: "AnimPixel";
+      src: url("fonts/anim-pixel.ttf") format("truetype");
+      font-display: swap;
+    }
+
+    :root {
+      --mono: "SFMono-Regular", "Cascadia Code", "JetBrains Mono", Consolas,
+        "Liberation Mono", Menlo, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC",
+        "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+
+      --bg: #f5f9ff;
+      --panel: #ffffff;
+      --shell: #0b0f16;
+      --shell-edge: #1d2634;
+      --shell-text: #c9d6e8;
+      --shell-dim: #6f829c;
+      --accent: #58a6ff;
+      --ok: #3fb950;
+      --warn: #f0883e;
+      --err: #ff6b6b;
+      --line: #d7e3f4;
+      --ink: #0f2744;
+      --ink-soft: #526b89;
+      --shadow: 0 30px 80px rgba(23, 52, 97, 0.16);
+    }
+
+    html[data-theme="dark"] {
+      --bg: #060d1c;
+      --panel: #0c1424;
+      --line: #22304a;
+      --ink: #e6eefc;
+      --ink-soft: #8ba0be;
+      --shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+    }
+
+    /* 黑客风：整页纯黑，只留荧光绿，和站里那套皮肤对齐 */
+    html[data-style="hacker"] {
+      --bg: #000000;
+      --panel: #050505;
+      --shell: #000000;
+      --shell-edge: #123a1c;
+      --shell-text: #b9ffcf;
+      --shell-dim: #4d8a5f;
+      --accent: #4dff88;
+      --ok: #4dff88;
+      --line: #123a1c;
+      --ink: #d8ffe4;
+      --ink-soft: #6fae82;
+    }
+
+    *,
+    *::before,
+    *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      padding: clamp(20px, 4vw, 56px);
+      background:
+        radial-gradient(1200px 600px at 50% -20%, rgba(88, 166, 255, 0.12), transparent 60%),
+        var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    html[data-style="hacker"] body {
+      background: #000;
+    }
+
+    .wrap {
+      width: min(760px, 100%);
+      display: grid;
+      gap: 20px;
+    }
+
+    /* ---------- 标题条 ---------- */
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      color: var(--ink-soft);
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 26px;
+      height: 1px;
+      background: currentColor;
+      opacity: 0.5;
+    }
+
+    /* ---------- 终端窗口 ---------- */
+    .term {
+      background: var(--shell);
+      border: 1px solid var(--shell-edge);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      font-family: var(--mono);
+    }
+
+    .term__bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--shell-edge);
+    }
+
+    .term__dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ff5f57;
+    }
+
+    .term__dot:nth-child(2) { background: #febc2e; }
+    .term__dot:nth-child(3) { background: #28c840; }
+
+    .term__title {
+      margin-left: 8px;
+      font-size: 12px;
+      color: var(--shell-dim);
+      letter-spacing: 0.04em;
+    }
+
+    .term__body {
+      padding: clamp(18px, 3.2vw, 30px);
+      font-size: clamp(13px, 1.15vw, 14.5px);
+      line-height: 1.85;
+      color: var(--shell-text);
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      opacity: 0;
+      transform: translateY(6px);
+      animation: lineIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .row:nth-child(1) { animation-delay: 0.04s; }
+    .row:nth-child(2) { animation-delay: 0.16s; }
+    .row:nth-child(3) { animation-delay: 0.26s; }
+    .row:nth-child(4) { animation-delay: 0.36s; }
+    .row:nth-child(5) { animation-delay: 0.46s; }
+    .row:nth-child(6) { animation-delay: 0.56s; }
+
+    @keyframes lineIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .prompt { color: var(--ok); }
+    .err { color: var(--err); }
+    .dim { color: var(--shell-dim); }
+    .warn { color: var(--warn); }
+    .path { color: var(--accent); word-break: break-all; }
+
+    /* 404 大字：像素字体，和站里的像素元素同一套 */
+    .code {
+      margin: 22px 0 6px;
+      font-family: "AnimPixel", var(--mono);
+      font-size: clamp(64px, 16vw, 132px);
+      line-height: 0.9;
+      letter-spacing: 0.06em;
+      color: var(--shell-text);
+      opacity: 0;
+      animation: codeIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.62s forwards;
+    }
+
+    .code span { color: var(--accent); }
+
+    @keyframes codeIn {
+      from { opacity: 0; letter-spacing: 0.2em; }
+      to { opacity: 1; letter-spacing: 0.06em; }
+    }
+
+    .code-note {
+      margin: 0 0 20px;
+      font-size: 13px;
+      color: var(--shell-dim);
+      letter-spacing: 0.04em;
+      opacity: 0;
+      animation: lineIn 0.5s ease 0.78s forwards;
+    }
+
+    /* 光标 */
+    .caret {
+      display: inline-block;
+      width: 9px;
+      height: 15px;
+      translate: 0 2px;
+      background: var(--ok);
+      animation: blink 1.1s steps(1) infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    /* ---------- 命令按钮 ---------- */
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .cmd {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--ink);
+      font-family: var(--mono);
+      font-size: 13px;
+      text-decoration: none;
+      transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+                  border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .cmd:hover,
+    .cmd:focus-visible {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.16);
+    }
+
+    .cmd:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .cmd .sigil { color: var(--ok); }
+    .cmd--primary { background: var(--accent); border-color: var(--accent); color: #061223; }
+    .cmd--primary .sigil { color: #061223; opacity: 0.65; }
+
+    html[data-style="hacker"] .cmd {
+      background: #050505;
+      border-color: #123a1c;
+      color: #b9ffcf;
+    }
+
+    /* 主按钮必须排在 .cmd 之后再用 .cmd.cmd--primary 提高一级，
+       否则上面那条 hacker 配色会把绿底上的字也刷成绿，等于看不见 */
+    html[data-style="hacker"] .cmd.cmd--primary {
+      background: #4dff88;
+      border-color: #4dff88;
+      color: #001a0a;
+      box-shadow: 0 0 24px rgba(77, 255, 136, 0.28);
+    }
+
+    /* ---------- 页脚 ---------- */
+    .foot {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 14px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--ink-soft);
+    }
+
+    .foot a { color: inherit; text-decoration: none; border-bottom: 1px solid currentColor; }
+    .foot a:hover { color: var(--accent); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .row, .code, .code-note { animation: none; opacity: 1; transform: none; }
+      .caret { animation: none; }
+      .cmd { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <p class="eyebrow">HNYZ // error_report</p>
+
+    <section class="term" aria-labelledby="err-heading">
+      <div class="term__bar" aria-hidden="true">
+        <span class="term__dot"></span>
+        <span class="term__dot"></span>
+        <span class="term__dot"></span>
+        <span class="term__title">hnyz@club: ~</span>
+      </div>
+
+      <div class="term__body">
+        <p class="row"><span class="prompt">$</span> <span>cd <span class="path" data-path>/this-page</span></span></p>
+        <p class="row"><span class="err">bash: cd:</span> <span class="path" data-path>/this-page</span>: <span class="err">No such file or directory</span></p>
+
+        <h1 class="code" id="err-heading">4<span>0</span>4</h1>
+        <p class="code-note">page_not_found &nbsp;·&nbsp; 这个目录没有 index，也没有被人提交过</p>
+
+        <p class="row"><span class="prompt">$</span> <span class="dim">git log --all -- <span class="path" data-path>/this-page</span></span></p>
+        <p class="row"><span class="dim">fatal: your current branch 'main' does not have any commits yet</span></p>
+
+        <p class="row">
+          <span class="prompt">$</span>
+          <span class="caret" aria-hidden="true"></span>
+          <span class="dim">试试下面两条命令</span>
+        </p>
+      </div>
+    </section>
+
+    <nav class="actions" aria-label="返回">
+      <a class="cmd cmd--primary" href="./">
+        <span class="sigil" aria-hidden="true">$</span> cd ~/home
+      </a>
+      <a class="cmd" href="projects.html">
+        <span class="sigil" aria-hidden="true">$</span> ls ~/projects
+      </a>
+      <a class="cmd" href="gallery.html">
+        <span class="sigil" aria-hidden="true">$</span> open ~/gallery
+      </a>
+    </nav>
+
+    <p class="foot">
+      <span>// 也可能是链接少打了一个字母。</span>
+      <a href="./#join">找不到就来群里问一句 →</a>
+    </p>
+  </main>
+
+  <script>
+    /* 把真实路径填进终端里，比一句干巴巴的 404 有用：
+       用户能立刻看出是自己拼错了，还是收藏夹里的链接过期了。 */
+    (function () {
+      var path = location.pathname || "/";
+      /* 去掉仓库子路径，只留站内那一截；根路径给一个占位 */
+      path = path.replace(/^\/club-website/, "") || "/";
+      var nodes = document.querySelectorAll("[data-path]");
+      for (var i = 0; i < nodes.length; i += 1) nodes[i].textContent = path;
+
+      /* 回车回首页：终端页面的默认动作 */
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" && !event.metaKey && !event.ctrlKey) {
+          location.href = "./";
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

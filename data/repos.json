@@ -1,0 +1,65 @@
+{
+  "generatedAt": "2026-10-30T05:56:49Z",
+  "generator": "scripts/fetch-repos.mjs",
+  "count": 2,
+  "repos": {
+    "ghxiaochi/zaco-guess-number": {
+      "name": "zaco-guess-number",
+      "full_name": "ghxiaochi/zaco-guess-number",
+      "description": null,
+      "html_url": "https://github.com/ghxiaochi/zaco-guess-number",
+      "homepage": null,
+      "language": "C++",
+      "stargazers_count": 1,
+      "forks_count": 0,
+      "open_issues_count": 0,
+      "pushed_at": "2026-09-18T14:27:32Z",
+      "updated_at": "2026-10-05T12:54:13Z",
+      "archived": false,
+      "topics": [],
+      "owner": {
+        "login": "ghxiaochi"
+      }
+    },
+    "Anuken/animdustry": {
+      "name": "animdustry",
+      "full_name": "Anuken/animdustry",
+      "description": "the anime gacha rhythm game",
+      "html_url": "https://github.com/Anuken/animdustry",
+      "homepage": "",
+      "language": "Nim",
+      "stargazers_count": 285,
+      "forks_count": 16,
+      "open_issues_count": 7,
+      "pushed_at": "2026-03-26T00:35:07Z",
+      "updated_at": "2026-10-26T19:32:12Z",
+      "archived": false,
+      "topics": [],
+      "owner": {
+        "login": "Anuken"
+      }
+    }
+  },
+  "missing": [
+    {
+      "key": "ghxiaochi/club-website",
+      "reason": "HTTP 403"
+    },
+    {
+      "key": "ghxiaochi/zaco-guess-number",
+      "reason": "HTTP 403"
+    },
+    {
+      "key": "ghxiaochi/led",
+      "reason": "HTTP 403"
+    },
+    {
+      "key": "vveyin/DrawFunc",
+      "reason": "HTTP 403"
+    },
+    {
+      "key": "Anuken/animdustry",
+      "reason": "HTTP 403"
+    }
+  ]
+}

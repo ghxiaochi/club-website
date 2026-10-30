@@ -44,15 +44,15 @@
   <meta property="og:url" content="https://ghxiaochi.github.io/club-website/">
   <meta property="og:site_name" content="HNYZ · 衡南一中编程社">
   <meta property="og:locale" content="zh_CN">
-  <meta property="og:image" content="https://ghxiaochi.github.io/club-website/images/og-cover.png">
-  <meta property="og:image:type" content="image/png">
+  <meta property="og:image" content="https://ghxiaochi.github.io/club-website/images/og-cover.jpg">
+  <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="HNYZ 衡南一中编程社：把想法，写成代码。">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="HNYZ｜衡南一中编程社">
   <meta name="twitter:description" content="把想法，写成代码。">
-  <meta name="twitter:image" content="https://ghxiaochi.github.io/club-website/images/og-cover.png">
+  <meta name="twitter:image" content="https://ghxiaochi.github.io/club-website/images/og-cover.jpg">
   <meta name="twitter:image:alt" content="HNYZ 衡南一中编程社：把想法，写成代码。">
   <link rel="canonical" href="https://ghxiaochi.github.io/club-website/">
 
@@ -60,29 +60,39 @@
 
   <!-- 站点图标与样式。全部使用本地文件，无外部依赖。 -->
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/style.css?v=20261095">
-  <link rel="stylesheet" href="css/pet.css?v=20261025b">
-  <link rel="stylesheet" href="css/personal.css?v=20261095">
-  <link rel="stylesheet" href="css/avatar-pet.css?v=20261057">
-  <link rel="stylesheet" href="css/skins.css?v=20261098">
-  <link rel="stylesheet" href="css/type.css?v=20261095">
-  <link rel="stylesheet" href="css/motion.css?v=20261095">
-  <link rel="stylesheet" href="css/dino.css?v=20261095">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="application-name" content="HNYZ">
+  <meta name="apple-mobile-web-app-title" content="HNYZ">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" href="css/style.css?v=20261099">
+  <link rel="stylesheet" href="css/pet.css?v=20261099">
+  <link rel="stylesheet" href="css/personal.css?v=20261099">
+  <link rel="stylesheet" href="css/avatar-pet.css?v=20261099">
+  <link rel="stylesheet" href="css/skins.css?v=20261099">
+  <link rel="stylesheet" href="css/type.css?v=20261099">
+  <link rel="stylesheet" href="css/motion.css?v=20261099">
+  <link rel="stylesheet" href="css/dino.css?v=20261099">
+  <link rel="stylesheet" href="css/guestbook.css?v=20261099">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <!-- 项目卡片、全部项目折叠页和复制按钮由 js/main.js 驱动 -->
-  <script src="js/sfx.js?v=20261095" defer></script>
-  <script src="js/theme.js?v=20261095" defer></script>
-  <script src="js/theme-icon.js?v=20261095" defer></script>
-  <script src="js/members.js?v=20261034" defer></script>
-  <script src="js/main.js?v=20261095" defer></script>
-  <script src="js/pet.js?v=20261025c" defer></script>
-  <script src="js/avatar-pet.js?v=20261095" defer></script>
-  <script src="js/personal.js?v=20261095" defer></script>
-  <script src="js/click-fx.js?v=20261058" defer></script>
-  <script src="js/skins.js?v=20261098" defer></script>
-  <script src="js/matrix.js?v=20261095" defer></script>
-  <script src="js/copy.js?v=20261095" defer></script>
+  <script src="js/sfx.js?v=20261099" defer></script>
+  <script src="js/theme.js?v=20261099" defer></script>
+  <script src="js/theme-icon.js?v=20261099" defer></script>
+  <script src="js/members.js?v=20261099" defer></script>
+  <script src="js/main.js?v=20261099" defer></script>
+  <script src="js/pet.js?v=20261099" defer></script>
+  <script src="js/avatar-pet.js?v=20261099" defer></script>
+  <script src="js/personal.js?v=20261099" defer></script>
+  <script src="js/click-fx.js?v=20261099" defer></script>
+  <script src="js/skins.js?v=20261099" defer></script>
+  <script src="js/matrix.js?v=20261099" defer></script>
+  <script src="js/copy.js?v=20261099" defer></script>
+  <script src="js/pwa.js?v=20261099" defer></script>
+  <script src="js/guestbook.js?v=20261099" defer></script>
   <script>
     /* 页脚跑道不参与首屏：等 load 之后浏览器空闲了再拉脚本，
        用户提前往下滚也会立刻加载。少 80KB 的解析，首屏能早一点可交互。 */
@@ -92,7 +102,7 @@
         if (loaded) return;
         loaded = true;
         var script = document.createElement("script");
-        script.src = "js/dino.js?v=20261096";
+        script.src = "js/dino.js?v=20261099";
         script.async = true;
         document.body.appendChild(script);
       }
@@ -156,6 +166,7 @@
           <li><a href="#wall">资源墙</a></li>
           <li><a href="gallery.html">图集</a></li>
           <li><a href="#faq">FAQ</a></li>
+          <li><a href="#guestbook">留言板</a></li>
         </ul>
         <a class="nav-cta" href="#join">
           加入我们
@@ -394,7 +405,8 @@
           <p class="section-label">03 / GITHUB_REPOS</p>
           <h2 id="projects-title" data-copy="projects-title">从仓库里<br>长出来的作品</h2>
           <p class="section-intro" data-copy="projects-intro">
-            项目卡片通过 GitHub API 实时读取。想换项目，只要修改
+            卡片读的是 <code>data/repos.json</code>——每天凌晨由 GitHub Actions
+            抓一次的仓库快照，不消耗任何人的 API 额度。想换项目，只要修改
             <code>js/members.js</code> 里的 <code>HNYZ_MEMBERS</code> 数组；
             想换封面，就填 <code>coverImg</code>，留空会自动生成科技网格占位图。
             首页展示前 6 个，更多项目在「全部项目」页按成员折叠展示。
@@ -591,10 +603,46 @@
               <span class="faq-icon" aria-hidden="true"></span>
             </summary>
             <div class="faq-answer">
-              <p>由 <code>js/main.js</code> 通过 GitHub API 实时读取 <code>js/members.js</code> 里的仓库信息。首页最多展示前 6 个，完整列表在「全部项目」页按成员折叠。遇到 403 限流、404 或网络异常时，会自动切换到本地缓存或降级卡片，页面不会空白。</p>
+              <p>由 <code>js/main.js</code> 读取 <code>data/repos.json</code>——一份每天凌晨由 GitHub Actions 抓好的仓库快照，<strong>不消耗你的 API 额度</strong>。快照里缺某个仓库、或者文件读不到时，才会回退到 GitHub API 实时请求；再不行还有本地缓存和降级卡片，页面不会空白。</p>
             </div>
           </details>
         </div>
+      </div>
+    </section>
+
+    <!-- ========== 留言板 ========== -->
+    <section class="section" id="guestbook" aria-labelledby="guestbook-title">
+      <div class="container">
+        <div class="section-head">
+          <p class="section-label">07 / GUESTBOOK</p>
+          <h2 id="guestbook-title" data-copy="guestbook-title">留一句话<br>给下一个人看</h2>
+          <p class="section-intro" data-copy="guestbook-note">
+            留言用 GitHub 账号发表，存在仓库的 Discussions 里。不设匿名，
+            也没有第三方服务器——删库才会消失。
+          </p>
+        </div>
+
+        <div class="guestbook">
+          <div class="guestbook__bar">
+            <span class="guestbook__dot" aria-hidden="true"></span>
+            <span class="guestbook__dot" aria-hidden="true"></span>
+            <span class="guestbook__dot" aria-hidden="true"></span>
+            <code class="guestbook__path">~/hnyz/guestbook.log</code>
+            <span class="guestbook__state" data-guestbook-state aria-live="polite">standby</span>
+          </div>
+
+          <div class="guestbook__body" data-guestbook-body>
+            <p class="guestbook__loading">
+              <span>$ tail -f ~/hnyz/guestbook.log</span>
+              <span class="guestbook__caret" aria-hidden="true"></span>
+            </p>
+            <p class="guestbook__hint">滚动到这里才开始连接 GitHub，不拖首屏。</p>
+          </div>
+        </div>
+
+        <noscript>
+          <p class="guestbook__fallback">留言板需要 JavaScript：它只是 GitHub Discussions 的一个壳。</p>
+        </noscript>
       </div>
     </section>
 
@@ -603,7 +651,7 @@
       <div class="container">
         <div class="join-panel">
           <div class="join-copy">
-            <p class="section-label section-label--light">07 / JOIN_US</p>
+            <p class="section-label section-label--light">08 / JOIN_US</p>
             <h2 id="join-title" data-copy="join-title">下一次活动<br>来坐坐</h2>
             <p class="join-lead" data-copy="join-lead">
               不限年级与班级，零基础也欢迎。先进群看看大家在做什么，

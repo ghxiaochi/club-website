@@ -93,7 +93,7 @@
     "projects-intro": {
       minimal: "在 GitHub 上。",
       hacker:
-        "// 仓库是唯一可信的叙事。元数据由 API 实时拉取，本地缓存只负责降级；首页暴露前 6 个入口，其余按作者归档，等待被索引。"
+        "// 仓库是唯一可信的叙事。元数据由每日构建的静态快照喂给页面，API 只在前者缺失时兜底；首页暴露前 6 个入口，其余按作者归档，等待被索引。"
     },
     "schedule-title": {
       minimal: "每周两次",
@@ -116,6 +116,15 @@
     "faq-title": {
       minimal: "问题",
       hacker: "接入之前<br>先读文档"
+    },
+    "guestbook-title": {
+      minimal: "留言",
+      hacker: "把评论<br>提交到 upstream"
+    },
+    "guestbook-note": {
+      minimal: "GitHub 账号发表，存进 Discussions。",
+      hacker:
+        "// 无匿名、无中间层。每条评论都是仓库里的一条 discussion，删库才会消失。"
     },
     "join-title": {
       minimal: "来",

@@ -1,0 +1,198 @@
+/* =========================================================
+   HNYZ · 留言板外框
+   ---------------------------------------------------------
+   giscus 的 iframe 自带样式，这里只负责外面那层：
+   终端风的标题条、等待态、配置未完成时的说明。
+   配色全部走站点变量，四套皮肤自动跟随，不额外写媒体查询。
+   ========================================================= */
+
+.guestbook {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--panel);
+  overflow: hidden;
+  box-shadow: 0 18px 44px rgba(23, 52, 97, 0.06);
+}
+
+html[data-theme="dark"] .guestbook {
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.45);
+}
+
+.guestbook__bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel-2);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.guestbook__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ff5f57;
+  flex: none;
+}
+
+.guestbook__dot:nth-child(2) { background: #febc2e; }
+.guestbook__dot:nth-child(3) { background: #28c840; }
+
+.guestbook__path {
+  margin-left: 6px;
+  color: var(--text-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.guestbook__state {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  color: var(--dim);
+}
+
+.guestbook__state::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.45;
+}
+
+.guestbook__state[data-live="on"] {
+  color: var(--green);
+}
+
+.guestbook__state[data-live="on"]::before {
+  opacity: 1;
+  box-shadow: 0 0 0 3px var(--green-soft);
+}
+
+.guestbook__body {
+  padding: clamp(14px, 2.2vw, 22px);
+  /* 只给待机态留个底：真接上 giscus 之后 iframe 会自己撑开 */
+  min-height: 132px;
+}
+
+/* ---------- 等待态 ---------- */
+.guestbook__loading {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-family: var(--mono);
+  font-size: 0.84rem;
+  color: var(--muted);
+}
+
+.guestbook__caret {
+  display: inline-block;
+  width: 8px;
+  height: 14px;
+  background: var(--green);
+  animation: guestbookBlink 1.1s steps(1) infinite;
+}
+
+@keyframes guestbookBlink {
+  50% { opacity: 0; }
+}
+
+.guestbook__hint {
+  margin: 10px 0 0;
+  font-size: 0.8rem;
+  color: var(--dim);
+}
+
+/* ---------- 配置未完成 ---------- */
+.guestbook__setup {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  line-height: 1.9;
+  color: var(--text-soft);
+}
+
+.guestbook__setup p { margin: 0; }
+
+/* 站点的 reset 把 ol 的编号清掉了，这里用计数器补回来，
+   顺便做成终端里那种 01. 02. 03. 的样子 */
+.guestbook__setup ol {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: gb-step;
+}
+
+.guestbook__setup li {
+  position: relative;
+  margin-bottom: 6px;
+  padding-left: 2.4em;
+  counter-increment: gb-step;
+}
+
+.guestbook__setup li::before {
+  content: "0" counter(gb-step) ".";
+  position: absolute;
+  left: 0;
+  color: var(--dim);
+}
+.guestbook__setup code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--blue-soft);
+  color: var(--blue-bright);
+  font-size: 0.94em;
+}
+
+html[data-style="hacker"] .guestbook__setup code {
+  background: rgba(77, 255, 136, 0.12);
+  color: #4dff88;
+}
+
+.guestbook__setup-note {
+  margin-top: 12px;
+  color: var(--dim);
+}
+
+/* ---------- 加载失败 ---------- */
+.guestbook__fallback {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.84rem;
+  line-height: 1.9;
+  color: var(--muted);
+}
+
+.guestbook__fallback a {
+  color: var(--blue);
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+}
+
+/* giscus 自己会撑满宽度，这里只修掉它默认的上下留白 */
+.guestbook__body .giscus,
+.guestbook__body .giscus-frame {
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guestbook__caret { animation: none; }
+}
+
+/* 只有 ?debug=1 时出现：把 giscus 的原始错误留给维护者 */
+.guestbook__debug {
+  margin: 10px 0 0;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  color: var(--dim);
+  word-break: break-all;
+}

@@ -1,0 +1,49 @@
+name: refresh-repos
+
+# 每天把项目数据抓成 data/repos.json 提交回仓库。
+# 前端读这份文件，就再也不吃 GitHub API 那 60 次/小时的匿名额度。
+#
+# 21:17 UTC = 次日 05:17（北京时间）。挑这个点是因为：
+# 早上第一个打开网站的人，看到的一定是当天的新数据。
+
+on:
+  schedule:
+    - cron: "17 21 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-repos
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Fetch repository metadata
+        env:
+          # 仓库自带的 token 每小时有 5000 次额度，抓 5 个仓库绰绰有余
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/fetch-repos.mjs
+
+      - name: Commit if changed
+        run: |
+          if [ -z "$(git status --porcelain data/repos.json)" ]; then
+            echo "数据没有变化，跳过提交"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/repos.json
+          git commit -m "chore(data): 刷新项目快照（$(date -u +%Y-%m-%d)）"
+          git push
