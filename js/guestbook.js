@@ -110,7 +110,18 @@
        看起来像贴在纸上的一张白纸 */
     body.setAttribute("data-connected", "1");
 
+    /* giscus 给 iframe 的 title 是写死的英文 "Comments"，
+       读屏会念成「Comments 框架」。中文站换个中文说法。
+       它偶尔会在重渲染时把 title 刷回去，所以过一会儿再确认一次。 */
+    nameFrame();
+    window.setTimeout(nameFrame, 900);
+
     pushTheme();
+  }
+
+  function nameFrame() {
+    var frame = body.querySelector("iframe.giscus-frame");
+    if (frame && frame.title !== "留言板评论区") frame.title = "留言板评论区";
   }
 
   window.addEventListener("message", function (event) {
