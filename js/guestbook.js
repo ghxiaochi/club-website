@@ -9,9 +9,9 @@
    3. 配置没填、或者 GitHub 连不上时，给一块说人话的说明，
       而不是一个白色的空 iframe。
 
-   ⚠ 配置在 CONFIG 里。category / categoryId 需要先去
-     https://giscus.app/zh-CN 生成（见 README 的「留言板」一节）。
-     两个都为空时留言板保持「未接线」状态，线上不会报错。
+   配置在 CONFIG 里，已接线（2026-10-30）。category / categoryId 之后如果
+   要换分类，去 https://giscus.app/zh-CN 重新生成再抄进来即可；
+   两个值被清空时，留言板自动退回「装修中」状态，线上不会报错。
    ========================================================= */
 
 (function () {
@@ -27,16 +27,18 @@
     repo: "ghxiaochi/club-website",
     /* 仓库的 node_id，公开信息，可以在 api.github.com/repos/… 里查到 */
     repoId: "R_kgDOVVfRIw",
-    /* ↓ 这两个去 giscus.app 生成后填进来，留言板才会真正出现 */
-    category: "",
-    categoryId: "",
+    /* 分类用 General：giscus 会在里面按 pathname 建 discussion。
+       换成别的分类要一起去 giscus.app 重新生成 category-id */
+    category: "General",
+    categoryId: "DIC_kwDOVVfRI84DKAf-",
     /* 用 pathname 而不是 title：站点有三套文案，同一个区块的标题
        在极简 / 黑客风下是不一样的。按 title 映射的话，同一个人换个皮肤
        再留言，就会开出第二个 discussion，评论被劈成两半。 */
     mapping: "pathname",
     strict: "0",
     reactions: "1",
-    inputPosition: "top",
+    /* bottom：先看已有的留言，再写自己的。新站没人留言时也不显得空 */
+    inputPosition: "bottom",
     lang: "zh-CN"
   };
 
@@ -106,6 +108,11 @@
 
     var tip = body.querySelector("[data-guestbook-loading]");
     if (tip) tip.remove();
+
+    /* 标记一下：CSS 靠它把外框的 padding 收掉，
+       让 iframe 贴住边框——不然白底 iframe 外面套一圈面板色，
+       看起来像贴在纸上的一张白纸 */
+    body.setAttribute("data-connected", "1");
 
     pushTheme();
   });

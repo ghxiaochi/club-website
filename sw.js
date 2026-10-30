@@ -18,12 +18,17 @@
    发版时改 VERSION，旧缓存会在 activate 里被清掉。
    ========================================================= */
 
-const VERSION = "v20261099";
-const CACHE = `hnyz-${VERSION}`;
+const VERSION = "20261101";
+const CACHE = `hnyz-v${VERSION}`;
 
 /* 站内根路径：GitHub Pages 上站点在 /club-website/ 子目录下，
    直接用 "./" 解析，换域名或换仓库都不用改这里 */
 const ROOT = new URL("./", self.location.href).href;
+
+/* 预缓存的 URL 必须和页面里引用的一模一样（连 ?v= 一起），
+   否则 cache.match 精确匹配不到，离线时还是一张白页。
+   所以版本号只在这里写一次，下面统一拼上去。 */
+const V = `?v=${VERSION}`;
 
 const CORE = [
   "./",
@@ -34,21 +39,21 @@ const CORE = [
   "./404.html",
   "./manifest.webmanifest",
   "./data/repos.json",
-  "./css/style.css",
-  "./css/type.css",
-  "./css/motion.css",
-  "./css/skins.css",
-  "./css/personal.css",
-  "./css/pet.css",
-  "./css/avatar-pet.css",
-  "./css/guestbook.css",
-  "./js/main.js",
-  "./js/members.js",
-  "./js/copy.js",
-  "./js/theme.js",
-  "./js/skins.js",
-  "./js/pwa.js",
-  "./js/guestbook.js",
+  `./css/style.css${V}`,
+  `./css/type.css${V}`,
+  `./css/motion.css${V}`,
+  `./css/skins.css${V}`,
+  `./css/personal.css${V}`,
+  `./css/pet.css${V}`,
+  `./css/avatar-pet.css${V}`,
+  `./css/guestbook.css${V}`,
+  `./js/main.js${V}`,
+  `./js/members.js${V}`,
+  `./js/copy.js${V}`,
+  `./js/theme.js${V}`,
+  `./js/skins.js${V}`,
+  `./js/pwa.js${V}`,
+  `./js/guestbook.js${V}`,
   "./images/favicon.svg",
   "./images/icon-192.png"
 ];

@@ -184,6 +184,35 @@ html[data-style="hacker"] .guestbook__setup code {
   width: 100%;
 }
 
+/* ---------- 接线之后 ----------
+   iframe 默认是 inline，行盒底部会留几像素基线缝；
+   外框的 padding 也会让白底内容旁边多出一圈面板色。
+   这两件事都只在「没内容」时好看，接上 giscus 就该收掉。
+
+   giscus 的 iframe 自己是透明底，底色得由这层补。
+   不补的话，深色模式下会从 giscus 的灰蓝控件里透出一块站点的藏蓝，
+   边界像贴歪的纸。--giscus-canvas 取的是各主题自己的 canvas 色。 */
+.guestbook {
+  --giscus-canvas: #ffffff; /* light */
+}
+
+html[data-theme="dark"] .guestbook { --giscus-canvas: #22272e; }              /* dark_dimmed */
+html[data-style="minimal"][data-theme="dark"] .guestbook { --giscus-canvas: #0d1117; } /* dark */
+html[data-style="hacker"] .guestbook { --giscus-canvas: #0a0c10; }            /* dark_high_contrast */
+
+.guestbook__body[data-connected="1"] {
+  padding: 0;
+  background: var(--giscus-canvas);
+}
+
+.guestbook__body iframe.giscus-frame {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: var(--giscus-canvas);
+  color-scheme: normal;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .guestbook__caret { animation: none; }
 }

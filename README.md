@@ -598,7 +598,8 @@ Pages 会自动重新构建。如果页面还是旧版本，先强制刷新（`C
 - [ ] 手机浏览器菜单里有「添加到主屏幕」，装好后打开是无地址栏的独立窗口
 - [ ] 打开过一次之后断网刷新，首页和项目页仍能正常显示（Service Worker）
 - [ ] 首屏项目卡片角标显示 `STATIC`（说明读的是 `data/repos.json`，没打 GitHub API）
-- [ ] 留言板：滚到区块附近才加载；未配置时显示「还在装修 + 群号」，不是白色空框
+- [ ] 留言板：滚到区块附近才加载；登录后能直接发评论；切皮肤时 iframe 跟着换主题
+- [ ] 留言板连不上时显示「群号 + Discussions 链接」，不是白色空框（`?debug=1` 看原始错误）
 - [ ] 不依赖任何后端
 
 ---
@@ -688,16 +689,26 @@ GITHUB_TOKEN=ghp_xxx node scripts/fetch-repos.mjs
 
 留言数据存在仓库的 **Discussions** 里，没有后端、没有数据库，删库才会消失。
 
-### 16.1 三步接线
+### 16.1 接线状态
 
-1. 仓库 **Settings → General → Features** → 勾上 **Discussions**
-2. 给仓库安装 Giscus App：<https://github.com/apps/giscus>
-3. 打开 <https://giscus.app/zh-CN>，填仓库名 `ghxiaochi/club-website`，
-   映射方式选 **pathname**，挑一个分类，把生成的 `data-category` 与 `data-category-id`
-   抄进 `js/guestbook.js` 顶部的 `CONFIG.category` / `CONFIG.categoryId`
+已接线（2026-10-30），配置写在 `js/guestbook.js` 的 `CONFIG` 里：
 
-两个值都为空时，留言板保持「装修中」的提示，**线上不会报错、不会出现白色空 iframe**。
-填好之后不需要改别的地方，下次打开自动生效。
+| 项 | 值 |
+|---|---|
+| 仓库 | `ghxiaochi/club-website` |
+| `repoId` | `R_kgDOVVfRIw` |
+| 分类 | `General` |
+| `categoryId` | `DIC_kwDOVVfRI84DKAf-` |
+| 映射 | `pathname` |
+| 输入框位置 | `bottom` |
+
+换分类或换仓库时，去 <https://giscus.app/zh-CN> 重新生成后抄这两个值即可，
+别的都不用动。把 `category` / `categoryId` 清空，留言板会自动退回
+「装修中 + 群号」的提示，**线上不会报错、不会出现白色空 iframe**。
+
+> 分类用 `General` 而不是 `Announcements` 也能跑，区别在于：
+> Announcements 类型只有维护者和 giscus 机器人能开新帖，别人没法在
+> Discussions 里手动建一条打乱 `pathname` 映射。想更干净就把分类换过去。
 
 > 为什么映射用 `pathname` 而不是官方推荐的 `title`：
 > 本站有三套文案，同一个区块的标题在极简 / 黑客风下是不一样的。
@@ -719,4 +730,9 @@ GITHUB_TOKEN=ghp_xxx node scripts/fetch-repos.mjs
   | 极简 / 棍木 | `light` | `dark` |
   | 黑客 | — | `dark_high_contrast` |
 
+- giscus 的 iframe 是**透明底**，底色由外层 `--giscus-canvas` 给，
+  取的是上面四个主题各自的 canvas 色（`#ffffff` / `#22272e` / `#0d1117` / `#0a0c10`）。
+  不补这层的话，深色下会从灰蓝控件里透出一块站点的藏蓝，边界像贴歪的纸。
+- 接上之后 `[data-connected]` 会把外框的 padding 收成 0，让 iframe 直接贴住边框；
+  iframe 也改成 `display: block`，不然行盒底部会留几像素基线缝。
 - 15 秒还没收到 giscus 的响应就判定为连不上，同样换成降级文案。
