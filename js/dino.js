@@ -839,6 +839,14 @@
        这里再建一次等于把刚推迟的工作又拉回主线程 */
     if (sprites.dino.length) buildSprites();
     updateScore(true);
+
+    /* 新一局开始：天梯页收到后收起成绩表单，
+       否则玩家重开之后表单还挂着上一局的分数 */
+    try {
+      strip.dispatchEvent(new CustomEvent("dino:start", { bubbles: true }));
+    } catch (error) {
+      /* 老内核没有 CustomEvent，忽略 */
+    }
   }
 
   /* 最高分落盘节流：跑动时分数每几十毫秒就涨一分，
