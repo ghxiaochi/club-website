@@ -47,6 +47,7 @@ club-website/
 ├── projects.html           # 全部项目页（按成员折叠）
 ├── gallery.html            # 图集页（瀑布流 + 灯箱）
 ├── member.html             # 成员页
+├── dino.html               # 天梯页：可玩的小恐龙 + 排行榜
 ├── 404.html                # 终端风 404（Pages 找不到路径时返回，站内任意深度都能用）
 ├── manifest.webmanifest    # PWA 清单（名称、图标、快捷方式）
 ├── sw.js                   # Service Worker：页面网络优先、资源缓存优先
@@ -60,7 +61,8 @@ club-website/
 │   ├── pet.css             # 右下角校徽背景板样式
 │   ├── avatar-pet.css      # 左下角像素头像彩蛋样式
 │   ├── characters.css      # 音游角色舞台与立绘
-│   └── guestbook.css       # 留言板外框（终端风的标题条、等待态、降级文案）
+│   ├── guestbook.css       # 留言板外框（终端风的标题条、等待态、降级文案）
+│   └── ladder.css          # 天梯页两栏布局与榜单（刻意不用 clamp/inset，照顾旧内核）
 ├── assets/
 │   └── moon-sun-sprite.png # 60 帧月亮/太阳雪碧图（3240×54）
 ├── fonts/                  # 游戏原版像素字体（来自 assets.7z）
@@ -85,11 +87,18 @@ club-website/
 │   ├── pet.js              # 校徽滚动旋转、点击说话
 │   ├── avatar-pet.js       # 头像点击台词与彩蛋
 │   ├── guestbook.js        # 留言板：滚动到附近才加载 giscus，并跟随皮肤换主题
-│   └── pwa.js              # Service Worker 注册（load 之后空闲时）
+│   ├── pwa.js              # Service Worker 注册（load 之后空闲时）
+│   └── ladder.js           # 天梯：拉榜（远程→缓存→本地）、渲染、死亡后交成绩
 ├── data/
-│   └── repos.json          # 项目快照（每天由 GitHub Actions 重写，前端优先读它）
+│   ├── repos.json          # 项目快照（每天由 GitHub Actions 重写，前端优先读它）
+│   └── ladder-seed.json    # 天梯的内置对手（带 BOT 标签，不是真人成绩）
 ├── scripts/
-│   └── fetch-repos.mjs     # 抓取仓库数据 → data/repos.json
+│   ├── fetch-repos.mjs     # 抓取仓库数据 → data/repos.json
+│   └── compat-fallback.mjs # 给 clamp/min/max/inset 补旧内核 fallback（幂等）
+├── worker/
+│   ├── ladder.js           # 天梯后端（Cloudflare Worker + KV）
+│   ├── wrangler.toml       # Worker 配置：KV 绑定
+│   └── dev-server.mjs      # 本地内存版后端，不用注册账号就能联调
 ├── .github/
 │   └── workflows/
 │       └── refresh-repos.yml  # 每天 05:17 跑一次上面的脚本
@@ -599,6 +608,16 @@ Pages 会自动重新构建。如果页面还是旧版本，先强制刷新（`C
 - [ ] 首屏项目卡片角标显示 `STATIC`（说明读的是 `data/repos.json`，没打 GitHub API）
 - [ ] 留言板：滚到区块附近才加载；登录后能直接发评论；切皮肤时 iframe 跟着换主题
 - [ ] 留言板连不上时显示「群号 + Discussions 链接」，不是白色空框（`?debug=1` 看原始错误）
+- [ ] 页脚跑道右上角的「天梯 →」能进 `dino.html`
+- [ ] 天梯页能自己跳（空格 / ↑ / 点画布），撞死之后弹出留名框
+- [ ] 榜首那句话读得通：`当前榜首 XXX，N 分（LV.N），领先第二名 M 分`
+- [ ] 交完成绩，名次和榜面对得上（不是永远「第 1 名」）
+- [ ] 「再来一局」能重开，且重开后表单收起、分数归零
+- [ ] 没配后端时标注「本地档案」，页面照常能玩；配了后端标注「共享天梯」
+- [ ] 断网进天梯页：用缓存 / 本地的榜，不白屏、不报错
+- [ ] 国产内核（微信 / QQ 浏览器）打开四页：字号正常、卡片不堆成一列、浮层不铺错
+- [ ] `node scripts/compat-fallback.mjs --dry` 输出 0 条（说明新加的样式都补过 fallback）
+- [ ] 改完 CSS 后 `grep -c 'fallback: 旧内核' css/*.css` 与改动量对得上
 - [ ] 发版后刷新，DevTools → Application → Cache Storage 里的键名跟着新版本号变
 - [ ] 四页各有且只有一个 `h1`，标题层级不跳级（`h1 → h2 → h3`）
 - [ ] 极简风浅色下的小字（`--dim`）对底色至少 4.5:1，别顺手调淡回去
@@ -754,3 +773,177 @@ GITHUB_TOKEN=ghp_xxx node scripts/fetch-repos.mjs
   但有两条例外：`Discussion not found`（空站正常状态，giscus 会在第一条评论时自建）
   不算失败；iframe 高度已经被撑起来时也不算失败——内容都渲染出来了，
   只是消息迟到，没必要把人推到「连不上」。
+
+---
+
+## 17. 像素小恐龙天梯榜
+
+首页页脚那条跑道是**自动巡航**的装饰：恐龙自己躲仙人掌，你不用管。
+想自己跑，点跑道右上角的「天梯 →」，进 `dino.html`。
+
+### 17.1 这个页面有什么
+
+| 区域 | 内容 |
+|---|---|
+| 左 | 可玩的小恐龙跑酷，空格 / ↑ / 点画布起跳 |
+| 左（死亡后） | 留名上榜：昵称 + 本局分数 |
+| 右 | 天梯 TOP 12，顶部一句话说明当前榜首 |
+
+榜首那句话是页面主角，形如：
+
+> 当前榜首 ALPHA，12,480 分（LV.100），领先第二名 2,840 分。
+
+榜单里带 `BOT` 标签的是**内置对手**（`data/ladder-seed.json`），
+不是真人成绩——一个刚上线的站点没有真实数据，空榜比有几个电脑对手更难看。
+真人成绩一旦超过就会顶上去，同名的取最高分。
+
+### 17.2 共享榜怎么开
+
+页面默认是**本地档**：只记录这台设备上的成绩，所有人看到的是各自设备 + 内置对手。
+要变成全站共享，需要一个后端。仓库里已经写好了，跑在 Cloudflare Workers 上：
+
+```text
+worker/ladder.js      # 单文件 Worker，GET 取榜 / POST 交成绩
+worker/wrangler.toml  # 配置：KV 绑定 + 兼容日期
+worker/dev-server.mjs # 本地联调用的内存版，不需要任何账号
+```
+
+三步部署（免费额度够用：每天 10 万次读、1000 次写）：
+
+1. `npx wrangler login`
+2. `npx wrangler kv namespace create LADDER`
+   把输出里的 `id` 填进 `worker/wrangler.toml` 的 `[[kv_namespaces]]`
+3. `cd worker && npx wrangler deploy`
+   拿到形如 `https://hnyz-dino-ladder.xxx.workers.dev` 的地址
+
+然后把这个地址填进 `dino.html` 的
+
+```html
+<meta name="ladder-endpoint" content="https://hnyz-dino-ladder.xxx.workers.dev/">
+```
+
+**结尾要带斜杠。** 填完刷新，榜头的「本地档案」会变成「共享天梯 · 所有人的成绩」。
+
+本地想先看看效果，不用部署：
+
+```bash
+node worker/dev-server.mjs                 # 起在 8787
+# 然后打开 dino.html?ladder=http://127.0.0.1:8787
+```
+
+### 17.3 连不上会怎样
+
+排行页**不允许因为后端挂了就白屏**，降级是三级的：
+
+| 情况 | 表现 |
+|---|---|
+| 后端正常 | 「共享天梯 · 所有人的成绩」 |
+| 后端 6 秒没响应 / 报错 | 用上次缓存渲染，标注「暂时连不上，显示上次缓存」 |
+| 从没连上过 / 没配地址 | 本地档 + 内置对手，标注「本地档案」 |
+
+提交也一样：交失败就把成绩存在 `localStorage` 的 `hnyz:dino-pending` 里，
+下次打开页面自动补交一次。**离线也能玩、也能留下成绩**，只是名次要等联网才对。
+
+### 17.4 后端做了什么校验
+
+`POST` 只收 JSON，body 上限 1KB，字段：
+
+```json
+{ "name": "阿池", "score": 4820, "level": 12 }
+```
+
+- 昵称：去掉控制字符与零宽字符，最多 12 字；空名前端兜底成「匿名恐龙」
+- 分数：整数，`0 ~ 300000`（正常玩到 100 级满级也就 6000 上下，留足余量）
+- 等级：`1 ~ 100`
+- 同一 IP 60 秒内最多 6 次提交（挡手滑连点和低级脚本）
+- 同名（按昵称哈希）只保留最高分，不追加新行
+
+说清楚：**这套校验拦不住会改包的人**。分数是客户端算的，服务端没有回放验证。
+社团站被人恶意刷榜的成本远高于收益，所以没做签名和回放——真需要的话，
+最小改动是让 Worker 记下开局时间戳，提交时校验「分数 ≤ 经过秒数 × 60」。
+
+### 17.5 排行榜的名次为什么由前端算
+
+Worker 只知道自己库里那份记录，而榜面上还有内置对手（`data/ladder-seed.json`）
+和其他人。所以 `POST` 返回的 `rank` 只作参考，前端拿到后会用
+`远程 ∪ 本地 ∪ 内置` 重新合并排序，再算真实名次。
+
+一开始直接用服务端的 `rank`，结果 59 分显示「第 1 名」——
+因为库里当时只有这一条。这个坑记在这儿，免得以后又改回去。
+
+---
+
+## 18. 旧内核兼容（国产浏览器 / 老 WebView）
+
+现象是「在 A 浏览器好好的，换个浏览器就排版崩成一列 / 动画乱 / 样式像全丢了」。
+
+### 18.1 根因不是一个，是三个叠在一起
+
+**一、`skins.css` 里有一个多余的右花括号。**
+
+```css
+.style-wipe.is-out .style-wipe__bar::after {
+  transform: scaleX(1);
+  transition: none;
+}
+}          ← 这行（原第 1342 行）
+```
+
+Chrome 的 CSS 错误恢复很宽容，跳过它继续解析，所以本地怎么测都正常。
+国产内核与旧 WebKit 的恢复策略更粗暴，会把它当成外层块的结束，
+后面整段 `@media` 与皮肤定义一起被吞掉——这就是「样式像全丢了」。
+已删除。
+
+**二、`clamp()` / `min()` / `max()` 会让整条声明失效。**
+
+Chromium 79 以下不认识这三个函数，处理方式不是「忽略这个函数」，
+而是**丢掉整条声明**。本站有 109 处用到，于是：
+`font-size` 回落到 16px、`padding` 归零、`left/right` 失效——
+版式自然就塌成一列了。
+
+**三、`inset` 简写（Chromium 87+）失效。** 48 处定位一起消失，
+全屏层、浮层、装饰角标全部错位。
+
+### 18.2 怎么修的
+
+`scripts/compat-fallback.mjs` 会扫一遍 `css/`，给每条含 `clamp/min/max` 的声明
+**在前面补一条静态值**；`inset` 则展开成 `top/right/bottom/left` 四行：
+
+```css
+font-size: 59.4px;              /* fallback: 旧内核 */
+font-size: clamp(3rem, 5.8vw, 5.15rem);
+```
+
+新浏览器读到第二条会覆盖第一条，视觉完全不变；旧浏览器不认识第二条，
+直接用第一条。参考视口取 1024×768（安卓平板横屏）。
+
+其他几处手工处理：
+
+| 问题 | 处理 |
+|---|---|
+| `color-mix()`（5 处） | 前置同属性的纯色值 |
+| `aspect-ratio`（4 处） | 容器有内容撑高，不加兜底；封面靠 `img` 自然高度 |
+| `paint-order` 不支持 | `@supports not` 里把 `-webkit-text-stroke` 减半，避免描边吃字心 |
+| `backdrop-filter` 缺前缀 | 全部补 `-webkit-backdrop-filter` |
+| JS `?.`（2 处） | 改成 `a && a.b` 的老写法——可选链是 ES2020 **语法**，旧解析器整份脚本直接 SyntaxError |
+| `ResizeObserver` | 加 `typeof` 判断，没有就退回 `window.resize` |
+
+改完的兼容底线：**Chromium 69 / iOS Safari 12**。
+
+### 18.3 改了 CSS 之后要重跑
+
+```bash
+node scripts/compat-fallback.mjs --dry   # 先看会改多少条
+node scripts/compat-fallback.mjs         # 写入
+```
+
+脚本是幂等的：已经补过 fallback 的声明会跳过，不会越跑越长。
+
+### 18.4 已知没做的两件事
+
+- **flex 的 `gap`**（Chromium 84+）：旧内核里 flex 容器的 `gap` 不生效，
+  元素会紧贴。全站 100 处，逐个换成 margin 会污染布局语义，
+  且不会造成「崩成一列」，只是间距变小。判断为可接受。
+- **`aspect-ratio`**：旧内核下高度由内容决定，封面比例不精确，但不塌。
+
+这两项要真遇上再说，别为了假想的用户把代码写脏。

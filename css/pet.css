@@ -10,9 +10,12 @@
   --hnyz-pet-spin: 0deg;
   position: fixed;
   left: auto;
+  right: 16.4px; /* fallback: 旧内核 */
   right: clamp(8px, 1.6vw, 20px);
+  bottom: 16.9px; /* fallback: 旧内核 */
   bottom: clamp(10px, 2.2vh, 22px);
   z-index: 35;
+  width: 84px; /* fallback: 旧内核 */
   width: clamp(84px, 8vw, 112px);
   aspect-ratio: 1;
   pointer-events: none;
@@ -24,6 +27,10 @@
 /* 校徽背后的浅蓝“背景板” */
 .hnyz-pet__board {
   position: absolute;
+  top: -5%; /* fallback: 旧内核 */
+  right: -5%; /* fallback: 旧内核 */
+  bottom: -5%; /* fallback: 旧内核 */
+  left: -5%; /* fallback: 旧内核 */
   inset: -5%;
   overflow: hidden;
   border: 1px solid rgba(147, 197, 253, 0.65);
@@ -41,6 +48,10 @@
 .hnyz-pet__board::before {
   content: "";
   position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   background-image:
     linear-gradient(rgba(37, 99, 235, 0.07) 1px, transparent 1px),
@@ -54,6 +65,10 @@
 .hnyz-pet__board::after {
   content: "";
   position: absolute;
+  top: 5%; /* fallback: 旧内核 */
+  right: 5%; /* fallback: 旧内核 */
+  bottom: 5%; /* fallback: 旧内核 */
+  left: 5%; /* fallback: 旧内核 */
   inset: 5%;
   border: 1px dashed rgba(37, 99, 235, 0.2);
   border-radius: 50%;
@@ -62,6 +77,10 @@
 
 .hnyz-pet__stage {
   position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   display: block;
   width: 100%;
@@ -83,6 +102,10 @@
 
 .hnyz-pet__badge-wrap {
   position: absolute;
+  top: 9%; /* fallback: 旧内核 */
+  right: 9%; /* fallback: 旧内核 */
+  bottom: 9%; /* fallback: 旧内核 */
+  left: 9%; /* fallback: 旧内核 */
   inset: 9%;
   z-index: 1;
   transform: rotate(var(--hnyz-pet-spin));

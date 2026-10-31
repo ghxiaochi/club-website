@@ -1,0 +1,478 @@
+/* =========================================================
+   HNYZ · DINO_RUN 天梯页
+   ---------------------------------------------------------
+   两栏：左边跑酷，右边榜。窄屏叠成一栏，游戏在上。
+   刻意不用 clamp / min / max / inset / flex-gap —— 这一页
+   要能被旧内核（Chromium 7x）完整吃下，宁可多写两行。
+   ========================================================= */
+
+.ladder-page {
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+/* ---------- 顶栏 ---------- */
+.ladder-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 18px 20px 6px;
+}
+
+.ladder-head__back {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 13px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-soft);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  background: var(--panel);
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.ladder-head__back:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+  transform: translateX(-2px);
+}
+
+.ladder-head__brand {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.16em;
+}
+
+.ladder-head__brand span {
+  color: var(--dim);
+  letter-spacing: 0.08em;
+}
+
+/* ---------- 主栅格 ---------- */
+.ladder {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.5fr);
+  grid-column-gap: 22px;
+  grid-row-gap: 18px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 14px 20px 56px;
+}
+
+/* ---------- 左：游戏 ---------- */
+.ladder-play {
+  min-width: 0;
+}
+
+.dino-run--arena {
+  padding: 14px 14px 16px;
+  border-top: 0;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.dino-run--arena .dino-run__stage {
+  height: 320px;
+}
+
+.dino-run--arena .dino-run__kicker {
+  font-size: 15px;
+}
+
+/* 舞台给够高度，S 才会从 2 跳到 3，像素画不至于糊成一片 */
+@media (min-width: 720px) {
+  .dino-run--arena .dino-run__stage {
+    height: 380px;
+  }
+}
+
+@media (min-width: 1100px) {
+  .dino-run--arena .dino-run__stage {
+    height: 430px;
+  }
+}
+
+.ladder-play__tips {
+  margin: 12px 2px 0;
+  color: #7f9dc4;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  line-height: 1.7;
+}
+
+/* 深色下这两处要压亮一点，否则压在深蓝底上看不清 */
+html[data-theme="dark"] .ladder-play__tips {
+  color: #8fa9c9;
+}
+
+/* ---------- 上榜表单 ---------- */
+.ladder-form {
+  margin-top: 16px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--panel);
+  box-shadow: var(--shadow-card);
+}
+
+.ladder-form[hidden] {
+  display: none;
+}
+
+.ladder-form__hint {
+  margin: 0 0 10px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ladder-form__row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* [hidden] 的 UA 样式是 display:none，被上面的 flex 盖掉了，得补回来 */
+.ladder-form__row[hidden] {
+  display: none;
+}
+
+.ladder-form__label {
+  margin-right: 8px;
+  color: var(--dim);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+.ladder-form__input {
+  flex: 1;
+  min-width: 160px;
+  margin-right: 10px;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.ladder-form__input:focus {
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
+  border-color: var(--blue);
+}
+
+.ladder-form__submit {
+  padding: 9px 18px;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--blue);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.ladder-form__submit:hover {
+  background: var(--blue-bright);
+}
+
+.ladder-form__submit[disabled] {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.ladder-form__again {
+  margin-top: 12px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-soft);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.ladder-form__again:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+/* ---------- 右：榜单 ---------- */
+.ladder-board {
+  padding: 18px 18px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--panel);
+  box-shadow: var(--shadow-card);
+  align-self: start;
+}
+
+.ladder-board__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.ladder-board__title {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 15px;
+  letter-spacing: 0.18em;
+}
+
+.ladder-board__meta {
+  margin: 0;
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  text-align: right;
+}
+
+.ladder-board__meta[data-tone="live"] {
+  color: var(--green);
+}
+
+.ladder-board__meta[data-tone="warn"] {
+  color: var(--orange);
+}
+
+/* 榜首那句话：这一页的主角 */
+.ladder-board__lead {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-left: 3px solid var(--blue);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: var(--blue-soft);
+  color: var(--text);
+  font-size: 14.5px;
+  line-height: 1.65;
+}
+
+.ladder-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ladder-row {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) auto auto;
+  align-items: center;
+  padding: 8px 8px;
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.ladder-row:last-child {
+  border-bottom: 0;
+}
+
+.ladder-row.is-first {
+  background: var(--blue-soft);
+}
+
+.ladder-row.is-mine {
+  box-shadow: inset 2px 0 0 var(--blue);
+}
+
+.ladder-row.is-empty {
+  display: block;
+  color: var(--dim);
+  font-size: 13px;
+  text-align: center;
+}
+
+.ladder-row__rank {
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 12px;
+  text-align: left;
+}
+
+.ladder-row__rank.is-top {
+  color: var(--blue);
+  font-size: 13px;
+}
+
+.ladder-row.is-first .ladder-row__rank {
+  color: var(--blue-bright);
+}
+
+.ladder-row__who {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.ladder-row__name {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 13.5px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.ladder-row__tag {
+  margin-left: 6px;
+  padding: 1px 5px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  vertical-align: 1px;
+}
+
+.ladder-row__score {
+  margin-left: 10px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13.5px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.ladder-row__lv {
+  margin-left: 8px;
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 10px;
+  text-align: right;
+}
+
+.ladder-board__mine {
+  margin: 12px 0 0;
+  color: var(--text-soft);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.03em;
+}
+
+.ladder-board__toast {
+  margin: 10px 0 0;
+  padding: 9px 12px;
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  color: var(--text-soft);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.ladder-board__toast[data-tone="ok"] {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.ladder-board__toast[data-tone="warn"] {
+  background: rgba(180, 83, 9, 0.1);
+  color: var(--orange);
+}
+
+.ladder-board__foot {
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+  color: var(--dim);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.ladder-board__foot b {
+  color: var(--text-soft);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+}
+
+/* ---------- 窄屏 ---------- */
+@media (max-width: 900px) {
+  .ladder {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 10px 14px 40px;
+  }
+
+  .ladder-head {
+    padding: 14px 14px 4px;
+  }
+
+  .dino-run--arena .dino-run__stage {
+    height: 260px;
+  }
+
+  .ladder-board {
+    padding: 16px 14px 14px;
+  }
+
+  .ladder-form {
+    padding: 14px;
+  }
+}
+
+@media (max-width: 420px) {
+  .ladder-row {
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+  }
+
+  .ladder-row__lv {
+    display: none;
+  }
+}
+
+/* ---------- 深色 ---------- */
+html[data-theme="dark"] .ladder-page {
+  background: var(--bg);
+}
+
+html[data-theme="dark"] .ladder-board__lead {
+  background: rgba(37, 99, 235, 0.16);
+}
+
+/* 减弱动效：只留必要的颜色变化 */
+@media (prefers-reduced-motion: reduce) {
+  .ladder-head__back,
+  .ladder-form__submit {
+    transition: none;
+  }
+}
+
+/* 舞台里那句 SPACE / TAP 和下面的操作提示重复，
+   而且贴在左下角正好压在恐龙身上，天梯页就不显示了 */
+.dino-run--arena .dino-run__hint {
+  display: none;
+}
+
+/* 手机上 HUD 会把标题挤成两行（「像素小恐」/「龙」），
+   小屏去掉版本后缀、收窄字号，保证一行读完 */
+@media (max-width: 560px) {
+  .dino-run--arena .dino-run__ver {
+    display: none;
+  }
+
+  .dino-run--arena .dino-run__kicker {
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dino-run--arena .dino-run__bar {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+}

@@ -2,7 +2,7 @@
    HNYZ · 个性化层
    ---------------------------------------------------------
    这一层不改动 style.css 的结构，只做三件事：
-   1. 深色主题：覆盖 :root 变量 + 少量硬编码白色的组件
+   1. 深色主题下组件级的覆盖（变量本身在 style.css，那边是所有页面的基础层）
    2. 动效：滚动渐显、卡片倾斜、首屏光晕、数字滚动
    3. 彩蛋：主题按钮、打字机标语、终端提示条、黑客模式
 
@@ -10,38 +10,6 @@
    ========================================================= */
 
 /* ---------- 1. 深色主题变量 ---------- */
-[data-theme="dark"] {
-  --bg: #060d1c;
-  --bg-deep: #040a16;
-  --panel: #0d1b33;
-  --panel-2: #102140;
-  --panel-3: #142a4f;
-
-  --border: #1e3557;
-  --border-strong: #2f5183;
-
-  --text: #e8f1ff;
-  --text-soft: #c3d6ef;
-  --muted: #94abc9;
-  --dim: #8098b8;
-
-  --blue: #5b93ff;
-  --blue-bright: #8ab4ff;
-  --green: #38bdf8;
-  --green-bright: #7dd3fc;
-  --orange: #fbbf24;
-  --red: #f87171;
-  --purple: #a78bfa;
-
-  --blue-soft: rgba(91, 147, 255, 0.16);
-  --green-soft: rgba(56, 189, 248, 0.16);
-
-  --glow-blue: 0 10px 30px rgba(91, 147, 255, 0.22);
-  --glow-green: 0 10px 26px rgba(56, 189, 248, 0.18);
-  --shadow-card: 0 18px 48px rgba(0, 0, 0, 0.46);
-
-  color-scheme: dark;
-}
 
 [data-theme="dark"] body {
   background-image:
@@ -426,6 +394,7 @@ html.reveal-ready .project-card[data-reveal] {
   display: flex;
   align-items: center;
   gap: 10px;
+  max-width: calc(100vw - 32px); /* fallback: 旧内核 */
   max-width: min(520px, calc(100vw - 32px));
   padding: 12px 18px;
   border: 1px solid var(--border-strong);
@@ -473,6 +442,10 @@ html[data-hacker="true"] {
 
 .hnyz-scanlines {
   position: fixed;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   z-index: 80;
   pointer-events: none;
@@ -904,6 +877,10 @@ body {
 
 .bg-orbs {
   position: fixed;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   z-index: 0;
   overflow: hidden;
@@ -943,6 +920,10 @@ body {
 
 .bg-orbs__dots {
   position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   background-image: radial-gradient(rgba(37, 99, 235, 0.18) 1px, transparent 1.2px);
   background-size: 26px 26px;
@@ -989,6 +970,10 @@ main,
 .gallery-board::before {
   content: "";
   position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   background-image:
     linear-gradient(rgba(147, 197, 253, 0.06) 1px, transparent 1px),
@@ -1094,6 +1079,10 @@ main,
 /* ---------- 灯箱 ---------- */
 .hnyz-lightbox {
   position: fixed;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   z-index: 120;
   display: grid;
@@ -1201,7 +1190,6 @@ body.is-lightbox-open {
   .gallery-item:hover {
     transform: translateY(-3px);
   }
-
 
   .hnyz-lightbox {
     grid-template-columns: 1fr;
@@ -1321,6 +1309,10 @@ body.is-lightbox-open {
    ========================================================= */
 .bg-icons {
   position: fixed;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   z-index: 0;
   overflow: hidden;
@@ -1398,6 +1390,10 @@ body.is-lightbox-open {
    ========================================================= */
 .boot {
   position: fixed;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   z-index: 200;
   display: grid;
@@ -1459,7 +1455,6 @@ body.is-lightbox-open {
     transition: none;
   }
 }
-
 
 /* =========================================================
    音效开关（头部，和主题按钮同尺寸）
@@ -1528,6 +1523,10 @@ body.is-lightbox-open {
 /* ---------- 点击反馈 ---------- */
 .click-fx {
   position: fixed;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   z-index: 9990;
   display: block;

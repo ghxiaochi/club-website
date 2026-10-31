@@ -8,9 +8,12 @@
 
 .hnyz-avatar {
   position: fixed;
+  left: 16.4px; /* fallback: 旧内核 */
   left: clamp(8px, 1.6vw, 20px);
+  bottom: 16.9px; /* fallback: 旧内核 */
   bottom: clamp(10px, 2.2vh, 22px);
   z-index: 35;
+  width: 82px; /* fallback: 旧内核 */
   width: clamp(82px, 8vw, 112px);
   pointer-events: none;
   opacity: 0;
@@ -45,6 +48,10 @@
 .hnyz-avatar__button::before {
   content: "";
   position: absolute;
+  top: 8%; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 12%; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 8% 0 12%;
   border-radius: 50%;
   background: radial-gradient(circle at 50% 44%, rgba(74, 222, 128, 0.24), rgba(96, 165, 250, 0.1) 54%, transparent 72%);
@@ -265,7 +272,9 @@
    ========================================================= */
 .hnyz-avatar--summon {
   left: auto;
+  right: 26.6px; /* fallback: 旧内核 */
   right: clamp(18px, 2.6vw, 40px);
+  bottom: 153.6px; /* fallback: 旧内核 */
   bottom: clamp(150px, 20vh, 210px);
   animation: none;
   opacity: 0;
@@ -533,6 +542,10 @@
 /* 覆盖层：只用来放冲击波和碎片，不吃鼠标 */
 .pet-overlay {
   position: fixed;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   z-index: 205;
   overflow: hidden;
@@ -548,6 +561,7 @@
   top: 40%;
   z-index: 212;
   width: max-content;
+  max-width: 640px; /* fallback: 旧内核 */
   max-width: min(86vw, 640px);
   margin: 0;
   padding: 26px 34px 24px;
@@ -560,6 +574,7 @@
     inset 0 0 0 5px rgba(225, 29, 46, 0.18);
   color: #e11d2e;
   font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Heiti SC", sans-serif;
+  font-size: 38.9px; /* fallback: 旧内核 */
   font-size: clamp(1.35rem, 3.8vw, 2.5rem);
   font-weight: 900;
   font-style: italic;
@@ -763,6 +778,10 @@
 /* 白闪 */
 .pet-flash {
   position: fixed;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   z-index: 230;
   background: #ffffff;
@@ -825,6 +844,10 @@
 /* ---------- 墓碑 ---------- */
 .pet-tomb-veil {
   position: fixed;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   z-index: 214;
   background:
@@ -887,6 +910,7 @@
   justify-items: center;
   align-content: start;
   gap: 3px;
+  width: 184.3px; /* fallback: 旧内核 */
   width: clamp(168px, 18vw, 212px);
   aspect-ratio: 0.7;
   padding: 12px 14px 16px;
@@ -941,6 +965,10 @@
 .pet-tomb__stone::after {
   content: "";
   position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   border-radius: inherit;
   background-image:
@@ -1006,6 +1034,7 @@
 
 .pet-tomb__name {
   font-weight: 800;
+  font-size: 15.4px; /* fallback: 旧内核 */
   font-size: clamp(0.92rem, 1.5vw, 1.08rem);
   letter-spacing: 0.06em;
 }
@@ -1048,6 +1077,7 @@
 
 @media (max-width: 720px) {
   .pet-rampage-line {
+    font-size: 30.4px; /* fallback: 旧内核 */
     font-size: clamp(1.25rem, 7vw, 1.9rem);
   }
 }

@@ -15,8 +15,10 @@
   gap: 28px;
   padding: 34px 36px;
   overflow: hidden;
+  border: 1px solid var(--member-accent); /* fallback: 旧内核 */
   border: 1px solid color-mix(in srgb, var(--member-accent) 35%, transparent);
   border-radius: var(--radius-lg);
+  background: var(--panel); /* fallback: 旧内核 */
   background:
     radial-gradient(circle at 88% 12%, color-mix(in srgb, var(--member-accent) 22%, transparent), transparent 40%),
     var(--panel);
@@ -26,6 +28,10 @@
 .member-hero::before {
   content: "";
   position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   background-image:
     linear-gradient(color-mix(in srgb, var(--member-accent) 8%, transparent) 1px, transparent 1px),
@@ -51,6 +57,7 @@
 .member-hero__title {
   margin: 10px 0 12px;
   color: var(--text);
+  font-size: 34.8px; /* fallback: 旧内核 */
   font-size: clamp(1.6rem, 3.4vw, 2.4rem);
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -128,6 +135,10 @@
 
 .ad-banner__bg {
   position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   background-image: url("../images/decor/animdustry.jpg");
   background-size: cover;
@@ -136,6 +147,10 @@
 
 .ad-banner__scrim {
   position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   background: linear-gradient(180deg, rgba(5, 11, 22, 0.05) 0%, rgba(5, 11, 22, 0.82) 78%);
 }
@@ -161,6 +176,7 @@
 .ad-banner__title {
   margin: 6px 0 8px;
   color: #ffffff;
+  font-size: 30.7px; /* fallback: 旧内核 */
   font-size: clamp(1.4rem, 3vw, 2rem);
   font-weight: 800;
 }

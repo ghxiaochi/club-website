@@ -78,6 +78,7 @@ html[data-theme="dark"] .guestbook {
 }
 
 .guestbook__body {
+  padding: 22px; /* fallback: 旧内核 */
   padding: clamp(14px, 2.2vw, 22px);
   /* 只给待机态留个底：真接上 giscus 之后 iframe 会自己撑开 */
   min-height: 132px;

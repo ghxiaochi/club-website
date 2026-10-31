@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="HNYZ 编程社的像素小恐龙天梯榜：跑一局，看你能排到第几。">
+  <meta name="theme-color" content="#081426">
+
+  <script>
+    /* 主题预置：首帧前定好深浅，避免刷新闪白 */
+    (function () {
+      try {
+        var saved = localStorage.getItem("hnyz:theme");
+        var theme = saved === "light" || saved === "dark"
+          ? saved
+          : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.dataset.theme = theme;
+      } catch (error) { /* 隐私模式 */ }
+    })();
+  </script>
+
+  <!-- 天梯后端地址。留空就只用本地档案 + 内置成绩，页面照常能玩。
+       配好 Cloudflare Worker 后，把地址填进下面的 content（结尾带 /）。 -->
+  <meta name="ladder-endpoint" content="">
+
+  <link rel="canonical" href="https://hnyzbcs.de5.net/dino.html">
+  <meta property="og:title" content="DINO_RUN 天梯｜HNYZ">
+  <meta property="og:description" content="跑一局像素小恐龙，看你能排到第几。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hnyzbcs.de5.net/dino.html">
+  <meta property="og:site_name" content="HNYZ · 衡南一中编程社">
+  <meta property="og:image" content="https://hnyzbcs.de5.net/images/og-cover.jpg">
+  <meta property="og:image:type" content="image/jpeg">
+
+  <title>DINO_RUN 天梯｜HNYZ · 衡南一中编程社</title>
+
+  <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="application-name" content="HNYZ">
+
+  <link rel="stylesheet" href="css/style.css?v=20261109">
+  <link rel="stylesheet" href="css/dino.css?v=20261109">
+  <link rel="stylesheet" href="css/ladder.css?v=20261109">
+</head>
+<body class="ladder-page">
+
+  <header class="ladder-head">
+    <a class="ladder-head__back" href="./">
+      <span aria-hidden="true">←</span> 返回首页
+    </a>
+    <p class="ladder-head__brand">
+      DINO_RUN <span>// 天梯</span>
+    </p>
+  </header>
+
+  <main class="ladder" data-ladder>
+
+    <!-- ---------- 左：游戏 ---------- -->
+    <section class="ladder-play" aria-labelledby="ladder-title">
+      <div class="dino-run dino-run--arena" data-dino-run data-mode="manual" data-hold="1">
+        <div class="dino-run__inner">
+          <div class="dino-run__main">
+            <div class="dino-run__bar">
+              <h1 class="dino-run__kicker" id="ladder-title">
+                <span class="dino-run__led" aria-hidden="true"></span>
+                像素小恐龙
+                <span class="dino-run__ver">// 08-BIT</span>
+              </h1>
+              <div class="dino-run__hud">
+                <span class="dino-run__level" data-dino-level>LV.1</span>
+                <p class="dino-run__score" data-dino-score>HI 00000  00000</p>
+              </div>
+            </div>
+
+            <div class="dino-run__stage" data-dino-stage tabindex="0" role="application"
+                 aria-label="小恐龙跑酷。按空格或点击画布起跳，撞到仙人掌结束">
+              <canvas class="dino-run__canvas" data-dino-canvas aria-hidden="true"></canvas>
+              <p class="dino-run__hint" data-dino-hint>SPACE / 点击 → 起跳</p>
+              <p class="dino-run__pop" data-dino-pop aria-live="polite"></p>
+              <p class="dino-run__toast" data-dino-toast hidden>SIGNAL LOST // REBOOT</p>
+              <div class="dino-run__extinct" data-dino-extinct role="status" aria-live="polite" hidden>
+                <p class="dino-run__extinct-text">这就是恐龙灭绝的真相</p>
+                <button class="dino-run__rewind" type="button" data-dino-rewind>时间回溯</button>
+              </div>
+            </div>
+
+            <p class="ladder-play__tips">
+              空格 / ↑ / 点画布起跳 · 吃金币加分 · 每 10 级进化一次
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 死亡后出现：留名上榜 -->
+      <form class="ladder-form" data-ladder-form hidden>
+        <p class="ladder-form__hint" data-ladder-formhint>本局 0 分</p>
+        <div class="ladder-form__row">
+          <label class="ladder-form__label" for="ladder-name">昵称</label>
+          <input class="ladder-form__input" id="ladder-name" data-ladder-name
+                 type="text" maxlength="12" autocomplete="nickname"
+                 placeholder="最多 12 个字，不填就叫「匿名恐龙」">
+          <button class="ladder-form__submit" type="submit" data-ladder-submit>上榜</button>
+        </div>
+        <button class="ladder-form__again" type="button" data-ladder-again>再来一局</button>
+      </form>
+    </section>
+
+    <!-- ---------- 右：天梯 ---------- -->
+    <aside class="ladder-board" aria-labelledby="ladder-board-title">
+      <div class="ladder-board__head">
+        <h2 class="ladder-board__title" id="ladder-board-title">天梯</h2>
+        <p class="ladder-board__meta" data-ladder-meta>读取中…</p>
+      </div>
+
+      <p class="ladder-board__lead" data-ladder-lead>正在读取天梯…</p>
+
+      <ol class="ladder-list" data-ladder-list></ol>
+
+      <p class="ladder-board__mine" data-ladder-mine hidden></p>
+      <p class="ladder-board__toast" data-ladder-toast role="status" aria-live="polite" hidden></p>
+
+      <p class="ladder-board__foot">
+        同名的成绩只保留最高分。标了 <b>BOT</b> 的是内置对手，不是真人。
+      </p>
+    </aside>
+
+  </main>
+
+  <script src="js/dino.js?v=20261109" defer></script>
+  <script src="js/ladder.js?v=20261109" defer></script>
+</body>
+</html>

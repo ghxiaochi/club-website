@@ -118,6 +118,7 @@
 
 .dino-run__stage {
   position: relative;
+  height: 186px; /* fallback: 旧内核 */
   height: clamp(186px, 13.5vw, 196px);
   overflow: hidden;
   border: 1px solid rgba(125, 211, 252, 0.2);
@@ -138,6 +139,10 @@
 
 .dino-run__canvas {
   position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   display: block;
   width: 100%;
@@ -214,6 +219,10 @@
 .dino-run__toast {
   position: absolute;
   pointer-events: none;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   display: grid;
   place-items: start center;
@@ -222,6 +231,7 @@
   background: rgba(3, 9, 18, 0.52);
   color: var(--dino-accent);
   font-family: var(--mono);
+  font-size: 12.5px; /* fallback: 旧内核 */
   font-size: clamp(0.62rem, 1.4vw, 0.78rem);
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -243,7 +253,7 @@
 }
 
 /* 日间模式：跑道不再是一块黑，跟着页面一起亮起来 */
-html[data-theme="light"]:not([data-style="hacker"]):not([data-style="minimal"]) .dino-run {
+html[data-theme="light"]:not([data-style="hacker"]):not([data-style="minimal"]) .dino-run:not(.dino-run--arena) {
   --dino-ink: #10233c;
   --dino-accent: #0a84ff;
   --dino-dim: #6b86a6;
@@ -260,7 +270,7 @@ html[data-theme="light"]:not([data-style="hacker"]):not([data-style="minimal"]) 
   background-size: auto, 24px 24px, 24px 24px;
 }
 
-html[data-theme="light"]:not([data-style="hacker"]):not([data-style="minimal"]) .dino-run__stage {
+html[data-theme="light"]:not([data-style="hacker"]):not([data-style="minimal"]) .dino-run:not(.dino-run--arena) .dino-run__stage {
   border-color: rgba(24, 82, 150, 0.16);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.75), transparent 46%),
@@ -442,6 +452,10 @@ body.is-dino-visible .pet-summon {
 
 .dino-run__extinct {
   position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   pointer-events: none;
   opacity: 0;
@@ -476,9 +490,11 @@ body.is-dino-visible .pet-summon {
   box-shadow:
     inset 0 0 46px rgba(255, 96, 40, 0.12),
     0 12px 40px rgba(0, 0, 0, 0.35);
+  -webkit-backdrop-filter: blur(1.5px);
   backdrop-filter: blur(1.5px);
   color: #ffd9c0;
   font-family: inherit;
+  font-size: 26.6px; /* fallback: 旧内核 */
   font-size: clamp(1.1rem, 2.6vw, 1.9rem);
   font-weight: 600;
   line-height: 1.7;
@@ -577,5 +593,55 @@ body.is-dino-visible .pet-summon {
 
   .dino-run__extinct.is-on .dino-run__rewind {
     transform: translate(0, -50%);
+  }
+}
+
+/* ---------------------------------------------------------
+   天梯入口：HUD 最右边那个小按钮
+   ---------------------------------------------------------
+   页脚那条跑道是自动巡航，想自己跑得去 dino.html。
+   这里放一个明确出口，不然访客只会以为是个装饰动画。
+   --------------------------------------------------------- */
+.dino-run__ladder {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border: 1px solid rgba(125, 211, 252, 0.42);
+  border-radius: 999px;
+  color: var(--dino-accent);
+  background: rgba(125, 211, 252, 0.08);
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.dino-run__ladder span {
+  margin-left: 4px;
+  transition: transform 0.2s ease;
+}
+
+.dino-run__ladder:hover,
+.dino-run__ladder:focus-visible {
+  border-color: var(--dino-accent);
+  background: rgba(125, 211, 252, 0.18);
+  color: #ffffff;
+}
+
+.dino-run__ladder:hover span {
+  transform: translateX(3px);
+}
+
+.dino-run__ladder:focus-visible {
+  outline: 2px solid var(--dino-accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  /* 小屏 HUD 挤，只留「天梯」两个字 */
+  .dino-run__ladder span {
+    display: none;
   }
 }

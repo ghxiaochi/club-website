@@ -18,7 +18,7 @@
    发版时改 VERSION，旧缓存会在 activate 里被清掉。
    ========================================================= */
 
-const VERSION = "20261108";
+const VERSION = "20261109";
 const CACHE = `hnyz-v${VERSION}`;
 
 /* 站内根路径：用 "./" 就地解析，
@@ -37,9 +37,11 @@ const CORE = [
   "./projects.html",
   "./gallery.html",
   "./member.html",
+  "./dino.html",
   "./404.html",
   "./manifest.webmanifest",
   "./data/repos.json",
+  "./data/ladder-seed.json",
   `./css/style.css${V}`,
   `./css/type.css${V}`,
   `./css/motion.css${V}`,
@@ -48,6 +50,7 @@ const CORE = [
   `./css/pet.css${V}`,
   `./css/avatar-pet.css${V}`,
   `./css/guestbook.css${V}`,
+  `./css/ladder.css${V}`,
   `./js/main.js${V}`,
   `./js/members.js${V}`,
   `./js/copy.js${V}`,
@@ -55,6 +58,7 @@ const CORE = [
   `./js/skins.js${V}`,
   `./js/pwa.js${V}`,
   `./js/guestbook.js${V}`,
+  `./js/ladder.js${V}`,
   "./images/favicon.svg",
   "./images/icon-192.png"
 ];

@@ -98,6 +98,10 @@ html[data-style="hacker"] .style-toggle__grid i {
    --------------------------------------------------------- */
 .skin-bubbles {
   position: fixed;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   z-index: 0;
   display: none;
@@ -776,6 +780,10 @@ body.is-dino-visible .hnyz-pet {
 
 .style-deck {
   width: 100%;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   max-width: none;
   height: 100%;
@@ -793,6 +801,10 @@ body.is-dino-visible .hnyz-pet {
 .style-deck::before {
   content: "";
   position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   z-index: 1;
   pointer-events: none;
@@ -816,9 +828,12 @@ body.is-dino-visible .hnyz-pet {
   z-index: 2;
   display: flex;
   flex-direction: column;
+  width: 100%; /* fallback: 旧内核 */
+  max-width: 430px; /* fallback: 旧内核 */
   width: min(430px, 100%);
   height: 100%;
   margin: 0 auto;
+  padding: 18px 0 16px; /* fallback: 旧内核 */
   padding: max(18px, env(safe-area-inset-top)) 0 max(16px, env(safe-area-inset-bottom));
 }
 
@@ -885,6 +900,7 @@ body.is-dino-visible .hnyz-pet {
 .style-deck__viewport::after {
   content: "";
   display: block;
+  height: calc((100% - 555px) / 2); /* fallback: 旧内核 */
   height: max(0px, calc((100% - 555px) / 2));
 }
 
@@ -896,7 +912,11 @@ body.is-dino-visible .hnyz-pet {
   align-items: center;
   justify-content: flex-start;
   gap: 10px;
+  width: calc(100% - 52px); /* fallback: 旧内核 */
+  max-width: 360px; /* fallback: 旧内核 */
   width: min(360px, calc(100% - 52px));
+  height: calc(100% - 30px); /* fallback: 旧内核 */
+  max-height: 540px; /* fallback: 旧内核 */
   height: min(540px, calc(100% - 30px));
   margin: 15px auto;
   padding: 58px 26px 30px;
@@ -922,6 +942,10 @@ body.is-dino-visible .hnyz-pet {
 .style-card::after {
   content: "";
   position: absolute;
+  top: -1px; /* fallback: 旧内核 */
+  right: -1px; /* fallback: 旧内核 */
+  bottom: -1px; /* fallback: 旧内核 */
+  left: -1px; /* fallback: 旧内核 */
   inset: -1px;
   border-radius: inherit;
   border: 1px solid var(--card-accent);
@@ -970,11 +994,14 @@ body.is-dino-visible .hnyz-pet {
 .style-card__glyph {
   display: grid;
   place-items: center;
+  width: 106px; /* fallback: 旧内核 */
   width: clamp(82px, 22vw, 106px);
+  height: 106px; /* fallback: 旧内核 */
   height: clamp(82px, 22vw, 106px);
   margin-bottom: 4px;
   border-radius: 26%;
   font-family: var(--mono);
+  font-size: 30.4px; /* fallback: 旧内核 */
   font-size: clamp(1.4rem, 5vw, 1.9rem);
   font-weight: 700;
   letter-spacing: -0.04em;
@@ -1022,6 +1049,7 @@ body.is-dino-visible .hnyz-pet {
 
 .style-card__title {
   margin: 0;
+  font-size: 30.4px; /* fallback: 旧内核 */
   font-size: clamp(1.5rem, 5vw, 1.9rem);
   font-weight: 600;
   letter-spacing: -0.02em;
@@ -1113,6 +1141,7 @@ body.is-dino-visible .hnyz-pet {
 .style-deck__dots {
   position: absolute;
   top: 50%;
+  right: 12px; /* fallback: 旧内核 */
   right: max(12px, calc(50% - 214px));
   display: flex;
   flex-direction: column;
@@ -1217,6 +1246,10 @@ html[data-style] .style-deck.is-handoff {
 
 .style-wipe {
   position: fixed;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   z-index: 300;
   display: grid;
@@ -1250,9 +1283,14 @@ html[data-style] .style-deck.is-handoff {
    把那条生硬的直线化成一小段渐隐——扫过时像布的前缘被灯打亮。 */
 .style-wipe__veil {
   position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 8%); /* fallback: 旧内核 */
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 8%),
     linear-gradient(180deg, color-mix(in srgb, currentColor 7%, transparent), transparent 6%);
@@ -1281,6 +1319,7 @@ html[data-style] .style-deck.is-handoff {
   position: relative;
   z-index: 1;
   font-family: var(--mono);
+  font-size: 70.4px; /* fallback: 旧内核 */
   font-size: clamp(2rem, 8vw, 4.4rem);
   font-weight: 700;
   letter-spacing: 0.34em;
@@ -1313,6 +1352,7 @@ html[data-style] .style-deck.is-handoff {
   z-index: 1;
   left: 50%;
   bottom: 16%;
+  width: 240px; /* fallback: 旧内核 */
   width: min(240px, 56vw);
   height: 2px;
   transform: translateX(-50%);
@@ -1324,6 +1364,10 @@ html[data-style] .style-deck.is-handoff {
 .style-wipe__bar::after {
   content: "";
   position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   background: currentColor;
   transform: scaleX(0);
@@ -1338,7 +1382,6 @@ html[data-style] .style-deck.is-handoff {
 .style-wipe.is-out .style-wipe__bar::after {
   transform: scaleX(1);
   transition: none;
-}
 }
 
 /* ---------------------------------------------------------
@@ -1419,6 +1462,10 @@ html[data-style] .style-deck.is-handoff {
 
 .matrix-rain {
   position: fixed;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   z-index: 0;
   width: 100%;
@@ -1570,6 +1617,10 @@ html[data-style="bare"] .style-toggle__grid i {
 
 html[data-style="bare"] .bare-note {
   position: fixed;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   display: grid;
   place-items: center;
@@ -1898,6 +1949,10 @@ html[data-style="hacker"][data-theme="light"] .site-header .brand-copy strong {
 
 .hacker-term-overlay {
   position: fixed;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   z-index: 2147483000;
   display: flex;
@@ -1916,7 +1971,9 @@ html[data-style="hacker"][data-theme="light"] .site-header .brand-copy strong {
 }
 
 .hacker-term {
+  width: 720px; /* fallback: 旧内核 */
   width: min(720px, 94vw);
+  max-height: 614.4px; /* fallback: 旧内核 */
   max-height: min(80vh, 660px);
   display: flex;
   flex-direction: column;

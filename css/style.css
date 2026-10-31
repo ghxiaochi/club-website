@@ -166,6 +166,8 @@ code {
 }
 
 .container {
+  width: calc(100% - 56px); /* fallback: 旧内核 */
+  max-width: 1180px; /* fallback: 旧内核 */
   width: min(1180px, calc(100% - 56px));
   margin-inline: auto;
 }
@@ -390,6 +392,7 @@ code {
   max-width: 720px;
   margin-bottom: 26px;
   color: var(--text);
+  font-size: 59.4px; /* fallback: 旧内核 */
   font-size: clamp(3rem, 5.8vw, 5.15rem);
   font-weight: 800;
   line-height: 1.02;
@@ -517,6 +520,10 @@ code {
 .quick-card::before {
   content: "";
   position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: auto; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0 0 auto;
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--blue), transparent);
@@ -576,6 +583,7 @@ code {
 .quick-body h2 {
   margin: 10px 0 24px;
   color: var(--text);
+  font-size: 25.6px; /* fallback: 旧内核 */
   font-size: clamp(1.5rem, 2.5vw, 2rem);
   line-height: 1.25;
   letter-spacing: -0.02em;
@@ -682,6 +690,7 @@ code {
 .section-head h2 {
   margin: 14px 0 16px;
   color: var(--text);
+  font-size: 38.9px; /* fallback: 旧内核 */
   font-size: clamp(2rem, 3.8vw, 3.1rem);
   font-weight: 800;
   line-height: 1.1;
@@ -917,6 +926,10 @@ code {
 .project-cover::after {
   content: "";
   position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   background: linear-gradient(180deg, transparent 58%, rgba(15, 39, 68, 0.42));
   pointer-events: none;
@@ -925,6 +938,10 @@ code {
 /* coverImg 为空时的科技网格占位 */
 .cover-placeholder {
   position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   display: flex;
   flex-direction: column;
@@ -941,6 +958,10 @@ code {
 .cover-placeholder::before {
   content: "";
   position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   background-image:
     linear-gradient(rgba(37, 99, 235, 0.13) 1px, transparent 1px),
@@ -1019,6 +1040,7 @@ code {
   font-family: var(--mono);
   font-size: 0.56rem;
   letter-spacing: 0.07em;
+  -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
 }
 
@@ -1217,6 +1239,7 @@ code {
 .archive-head h1 {
   margin: 18px 0 18px;
   color: var(--text);
+  font-size: 55.3px; /* fallback: 旧内核 */
   font-size: clamp(2.5rem, 5.4vw, 4.4rem);
   font-weight: 800;
   line-height: 1.08;
@@ -1341,6 +1364,10 @@ code {
 .member-profile::before {
   content: "";
   position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   background-image:
     linear-gradient(rgba(37, 99, 235, 0.07) 1px, transparent 1px),
@@ -1562,6 +1589,10 @@ code {
 .wall-card::before {
   content: "";
   position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: auto; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0 0 auto;
   height: 1px;
   background: linear-gradient(90deg, var(--green), transparent 70%);
@@ -1720,6 +1751,10 @@ code {
 .join-panel::before {
   content: "";
   position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   background-image:
     linear-gradient(rgba(37, 99, 235, 0.07) 1px, transparent 1px),
@@ -1743,6 +1778,7 @@ code {
 .join-copy h2 {
   margin: 14px 0 16px;
   color: var(--text);
+  font-size: 38.9px; /* fallback: 旧内核 */
   font-size: clamp(2rem, 3.8vw, 3rem);
   line-height: 1.1;
   letter-spacing: -0.035em;
@@ -1793,6 +1829,7 @@ code {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: rgba(255, 255, 255, 0.66);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
 
@@ -1807,6 +1844,7 @@ code {
   margin: 6px 0 12px;
   color: var(--blue);
   font-family: var(--mono);
+  font-size: 30.4px; /* fallback: 旧内核 */
   font-size: clamp(1.5rem, 3vw, 1.9rem);
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -1935,6 +1973,7 @@ code {
   }
 
   .hero h1 {
+    font-size: 55.3px; /* fallback: 旧内核 */
     font-size: clamp(2.8rem, 5.4vw, 4.3rem);
   }
 
@@ -1955,6 +1994,8 @@ code {
   }
 
   .container {
+    width: calc(100% - 40px); /* fallback: 旧内核 */
+    max-width: 720px; /* fallback: 旧内核 */
     width: min(calc(100% - 40px), 720px);
   }
 
@@ -1980,6 +2021,7 @@ code {
     border-radius: var(--radius);
     background: #ffffff;
     box-shadow: 0 24px 48px rgba(30, 64, 175, 0.16);
+    -webkit-backdrop-filter: blur(18px);
     backdrop-filter: blur(18px);
   }
 
@@ -2014,6 +2056,7 @@ code {
   }
 
   .hero h1 {
+    font-size: 64px; /* fallback: 旧内核 */
     font-size: clamp(2.8rem, 9vw, 4rem);
   }
 
@@ -2128,6 +2171,7 @@ code {
   }
 
   .hero h1 {
+    font-size: 51.2px; /* fallback: 旧内核 */
     font-size: clamp(2.5rem, 12vw, 3.2rem);
   }
 
@@ -2156,6 +2200,7 @@ code {
   }
 
   .section-head h2 {
+    font-size: 38.4px; /* fallback: 旧内核 */
     font-size: clamp(1.8rem, 8vw, 2.4rem);
   }
 
@@ -2181,6 +2226,7 @@ code {
   }
 
   .archive-head h1 {
+    font-size: 48px; /* fallback: 旧内核 */
     font-size: clamp(2.2rem, 11vw, 3rem);
   }
 
@@ -2298,4 +2344,46 @@ code {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* =========================================================
+   深色主题变量
+   ---------------------------------------------------------
+   这一层必须在 style.css 里：它是所有页面的基础样式表。
+   原来放在 personal.css（个性化层），结果 dino.html 这种
+   只引基础层的页面拿不到深色变量，切到夜间还是一整片白。
+   皮肤（极简/黑客）在 skins.css 里再覆盖 --bg 等，加载顺序在
+   这之后，优先级不受影响。
+   ========================================================= */
+[data-theme="dark"] {
+  --bg: #060d1c;
+  --bg-deep: #040a16;
+  --panel: #0d1b33;
+  --panel-2: #102140;
+  --panel-3: #142a4f;
+
+  --border: #1e3557;
+  --border-strong: #2f5183;
+
+  --text: #e8f1ff;
+  --text-soft: #c3d6ef;
+  --muted: #94abc9;
+  --dim: #8098b8;
+
+  --blue: #5b93ff;
+  --blue-bright: #8ab4ff;
+  --green: #38bdf8;
+  --green-bright: #7dd3fc;
+  --orange: #fbbf24;
+  --red: #f87171;
+  --purple: #a78bfa;
+
+  --blue-soft: rgba(91, 147, 255, 0.16);
+  --green-soft: rgba(56, 189, 248, 0.16);
+
+  --glow-blue: 0 10px 30px rgba(91, 147, 255, 0.22);
+  --glow-green: 0 10px 26px rgba(56, 189, 248, 0.18);
+  --shadow-card: 0 18px 48px rgba(0, 0, 0, 0.46);
+
+  color-scheme: dark;
 }

@@ -54,7 +54,9 @@
   let startX = 120;
   let count = 4;
   let spacing = 45;
-  let mode = "auto";
+  /* 页脚默认自动巡航；天梯页在 HTML 上写 data-mode="manual"，
+     进去就能自己跳。localStorage 里的偏好只对带切换按钮的页面生效。 */
+  let mode = strip.dataset.mode === "manual" ? "manual" : "auto";
   let activated = !reduce.matches;
   let visible = false;
   let running = false;
@@ -158,7 +160,7 @@
   }
 
   if (reduce.matches) mode = "manual";
-  else if (!hasControls) mode = "auto";
+  else if (!hasControls && strip.dataset.mode !== "manual") mode = "auto";
 
   function readPalette() {
     const cs = window.getComputedStyle(strip);
@@ -742,7 +744,11 @@
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     ctx.imageSmoothingEnabled = false;
 
-    S = H >= 120 ? 2 : 1;
+    /* 三档缩放：页脚 186px 给 S=2；手机上舞台 260px 也留在 S=2
+       （再大一档，两只恐龙就横满整个屏宽）。
+       平板横屏是 619×380 —— 高度够但宽度不够，4 只 S=3 会排得贴在一起，
+       所以 S=3 要求宽度也上到 700 */
+    S = H >= 300 && W >= 700 ? 3 : H >= 120 ? 2 : 1;
     groundY = H - Math.round(12 + S * 2);
     count = W < 520 ? 2 : 4;
     spacing = 46 * S;
@@ -951,7 +957,10 @@
     }
 
     if (!grounded) return;
-    vy = JUMP_V;
+    /* 跳跃高度要跟着体量走：S=3 的恐龙身高是 S=2 的 1.5 倍，
+       仍用 -540 会变成「大个子贴地蹦」。抛物线高度 ∝ v²，
+       所以按 √(S/2) 放，落回地面时的高度正好同比 */
+    vy = JUMP_V * Math.sqrt(S / 2);
     grounded = false;
     burstDust(3);
   }
@@ -1105,6 +1114,16 @@
     burstDebris(18);
     if (toastEl) toastEl.hidden = false;
     if (hintEl) hintEl.style.opacity = "0";
+
+    /* 天梯页要接这个事件弹成绩表单。首页没人听，派发也无害 */
+    try {
+      strip.dispatchEvent(new CustomEvent("dino:die", {
+        bubbles: true,
+        detail: { score: Math.floor(score), level: level, combo: bestCombo }
+      }));
+    } catch (error) {
+      /* 老内核没有 CustomEvent，忽略 */
+    }
   }
 
   /* -------------------------------------------------------
@@ -1235,7 +1254,9 @@
 
     if (dead) {
       deadTimer -= dt;
-      if (deadTimer <= 0) resetRun();
+      /* data-hold=1 的页面（天梯页）不自动重开：
+         成绩表单刚弹出来就被下一局顶掉，名字都来不及填 */
+      if (deadTimer <= 0 && strip.dataset.hold !== "1") resetRun();
       return;
     }
 
@@ -2642,15 +2663,30 @@
   });
 
   let resizeTimer = 0;
-  const resizeObserver = new ResizeObserver(() => {
+  /* ResizeObserver 是 Chromium 64+ 才有的，老 WebView / 国产内核
+     可能没实现。没有就退回 window.resize —— 只是响应慢一点，
+     不会因为构造函数不存在整段脚本抛错、画布彻底不动 */
+  function onStageResize() {
     window.clearTimeout(resizeTimer);
     resizeTimer = window.setTimeout(() => {
       const changed = measure();
       if (changed) resetRun();
       if (visible) startLoop();
     }, 160);
+  }
+
+  if (typeof window.ResizeObserver === "function") {
+    const resizeObserver = new ResizeObserver(onStageResize);
+    resizeObserver.observe(stage);
+  } else {
+    window.addEventListener("resize", onStageResize);
+  }
+
+  /* 天梯页点「再来一局」时派发这个事件，比让它自己数秒重开可控 */
+  strip.addEventListener("dino:restart", function () {
+    resetRun();
+    if (!running) startLoop();
   });
-  resizeObserver.observe(stage);
 
   /* -------------------------------------------------------
      六、启动

@@ -96,7 +96,12 @@
     window.clearTimeout(resizeTimer);
     resizeTimer = window.setTimeout(updateSpinTarget, 150);
   });
-  motionQuery.addEventListener?.("change", updateSpinTarget);
+  /* 可选链是 ES2020 语法，旧内核整份脚本会解析失败，这里用老写法 */
+  if (typeof motionQuery.addEventListener === "function") {
+    motionQuery.addEventListener("change", updateSpinTarget);
+  } else if (typeof motionQuery.addListener === "function") {
+    motionQuery.addListener(updateSpinTarget);
+  }
 
   currentSpin = motionQuery.matches ? 0 : window.scrollY * 0.24;
   targetSpin = currentSpin;

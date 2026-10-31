@@ -176,7 +176,7 @@
         (typeof member.title === "string" && member.title.trim()) ||
         data.name ||
         member.repo,
-      owner: data.owner?.login || member.user,
+      owner: (data.owner && data.owner.login) || member.user,
       description:
         (typeof member.desc === "string" && member.desc.trim()) ||
         (typeof data.description === "string" && data.description.trim()) ||
