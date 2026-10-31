@@ -18,7 +18,7 @@
    发版时改 VERSION，旧缓存会在 activate 里被清掉。
    ========================================================= */
 
-const VERSION = "20261116";
+const VERSION = "20261117";
 const CACHE = `hnyz-v${VERSION}`;
 
 /* 站内根路径：用 "./" 就地解析，

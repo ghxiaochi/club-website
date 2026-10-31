@@ -298,7 +298,10 @@
     formEl.dataset.score = String(score);
     if (nameInput) {
       nameInput.value = readText(KEY_NAME, "");
-      nameInput.focus({ preventScroll: true });
+      /* 桌面端不抢焦点：抢了之后按空格就是在输入框里打空格，
+         想「空格重开一局」的玩家会以为游戏卡住了。触屏才自动弹键盘 */
+      const coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+      if (coarse) nameInput.focus({ preventScroll: true });
     }
     const hint = formEl.querySelector("[data-ladder-formhint]");
     if (hint) hint.textContent = "本局 " + num(score) + " 分 —— 填个名字，去 GitHub 发布";
@@ -347,6 +350,7 @@
       }
 
       collapseForm("已在新窗口打开 GitHub，点 Submit 就上榜（约 1 分钟）");
+      if (submitBtn) submitBtn.blur();
       toast("这条先记在本机，GitHub 收录后所有人可见", "ok");
     });
   }
@@ -358,6 +362,9 @@
     againBtn.addEventListener("click", function () {
       hideForm();
       if (nameInput) nameInput.blur();
+      /* 按钮自己也失焦，不然焦点还留在 button 上，
+         keydown 会把空格让给按钮，玩家按空格跳不起来 */
+      againBtn.blur();
       try {
         strip.dispatchEvent(new CustomEvent("dino:restart", { bubbles: true }));
       } catch (error) {
