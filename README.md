@@ -96,9 +96,11 @@ club-website/
 │   ├── fetch-repos.mjs     # 抓取仓库数据 → data/repos.json
 │   └── compat-fallback.mjs # 给 clamp/min/max/inset 补旧内核 fallback（幂等）
 ├── worker/
-│   ├── ladder.js           # 天梯后端（Cloudflare Worker + KV）
-│   ├── wrangler.toml       # Worker 配置：KV 绑定
+│   ├── ladder.js           # 天梯后端本体（Cloudflare Worker + KV）
+│   ├── wrangler.toml       # 单独部署成 Worker 时才用：KV 绑定
 │   └── dev-server.mjs      # 本地内存版后端，不用注册账号就能联调
+├── functions/
+│   └── api/ladder.js       # Pages Functions：把上面的后端挂到同域 /api/ladder（6 行）
 ├── .github/
 │   └── workflows/
 │       └── refresh-repos.yml  # 每天 05:17 跑一次上面的脚本
@@ -799,30 +801,39 @@ GITHUB_TOKEN=ghp_xxx node scripts/fetch-repos.mjs
 
 ### 17.2 共享榜怎么开
 
-页面默认是**本地档**：只记录这台设备上的成绩，所有人看到的是各自设备 + 内置对手。
-要变成全站共享，需要一个后端。仓库里已经写好了，跑在 Cloudflare Workers 上：
+页面默认指向**同域的 `/api/ladder`**：一个 Pages Function，只有 6 行，
+把 `worker/ladder.js` 原样转过去：
 
 ```text
-worker/ladder.js      # 单文件 Worker，GET 取榜 / POST 交成绩
-worker/wrangler.toml  # 配置：KV 绑定 + 兼容日期
-worker/dev-server.mjs # 本地联调用的内存版，不需要任何账号
+functions/api/ladder.js  # 同域入口：/api/ladder（GET 取榜 / POST 交成绩）
+worker/ladder.js         # 后端本体：校验、排序、限流、KV 读写
+worker/wrangler.toml     # 只有「单独部署成 Worker」时才用
+worker/dev-server.mjs    # 本地内存版，不用注册账号就能联调
 ```
 
-三步部署（免费额度够用：每天 10 万次读、1000 次写）：
+选同域而不是独立 Worker，是因为 `*.workers.dev` 在国内经常被干扰，
+而 `/api/ladder` 走的是主站这条已经验证可达的链路，也省掉跨域和预检。
 
-1. `npx wrangler login`
-2. `npx wrangler kv namespace create LADDER`
-   把输出里的 `id` 填进 `worker/wrangler.toml` 的 `[[kv_namespaces]]`
-3. `cd worker && npx wrangler deploy`
-   拿到形如 `https://hnyz-dino-ladder.xxx.workers.dev` 的地址
+**只差一个 KV。** 在 Cloudflare 控制台点两下：
 
-然后把这个地址填进 `dino.html` 的
+1. Workers & Pages → **KV** → Create namespace（比如叫 `ladder`）
+2. Pages 项目 → **Settings → Functions → KV namespace bindings**
+   变量名必须填 **`LADDER`**（代码里写死了），Production 和 Preview 都绑上，保存
+
+保存后重新部署一次（推一版代码，或控制台 Retry deployment）。榜头从
+「本地档案」变成「共享天梯 · 所有人的成绩」，全站共享生效。
+
+没绑 KV 时接口返回 503 `{"ok":false,"error":"服务端还没绑定 KV…"}`，
+页面**不会白屏**，自动退回本地档——所以先发版、后绑 KV 也不会出事。
+
+想指到别处（独立 Worker、本地联调）就改 `dino.html` 的
 
 ```html
-<meta name="ladder-endpoint" content="https://hnyz-dino-ladder.xxx.workers.dev/">
+<meta name="ladder-endpoint" content="https://hnyz-dino-ladder.xxx.workers.dev">
 ```
 
-**结尾要带斜杠。** 填完刷新，榜头的「本地档案」会变成「共享天梯 · 所有人的成绩」。
+**结尾不要带斜杠**：`/api/ladder` 和 `/api/ladder/` 在 Pages Functions 里是两条路由，
+只留不带斜杠的那个才稳（`js/ladder.js` 的 `normalize()` 会统一去掉）。
 
 本地想先看看效果，不用部署：
 

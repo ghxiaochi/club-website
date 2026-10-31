@@ -16,16 +16,19 @@
   const root = document.querySelector("[data-ladder]");
   if (!root) return;
 
-  /* 后端地址。留空就走本地档（站点刚上线没配 Worker 时是这个状态）。
-     配好 Worker 后把地址写进 dino.html 的
-     <meta name="ladder-endpoint" content="https://xxx.workers.dev/">。
+  /* 后端地址。留空就走本地档（站点刚上线没配后端时是这个状态）。
+     现在默认指向同域的 Pages Functions：/api/ladder
+     想让全站共享，去 Cloudflare Pages 项目里绑一个叫 LADDER 的 KV 就行，
+     页面这边不用再改。
      调试时可以用 ?ladder=http://127.0.0.1:8787 临时指过去。 */
   const meta = document.querySelector('meta[name="ladder-endpoint"]');
 
   function normalize(url) {
     const s = String(url || "").trim();
     if (!s) return "";
-    return s.replace(/\/+$/, "") + "/";
+    /* 末尾斜杠统一去掉：/api/ladder/ 和 /api/ladder 会被
+       Pages Functions 当成两条路由，只留不带斜杠的那个才稳 */
+    return s.replace(/\/+$/, "");
   }
 
   const qs = /[?&]ladder=([^&]+)/.exec(window.location.search);

@@ -19,9 +19,11 @@
     })();
   </script>
 
-  <!-- 天梯后端地址。留空就只用本地档案 + 内置成绩，页面照常能玩。
-       配好 Cloudflare Worker 后，把地址填进下面的 content（结尾带 /）。 -->
-  <meta name="ladder-endpoint" content="">
+  <!-- 天梯后端地址。默认走同域的 Pages Functions /api/ladder：
+       只要在 Cloudflare Pages 项目里绑一个名为 LADDER 的 KV，
+       所有人就共享同一张榜；没绑或接口挂了会自动退回本地档案。
+       想指到别处（独立 Worker、本地联调）改这里即可。 -->
+  <meta name="ladder-endpoint" content="/api/ladder">
 
   <link rel="canonical" href="https://hnyzbcs.de5.net/dino.html">
   <meta property="og:title" content="DINO_RUN 天梯｜HNYZ">
@@ -39,9 +41,9 @@
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="application-name" content="HNYZ">
 
-  <link rel="stylesheet" href="css/style.css?v=20261112">
-  <link rel="stylesheet" href="css/dino.css?v=20261112">
-  <link rel="stylesheet" href="css/ladder.css?v=20261112">
+  <link rel="stylesheet" href="css/style.css?v=20261113">
+  <link rel="stylesheet" href="css/dino.css?v=20261113">
+  <link rel="stylesheet" href="css/ladder.css?v=20261113">
 </head>
 <body class="ladder-page">
 
@@ -127,7 +129,7 @@
 
   </main>
 
-  <script src="js/dino.js?v=20261112" defer></script>
-  <script src="js/ladder.js?v=20261112" defer></script>
+  <script src="js/dino.js?v=20261113" defer></script>
+  <script src="js/ladder.js?v=20261113" defer></script>
 </body>
 </html>
