@@ -19,12 +19,8 @@
     })();
   </script>
 
-  <!-- 天梯后端地址。留空 = 只用本地档案 + 内置对手（当前状态）。
-       要全站共享：把后端部署好，把它的地址填进 content，
-       例如 content="https://hnyz-dino-ladder.xxx.workers.dev"（结尾不要带斜杠）。
-       注意本站托管在 GitHub Pages（hnyzbcs.de5.net 由 de5.net 反代加速），
-       不是 Cloudflare Pages，所以 functions/ 目录里的同域接口不会生效。 -->
-  <meta name="ladder-endpoint" content="">
+  <!-- 榜单数据来自 data/ladder.json，由 .github/workflows/ladder.yml
+       汇总带 [DINO] 标题的 Issues 生成，页面不需要任何后端。 -->
 
   <link rel="canonical" href="https://hnyzbcs.de5.net/dino.html">
   <meta property="og:title" content="DINO_RUN 天梯｜HNYZ">
@@ -42,9 +38,9 @@
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="application-name" content="HNYZ">
 
-  <link rel="stylesheet" href="css/style.css?v=20261114">
-  <link rel="stylesheet" href="css/dino.css?v=20261114">
-  <link rel="stylesheet" href="css/ladder.css?v=20261114">
+  <link rel="stylesheet" href="css/style.css?v=20261115">
+  <link rel="stylesheet" href="css/dino.css?v=20261115">
+  <link rel="stylesheet" href="css/ladder.css?v=20261115">
 </head>
 <body class="ladder-page">
 
@@ -71,7 +67,6 @@
                 <span class="dino-run__ver">// 08-BIT</span>
               </h1>
               <div class="dino-run__hud">
-                <span class="dino-run__level" data-dino-level>LV.1</span>
                 <p class="dino-run__score" data-dino-score>HI 00000  00000</p>
               </div>
             </div>
@@ -89,7 +84,7 @@
             </div>
 
             <p class="ladder-play__tips">
-              空格 / ↑ / 点画布起跳 · 吃金币加分 · 每 10 级进化一次
+              空格 / ↑ / 点画布起跳 · 吃金币加分 · 跑到撞死为止
             </p>
           </div>
         </div>
@@ -102,8 +97,8 @@
           <label class="ladder-form__label" for="ladder-name">昵称</label>
           <input class="ladder-form__input" id="ladder-name" data-ladder-name
                  type="text" maxlength="12" autocomplete="nickname"
-                 placeholder="最多 12 个字，不填就叫「匿名恐龙」">
-          <button class="ladder-form__submit" type="submit" data-ladder-submit>上榜</button>
+                 placeholder="最多 12 字，留空即匿名">
+          <button class="ladder-form__submit" type="submit" data-ladder-submit>提交到天梯</button>
         </div>
         <button class="ladder-form__again" type="button" data-ladder-again>再来一局</button>
       </form>
@@ -124,13 +119,13 @@
       <p class="ladder-board__toast" data-ladder-toast role="status" aria-live="polite" hidden></p>
 
       <p class="ladder-board__foot">
-        同名的成绩只保留最高分。标了 <b>BOT</b> 的是内置对手，不是真人。
+        提交会打开一条 GitHub Issue，用你的 GitHub 账号发布后，约 1 分钟由 Actions 收进榜单。同名的只保留最高分。
       </p>
     </aside>
 
   </main>
 
-  <script src="js/dino.js?v=20261114" defer></script>
-  <script src="js/ladder.js?v=20261114" defer></script>
+  <script src="js/dino.js?v=20261115" defer></script>
+  <script src="js/ladder.js?v=20261115" defer></script>
 </body>
 </html>

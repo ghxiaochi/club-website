@@ -1,13 +1,15 @@
 /* =========================================================
    HNYZ · DINO_RUN 天梯榜
    ---------------------------------------------------------
-   三件事：
-     1. 拉榜（共享后端 → 缓存 → 内置档案）
-     2. 渲染榜首那句话 + TOP N 列表
-     3. 死亡后提交成绩
+   榜来自 data/ladder.json（静态文件，所有人看到的是同一份）。
+   这个文件由 GitHub Actions 汇总 Issues 生成：
+     玩家点「提交到天梯」→ 打开预填好的 Issue 页面 →
+     用 GitHub 账号发布 → Actions 解析、重排、写回 JSON。
 
-   降级顺序很重要：后端没配、被墙、超时，都不能让页面空着。
-   endpoint 为空 → 直接用内置档案 + 本地成绩，页面照常能玩能上榜。
+   页面这边只做三件事：
+     1. 读 JSON 渲染榜
+     2. 渲染榜首那句话
+     3. 死亡后组织一条 Issue 链接
    ========================================================= */
 
 (() => {
@@ -16,29 +18,13 @@
   const root = document.querySelector("[data-ladder]");
   if (!root) return;
 
-  /* 后端地址。留空就走本地档（站点刚上线没配后端时是这个状态）。
-     现在默认指向同域的 Pages Functions：/api/ladder
-     想让全站共享，去 Cloudflare Pages 项目里绑一个叫 LADDER 的 KV 就行，
-     页面这边不用再改。
-     调试时可以用 ?ladder=http://127.0.0.1:8787 临时指过去。 */
-  const meta = document.querySelector('meta[name="ladder-endpoint"]');
-
-  function normalize(url) {
-    const s = String(url || "").trim();
-    if (!s) return "";
-    /* 末尾斜杠统一去掉：/api/ladder/ 和 /api/ladder 会被
-       Pages Functions 当成两条路由，只留不带斜杠的那个才稳 */
-    return s.replace(/\/+$/, "");
-  }
-
-  const qs = /[?&]ladder=([^&]+)/.exec(window.location.search);
-  const ENDPOINT = normalize(qs ? decodeURIComponent(qs[1]) : (meta && meta.content));
+  const BOARD_URL = "data/ladder.json";
+  const REPO = "ghxiaochi/club-website";
+  const ISSUE_LABEL = "score";
 
   const LIMIT = 12;
   const KEY_NAME = "hnyz:dino-name";
   const KEY_LOCAL = "hnyz:dino-ladder-local";
-  const KEY_CACHE = "hnyz:dino-board-cache";
-  const SEED_URL = "data/ladder-seed.json";
 
   const leadEl = root.querySelector("[data-ladder-lead]");
   const listEl = root.querySelector("[data-ladder-list]");
@@ -51,10 +37,8 @@
 
   const strip = document.querySelector("[data-dino-run]");
 
-  let board = [];        /* [{ name, score, level, at, bot }] */
-  let seedRows = [];     /* 内置对手，合并时反复要用 */
-  let source = "none";   /* remote | cache | local */
-  let pending = null;    /* 待提交的成绩 */
+  let board = [];
+  let loaded = false;
   let toastTimer = 0;
 
   /* ---------- 小工具 ---------- */
@@ -97,44 +81,39 @@
     window.clearTimeout(toastTimer);
     toastTimer = window.setTimeout(function () {
       toastEl.hidden = true;
-    }, 4200);
+    }, 5200);
   }
 
   /* ---------- 榜单装配 ---------- */
 
-  function mergeRows(remote, local, seed) {
+  /* 静态榜是权威数据；本地那份是「刚提交、还没被 GitHub 收录」的记录，
+     同名时以静态榜为准（说明已经收进去了）。 */
+  function mergeRows(staticRows, localRows) {
     const out = [];
     const seen = {};
 
-    function push(row, bot) {
+    function push(row, pending) {
       const key = String(row.name || "").toLowerCase();
       if (!key) return;
       if (seen[key]) {
         if ((row.score || 0) > seen[key].score) {
-          seen[key].score = row.score;
-          seen[key].level = row.level;
+          seen[key].score = Math.floor(row.score);
         }
         return;
       }
       const item = {
         name: String(row.name || "").slice(0, 12),
         score: Math.max(0, Math.floor(Number(row.score) || 0)),
-        level: Math.max(1, Math.floor(Number(row.level) || 1)),
-        at: Number(row.at) || 0,
-        bot: !!bot
+        pending: !!pending
       };
       seen[key] = item;
       out.push(item);
     }
 
-    /* 真人优先于内置档案：同名时以真人成绩为准 */
-    (remote || []).forEach(function (r) { push(r, false); });
-    (local || []).forEach(function (r) { push(r, false); });
-    (seed || []).forEach(function (r) { push(r, true); });
+    (staticRows || []).forEach(function (r) { push(r, false); });
+    (localRows || []).forEach(function (r) { push(r, true); });
 
-    out.sort(function (a, b) {
-      return b.score - a.score || a.at - b.at;
-    });
+    out.sort(function (a, b) { return b.score - a.score; });
     return out;
   }
 
@@ -146,9 +125,7 @@
     }
     const top = board[0];
     const second = board[1];
-    let text = "当前榜首 " + top.name + "，";
-    text += num(top.score) + " 分";
-    if (top.level > 1) text += "（LV." + top.level + "）";
+    let text = "当前榜首 " + top.name + "，" + num(top.score) + " 分";
     if (second && second.score < top.score) {
       text += "，领先第二名 " + num(top.score - second.score) + " 分";
     }
@@ -170,7 +147,7 @@
     if (!rows.length) {
       const li = document.createElement("li");
       li.className = "ladder-row is-empty";
-      li.textContent = "还没有记录";
+      li.textContent = loaded ? "还没有记录，第一名空着" : "读取中…";
       listEl.appendChild(li);
       return;
     }
@@ -189,8 +166,6 @@
 
       li.appendChild(rankBadge(i));
 
-      /* 名字和 BOT 标签要在同一格里，否则网格的第三列会被标签占掉，
-         分数和等级挤到下一行去 */
       const who = document.createElement("span");
       who.className = "ladder-row__who";
 
@@ -199,11 +174,11 @@
       name.textContent = row.name;
       who.appendChild(name);
 
-      if (row.bot) {
+      if (row.pending) {
         const tag = document.createElement("span");
         tag.className = "ladder-row__tag";
-        tag.textContent = "BOT";
-        tag.title = "内置的电脑对手，不是真人成绩";
+        tag.textContent = "待收录";
+        tag.title = "这条还在你的浏览器里，GitHub 收录后所有人可见";
         who.appendChild(tag);
       }
 
@@ -214,28 +189,20 @@
       score.textContent = num(row.score);
       li.appendChild(score);
 
-      const lv = document.createElement("span");
-      lv.className = "ladder-row__lv";
-      lv.textContent = "LV." + row.level;
-      li.appendChild(lv);
-
       listEl.appendChild(li);
     });
   }
 
   function renderMeta() {
     if (!metaEl) return;
-    if (source === "remote") {
-      metaEl.textContent = "共享天梯 · 所有人的成绩";
+    if (!loaded) {
+      metaEl.textContent = "读取中…";
+      metaEl.dataset.tone = "local";
+    } else if (board.length) {
+      metaEl.textContent = "GitHub 汇总 · 提交后约 1 分钟更新";
       metaEl.dataset.tone = "live";
-    } else if (source === "cache") {
-      metaEl.textContent = "暂时连不上，显示上次缓存";
-      metaEl.dataset.tone = "warn";
-    } else if (ENDPOINT) {
-      metaEl.textContent = "本地档案 · 共享天梯没响应";
-      metaEl.dataset.tone = "warn";
     } else {
-      metaEl.textContent = "本地档案";
+      metaEl.textContent = "榜还没生成，等你来占第一位";
       metaEl.dataset.tone = "local";
     }
   }
@@ -248,7 +215,7 @@
       if (r && Number(r.score) > best) best = Number(r.score);
     });
     if (best > 0) {
-      mineEl.textContent = "我的最好成绩：" + num(best) + " 分";
+      mineEl.textContent = "我这台设备的最好成绩：" + num(best) + " 分";
       mineEl.hidden = false;
     } else {
       mineEl.hidden = true;
@@ -262,72 +229,46 @@
     renderMine();
   }
 
-  /* ---------- 数据来源 ---------- */
+  /* ---------- 读榜 ---------- */
 
-  function loadSeed() {
-    return fetch(SEED_URL, { cache: "no-cache" })
-      .then(function (r) { return r.ok ? r.json() : []; })
-      .catch(function () { return []; });
-  }
-
-  function loadRemote() {
-    if (!ENDPOINT) return Promise.resolve(null);
-
-    const ctrl = typeof AbortController === "function" ? new AbortController() : null;
-    const timer = window.setTimeout(function () {
-      if (ctrl) ctrl.abort();
-    }, 6000);
-
-    return fetch(ENDPOINT + "?limit=" + LIMIT, ctrl ? { signal: ctrl.signal } : undefined)
+  /* 静态文件走 GitHub Pages 的 CDN，直接用缓存会看到旧榜；
+     带上时间戳每次都取最新的那一份 */
+  function loadBoard() {
+    return fetch(BOARD_URL + "?t=" + Date.now(), { cache: "no-store" })
       .then(function (r) {
         if (!r.ok) throw new Error("HTTP " + r.status);
         return r.json();
       })
-      .then(function (data) {
-        if (!data || !data.ok || !Array.isArray(data.rows)) throw new Error("bad payload");
-        window.clearTimeout(timer);
-        writeJSON(KEY_CACHE, { at: Date.now(), rows: data.rows });
-        return data.rows;
-      })
-      .catch(function () {
-        window.clearTimeout(timer);
-        return null;
-      });
+      .catch(function () { return null; });
   }
 
   function boot() {
-    const local = readJSON(KEY_LOCAL, []);
-
-    Promise.all([loadRemote(), loadSeed()]).then(function (result) {
-      const remote = result[0];
-      const seed = result[1];
-      seedRows = seed || [];
-
-      if (remote) {
-        source = "remote";
-        board = mergeRows(remote, local, seed);
-      } else if (ENDPOINT) {
-        const cache = readJSON(KEY_CACHE, null);
-        if (cache && Array.isArray(cache.rows) && cache.rows.length) {
-          source = "cache";
-          board = mergeRows(cache.rows, local, seed);
-        } else {
-          source = "local";
-          board = mergeRows(null, local, seed);
-        }
-      } else {
-        source = "local";
-        board = mergeRows(null, local, seed);
-      }
-
+    loadBoard().then(function (rows) {
+      loaded = true;
+      const local = readJSON(KEY_LOCAL, []);
+      board = mergeRows(rows || [], local);
       paint();
-      retryPending();
     });
   }
 
-  /* ---------- 提交 ---------- */
+  /* ---------- 提交：组织一条 GitHub Issue ---------- */
 
-  function saveLocal(name, score, level) {
+  function issueUrl(name, score) {
+    const title = "[DINO] " + name + " · " + score + " 分";
+    const body = [
+      "<!-- 这一行别删：Actions 靠它认成绩 -->",
+      "score: " + score,
+      "",
+      "name: " + name
+    ].join("\n");
+
+    return "https://github.com/" + REPO + "/issues/new"
+      + "?labels=" + encodeURIComponent(ISSUE_LABEL)
+      + "&title=" + encodeURIComponent(title)
+      + "&body=" + encodeURIComponent(body);
+  }
+
+  function saveLocal(name, score) {
     const local = readJSON(KEY_LOCAL, []);
     const key = String(name).toLowerCase();
     const exist = local.filter(function (r) {
@@ -335,122 +276,18 @@
     })[0];
 
     if (exist) {
-      if (score > exist.score) {
-        exist.score = score;
-        exist.level = level;
-      }
+      if (score > exist.score) exist.score = score;
     } else {
-      local.push({ name: name, score: score, level: level, at: Date.now() });
+      local.push({ name: name, score: score });
     }
 
     local.sort(function (a, b) { return b.score - a.score; });
     writeJSON(KEY_LOCAL, local.slice(0, 20));
   }
 
-  function submitScore(name, score, level) {
-    saveLocal(name, score, level);
-    writePending({ name: name, score: score, level: level, at: Date.now() });
-
-    if (!ENDPOINT) {
-      toast("已记在本地档案", "info");
-      return Promise.resolve(false);
-    }
-
-    return send({ name: name, score: score, level: level }).then(function (res) {
-      if (!res || !res.ok) {
-        toast((res && res.error) || "提交失败，已存在本地，下次打开再试", "warn");
-        return false;
-      }
-
-      clearPending();
-
-      /* 名次不能直接用 res.rank：服务端只知道自己那份，
-         榜上还有内置对手和别人的记录。拉回最新数据合并后再算。 */
-      return loadRemote().then(function (rows) {
-        if (rows) {
-          source = "remote";
-          board = mergeRows(rows, readJSON(KEY_LOCAL, []), seedRows);
-          paint();
-        }
-        const key = name.toLowerCase();
-        let rank = 0;
-        for (let i = 0; i < board.length; i++) {
-          if (board[i].name.toLowerCase() === key) {
-            rank = i + 1;
-            break;
-          }
-        }
-        toast(
-          res.improved
-            ? "上榜成功，当前第 " + (rank || "?") + " 名"
-            : "这次没超过你的最好成绩（" + num(res.best) + " 分）",
-          res.improved ? "ok" : "info"
-        );
-        return true;
-      });
-    });
-  }
-
-  function send(payload) {
-    if (!ENDPOINT) return Promise.resolve(null);
-
-    const ctrl = typeof AbortController === "function" ? new AbortController() : null;
-    const timer = window.setTimeout(function () {
-      if (ctrl) ctrl.abort();
-    }, 8000);
-
-    return fetch(ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-      signal: ctrl ? ctrl.signal : undefined
-    })
-      .then(function (r) { return r.json().catch(function () { return null; }); })
-      .then(function (data) {
-        window.clearTimeout(timer);
-        return data;
-      })
-      .catch(function () {
-        window.clearTimeout(timer);
-        return null;
-      });
-  }
-
-  function writePending(item) {
-    pending = item;
-    writeJSON("hnyz:dino-pending", item);
-  }
-
-  function clearPending() {
-    pending = null;
-    try {
-      window.localStorage.removeItem("hnyz:dino-pending");
-    } catch (error) {
-      /* 忽略 */
-    }
-  }
-
-  /* 上次没提交成功的成绩，这次打开悄悄补交 */
-  function retryPending() {
-    const saved = readJSON("hnyz:dino-pending", null);
-    if (!saved || !ENDPOINT) return;
-    send(saved).then(function (res) {
-      if (res && res.ok) {
-        clearPending();
-        loadRemote().then(function (rows) {
-          if (rows) {
-            source = "remote";
-            board = mergeRows(rows, readJSON(KEY_LOCAL, []), seedRows);
-            paint();
-          }
-        });
-      }
-    });
-  }
-
   /* ---------- 表单 ---------- */
 
-  function showForm(score, level) {
+  function showForm(score) {
     if (!formEl) return;
     formEl.hidden = false;
 
@@ -459,24 +296,22 @@
     if (submitBtn) submitBtn.disabled = false;
 
     formEl.dataset.score = String(score);
-    formEl.dataset.level = String(level);
     if (nameInput) {
       nameInput.value = readText(KEY_NAME, "");
       nameInput.focus({ preventScroll: true });
     }
     const hint = formEl.querySelector("[data-ladder-formhint]");
-    if (hint) hint.textContent = "本局 " + num(score) + " 分 · LV." + level + "，留个名字上榜";
+    if (hint) hint.textContent = "本局 " + num(score) + " 分 —— 填个名字，去 GitHub 发布";
   }
 
-  /* 交完成绩只收起输入框，把「再来一局」留下。
-     整块藏掉的话，玩家会盯着 SIGNAL LOST 的画面无路可走。 */
+  /* 交完成绩只收起输入框，把「再来一局」留下 */
   function collapseForm(text) {
     if (!formEl) return;
     formEl.hidden = false;
     const row = formEl.querySelector(".ladder-form__row");
     if (row) row.hidden = true;
     const hint = formEl.querySelector("[data-ladder-formhint]");
-    if (hint) hint.textContent = text || "已记录，再来一局？";
+    if (hint) hint.textContent = text || "已提交，再来一局？";
   }
 
   function hideForm() {
@@ -487,12 +322,9 @@
     formEl.addEventListener("submit", function (event) {
       event.preventDefault();
       const score = Number(formEl.dataset.score) || 0;
-      const level = Number(formEl.dataset.level) || 1;
       let name = nameInput ? nameInput.value.trim() : "";
 
-      if (!name) {
-        name = "匿名恐龙";
-      }
+      if (!name) name = "匿名恐龙";
       name = Array.from(name).slice(0, 12).join("");
 
       try {
@@ -501,17 +333,26 @@
         /* 忽略 */
       }
 
-      if (submitBtn) submitBtn.disabled = true;
-      submitScore(name, score, level).then(function () {
-        if (submitBtn) submitBtn.disabled = false;
-        collapseForm("本局 " + num(score) + " 分 · LV." + level + "，已记录");
-      });
+      saveLocal(name, score);
+      board = mergeRows(
+        board.filter(function (r) { return !r.pending; }),
+        readJSON(KEY_LOCAL, [])
+      );
+      paint();
+
+      const win = window.open(issueUrl(name, score), "_blank");
+      if (!win) {
+        toast("新窗口被拦了，允许弹窗再点一次", "warn");
+        return;
+      }
+
+      collapseForm("已在新窗口打开 GitHub，点 Submit 就上榜（约 1 分钟）");
+      toast("这条先记在本机，GitHub 收录后所有人可见", "ok");
     });
   }
 
   /* ---------- 接小恐龙 ---------- */
 
-  /* 「再来一局」：dino.js 在天梯页上不自动重开，等这里发号施令 */
   const againBtn = root.querySelector("[data-ladder-again]");
   if (againBtn && strip) {
     againBtn.addEventListener("click", function () {
@@ -529,9 +370,8 @@
     strip.addEventListener("dino:die", function (event) {
       const detail = (event && event.detail) || {};
       const score = Number(detail.score) || 0;
-      const level = Number(detail.level) || 1;
       if (score < 20) return; /* 一开局就撞，别往榜上塞 */
-      showForm(score, level);
+      showForm(score);
     });
 
     strip.addEventListener("dino:start", function () {

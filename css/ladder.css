@@ -271,7 +271,7 @@ html[data-theme="dark"] .ladder-play__tips {
 
 .ladder-row {
   display: grid;
-  grid-template-columns: 26px minmax(0, 1fr) auto auto;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
   align-items: center;
   padding: 8px 8px;
   border-bottom: 1px solid var(--border);
@@ -348,14 +348,6 @@ html[data-theme="dark"] .ladder-play__tips {
   text-align: right;
 }
 
-.ladder-row__lv {
-  margin-left: 8px;
-  color: var(--dim);
-  font-family: var(--mono);
-  font-size: 10px;
-  text-align: right;
-}
-
 .ladder-board__mine {
   margin: 12px 0 0;
   color: var(--text-soft);
@@ -427,10 +419,6 @@ html[data-theme="dark"] .ladder-play__tips {
 @media (max-width: 420px) {
   .ladder-row {
     grid-template-columns: 22px minmax(0, 1fr) auto;
-  }
-
-  .ladder-row__lv {
-    display: none;
   }
 }
 

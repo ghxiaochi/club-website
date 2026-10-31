@@ -1,0 +1,94 @@
+name: 天梯汇总
+
+# 玩家点「提交到天梯」会打开一条标题以 [DINO] 开头的 Issue。
+# 这个 workflow 把所有这类 Issue 解析成成绩，重排后写回 data/ladder.json，
+# GitHub Pages 部署完就是新的榜单。
+
+on:
+  issues:
+    types: [opened, edited, reopened, closed, deleted]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: read
+
+# 多人同时提交时排队跑，别让两个 job 同时改同一个文件
+concurrency:
+  group: dino-ladder
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.issue.title, '[DINO]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 汇总 Issues 生成榜单
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            // 站在榜首的那条，不属于任何 Issue，每次重算都要带上
+            const SEED = [{ name: '东方马也', score: 999999 }];
+
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100
+            });
+
+            const rows = new Map();
+
+            for (const issue of issues) {
+              if (issue.pull_request) continue;
+              if (!issue.title.startsWith('[DINO]')) continue;
+
+              const body = issue.body || '';
+              const ms = /^\s*score\s*[:：]\s*(\d+)\s*$/im.exec(body);
+              if (!ms) {
+                core.info(`#${issue.number} 没有 score 行，跳过`);
+                continue;
+              }
+
+              const score = parseInt(ms[1], 10);
+              if (!Number.isFinite(score) || score < 0) continue;
+
+              // 名字优先取 body 里的 name，没有再退回 GitHub 用户名
+              let name = '';
+              const mn = /^\s*name\s*[:：]\s*(.+?)\s*$/im.exec(body);
+              if (mn) name = mn[1].replace(/[<>\r\n]/g, '').slice(0, 12).trim();
+              if (!name) name = issue.user.login;
+
+              const key = name.toLowerCase();
+              const prev = rows.get(key);
+              if (!prev || score > prev.score) rows.set(key, { name, score });
+            }
+
+            for (const seed of SEED) {
+              const key = seed.name.toLowerCase();
+              const prev = rows.get(key);
+              if (!prev || seed.score > prev.score) rows.set(key, seed);
+            }
+
+            const list = Array.from(rows.values())
+              .sort((a, b) => b.score - a.score)
+              .slice(0, 100);
+
+            fs.writeFileSync('data/ladder.json', JSON.stringify(list, null, 2) + '\n');
+            core.info('榜单条数：' + list.length);
+
+      - name: 提交
+        run: |
+          if git diff --quiet -- data/ladder.json; then
+            echo "榜单没变化，跳过提交"
+            exit 0
+          fi
+          git config user.name "ladder-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/ladder.json
+          git commit -m "chore(天梯): 汇总成绩 $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push

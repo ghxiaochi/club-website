@@ -17,7 +17,6 @@
   const stage = strip.querySelector("[data-dino-stage]");
   const canvas = strip.querySelector("[data-dino-canvas]");
   const scoreEl = strip.querySelector("[data-dino-score]");
-  const levelEl = strip.querySelector("[data-dino-level]");
   const popEl = strip.querySelector("[data-dino-pop]");
   const hintEl = strip.querySelector("[data-dino-hint]");
   const toastEl = strip.querySelector("[data-dino-toast]");
@@ -42,8 +41,7 @@
   const H_UNITS = 47;
   const GRAVITY = 2000;
   const JUMP_V = -540;
-  /* 等级上限抽成常量；×1 下一整个昼夜循环的秒数 */
-  const LEVEL_CAP = 100;
+  /* ×1 下一整个昼夜循环的秒数 */
   const DAY_CYCLE = 34;
 
   let W = 0;
@@ -89,11 +87,10 @@
   let trail = [];
   let clock = 0;
 
-  /* 玩法状态：档位、连击、飘字、震屏 */
-  let level = 1;
+  /* 玩法状态：连击、飘字、震屏。
+     没有等级制度：难度只跟分数走，跑多远算多远，不封顶。 */
   let combo = 0;
   let bestCombo = 0;
-  let nextLevelAt = 40;
   let popTimer = 0;
   let shake = 0;
   /* 进化演出：里程碑轻闪、领队进化辉光 */
@@ -447,14 +444,9 @@
       : a, b, t);
   }
 
-  /* 墨绿 → 深绿 → 墨蓝 → 暗金：目标羽色随等级渐变，再与皮肤底色按 3:1 调和 */
+  /* 羽色固定用皮肤墨色。等级渐变的逻辑已随等级制度一起拿掉 */
   function dinoTone() {
-    const tones = ["#2f8f5f", "#37c58f", "#4f8fd9", "#d9a441"];
-    if (level < 20) return palette.ink;
-    const t = Math.min(0.999, (level - 20) / 60) * (tones.length - 1);
-    const i = Math.floor(t);
-    const target = lerpHex(tones[i], tones[i + 1] || tones[i], t - i);
-    return mixHex(target, palette.ink, 0.28);
+    return palette.ink;
   }
 
   function buildSprites() {
@@ -818,10 +810,8 @@
     dust = [];
     trail = [];
     clock = 0;
-    level = 1;
     combo = 0;
     bestCombo = 0;
-    nextLevelAt = 40;
     popTimer = 0;
     shake = 0;
     flash = 0;
@@ -839,7 +829,6 @@
       extinctEl.classList.remove("is-on");
     }
     if (timeEl) timeEl.classList.remove("is-locked");
-    if (levelEl) levelEl.textContent = "LV.1";
     if (popEl) {
       popEl.textContent = "";
       popEl.classList.remove("is-on");
@@ -979,8 +968,9 @@
   }
 
   function spawnObstacle() {
-    /* 10 级起学会飞：三成概率出翼龙。高空的跑过去就行，低空的要跳 */
-    if (level >= 10 && Math.random() < 0.3) {
+    /* 300 分之后开始出翼龙：高空跑过去就行，低空的要跳。
+       原版也是先只放仙人掌，跑一段才放翼龙 */
+    if (score > 300 && Math.random() < 0.3) {
       const high = Math.random() < 0.5;
       obstacles.push({
         kind: "ptero",
@@ -1004,9 +994,9 @@
       variant
     });
 
-    /* 30 级起混编：三成概率再补一株，拼成双连仙人掌 */
+    /* 900 分之后混编：三成概率再补一株，拼成双连仙人掌 */
     let width = sprite.width;
-    if (level >= 30 && Math.random() < 0.35) {
+    if (score > 900 && Math.random() < 0.35) {
       const v2 = (variant + 1) % sprites.cacti.length;
       const s2 = sprites.cacti[v2];
       obstacles.push({
@@ -1019,10 +1009,11 @@
       width += s2.width + 2;
     }
 
-    /* 仙人掌上方挂金币拱门：跳得准就一路吃过去；30 级起出现双排 */
-    if (Math.random() < (level >= 30 ? 0.75 : 0.62)) {
+    /* 仙人掌上方挂金币拱门：跳得准就一路吃过去；900 分之后出现双排 */
+    const dense = score > 900;
+    if (Math.random() < (dense ? 0.75 : 0.62)) {
       const cx = W + 24 + width / 2;
-      const rows = level >= 30 ? [0, 24] : [0];
+      const rows = dense ? [0, 24] : [0];
       rows.forEach((extra) => {
         [[-46, 26], [0, 46], [46, 26]].forEach(([dx, lift]) => {
           coins.push({
@@ -1119,7 +1110,7 @@
     try {
       strip.dispatchEvent(new CustomEvent("dino:die", {
         bubbles: true,
-        detail: { score: Math.floor(score), level: level, combo: bestCombo }
+        detail: { score: Math.floor(score) }
       }));
     } catch (error) {
       /* 老内核没有 CustomEvent，忽略 */
@@ -1137,24 +1128,6 @@
     void popEl.offsetWidth;
     popEl.classList.add("is-on");
     popTimer = 0.9;
-  }
-
-  function setLevel(next) {
-    level = next;
-    if (levelEl) {
-      levelEl.textContent = `LV.${level}`;
-      levelEl.classList.remove("is-bump");
-      void levelEl.offsetWidth;
-      levelEl.classList.add("is-bump");
-    }
-
-    /* 每 10 级一次大里程碑：飘字 + 全屏轻闪 + 领队短暂发亮 */
-    if (level > 1 && level % 10 === 0) {
-      pop(`EVOLUTION // STAGE ${level / 10 + 1}`, "level");
-      flash = 0.32;
-      stageGlow = 1;
-      buildSprites(); /* 羽色随等级渐变，重建贴图 */
-    }
   }
 
   function collectCoins() {
@@ -1260,21 +1233,11 @@
       return;
     }
 
-    /* 速度三层：世界里程 + 等级成长，等级是主角 */
-    speed = 240 + Math.min(160, worldX / 80) + Math.min(220, (level - 1) * 2.4);
+    /* 速度只看跑过的里程，没有等级成长，也没有封顶后的停顿 */
+    speed = 240 + Math.min(160, worldX / 80);
     distance += speed * dt;
     score = distance / 14;
     updateScore(false);
-
-    /* 升级增量从约 41 分起步、缓慢涨到约 120 分：×1 全程 3~5 分钟 */
-    if (score >= nextLevelAt && level < LEVEL_CAP) {
-      setLevel(level + 1);
-      nextLevelAt += Math.round(40 + level * 0.8);
-      if (level >= LEVEL_CAP) {
-        startExtinction();
-        return;
-      }
-    }
 
     if (stageGlow > 0) stageGlow = Math.max(0, stageGlow - dt);
     if (flash > 0) flash = Math.max(0, flash - dt * 1.4);
@@ -1297,23 +1260,6 @@
     if (spawnIn <= 0) {
       spawnObstacle();
       spawnIn = obstacleGap();
-    }
-
-    /* 50 级起，无敌星按自己的节奏落下来 */
-    if (level >= 50) {
-      starIn -= dt;
-      if (starIn <= 0) {
-        coins.push({
-          kind: "star",
-          x: W + 30,
-          lift: 40 + Math.random() * 18,
-          frame: 0,
-          spin: 0,
-          got: false
-        });
-        starIn = 16 + Math.random() * 12;
-        pop("STAR INBOUND", "combo");
-      }
     }
 
     obstacles.forEach((item) => {
@@ -2218,8 +2164,8 @@
     const sprite = sprites.dino[frame];
     const moonlit = nightLift > 0.02 ? sprites.dinoNight[frame] : null;
 
-    /* 40 级起，跟随龙从波浪跟跳收紧成衔尾式齐冲 */
-    const formation = level >= 40;
+    /* 跟随龙一直是波浪式跟跳，不再随等级收紧成齐冲 */
+    const formation = false;
 
     for (let i = count - 1; i >= 0; i -= 1) {
       const x = Math.round(startX - i * spacing);
@@ -2698,7 +2644,7 @@
 
   const dinoDebug = () => ({
     visible, running, activated, score, dead, mode, W, H, S,
-    obs: obstacles.length, coins: coins.length, level, combo, bestCombo, worldX,
+    obs: obstacles.length, coins: coins.length, combo, bestCombo, worldX,
     gameClock, timeScale, starTimer, cine: cine ? cine.phase : null,
     cineT: cine ? Math.round(cine.t * 100) / 100 : 0,
     perf: { update: Math.round(perfUpdate * 100) / 100, draw: Math.round(perfDraw * 100) / 100 },
@@ -2713,11 +2659,6 @@
   dinoDebug.rewind = () => startRewind();
   dinoDebug.setClock = (value) => {
     gameClock = ((value % 1) + 1) % 1;
-  };
-  dinoDebug.extinct = () => {
-    level = LEVEL_CAP - 1;
-    setLevel(LEVEL_CAP);
-    startExtinction();
   };
   window.__HNYZ_DINO__ = dinoDebug;
 
