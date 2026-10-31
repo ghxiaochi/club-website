@@ -100,7 +100,7 @@ club-website/
 │   ├── wrangler.toml       # 单独部署成 Worker 时才用：KV 绑定
 │   └── dev-server.mjs      # 本地内存版后端，不用注册账号就能联调
 ├── functions/
-│   └── api/ladder.js       # Pages Functions：把上面的后端挂到同域 /api/ladder（6 行）
+│   └── api/ladder.js       # 备用：Cloudflare Pages 下的同域入口（GitHub Pages 不执行）
 ├── .github/
 │   └── workflows/
 │       └── refresh-repos.yml  # 每天 05:17 跑一次上面的脚本
@@ -801,39 +801,42 @@ GITHUB_TOKEN=ghp_xxx node scripts/fetch-repos.mjs
 
 ### 17.2 共享榜怎么开
 
-页面默认指向**同域的 `/api/ladder`**：一个 Pages Function，只有 6 行，
-把 `worker/ladder.js` 原样转过去：
+页面默认**没有后端**（`dino.html` 的 meta 留空）：只记录这台设备的成绩 + 内置对手。
+
+要全站共享，得有个能 HTTP 读写的后端。仓库里带了一个现成的：
 
 ```text
-functions/api/ladder.js  # 同域入口：/api/ladder（GET 取榜 / POST 交成绩）
-worker/ladder.js         # 后端本体：校验、排序、限流、KV 读写
-worker/wrangler.toml     # 只有「单独部署成 Worker」时才用
-worker/dev-server.mjs    # 本地内存版，不用注册账号就能联调
+worker/ladder.js      # 单文件 Worker：GET 取榜 / POST 交成绩，数据存 KV
+worker/wrangler.toml  # KV 绑定与兼容日期
+worker/dev-server.mjs # 本地内存版，不登录也能联调
 ```
 
-选同域而不是独立 Worker，是因为 `*.workers.dev` 在国内经常被干扰，
-而 `/api/ladder` 走的是主站这条已经验证可达的链路，也省掉跨域和预检。
+三步部署（免费额度：每天 10 万次读、1000 次写）：
 
-**只差一个 KV。** 在 Cloudflare 控制台点两下：
+1. `npx wrangler login`
+2. `npx wrangler kv namespace create LADDER`
+   把输出里的 `id` 填进 `worker/wrangler.toml` 的 `[[kv_namespaces]]`
+3. `cd worker && npx wrangler deploy`
+   拿到形如 `https://hnyz-dino-ladder.xxx.workers.dev` 的地址
 
-1. Workers & Pages → **KV** → Create namespace（比如叫 `ladder`）
-2. Pages 项目 → **Settings → Functions → KV namespace bindings**
-   变量名必须填 **`LADDER`**（代码里写死了），Production 和 Preview 都绑上，保存
-
-保存后重新部署一次（推一版代码，或控制台 Retry deployment）。榜头从
-「本地档案」变成「共享天梯 · 所有人的成绩」，全站共享生效。
-
-没绑 KV 时接口返回 503 `{"ok":false,"error":"服务端还没绑定 KV…"}`，
-页面**不会白屏**，自动退回本地档——所以先发版、后绑 KV 也不会出事。
-
-想指到别处（独立 Worker、本地联调）就改 `dino.html` 的
+然后填进 `dino.html`：
 
 ```html
 <meta name="ladder-endpoint" content="https://hnyz-dino-ladder.xxx.workers.dev">
 ```
 
-**结尾不要带斜杠**：`/api/ladder` 和 `/api/ladder/` 在 Pages Functions 里是两条路由，
-只留不带斜杠的那个才稳（`js/ladder.js` 的 `normalize()` 会统一去掉）。
+刷新后榜头从「本地档案」变成「共享天梯 · 所有人的成绩」。
+
+**结尾不要带斜杠**（`js/ladder.js` 的 `normalize()` 也会统一去掉）。
+
+> **关于 `functions/api/ladder.js`**
+> 那是给 **Cloudflare Pages** 用的同域入口，好处是没有跨域、没有 OPTIONS 预检，
+> 也不用赌 `*.workers.dev` 在国内的可达性。
+> 但本站现在托管在 **GitHub Pages**（`CNAME` 指向 `hnyzbcs.de5.net`，
+> 由 de5.net 反代加速，响应头里能看到 `x-github-request-id`），
+> GitHub Pages 不会执行这个目录，`/api/ladder` 会走 404。
+> 文件留着不动：哪天站点迁到 Cloudflare Pages，绑一个叫 `LADDER` 的 KV 就自动生效，
+> 前端 meta 改回 `/api/ladder` 即可。
 
 本地想先看看效果，不用部署：
 

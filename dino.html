@@ -19,11 +19,12 @@
     })();
   </script>
 
-  <!-- 天梯后端地址。默认走同域的 Pages Functions /api/ladder：
-       只要在 Cloudflare Pages 项目里绑一个名为 LADDER 的 KV，
-       所有人就共享同一张榜；没绑或接口挂了会自动退回本地档案。
-       想指到别处（独立 Worker、本地联调）改这里即可。 -->
-  <meta name="ladder-endpoint" content="/api/ladder">
+  <!-- 天梯后端地址。留空 = 只用本地档案 + 内置对手（当前状态）。
+       要全站共享：把后端部署好，把它的地址填进 content，
+       例如 content="https://hnyz-dino-ladder.xxx.workers.dev"（结尾不要带斜杠）。
+       注意本站托管在 GitHub Pages（hnyzbcs.de5.net 由 de5.net 反代加速），
+       不是 Cloudflare Pages，所以 functions/ 目录里的同域接口不会生效。 -->
+  <meta name="ladder-endpoint" content="">
 
   <link rel="canonical" href="https://hnyzbcs.de5.net/dino.html">
   <meta property="og:title" content="DINO_RUN 天梯｜HNYZ">
@@ -41,9 +42,9 @@
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="application-name" content="HNYZ">
 
-  <link rel="stylesheet" href="css/style.css?v=20261113">
-  <link rel="stylesheet" href="css/dino.css?v=20261113">
-  <link rel="stylesheet" href="css/ladder.css?v=20261113">
+  <link rel="stylesheet" href="css/style.css?v=20261114">
+  <link rel="stylesheet" href="css/dino.css?v=20261114">
+  <link rel="stylesheet" href="css/ladder.css?v=20261114">
 </head>
 <body class="ladder-page">
 
@@ -129,7 +130,7 @@
 
   </main>
 
-  <script src="js/dino.js?v=20261113" defer></script>
-  <script src="js/ladder.js?v=20261113" defer></script>
+  <script src="js/dino.js?v=20261114" defer></script>
+  <script src="js/ladder.js?v=20261114" defer></script>
 </body>
 </html>
