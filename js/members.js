@@ -40,7 +40,7 @@ window.HNYZ_MEMBERS = [
     user: "vveyin",
     repo: "DrawFunc",
     coverImg: "images/project-drawfunc.svg",
-    title: "DrawFunc 手表函数绘图",
+    title: "f(x) 手表函数绘图器",
     desc: "为 Android 11 手表写的开源函数绘图 App：支持显函数、极坐标、参数方程和隐函数，适配圆屏与旋转表冠。",
     language: "Kotlin"
   },
@@ -85,7 +85,7 @@ window.HNYZ_PROFILES = {
     kicker: "MEMBER_PAGE // 2026–2027",
     title: "vveyin 的主页",
     desc: "给手表写 App 的人。",
-    intro: "喜欢把手机塞进手表里。DrawFunc 是我给 Android 11 手表写的函数绘图 App。",
+    intro: "喜欢把手机塞进手表里。f(x) 是我给 Android 11 手表写的函数绘图 App。",
     link: "https://github.com/vveyin",
     accent: "#7c3aed",
     sprites: [
