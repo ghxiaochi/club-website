@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-31T00:50:42Z",
+  "generatedAt": "2026-11-01T00:11:02Z",
   "generator": "scripts/fetch-repos.mjs",
   "count": 5,
   "repos": {
@@ -40,17 +40,17 @@
       }
     },
     "vveyin/DrawFunc": {
-      "name": "DrawFunc",
-      "full_name": "vveyin/DrawFunc",
+      "name": "f-x",
+      "full_name": "vveyin/f-x",
       "description": "为安卓手表设计的函数绘图app",
-      "html_url": "https://github.com/vveyin/DrawFunc",
+      "html_url": "https://github.com/vveyin/f-x",
       "homepage": null,
       "language": "Kotlin",
-      "stargazers_count": 3,
+      "stargazers_count": 4,
       "forks_count": 1,
       "open_issues_count": 0,
-      "pushed_at": "2026-10-27T15:50:54Z",
-      "updated_at": "2026-10-27T15:50:58Z",
+      "pushed_at": "2026-10-31T13:29:19Z",
+      "updated_at": "2026-10-31T13:40:54Z",
       "archived": false,
       "topics": [],
       "owner": {
@@ -85,8 +85,8 @@
       "stargazers_count": 0,
       "forks_count": 0,
       "open_issues_count": 0,
-      "pushed_at": "2026-10-30T19:33:17Z",
-      "updated_at": "2026-10-30T19:33:20Z",
+      "pushed_at": "2026-10-31T06:35:56Z",
+      "updated_at": "2026-10-31T06:35:59Z",
       "archived": false,
       "topics": [],
       "owner": {
