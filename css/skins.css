@@ -295,8 +295,8 @@ body.is-dino-visible .hnyz-pet {
 .style-deck__viewport::after {
   content: "";
   display: block;
-  height: calc((100% - 555px) / 2); /* fallback: 旧内核 */
-  height: max(0px, calc((100% - 555px) / 2));
+  height: calc((100% - 550px) / 2); /* fallback: 旧内核 */
+  height: max(0px, calc((100% - 550px) / 2));
 }
 
 .style-card {
@@ -307,14 +307,16 @@ body.is-dino-visible .hnyz-pet {
   align-items: center;
   justify-content: flex-start;
   gap: 10px;
-  width: calc(100% - 52px); /* fallback: 旧内核 */
+  /* 高度跟内容走：写死 540px 时，屏一矮内容就顶出去，手表上只剩一条缝 */
+  width: calc(100% - 48px); /* fallback: 旧内核 */
   max-width: 360px; /* fallback: 旧内核 */
-  width: min(360px, calc(100% - 52px));
-  height: calc(100% - 30px); /* fallback: 旧内核 */
-  max-height: 540px; /* fallback: 旧内核 */
-  height: min(540px, calc(100% - 30px));
-  margin: 15px auto;
-  padding: 58px 26px 30px;
+  width: min(360px, calc(100% - 48px));
+  /* 高度跟内容走，但给个下限：卡片太矮会露出半张邻卡，读起来像列表 */
+  height: auto;
+  min-height: calc(100% - 30px); /* fallback: 旧内核 */
+  min-height: min(520px, calc(100% - 30px));
+  margin: 10px auto;
+  padding: 48px 24px 26px;
   scroll-snap-align: center;
   scroll-snap-stop: always;
   text-align: center;
@@ -324,10 +326,10 @@ body.is-dino-visible .hnyz-pet {
     radial-gradient(ellipse 80% 40% at 50% 0%, rgba(255, 255, 255, 0.055), transparent 70%),
     linear-gradient(180deg, rgba(15, 20, 18, 0.95), rgba(6, 9, 7, 0.97));
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3), 0 34px 80px rgba(0, 0, 0, 0.55);
-  opacity: 0.38;
-  transform: scale(0.94);
-  transition: opacity 0.45s ease, transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.4s ease, box-shadow 0.4s ease;
+  opacity: 0.22;
+  /* 只动透明度和描边：缩放会让滚动容器反复重算吸附点，
+     滚动回调又把活跃卡改回来，两边互相推，低端机上就是那一下抽搐 */
+  transition: opacity 0.35s ease, border-color 0.35s ease;
 }
 
 .style-card[data-style-option="default"] { --card-accent: rgba(96, 165, 250, 0.55); }
@@ -355,7 +357,6 @@ body.is-dino-visible .hnyz-pet {
 
 .style-card.is-active {
   opacity: 1;
-  transform: scale(1);
   box-shadow: 0 0 0 1px var(--card-accent), 0 34px 90px rgba(0, 0, 0, 0.62);
 }
 
@@ -1067,5 +1068,109 @@ html[data-style] .style-deck.is-handoff {
   .hacker-term__cursor {
     transition: none;
     animation: none;
+  }
+}
+
+/* 矮屏 / 手表：一屏塞不下一张标准卡。标题栏、提示、色点依次让位，
+   卡片本身必须完整。 */
+@media (max-height: 560px), (max-width: 300px) {
+  .style-deck {
+    background: #050807;
+  }
+
+  .style-deck__shell {
+    padding: 6px 0;
+  }
+
+  .style-deck__head {
+    padding: 0 12px 4px;
+    gap: 8px;
+  }
+
+  .style-deck__kicker,
+  .style-deck__hint,
+  .style-deck__dots {
+    display: none;
+  }
+
+  .style-deck__title {
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+  }
+
+  .style-deck__close {
+    width: 28px;
+    height: 28px;
+  }
+
+  .style-card {
+    width: calc(100% - 16px);
+    margin: 6px auto;
+    padding: 16px 12px 14px;
+    gap: 6px;
+    border-radius: 14px;
+  }
+
+  .style-card__top {
+    top: 6px;
+    left: 12px;
+    right: 12px;
+    font-size: 0.48rem;
+    letter-spacing: 0.08em;
+  }
+
+  .style-card__glyph {
+    width: 46px; /* fallback: 旧内核 */
+    width: clamp(38px, 16vw, 52px);
+    height: 46px; /* fallback: 旧内核 */
+    height: clamp(38px, 16vw, 52px);
+    font-size: 0.95rem;
+    margin-bottom: 0;
+  }
+
+  .style-card__kicker {
+    font-size: 0.5rem;
+    letter-spacing: 0.12em;
+  }
+
+  .style-card__title {
+    font-size: 1rem;
+  }
+
+  .style-card__desc {
+    font-size: 0.66rem;
+    line-height: 1.5;
+    max-width: 26ch;
+  }
+
+  .style-card__swatches i {
+    width: 11px;
+    height: 11px;
+  }
+
+  .style-card__apply {
+    min-height: 30px;
+    padding: 0 14px;
+    font-size: 0.66rem;
+  }
+}
+
+/* 再窄一档：只留编号、名字和按钮 */
+@media (max-width: 240px) {
+  .style-card__desc,
+  .style-card__swatches,
+  .style-card__kicker,
+  .style-card__current,
+  .style-deck__title {
+    display: none;
+  }
+
+  .style-deck__head {
+    justify-content: flex-end;
+    padding: 0 6px 2px;
+  }
+
+  .style-card__title {
+    font-size: 0.95rem;
   }
 }
