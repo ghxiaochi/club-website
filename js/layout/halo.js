@@ -84,7 +84,7 @@
   }
 
   function baseRadius() {
-    return Math.max(52, Math.min(W, H) * 0.235);
+    return Math.max(56, Math.min(W, H) * 0.26);
   }
 
   function build() {
@@ -146,7 +146,7 @@
     canvas.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     /* 环偏右：左边留给标题和正文，别让光压着字 */
-    CX = W < 720 ? W * 0.5 : W * 0.64;
+    CX = W < 720 ? W * 0.5 : W * 0.62;
     CY = H * 0.42;
     build();
     draw(0);

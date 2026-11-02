@@ -2,7 +2,9 @@
 
 一个纯静态的社团官网：**HTML + CSS + 原生 JavaScript**，没有后端、没有数据库、没有构建步骤。
 
-整体是蓝白科技风：浅蓝底、白色卡片、深海军蓝文字。教学内容以 **Arduino 硬件编程**为主线。右下角有一个不署名的校徽，随页面滚动旋转，点击会说一句社团台词；「全部项目」页左下角还有 ghxiaochi 的像素头像彩蛋，点击若干次会出现隐藏台词。「全部项目」页的 ghxiaochi 分组顶部有个人主页横幅和三张贴纸；成员个人页里也有这只桌宠；独立「图集」页放着社团梗图；背景里还散着一层灰度小图标（校徽 / Arduino / token）缓慢浮动。项目卡片通过 **GitHub API** 读取仓库信息；首页展示前 6 个，完整列表在单独的「全部项目」页按成员折叠。遇到 403 限流、404 或网络异常会自动切换到本地缓存或降级卡片。
+整站是一个**驾驶舱**：顶部一条状态头（品牌 + 5 个实时计数），中间一整块舞台（编织光环的 Canvas 光场，内容浮在它上面滚动），底部 8 块数据面板（点一块就跳到那一段，滚到哪段哪块亮起），最底一行状态条（页面切换 + 快捷键提示）。整页 100vh 不滚动，滚动只发生在舞台内部。版式参考 [HALOFLUX](https://github.com/Ryder191/haloflux)（PolyForm Noncommercial 1.0.0）——**只借鉴了版式思路，代码、配色与图形全部自写，未复制其源码**。
+
+五套皮肤共用同一副骨架，各自只改一套颜色变量：默认（炭黑 + 冰蓝）、极简（纸白 + 墨）、黑客（纯黑 + 荧光绿）、控制台（炭黑 + 单橙）、棍木（整页清空）。教学内容以 **Arduino 硬件编程**为主线。右下角有一个不署名的校徽，随页面滚动旋转，点击会说一句社团台词；「全部项目」页左下角还有 ghxiaochi 的像素头像彩蛋，点击若干次会出现隐藏台词。「全部项目」页的 ghxiaochi 分组顶部有个人主页横幅和三张贴纸；成员个人页里也有这只桌宠；独立「图集」页放着社团梗图；背景里还散着一层灰度小图标（校徽 / Arduino / token）缓慢浮动。项目卡片通过 **GitHub API** 读取仓库信息；首页展示前 6 个，完整列表在单独的「全部项目」页按成员折叠。遇到 403 限流、404 或网络异常会自动切换到本地缓存或降级卡片。
 
 - **线上地址**：<https://hnyzbcs.de5.net/>（自定义域名，`ghxiaochi.github.io/club-website/` 会 301 过来）
 - **仓库地址**：<https://github.com/ghxiaochi/club-website>
@@ -43,109 +45,185 @@
 
 ```text
 club-website/
-├── index.html              # 首页
+├── index.html              # 首页（驾驶舱总览，8 块面板）
 ├── projects.html           # 全部项目页（按成员折叠）
 ├── gallery.html            # 图集页（瀑布流 + 灯箱）
 ├── member.html             # 成员页
-├── dino.html               # 天梯页：可玩的小恐龙 + 排行榜
-├── 404.html                # 终端风 404（Pages 找不到路径时返回，站内任意深度都能用）
-├── manifest.webmanifest    # PWA 清单（名称、图标、快捷方式）
+├── dino.html               # 天梯页：可玩的小恐龙 + 排行榜（舞台改成整块游戏区）
+├── 404.html                # 终端风 404
+├── manifest.webmanifest    # PWA 清单
 ├── sw.js                   # Service Worker：页面网络优先、资源缓存优先
+│
 ├── css/
-│   ├── style.css           # 全站样式（蓝白科技风）
-│   ├── personal.css        # 深色主题、动效、彩蛋样式（在 style.css 之后加载）
-│   ├── skins.css           # 四套网页风格（默认 / 极简 / 黑客 / 棍木）的皮肤层
-│   ├── dino.css            # 页脚小恐龙跑道、日间/夜间配色
-│   ├── type.css            # 三套风格的字体栈（标题衬线 / 等宽 / 几何无衬线；棍木只有一行灰字）
-│   ├── motion.css          # 弹性动效层（统一回弹曲线，最后加载）
-│   ├── pet.css             # 右下角校徽背景板样式
-│   ├── avatar-pet.css      # 左下角像素头像彩蛋样式
-│   ├── characters.css      # 音游角色舞台与立绘
-│   ├── guestbook.css       # 留言板外框（终端风的标题条、等待态、降级文案）
-│   ├── ladder.css          # 天梯页两栏布局与榜单（刻意不用 clamp/inset，照顾旧内核）
-│   ├── skin-hacker.css     # 黑客风覆盖（22KB，只在切到该皮肤时加载）
-│   ├── skin-minimal.css    # 极简风覆盖（6KB，同上）
-│   ├── skin-bare.css       # 棍木覆盖（2KB，同上）
-│   └── console.css         # 控制台风（炭黑 + 米白 + 单一橙，含调参面板样式，同上）
-├── assets/
-│   └── moon-sun-sprite.webp # 60 帧月亮/太阳雪碧图（3240×54，无损 webp）
-├── fonts/                  # 游戏原版像素字体（来自 assets.7z）
-│   ├── anim-title.ttf      # 大标题
-│   └── anim-pixel.ttf      # 副标题 / 小字
-├── audio/                  # 游戏原版音效（MP3 单声道，共约 104KB）
-│   ├── jump / pat / hit    # 扫过跳一下 / 右键戳 / 未解锁
-│   ├── back / view         # 关闭角色卡 / 打开角色卡的小曲
+│   ├── base/               # 地基：变量、重置、排版、动效曲线
+│   │   ├── style.css       # 全站变量与组件（驾驶舱里由 .ck 整组覆盖成暗色）
+│   │   ├── type.css        # 各风格的字体栈
+│   │   └── motion.css      # 弹性动效层（最后加载）
+│   ├── layout/             # 结构层：只摆位置，不定义配色
+│   │   └── cockpit.css     # 驾驶舱骨架（顶栏 / 舞台 / 面板 / 状态条）
+│   ├── ui/                 # 业务组件
+│   │   ├── personal.css    # 深色主题、彩蛋、滚动动效
+│   │   ├── skins.css       # 皮肤面板、转场幕布、公共部分
+│   │   ├── member.css      # 成员头卡
+│   │   ├── ladder.css      # 天梯两栏、榜单
+│   │   ├── dino.css        # 小恐龙跑道
+│   │   ├── characters.css  # 音游角色舞台
+│   │   ├── pet.css         # 校徽背景板
+│   │   ├── avatar-pet.css  # 像素头像彩蛋
+│   │   └── guestbook.css   # 留言板外框
+│   └── skins/              # 每套皮肤一个文件，切到才下载
+│       ├── skin-hacker.css
+│       ├── skin-minimal.css
+│       ├── skin-bare.css
+│       └── console.css
+│
 ├── js/
-│   ├── sfx.js              # 音效池与开关（跟随鼠标点击播放，可静音）
-│   ├── members.js          # 项目清单 + 成员主页横幅配置（唯一需要手动维护的数据）
-│   ├── main.js             # GitHub API、缓存、卡片渲染、折叠、交互
-│   ├── gallery-data.js     # 图集清单（加图改这里）
-│   ├── gallery.js          # 图集渲染与灯箱
-│   ├── theme.js            # 深浅色主题切换与记忆
-│   ├── skins.js            # 网页风格切换面板、竖向卡片、擦除转场、棍木的按钮搬运
-│   ├── dino.js             # 页脚像素小恐龙（金币 / 连击 / 星空，等级已移除；距视口 800px 才加载）
-│   ├── matrix.js           # 黑客风的数字雨（只在 hacker 皮肤下启动）
-│   ├── console.js          # 控制台皮肤的调参面板（15 个旋钮 / 预设 / 导入导出，只在那套皮肤下启动）
-│   ├── copy.js             # 三套文案，按风格替换 data-copy 节点（棍木没有文案可换）
-│   ├── theme-icon.js       # 主题按钮的月亮 / 太阳雪碧图帧动画
-│   ├── personal.js         # 打字机标语、滚动渐显、卡片倾斜、彩蛋
-│   ├── pet.js              # 校徽滚动旋转、点击说话
-│   ├── avatar-pet.js       # 头像点击台词与彩蛋
-│   ├── guestbook.js        # 留言板：滚动到附近才加载 giscus，并跟随皮肤换主题
-│   ├── pwa.js              # Service Worker 注册（load 之后空闲时）
-│   └── ladder.js           # 天梯：读 data/ladder.json、渲染、死亡后拼 GitHub Issue 链接
+│   ├── core/               # 与界面无关的地基
+│   │   ├── pwa.js          # Service Worker 注册
+│   │   ├── theme.js        # 深浅色切换与记忆
+│   │   ├── theme-icon.js   # 日月按钮帧动画
+│   │   ├── sfx.js          # 音效池
+│   │   ├── click-fx.js     # 点击特效
+│   │   ├── copy.js         # 三套文案替换
+│   │   ├── main.js         # GitHub API、缓存、卡片渲染、折叠
+│   │   └── splash-scene.js # 开屏动画
+│   ├── layout/             # 驾驶舱本身
+│   │   ├── cockpit.js      # 生成面板、滚动联动、KPI 统计、时钟
+│   │   ├── halo.js         # 舞台光场（编织环 + 分层光束）
+│   │   └── skins.js        # 皮肤切换面板与转场
+│   ├── ui/                 # 各区块的交互
+│   │   ├── members.js      # 项目清单 + 成员配置（唯一要手改的数据）
+│   │   ├── dino.js         # 像素小恐龙
+│   │   ├── ladder.js       # 天梯：读 JSON、渲染、死亡后拼 Issue
+│   │   ├── gallery.js      # 图集渲染与灯箱
+│   │   ├── gallery-data.js # 图集清单
+│   │   ├── member.js       # 成员页渲染
+│   │   ├── personal.js     # 打字机、滚动渐显、彩蛋
+│   │   ├── pet.js          # 校徽滚动与台词
+│   │   ├── avatar-pet.js   # 头像台词与彩蛋
+│   │   ├── characters.js   # 角色舞台
+│   │   └── guestbook.js    # 留言板（giscus）
+│   └── skins/              # 只属于某套皮肤的脚本
+│       ├── matrix.js       # 黑客风的数字雨
+│       └── console.js      # 控制台的 15 旋钮调参面板
+│
+├── assets/                 # 日月雪碧图
+├── fonts/                  # 像素字体（anim-title / anim-pixel）
+├── audio/                  # 音效（约 104KB）
 ├── data/
-│   ├── repos.json          # 项目快照（每天由 GitHub Actions 重写，前端优先读它）
-│   └── ladder.json         # 天梯榜单（Actions 汇总 Issues 生成，页面只读）
-├── scripts/
-│   ├── fetch-repos.mjs     # 抓取仓库数据 → data/repos.json
-│   └── compat-fallback.mjs # 给 clamp/min/max/inset 补旧内核 fallback（幂等）
-├── .github/
-│   └── workflows/
-│       ├── refresh-repos.yml  # 每天 05:17 跑一次上面的脚本
-│       └── ladder.yml         # 天梯：Issue 提交 → 汇总写回 data/ladder.json
-├── images/
-│   ├── favicon.svg
-│   ├── icon-192.png        # PWA 图标
-│   ├── icon-512.png
-│   ├── icon-maskable-512.png
-│   ├── apple-touch-icon.png
-│   ├── og-cover.jpg        # 1200×630 分享图（76KB，原来是 305KB 的 PNG）
-│   ├── project-website.svg # 社团官网封面
-│   ├── project-zaco.svg    # Zaco 猜数字封面
-│   ├── characters/          # 角色素材
-│   │   ├── art-*.webp       # 高精度立绘（结果页用，8 张约 400KB）
-│   │   ├── unit-*.webp      # 像素站位图（游戏原版，每个 300B 左右）
-│   │   ├── unit-alpha.webp  # 已解锁的 4 个 + 各自的 -hit 挨打帧
-│   │   ├── unit-mono.webp
-│   │   ├── unit-oct.webp
-│   │   ├── unit-crawler.webp
-│   │   └── unit-zenith / quad / oxynoe / sei.webp  # 未解锁角色
-│   ├── decor/               # 背景图标（灰度、已去底）
-│   │   ├── icon-badge.webp
-│   │   ├── icon-arduino.webp
-│   │   └── icon-token.webp
-│   ├── gallery/             # 图集素材
-│   │   ├── meme-cup.webp    # 梗图（已去底）
-│   │   ├── meme-dizzy.webp
-│   │   ├── meme-wink.webp
-│   ├── personal/
-│   │   ├── sticker-2.webp   # ghxiaochi 主页贴纸（已去底）
-│   │   ├── sticker-3.webp
-│   │   ├── sticker-4.webp
-│   │   ├── chibi-1.jpg      # 早期贴纸（未再使用）
-│   │   └── chibi-2.jpg      # ghxiaochi 主页贴纸
-│   └── pet/
-│       ├── badge-school-hd.webp  # 高清校徽
-│       └── ghxiaochi-avatar.webp # 像素头像彩蛋
+│   ├── repos.json          # 项目快照（每天由 Actions 重写）
+│   └── ladder.json         # 天梯榜单（Actions 汇总 Issues 生成）
+├── scripts/                # fetch-repos.mjs / compat-fallback.mjs
+├── .github/workflows/      # refresh-repos.yml / ladder.yml
+├── images/                 # 图标、封面、角色、图集、头像
 ├── robots.txt
 ├── sitemap.xml
 └── README.md
 ```
 
+**分层规则**（加东西时照这个放）：
+
+| 目录 | 只管什么 | 不该出现什么 |
+|---|---|---|
+| `css/base` | 变量、重置、字体、动效曲线 | 任何具体区块的选择器 |
+| `css/layout` | 骨架的位置、尺寸、层级 | 品牌色（只有 `--ck-*` 变量） |
+| `css/ui` | 单个组件的长相 | 布局网格 |
+| `css/skins` | 覆盖变量和少量质感 | 新组件 |
+| `js/core` | 数据、主题、音效、请求 | 直接操作驾驶舱 DOM |
+| `js/layout` | 驾驶舱的生成与联动 | 业务数据 |
+| `js/ui` | 单块内容的渲染与交互 | 全局导航 |
+| `js/skins` | 某套皮肤专属的效果 | 被别的皮肤引用 |
+
 ---
 
-## 3. 开屏与首屏位置
+## 3. 驾驶舱结构
+
+四个部分，从上到下：
+
+```text
+┌─────────────────────────────────────────────────────────┐
+│ HNYZ/编程社     REPOS  DIRECTIONS  SESSIONS  TOP  STATUS│  ← 状态头
+│                 ────    ────────    ──────   ────  ──── │     KPI + 进度条
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  内容浮在光场上滚动（首屏遮罩很薄，越往下越实）          │  ← 舞台
+│                                                         │
+├─────────────────────────────────────────────────────────┤
+│ 01 关于  │ 02 做什么 │ 03 项目  │ 04 活动               │  ← 面板
+│ 05 资源  │ 06 FAQ   │ 07 留言  │ 08 加入               │     4 列 × 2 行
+├─────────────────────────────────────────────────────────┤
+│ HOME PROJECTS MEMBER GALLERY LADDER      © 2026 HNYZ    │  ← 状态条
+└─────────────────────────────────────────────────────────┘
+```
+
+### 面板是自动长出来的
+
+`js/layout/cockpit.js` 扫舞台里的区块，按这个顺序取信息：
+
+| 面板上的位置 | 从哪来 |
+|---|---|
+| 序号 `01` | 区块在页面里的顺序 |
+| 标题 | 区块里的第一个 `h1/h2/h3`（可用 `data-ck-title` 写死） |
+| 右上角数字 | 区块里项目卡 / 卡片 / 榜单行的数量（可用 `data-ck-count`） |
+| 正文 3–4 行 | 区块里的 `h3` 或列表项标题 |
+| 底部小字 | 条目总数（可用 `data-ck-cap`） |
+
+默认抓 `section[id]`。像「图集」这种整页只有一个 section 的，就在想变成面板的块上写
+`data-ck-panel-src`，可以写多个。不够 4 块时自动补「去别的页」的跳转面板。
+
+```html
+<div class="archive-head" data-ck-panel-src
+     data-ck-title="全部仓库" data-ck-cap="OVERVIEW">…</div>
+```
+
+### 滚动的分工
+
+- 整页 `100vh` 不滚动，**只有舞台内部滚**（`.ck-view`）。
+- 面板 ↔ 滚动双向联动：点面板滚过去，滚到哪段面板亮起（`is-on`）。
+- 首屏额外的 `--ck-veil` 变量由滚动距离驱动：0 → 420px 之间从 0.3 加到 0.95，
+  所以开场是纯光场海报，往下读才压暗。`prefers-reduced-motion` 下同样生效（只改不透明度）。
+
+### 快捷键
+
+| 键 | 作用 |
+|---|---|
+| `1`–`8` | 跳到第 N 块面板对应的区块 |
+| `Esc` | 回到舞台顶部 |
+| `S` | 打开皮肤面板 |
+| `C` | 控制台皮肤的调参面板 |
+
+### 光场
+
+`js/layout/halo.js`，纯 Canvas 2D，约 300 行：
+
+- 中心三层同心环 + 刻度 + 三条绕环的正弦（编织感）+ 环上 12 个随节拍跳的方块；
+- 环外分三层向外打光束，长度和亮度各自带相位；
+- 时钟不是匀速的：三个不同周期的正弦叠在一起，转速会时快时慢，
+  偶尔慢到像卡住——匀速旋转看着像风扇，不像仪器；
+- 颜色只读 `--ck-accent` / `--ck-accent-2`，切皮肤时重读一次；
+- `ResizeObserver` 重建几何；标签页隐藏时停掉 `requestAnimationFrame`；
+  `prefers-reduced-motion` 下只画一帧静态图。
+
+### 皮肤怎么接进来
+
+骨架里所有颜色都是 `--ck-*` 变量，皮肤只覆盖变量：
+
+```css
+html[data-style="hacker"] .ck {
+  --ck-bg: #020604;
+  --ck-panel: #040d08;
+  --ck-accent: #39ff88;
+  /* …二十来行 */
+}
+```
+
+另外 `.ck` 里还重定义了 `--bg` / `--panel` / `--text` 这一组旧变量，
+所以 `style.css` 里那些卡片（`.do-card`、`.project-card`、`.member-hero`…）
+不用写任何覆盖规则就会跟着变暗。
+
+---
+
+## 4. 开屏与首屏位置
 
 打开首页时会先显示约 0.8 秒的开屏（`{ }` + HNYZ + 口号），同时脚本把页面**直接定位到「关于」这一块**，不做平滑滚动：
 
@@ -153,7 +231,7 @@ club-website/
 - 打开时会清掉 URL 里残留的 `#join` 之类锚点，防止一进来就跳到页尾
 - 想改成打开时停在顶部首屏，把 `index.html` 里 `place()` 中的 `document.getElementById("about")` 换成 `null` 即可
 
-## 4. 本地预览
+## 5. 本地预览
 
 ### 方式 A：直接打开
 
@@ -175,9 +253,9 @@ npx serve .
 
 ---
 
-## 5. 修改项目卡片
+## 6. 修改项目卡片
 
-打开 `js/members.js`，只改 `window.HNYZ_MEMBERS` 数组：
+打开 `js/ui/members.js`，只改 `window.HNYZ_MEMBERS` 数组：
 
 ```js
 window.HNYZ_MEMBERS = [
@@ -225,7 +303,7 @@ window.HNYZ_MEMBERS = [
 - 首页最多请求并展示前 6 个，避免一次消耗太多 GitHub API 配额；第 7 个开始会自动出现「查看全部 N 个项目」入口。
 - `projects.html` 会按 `user`（GitHub 用户名）自动分组，每个成员是一个原生 `<details>` 折叠面板。
 - 折叠面板**展开时才请求该组仓库**，不会一进页面就把 API 配额打满；第一组默认展开。
-- 想调整首页数量，改 `js/main.js` 顶部的 `const HOME_LIMIT = 6;`。
+- 想调整首页数量，改 `js/core/main.js` 顶部的 `const HOME_LIMIT = 6;`。
 
 ### 封面图
 
@@ -236,7 +314,7 @@ window.HNYZ_MEMBERS = [
 
 ---
 
-## 6. 数据与异常兜底
+## 7. 数据与异常兜底
 
 首页使用 `Promise.all` 并发请求前 6 个仓库：
 
@@ -264,13 +342,13 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 项目区右侧的 `REPOS // GITHUB_API` 表示实时数据；出现 `DEGRADED` 表示用了兜底数据，页面顶部会出现黄色提示条。
 
-为减少 GitHub API 限流影响，`js/main.js` 会把成功返回的仓库数据写入 `localStorage`，缓存 10 分钟（key：`hnyz:github-repo-cache:v1`）。同一浏览器 10 分钟内重复打开页面不会重复请求 API；缓存不可用时会自动忽略，不影响页面加载。
+为减少 GitHub API 限流影响，`js/core/main.js` 会把成功返回的仓库数据写入 `localStorage`，缓存 10 分钟（key：`hnyz:github-repo-cache:v1`）。同一浏览器 10 分钟内重复打开页面不会重复请求 API；缓存不可用时会自动忽略，不影响页面加载。
 
-降级卡片只使用 `js/members.js` 里的本地字段（标题、简介、语言），不再维护第二份硬编码的 stars / forks 快照；数据未知时显示 `—`，避免展示过时数字。
+降级卡片只使用 `js/ui/members.js` 里的本地字段（标题、简介、语言），不再维护第二份硬编码的 stars / forks 快照；数据未知时显示 `—`，避免展示过时数字。
 
 ---
 
-## 7. 修改品牌 / 联系方式
+## 8. 修改品牌 / 联系方式
 
 全局搜索替换即可：
 
@@ -279,7 +357,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 | `HNYZ` | `index.html`、`README.md`、封面 SVG |
 | `1098931492` | `index.html` 中 `data-copy-value` 和文本 |
 | `483677268@qq.com` | `index.html` 的 `mailto:` 和 `data-copy-value` |
-| `ghxiaochi` | `index.html` 的 GitHub 链接、`js/members.js` 的 `HNYZ_MEMBERS` |
+| `ghxiaochi` | `index.html` 的 GitHub 链接、`js/ui/members.js` 的 `HNYZ_MEMBERS` |
 
 活动频率和每次 60 分钟在 `index.html` 里搜索 `每周 2 次` / `每周两次` / `60 MIN`，涉及首屏数据、社团信息、活动节奏和 FAQ。
 
@@ -287,9 +365,9 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 ---
 
-## 8. 音效
+## 9. 音效
 
-`js/sfx.js` 是一个小音效池：每个音效预载 1–3 个实例，轮着播，所以快速连点不会互相打断。素材是 Animdustry 原版 `assets/sounds` 与 `assets/music`，转成单声道 MP3（96kbps，iOS 也能放）后总共约 104KB，全部懒加载。
+`js/core/sfx.js` 是一个小音效池：每个音效预载 1–3 个实例，轮着播，所以快速连点不会互相打断。素材是 Animdustry 原版 `assets/sounds` 与 `assets/music`，转成单声道 MP3（96kbps，iOS 也能放）后总共约 104KB，全部懒加载。
 
 | 动作 | 音效 |
 |---|---|
@@ -330,33 +408,37 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 - 立绘等 `decode()` 完成再显示，且在空闲时预载，点开不卡
 - 暴走、弹球期间自动暂停背景动画并关闭头部毛玻璃（见「个性化与彩蛋」）
 
-## 9. 个性化与彩蛋
+## 10. 个性化与彩蛋
 
-这一层由 `css/personal.css` + `js/theme.js` + `js/personal.js` 组成，**不改动 `style.css`**，删掉这三行引用即可完全回到原版。
+这一层由 `css/ui/personal.css` + `js/core/theme.js` + `js/ui/personal.js` 组成，**不改动 `style.css`**，删掉这三行引用即可完全回到原版。
 
 | 功能 | 说明 | 位置 |
 |---|---|---|
-| 深浅色切换 | 首次访问跟随系统偏好；点击头部太阳/月亮按钮切换，选择存 `localStorage`（key：`hnyz:theme`）；页面 `<head>` 内联脚本负责首帧预置，避免刷新白闪 | `js/theme.js` |
-| 打字机标语 | 首屏按当前时段问候（「晚上好，这里是衡南一中编程社。」），随后轮播社团口号 | `js/personal.js` |
-| 滚动渐显 | 各区块、卡片进入视口时淡入上浮；`main.js` 动态渲染的项目卡片也会被 `MutationObserver` 捕获 | `js/personal.js` |
-| 数字滚动 | 首屏 `data-count` 的统计数字从 0 滚到目标值 | `index.html` + `js/personal.js` |
-| 全站光标光晕 | 一层 fixed 柔光跟随鼠标，覆盖所有板块；浅色用 multiply、深色用 screen，触屏和减少动效时关闭 | `js/personal.js` |
-| 技术跑马灯 | 首屏下方的关键词带，自动复制到足够宽后按一组宽度循环，悬停暂停 | `js/personal.js` + `index.html` |
-| 图集 / 灯箱 | 照片墙卡片 + 点击看大图，支持键盘 ← → 翻页、Esc 关闭、焦点回到原卡片 | `js/gallery.js` |
-| 背景层 | body 多层柔光 + 点阵，加一层 fixed 光斑（静态，避免大尺寸动画在不同 GPU 上出现棋盘格） | `css/personal.css`
-| 手账感 | 卡片轻微倾斜 + 顶部胶带、引言做成便签、主按钮带厚度 | `css/personal.css` |
+| 深浅色切换 | 首次访问跟随系统偏好；点击头部太阳/月亮按钮切换，选择存 `localStorage`（key：`hnyz:theme`）；页面 `<head>` 内联脚本负责首帧预置，避免刷新白闪 | `js/core/theme.js` |
+| 打字机标语 | 首屏按当前时段问候（「晚上好，这里是衡南一中编程社。」），随后轮播社团口号 | `js/ui/personal.js` |
+| 滚动渐显 | 各区块、卡片进入视口时淡入上浮；`main.js` 动态渲染的项目卡片也会被 `MutationObserver` 捕获 | `js/ui/personal.js` |
+| 数字滚动 | 首屏 `data-count` 的统计数字从 0 滚到目标值 | `index.html` + `js/ui/personal.js` |
+| 全站光标光晕 | 一层 fixed 柔光跟随鼠标，覆盖所有板块；浅色用 multiply、深色用 screen，触屏和减少动效时关闭 | `js/ui/personal.js` |
+| 技术跑马灯 | 首屏下方的关键词带，自动复制到足够宽后按一组宽度循环，悬停暂停 | `js/ui/personal.js` + `index.html` |
+| 图集 / 灯箱 | 照片墙卡片 + 点击看大图，支持键盘 ← → 翻页、Esc 关闭、焦点回到原卡片 | `js/ui/gallery.js` |
+| 背景层 | body 多层柔光 + 点阵，加一层 fixed 光斑（静态，避免大尺寸动画在不同 GPU 上出现棋盘格） | `css/ui/personal.css`
+| 手账感 | 卡片轻微倾斜 + 顶部胶带、引言做成便签、主按钮带厚度 | `css/ui/personal.css` |
 | 首页贴纸 | 首屏关键词胶囊（#零基础友好 等），带轻微旋转 | `index.html` |
-| 卡片 3D 倾斜 | 仅精确指针（鼠标）启用，触屏不触发 | `js/personal.js` |
-| 连点 Logo | 2.6 秒内连点 5 次品牌区，弹出一条随机台词 | `js/personal.js` |
-| 黑客模式 | 键盘输入 ↑↑↓↓←→←→BA，配色转绿 + 扫描线，9 秒后自动退出 | `js/personal.js` |
-| 访问次数 | 页脚显示「这是你第 N 次打开这里」，存 `localStorage`（key：`hnyz:visits`） | `js/personal.js` |
-| 控制台签名 | 打开 DevTools 能看到 ASCII 标志、群号和彩蛋提示 | `js/personal.js` |
+| 卡片 3D 倾斜 | 仅精确指针（鼠标）启用，触屏不触发 | `js/ui/personal.js` |
+| 连点 Logo | 2.6 秒内连点 5 次品牌区，弹出一条随机台词 | `js/ui/personal.js` |
+| 黑客模式 | 键盘输入 ↑↑↓↓←→←→BA，配色转绿 + 扫描线，9 秒后自动退出 | `js/ui/personal.js` |
+| 访问次数 | 页脚显示「这是你第 N 次打开这里」，存 `localStorage`（key：`hnyz:visits`） | `js/ui/personal.js` |
+| 控制台签名 | 打开 DevTools 能看到 ASCII 标志、群号和彩蛋提示 | `js/ui/personal.js` |
 
 > 所有动效都尊重 `prefers-reduced-motion`：系统开启「减少动态效果」时，渐显、打字机、倾斜、光晕全部停用，内容直接可见。
 
 ### 网页风格（五套皮肤）
 
-页面右上角顶栏有一个四格小方块，点开是一块全屏面板：五张竖向卡片，上下滑动 / ↑↓ 切换，中间那张就是当前风格。
+顶栏右侧的 `STYLE` 按钮（或按 `S`）打开风格面板：五张竖向卡片，上下滑动 / ↑↓ 切换，中间那张就是当前风格。
+
+**五套皮肤共用同一副骨架**。结构（顶栏、舞台、面板、状态条）写在 `css/layout/cockpit.css` 里，颜色全是 `--ck-*` 变量；每套皮肤只在自己的文件里覆盖这二十来个变量，一行结构样式都不碰。所以改骨架的时候五套皮肤一起动，加皮肤的时候也不会漏掉哪块面板。
+
+`.ck` 里还重定义了 `--bg` / `--panel` / `--text` / `--blue` 这一组旧变量（`style.css` 一直在用的那套），于是所有老组件——项目卡、日程卡、加入面板、成员头卡、相册板——**不用写任何覆盖规则**就会跟着皮肤变暗或变亮。
 
 切换是**两块幕布的接力**，不是「面板淡出、幕布再升起」两段各走各的：
 
@@ -373,12 +455,12 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 |---|---|---|
 | `default` 蓝白科技 | 原来的样子，光斑、角色排、校徽、动效全保留 | 什么都不改 |
 | `minimal` 极简 | 纯黑白灰、直角、去阴影，隐藏光斑 / 装饰图标 / 贴纸 / 校徽 | `html[data-style="minimal"]` 变量 + 隐藏清单 |
-| `hacker` 黑客终端 | 纯黑底，背景只有一整屏代码雨和一层漂浮的气泡，等宽字 + 荧光绿；跑道里的天也永远是纯黑，太阳、月亮统一荧光绿（金币仍是琥珀色） | `html[data-style="hacker"]` 变量 + `js/matrix.js` 画布 + `.skin-bubbles` + `skyPal` |
-| `console` 控制台 | 炭黑底 + 米白字 + **一个**橙色（原本的蓝/绿/紫在这里都收成同一色相，靠明度区分）。全站等宽、宽字距、零圆角、零渐变；每个小节标题自动带 `[01]` 编号，滚动时一层极淡的 CRT 扫描线，四角有 HUD 角标。**顶栏多一个 ⌘ 按钮，打开实时调参面板**：15 个旋钮（扫描线、色相、底色/文字明度、字号、行高、正文宽度、标题字距、面板宽与不透明度……），改完即时生效、存在本机，可导出/导入 JSON。 | `html[data-style="console"]` 变量 + `css/console.css` + `js/console.js`，**只有这套皮肤会下载**；视觉参考 world.execute(me) 歌词 MV 的三墨配色与 HALOFLUX 的控制台排版 |
+| `hacker` 黑客终端 | 纯黑底，背景只有一整屏代码雨和一层漂浮的气泡，等宽字 + 荧光绿；跑道里的天也永远是纯黑，太阳、月亮统一荧光绿（金币仍是琥珀色） | `html[data-style="hacker"]` 变量 + `js/skins/matrix.js` 画布 + `.skin-bubbles` + `skyPal` |
+| `console` 控制台 | 炭黑底 + 米白字 + **一个**橙色（原本的蓝/绿/紫在这里都收成同一色相，靠明度区分）。全站等宽、宽字距、零圆角、零渐变；每个小节标题自动带 `[01]` 编号，滚动时一层极淡的 CRT 扫描线，四角有 HUD 角标。**顶栏多一个 ⌘ 按钮，打开实时调参面板**：15 个旋钮（扫描线、色相、底色/文字明度、字号、行高、正文宽度、标题字距、面板宽与不透明度……），改完即时生效、存在本机，可导出/导入 JSON。 | `html[data-style="console"]` 变量 + `css/skins/console.css` + `js/skins/console.js`，**只有这套皮肤会下载**；视觉参考 world.execute(me) 歌词 MV 的三墨配色与 HALOFLUX 的控制台排版 |
 | `bare` 棍木 | 全白空白页，没有内容、颜色和链接，中间一句灰字，右上角只剩风格按钮 | `html[data-style="bare"]` 隐藏 `body` 下所有节点 + 按钮搬到 `body` |
 
 - 选择存在 `localStorage`（key：`hnyz:style`），四个页面共用；`<head>` 里有内联脚本做首帧预置，刷新不会闪一下默认皮肤。
-- **皮肤样式按需下载**：`skins.css` 只留风格面板、转场幕布和公共部分（26KB），四套皮肤的覆盖规则各自拆成 `css/skin-hacker.css`（22KB）、`skin-minimal.css`（6KB）、`skin-bare.css`（2KB）、`console.css`（36KB，含调参面板样式）。默认皮肤的用户一个字节都不付；切到别的皮肤时，`<head>` 的预置脚本会在首绘前同步插一份 `<link>`（只对非默认皮肤的用户付费），运行时切换则由 `skins.js` 先 `await` 样式就绪、再开始幕布转场——否则幕布揭开时样式还在路上，会露出半套旧样式。
+- **皮肤样式按需下载**：`skins.css` 只留风格面板、转场幕布和公共部分（26KB），四套皮肤的覆盖规则各自拆成 `css/skins/skin-hacker.css`（22KB）、`skin-minimal.css`（6KB）、`skin-bare.css`（2KB）、`console.css`（36KB，含调参面板样式）。默认皮肤的用户一个字节都不付；切到别的皮肤时，`<head>` 的预置脚本会在首绘前同步插一份 `<link>`（只对非默认皮肤的用户付费），运行时切换则由 `skins.js` 先 `await` 样式就绪、再开始幕布转场——否则幕布揭开时样式还在路上，会露出半套旧样式。
 - 拆包前后用 CSSOM 逐条比对过：`default 113 条 / hacker 205 条 / minimal 139 条 / bare 121 条`，与拆分前的期望规则集完全一致（多 0 条、少 0 条）。
 - 切到 `hacker` 时如果当前是浅色主题，会自动切到深色（否则只有半屏是黑的），并同步写 `hnyz:theme`。
 - 换肤会派发 `hnyz:stylechange` 事件，小恐龙、Canvas 相关组件收到后按新的 CSS 变量重画贴图。
@@ -395,7 +477,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 - 恐龙恒定自动跑：按仙人掌距离自己起跳；最高分存 `localStorage`（key：`hnyz:dino-hi`）
 - 想自己玩也可以：点跑道、空格、↑ 都能让它跳一下，撞到仙人掌会显示 `SIGNAL LOST // REBOOT`，1.4 秒后自动重开
-- 按钮去掉后 `js/dino.js` 用 `hasControls` 判断：没有 `[data-dino-mode]` 就不读 `localStorage` 里的旧模式，避免之前存过 `manual` 导致恐龙站着不动
+- 按钮去掉后 `js/ui/dino.js` 用 `hasControls` 判断：没有 `[data-dino-mode]` 就不读 `localStorage` 里的旧模式，避免之前存过 `manual` 导致恐龙站着不动
 
 跑道上的玩法：
 
@@ -439,7 +521,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 - 静止时**不空转**：浅色主题停在第 40 帧（太阳），深色主题停在第 0 帧（月亮）
 - 点击切换时沿雪碧图走最近的一头——月 → 日正放，日 → 月倒放，约 0.36 秒走完（40 帧 × 9ms，帧号按 ease-out 走，收尾慢下来），中途能看见收缩和张开
 - 极简风加 `grayscale`，黑客风用 `hue-rotate(-90deg)` 把蓝转到荧光绿
-- 帧号由 `js/theme-icon.js` 用 `requestAnimationFrame` 推进；主题变更来自按钮、系统偏好或风格脚本都能接住（监听 `data-theme`）
+- 帧号由 `js/core/theme-icon.js` 用 `requestAnimationFrame` 推进；主题变更来自按钮、系统偏好或风格脚本都能接住（监听 `data-theme`）
 
 切换本身用 View Transitions：新界面从按钮中心长成一个盖住视口的圆（`clip-path: circle()`，半径按视口对角线算）。两个细节是为了让画面「稳」：
 
@@ -451,7 +533,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 ### 三种风格的字体与文案
 
-同一套版式，三种语气。字体在 `css/type.css` 里只换字体栈，不动字号和布局：
+同一套版式，三种语气。字体在 `css/base/type.css` 里只换字体栈，不动字号和布局：
 
 | 风格 | 标题 | 正文 | 细节 |
 |---|---|---|---|
@@ -461,7 +543,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 正文用 `--sans`、标题用 `--display`，三套风格只覆盖这两个变量，所以加风格时不用碰具体选择器。
 
-文案在 `js/copy.js` 里集中维护，HTML 只写 `data-copy="键名"`。首页六个区块、项目页、图集页、成员页的标题 / 简介 / 按钮 / 页尾都挂了键名，不再只改首屏：
+文案在 `js/core/copy.js` 里集中维护，HTML 只写 `data-copy="键名"`。首页六个区块、项目页、图集页、成员页的标题 / 简介 / 按钮 / 页尾都挂了键名，不再只改首屏：
 
 - 蓝白科技：`把想法 写成代码` / `我们不生产课件，只维护一套可以反复失败的实验环境。`
 - 极简：`少 即是多` / `做硬件。删到最少。能跑就行。` / 区块标题只留两三个字
@@ -473,13 +555,13 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 切换风格时 `skins.js` 派发 `hnyz:stylechange`，`copy.js` 收到后重写节点内容；页面加载时按 `localStorage` 里的风格先应用一次，不会闪。
 
-首屏那句打字机标语（`[data-rotator]`）也备了三套，写在 `js/personal.js` 的 `ROTATOR` 里：蓝白科技是「零基础也能进来」，极简是「删到只剩必要的那一行」，黑客是「教不是输入，是接口对齐」。切风格时会清掉正在打的那一句、从新的第一句重新打，用一个自增的 `token` 让旧定时器自己作废。
+首屏那句打字机标语（`[data-rotator]`）也备了三套，写在 `js/ui/personal.js` 的 `ROTATOR` 里：蓝白科技是「零基础也能进来」，极简是「删到只剩必要的那一行」，黑客是「教不是输入，是接口对齐」。切风格时会清掉正在打的那一句、从新的第一句重新打，用一个自增的 `token` 让旧定时器自己作废。
 
 ### 黑客风：从配色到终端
 
 背景被清到只剩两样东西：**代码雨**和**气泡**。原来的手绘涂鸦底纹（`skin-doodle`）、扫描线（`skin-scanlines`）、工程网格和背景图标阵列（`bg-icons`）全部删掉，理由是它们在深底上只剩一团说不清是什么的灰影。
 
-`js/matrix.js` 画那层代码雨（片假名 + 数字 + 符号），只在 `data-style="hacker"` 下启动：
+`js/skins/matrix.js` 画那层代码雨（片假名 + 数字 + 符号），只在 `data-style="hacker"` 下启动：
 
 - 画布 `fixed` 铺满视口，`z-index: 0`，内容在它上面；用 `destination-out` 逐帧擦淡，所以背景是透明的，字能正常读
 - 字符**按格下落**：只有跨过一行（`size × 1.04`）才落一个字。连续坐标会让字形互相压成一团糊，卡在格子里才是清的
@@ -505,7 +587,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 ### 弹性动效
 
-`css/motion.css` 用一条统一曲线 `cubic-bezier(0.34, 1.56, 0.64, 1)`——第二控制点大于 1，位移会先冲过头再落回来，所以是「弹」的，不是「滑」的。
+`css/base/motion.css` 用一条统一曲线 `cubic-bezier(0.34, 1.56, 0.64, 1)`——第二控制点大于 1，位移会先冲过头再落回来，所以是「弹」的，不是「滑」的。
 
 | 位置 | 效果 |
 |---|---|
@@ -521,12 +603,12 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 ### 深色主题
 
-深色配色是 `css/personal.css` 顶部的 `[data-theme="dark"]` 变量块，覆盖 `style.css` 里 `:root` 的同名变量。改深色只需要动这一块；少数组件在 `style.css` 里写死了浅色，已在 `personal.css` 里单独覆盖：次要按钮、联系卡标题栏、占位封面、校徽底板、页脚、移动端菜单，以及 **`.section--soft` 区块底色**（这一条曾经导致深色模式下出现一块灰白板、白字看不清，已修复）。
+深色配色是 `css/ui/personal.css` 顶部的 `[data-theme="dark"]` 变量块，覆盖 `style.css` 里 `:root` 的同名变量。改深色只需要动这一块；少数组件在 `style.css` 里写死了浅色，已在 `personal.css` 里单独覆盖：次要按钮、联系卡标题栏、占位封面、校徽底板、页脚、移动端菜单，以及 **`.section--soft` 区块底色**（这一条曾经导致深色模式下出现一块灰白板、白字看不清，已修复）。
 
-## 10. 往图集里加图
+## 11. 往图集里加图
 
 1. 把图片放进 `images/gallery/`
-2. 打开 `js/gallery-data.js`，在数组末尾加一条：
+2. 打开 `js/ui/gallery-data.js`，在数组末尾加一条：
 
 ```js
 {
@@ -536,11 +618,11 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 }
 ```
 
-建议短边 ≥ 800px；透明底的贴纸类图片会自动在白色相纸里居中显示，不会变形。想删掉某张，删掉数组里那一项即可（首页 ghxiaochi 个人页的贴纸在 `js/members.js` 的 `HNYZ_PROFILES` 里，两者互不影响）。
+建议短边 ≥ 800px；透明底的贴纸类图片会自动在白色相纸里居中显示，不会变形。想删掉某张，删掉数组里那一项即可（首页 ghxiaochi 个人页的贴纸在 `js/ui/members.js` 的 `HNYZ_PROFILES` 里，两者互不影响）。
 
-## 11. 换主题色
+## 12. 换主题色
 
-所有颜色集中在 `css/style.css` 顶部的 `:root`：
+所有颜色集中在 `css/base/style.css` 顶部的 `:root`：
 
 ```css
 :root {
@@ -554,11 +636,11 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 }
 ```
 
-改这几个变量即可整体换色，不需要逐个改选择器。深色主题的同名变量在 `css/personal.css` 的 `[data-theme="dark"]` 里。
+改这几个变量即可整体换色，不需要逐个改选择器。深色主题的同名变量在 `css/ui/personal.css` 的 `[data-theme="dark"]` 里。
 
-校徽位于两页的 `.hnyz-pet`，样式在 `css/pet.css`，交互在 `js/pet.js`。图片为 `images/pet/badge-school-hd.webp`，放在右下角的浅蓝背景板里；如需停用，删除页面中的 `.hnyz-pet` 结构即可。
+校徽位于两页的 `.hnyz-pet`，样式在 `css/ui/pet.css`，交互在 `js/ui/pet.js`。图片为 `images/pet/badge-school-hd.webp`，放在右下角的浅蓝背景板里；如需停用，删除页面中的 `.hnyz-pet` 结构即可。
 
-桌宠「东方马也」出现在 `projects.html` 和 `member.html?u=ghxiaochi` 的左下角，样式在 `css/avatar-pet.css`，交互在 `js/avatar-pet.js`。
+桌宠「东方马也」出现在 `projects.html` 和 `member.html?u=ghxiaochi` 的左下角，样式在 `css/ui/avatar-pet.css`，交互在 `js/ui/avatar-pet.js`。
 
 - 点击会**数次数**：第 1 下「干嘛？」，之后每 3 下报一次「你已经点了我 N 次了。」；超过 30 下改成「你又点了我。这是第 N 次了。」
 - 每次点击蹦几颗小星星；2.6 秒内连点 6 下会左右晃并说「头有点晕」
@@ -570,11 +652,11 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 首页右下角有「召唤东方马也」按钮：点击后桌宠滑入并挥手，停留 26 秒（点击可续时）后自己说「我先回项目区了」再滑走；再次点击按钮可以提前让它回去。它默认在左下角，可以按住拖到任意位置（位置会记住），右下角仍然保留校徽。
 
-ghxiaochi 的个人主页横幅配置在 `js/members.js` 的 `window.HNYZ_PROFILES` 里（key 与成员的 `user` 一致才会显示），由 `js/main.js` 的 `createMemberProfile(user)` 渲染注入，两张贴纸在 `images/personal/`。新增成员想加横幅，在 `HNYZ_PROFILES` 里加一个同 user 的键即可。
+ghxiaochi 的个人主页横幅配置在 `js/ui/members.js` 的 `window.HNYZ_PROFILES` 里（key 与成员的 `user` 一致才会显示），由 `js/core/main.js` 的 `createMemberProfile(user)` 渲染注入，两张贴纸在 `images/personal/`。新增成员想加横幅，在 `HNYZ_PROFILES` 里加一个同 user 的键即可。
 
 ---
 
-## 12. 部署到 GitHub Pages
+## 13. 部署到 GitHub Pages
 
 ### 首次部署
 
@@ -607,7 +689,7 @@ Pages 会自动重新构建。如果页面还是旧版本，先强制刷新（`C
 
 ---
 
-## 13. 验收清单
+## 14. 验收清单
 
 - [ ] 本地打开 `index.html` 能看到完整首页
 - [ ] 首页项目卡片由 GitHub API 渲染，最多 6 张
@@ -651,13 +733,13 @@ Pages 会自动重新构建。如果页面还是旧版本，先强制刷新（`C
 
 ---
 
-## 14. FAQ
+## 15. FAQ
 
 **Q：为什么卡片显示 `DEGRADED`？**  
-A：GitHub API 返回了 403（限流）、404 或网络异常，页面自动用了本地缓存或 `js/members.js` 里的字段降级渲染。stars / forks 未知时显示 `—`，不会假装成 0。
+A：GitHub API 返回了 403（限流）、404 或网络异常，页面自动用了本地缓存或 `js/ui/members.js` 里的字段降级渲染。stars / forks 未知时显示 `—`，不会假装成 0。
 
 **Q：为什么改了 `members` 但页面没变化？**  
-A：先强制刷新；确认改的是 `js/members.js` 里的 `window.HNYZ_MEMBERS`，不是旧版 `projects.json`。当前版本已经不再读取 `projects.json`。
+A：先强制刷新；确认改的是 `js/ui/members.js` 里的 `window.HNYZ_MEMBERS`，不是旧版 `projects.json`。当前版本已经不再读取 `projects.json`。
 
 **Q：Star / Fork 数量不更新？**  
 A：成功请求会缓存 10 分钟，所以短时间内看到的是缓存值；超过 10 分钟或强制刷新后会重新请求。确认仓库是公开的，且没有触发 403 限流。
@@ -667,7 +749,7 @@ A：可以，`members` 没有数量上限。首页只展示前 6 个；更多项
 
 ---
 
-## 15. PWA、404 与项目快照
+## 16. PWA、404 与项目快照
 
 这一节的三件事都是「补上缺的那块拼图」，彼此独立，可以单独关掉。
 
@@ -683,7 +765,7 @@ A：可以，`members` 没有数量上限。首页只展示前 6 个；更多项
 | 图片 / 音频 / 字体 / `data/repos.json` | **先给缓存，后台更新** | 下次打开生效；改一张图不用等版本号 |
 | 跨域（giscus、api.github.com） | 直接放行 | 第三方响应头我们控制不了，缓存下来只会制造难查的怪问题 |
 
-`js/pwa.js` 在 `load` 之后的空闲时间注册，四页共用。调试时可以临时关掉：
+`js/core/pwa.js` 在 `load` 之后的空闲时间注册，四页共用。调试时可以临时关掉：
 
 ```text
 https://…/index.html?nosw=1        # 本次不注册
@@ -704,7 +786,7 @@ navigator.serviceWorker.getRegistrations().then(list => list.forEach(r => r.unre
 缓存里存的也是上一版的资源。实测发版后轮询 38 秒，缓存键始终停在旧版本，
 `installing` 一直是 `false`。
 
-`sw.js` 没有自己的版本号可加，所以 `js/pwa.js` 会从页面已有的样式表上摘 `?v=`
+`sw.js` 没有自己的版本号可加，所以 `js/core/pwa.js` 会从页面已有的样式表上摘 `?v=`
 拼进注册 URL，每次发版 URL 都跟着变，绕过所有中间缓存。scope 仍是站点根目录。
 
 > 顺带记一笔：`updateViaCache: "none"` 管的是 `importScripts` 那一层，
@@ -714,7 +796,7 @@ navigator.serviceWorker.getRegistrations().then(list => list.forEach(r => r.unre
 ### 15.2 404 页
 
 `404.html` 会被 GitHub Pages 用在**任意深度**的错误路径上，所以它不能用相对路径
-（`/foo/bar` 下 `css/style.css` 会被解析到 `/foo/css/…`）。
+（`/foo/bar` 下 `css/base/style.css` 会被解析到 `/foo/css/…`）。
 文件开头用一行 `<base href="/">` 把引用钉在站点根目录——
 站点在自定义域名下，根就是 `/`；**如果哪天退回二级路径部署，这一行要跟着改**。
 
@@ -727,7 +809,7 @@ navigator.serviceWorker.getRegistrations().then(list => list.forEach(r => r.unre
 现在改成两级：
 
 1. `scripts/fetch-repos.mjs` 每天抓一次仓库元数据，写进 `data/repos.json`；
-2. 前端 `js/main.js` 优先读这份同域文件，**一次 API 都不消耗**；
+2. 前端 `js/core/main.js` 优先读这份同域文件，**一次 API 都不消耗**；
    快照里缺某个仓库、或文件读不到时，才回退到 GitHub API 实时请求。
 
 定时任务是 `.github/workflows/refresh-repos.yml`（21:17 UTC / 05:17 北京时间），
@@ -745,13 +827,13 @@ GITHUB_TOKEN=ghp_xxx node scripts/fetch-repos.mjs
 
 ---
 
-## 16. 留言板（Giscus）
+## 17. 留言板（Giscus）
 
 留言数据存在仓库的 **Discussions** 里，没有后端、没有数据库，删库才会消失。
 
 ### 16.1 接线状态
 
-已接线（2026-10-30），配置写在 `js/guestbook.js` 的 `CONFIG` 里：
+已接线（2026-10-30），配置写在 `js/ui/guestbook.js` 的 `CONFIG` 里：
 
 | 项 | 值 |
 |---|---|
@@ -802,7 +884,7 @@ GITHUB_TOKEN=ghp_xxx node scripts/fetch-repos.mjs
 
 ---
 
-## 17. 像素小恐龙天梯榜
+## 18. 像素小恐龙天梯榜
 
 首页页脚那条跑道是**自动巡航**的装饰：恐龙自己躲仙人掌，你不用管。
 想自己跑，点跑道右上角的「天梯 →」，进 `dino.html`。
@@ -868,7 +950,7 @@ Issue 的 body 是玩家自己写的，**分数可以随便填**。
 `data/ladder.json` 就是个静态文件，改完直接打开 `dino.html` 就能看到效果，
 不需要任何服务。提交链路要推到 GitHub 才有 Actions，本地测不了。
 
-## 18. 旧内核兼容（国产浏览器 / 老 WebView）
+## 19. 旧内核兼容（国产浏览器 / 老 WebView）
 
 现象是「在 A 浏览器好好的，换个浏览器就排版崩成一列 / 动画乱 / 样式像全丢了」。
 

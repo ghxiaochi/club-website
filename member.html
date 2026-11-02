@@ -35,16 +35,16 @@
       try {
         var style = localStorage.getItem("hnyz:style");
         var sheet = {
-          hacker: "css/skin-hacker.css",
-          minimal: "css/skin-minimal.css",
-          bare: "css/skin-bare.css",
-          console: "css/console.css"
+          hacker: "css/skins/skin-hacker.css",
+          minimal: "css/skins/skin-minimal.css",
+          bare: "css/skins/skin-bare.css",
+          console: "css/skins/console.css"
         }[style];
         if (!sheet) return;
         document.documentElement.dataset.style = style;
         var link = document.createElement("link");
         link.rel = "stylesheet";
-        link.href = sheet + "?v=20261119";
+        link.href = sheet + "?v=20261121";
         link.setAttribute("data-skin-css", style);
         document.head.appendChild(link);
       } catch (error) { /* 隐私模式下忽略 */ }
@@ -81,38 +81,40 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="stylesheet" href="css/style.css?v=20261119">
-  <link rel="stylesheet" href="css/cockpit.css?v=20261120">
-  <link rel="stylesheet" href="css/pet.css?v=20261119">
-  <link rel="stylesheet" href="css/personal.css?v=20261119">
-  <link rel="stylesheet" href="css/member.css?v=20261119">
-  <link rel="stylesheet" href="css/avatar-pet.css?v=20261119">
-  <link rel="stylesheet" href="css/skins.css?v=20261119">
-  <link rel="stylesheet" href="css/type.css?v=20261119">
-  <link rel="stylesheet" href="css/motion.css?v=20261119">
+  <link rel="stylesheet" href="css/base/style.css?v=20261121">
+  <link rel="stylesheet" href="css/layout/cockpit.css?v=20261121">
+  <link rel="stylesheet" href="css/ui/pet.css?v=20261121">
+  <link rel="stylesheet" href="css/ui/personal.css?v=20261121">
+  <link rel="stylesheet" href="css/ui/member.css?v=20261121">
+  <link rel="stylesheet" href="css/ui/avatar-pet.css?v=20261121">
+  <link rel="stylesheet" href="css/ui/skins.css?v=20261121">
+  <link rel="stylesheet" href="css/base/type.css?v=20261121">
+  <link rel="stylesheet" href="css/base/motion.css?v=20261121">
   <!-- dino.css 在首屏折叠线以下（页脚跑道），先按低优先级下载，不挡住首屏渲染 -->
-  <link rel="preload" href="css/dino.css?v=20261119" as="style" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/dino.css?v=20261119"></noscript>
+  <link rel="preload" href="css/ui/dino.css?v=20261121" as="style" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/ui/dino.css?v=20261121"></noscript>
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
-  <script src="js/sfx.js?v=20261119" defer></script>
-  <script src="js/theme.js?v=20261119" defer></script>
-  <script src="js/theme-icon.js?v=20261119" defer></script>
-  <script src="js/members.js?v=20261119" defer></script>
-  <script src="js/main.js?v=20261119" defer></script>
-  <script src="js/pet.js?v=20261119" defer></script>
-  <script src="js/member.js?v=20261119" defer></script>
-  <script src="js/avatar-pet.js?v=20261119" defer></script>
-  <script src="js/personal.js?v=20261119" defer></script>
-  <script src="js/click-fx.js?v=20261119" defer></script>
-  <script src="js/skins.js?v=20261119" defer></script>
-  <script src="js/copy.js?v=20261119" defer></script>
-  <script src="js/pwa.js?v=20261119" defer></script>
-  <script src="js/cockpit.js?v=20261120" defer></script>
-  <script src="js/halo.js?v=20261120" defer></script>
+  <script src="js/core/sfx.js?v=20261121" defer></script>
+  <script src="js/core/theme.js?v=20261121" defer></script>
+  <script src="js/core/theme-icon.js?v=20261121" defer></script>
+  <script src="js/ui/members.js?v=20261121" defer></script>
+  <script src="js/core/main.js?v=20261121" defer></script>
+  <script src="js/ui/pet.js?v=20261121" defer></script>
+  <script src="js/ui/member.js?v=20261121" defer></script>
+  <script src="js/ui/avatar-pet.js?v=20261121" defer></script>
+  <script src="js/ui/personal.js?v=20261121" defer></script>
+  <script src="js/core/click-fx.js?v=20261121" defer></script>
+  <script src="js/layout/skins.js?v=20261121" defer></script>
+  <script src="js/core/copy.js?v=20261121" defer></script>
+  <script src="js/core/pwa.js?v=20261121" defer></script>
+  <script src="js/layout/cockpit.js?v=20261121" defer></script>
+  <script src="js/layout/halo.js?v=20261121" defer></script>
   <script>
-    /* 页脚跑道和留言板都在折叠线以下：等它们真的接近视口再加载，
-       首屏不为这 100KB 付任何代价。提前 800px 开始拉，滚到底时已经就位。 */
+    /* 页脚跑道和留言板都在折叠线以下：等它们真的接近视口再加载。
+       驾驶舱里滚动发生在舞台内部，所以观察器的 root 要指向 .ck-view，
+       而且这段脚本在 <head> 里跑，那时候 body 还没解析完，
+       必须等 DOMContentLoaded 之后再取节点。 */
     (function () {
       var dino = false;
       var guestbook = false;
@@ -127,17 +129,16 @@
       function loadDino() {
         if (dino) return;
         dino = true;
-        inject("js/dino.js?v=20261119");
+        inject("js/ui/dino.js?v=20261121");
       }
 
       function loadGuestbook() {
         if (guestbook) return;
         guestbook = true;
-        inject("js/guestbook.js?v=20261119");
+        inject("js/ui/guestbook.js?v=20261121");
       }
 
       function watch(el, fn) {
-        /* 这页没有这块内容（只有首页有留言板），当作已处理，别再拉脚本 */
         if (!el) return true;
         if (!("IntersectionObserver" in window)) return false;
         var io = new IntersectionObserver(function (entries) {
@@ -147,20 +148,31 @@
             fn();
             return;
           }
-        }, { rootMargin: "800px 0px" });
+        }, {
+          rootMargin: "800px 0px",
+          root: document.querySelector("[data-ck-view]") || null
+        });
         io.observe(el);
         return true;
       }
 
-      var okDino = watch(document.querySelector("[data-dino-run]"), loadDino);
-      var okBook = watch(document.querySelector("[data-guestbook-body]"), loadGuestbook);
+      function start() {
+        var okDino = watch(document.querySelector("[data-dino-run]"), loadDino);
+        var okBook = watch(document.querySelector("[data-guestbook-body]"), loadGuestbook);
 
-      /* 老内核没有 IntersectionObserver：退回「一滚就加载」 */
-      if (!okDino || !okBook) {
-        window.addEventListener("scroll", function () {
-          if (!okDino) loadDino();
-          if (!okBook) loadGuestbook();
-        }, { once: true, passive: true });
+        /* 老内核没有 IntersectionObserver：退回「一滚就加载」 */
+        if (!okDino || !okBook) {
+          window.addEventListener("scroll", function () {
+            if (!okDino) loadDino();
+            if (!okBook) loadGuestbook();
+          }, { once: true, passive: true });
+        }
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", start);
+      } else {
+        start();
       }
     })();
   </script>
@@ -238,7 +250,7 @@
     <span class="ck-bar__hint">1–8 直达面板 · ESC 回顶</span>
     <div class="ck-bar__right">
       <span>© 2026 HNYZ</span>
-      <span>BUILD 20261120</span>
+      <span>BUILD 20261121</span>
     </div>
   </footer>
 
@@ -278,7 +290,7 @@
     </div>
   </footer>
 
-  <!-- 页脚小恐龙：自动起跳躲仙人掌，画布由 js/dino.js 驱动 -->
+  <!-- 页脚小恐龙：自动起跳躲仙人掌，画布由 js/ui/dino.js 驱动 -->
   <section class="dino-run" data-dino-run data-mode="auto" aria-labelledby="dino-run-title">
     <div class="container dino-run__inner">
       <div class="dino-run__main">

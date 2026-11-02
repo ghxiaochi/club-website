@@ -27,7 +27,7 @@
   const splashCount = splash ? splash.querySelector("[data-splash-count]") : null;
   const splashDecor = splash ? Array.from(splash.querySelectorAll("[data-splash-decor]")) : [];
 
-  /* 角色卡背景的 canvas 画布（js/splash-scene.js），没加载时静默降级 */
+  /* 角色卡背景的 canvas 画布（js/core/splash-scene.js），没加载时静默降级 */
   const scene = window.HNYZ_SPLASH_SCENE || { show() {}, hide() {}, resize() {} };
 
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -41,7 +41,7 @@
     return Math.pow(2, step / 12);
   }
 
-  /* 音效模块（js/sfx.js），没加载时静默降级 */
+  /* 音效模块（js/core/sfx.js），没加载时静默降级 */
   const sfx = window.HNYZ_SFX || { play() {}, stop() {} };
 
   /* 角色数据来自游戏 src/vars.nim 的 allUnits，顺序与原作一致；

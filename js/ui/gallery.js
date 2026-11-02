@@ -1,7 +1,7 @@
 /* =========================================================
    HNYZ · 图集页
    ---------------------------------------------------------
-   1. 读取 js/gallery-data.js 的 HNYZ_GALLERY，渲染瀑布流
+   1. 读取 js/ui/gallery-data.js 的 HNYZ_GALLERY，渲染瀑布流
    2. 顶部分类筛选（全部 / 梗图 / 壁纸 / 社团）
    3. 点击图片开灯箱，← → 翻页、Esc 关闭；翻页只在当前筛选内
    ========================================================= */
@@ -80,7 +80,7 @@
     if (!items.length) {
       const empty = document.createElement("p");
       empty.className = "gallery-empty";
-      empty.textContent = "图集还是空的：在 js/gallery-data.js 里加一条，再把图片放进 images/gallery/。";
+      empty.textContent = "图集还是空的：在 js/ui/gallery-data.js 里加一条，再把图片放进 images/gallery/。";
       grid.appendChild(empty);
       updateCount();
       return;

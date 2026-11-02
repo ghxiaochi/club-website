@@ -293,6 +293,20 @@ html.ck-on .hnyz-ticker {
   background: var(--ck-line-2);
 }
 
+/* 舞台底部渐隐：内容滚到面板边上时淡出，
+   不然会露出半截标题，像被面板压住 */
+.ck-stage::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 7;
+  height: 64px;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, var(--ck-bg-head));
+}
+
 /* 舞台四角角标 */
 .ck-corners {
   position: absolute;
@@ -961,8 +975,7 @@ html.ck-on .ck-view .gallery-filter.is-active {
 
 /* ---- 跑马灯 / 页脚在驾驶舱里收起 ---- */
 html.ck-on .ck-view .site-footer,
-html.ck-on .ck-view .dino-run,
-html.ck-on .ck-view .guestbook {
+html.ck-on .ck-view .dino-run:not(.dino-run--arena) {
   display: none;
 }
 
@@ -1035,7 +1048,6 @@ a.ck-brand:hover b {
 /* ---------- 10. 驾驶舱里不该出现的固定装饰 ---------- */
 html.ck-on .site-footer,
 html.ck-on .dino-run:not(.dino-run--arena),
-html.ck-on .guestbook,
 html.ck-on .hnyz-pet,
 html.ck-on .hnyz-avatar,
 html.ck-on .pet-summon,
@@ -1099,6 +1111,14 @@ html.ck-on .ck-view .gallery-entry {
 html.ck-on .ck-view .gallery-entry:hover {
   border-color: var(--ck-line-2);
   background: var(--ck-panel-2);
+}
+
+/* 留言板外框 */
+html.ck-on .ck-view .guestbook {
+  border: 1px solid var(--ck-line);
+  border-radius: 0;
+  background: var(--ck-panel);
+  box-shadow: none;
 }
 
 /* deck 与舞台之间加一道影，内容滚到边上不会像被切断 */

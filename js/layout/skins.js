@@ -61,10 +61,10 @@
         所以从各页 HTML 里撤掉了 matrix.js，改在这里注入。
      ------------------------------------------------------- */
   const SKIN_CSS = {
-    hacker: "css/skin-hacker.css",
-    minimal: "css/skin-minimal.css",
-    bare: "css/skin-bare.css",
-    console: "css/console.css"
+    hacker: "css/skins/skin-hacker.css",
+    minimal: "css/skins/skin-minimal.css",
+    bare: "css/skins/skin-bare.css",
+    console: "css/skins/console.css"
   };
   const VERSION = "20261119";
 
@@ -108,7 +108,7 @@
     if (matrixRequested) return;
     matrixRequested = true;
     const script = document.createElement("script");
-    script.src = "js/matrix.js?v=20261119";
+    script.src = "js/skins/matrix.js?v=20261119";
     script.async = true;
     document.body.appendChild(script);
   }
@@ -120,7 +120,7 @@
     if (consoleRequested) return;
     consoleRequested = true;
     const script = document.createElement("script");
-    script.src = `js/console.js?v=${VERSION}`;
+    script.src = `js/skins/console.js?v=${VERSION}`;
     script.async = true;
     document.body.appendChild(script);
   }
@@ -133,7 +133,7 @@
   /* -------------------------------------------------------
      一、黑客风的背景层：一层漂浮的气泡
      -------------------------------------------------------
-     代码雨在 js/matrix.js 里画，气泡放在 DOM 里用 CSS 动，
+     代码雨在 js/skins/matrix.js 里画，气泡放在 DOM 里用 CSS 动，
      只跑 transform，便宜且不会和画布抢帧。
      尺寸、位置、速度、延迟都写死在行内，刷新也不会变。
      ------------------------------------------------------- */
