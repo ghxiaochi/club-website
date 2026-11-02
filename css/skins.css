@@ -818,6 +818,11 @@ html[data-style] .style-deck.is-handoff {
 /* 矮屏 / 手表：一屏塞不下一张标准卡。所有尺寸按屏高收，
    标题栏、提示语、色点依次让位，卡片本身必须完整。 */
 @media (max-height: 560px), (max-width: 300px){
+  /* 小屏没有空间做「玻璃」：底色收成实心，别让底下的正文透上来 */
+  .style-deck {
+    background: #050807;
+  }
+
   .style-deck__shell {
     padding: 6px 0;
   }
@@ -909,11 +914,8 @@ html[data-style] .style-deck.is-handoff {
   }
 
   .style-deck__head {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    left: auto;
-    padding: 0;
+    justify-content: flex-end;
+    padding: 0 6px 2px;
   }
 
   .style-card__title {
