@@ -405,7 +405,7 @@
   tomb.innerHTML =
     '<button class="pet-tomb__btn" type="button" data-pet-revive aria-label="点击墓碑 5 次，复活东方马也">' +
     '<span class="pet-tomb__stone">' +
-    '<span class="pet-tomb__portrait"><img src="images/pet/ghxiaochi-avatar.webp" alt="" width="648" height="954"></span>' +
+    '<span class="pet-tomb__portrait"><img src="images/pet/ghxiaochi-avatar-128.webp" alt="" width="128" height="188" loading="lazy" decoding="async"></span>' +
     '<span class="pet-tomb__mark">R.I.P.</span>' +
     '<span class="pet-tomb__name">东方马也</span>' +
     '<span class="pet-tomb__date">2026 — 2026</span>' +

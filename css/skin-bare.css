@@ -1,0 +1,84 @@
+/* HNYZ · bare：只在切到这套风格时下载 */
+
+
+/* =========================================================
+   棍木 · 空白
+   ---------------------------------------------------------
+   一个什么都不做的风格：不留内容、不留颜色、不留任何链接。
+   只保留两样东西——右上角的风格按钮（skins.js 会把它从
+   顶栏挪到 body 下，否则父级 display:none 会连它一起藏掉），
+   以及正中间一句灰字。
+   ========================================================= */
+
+html[data-style="bare"] {
+  height: 100%;
+  overflow: hidden;
+  /* 深色主题的底色在这里一律作废 */
+  background: #ffffff !important;
+}
+
+html[data-style="bare"] body {
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
+  background: #ffffff !important;
+  filter: none !important;
+}
+
+/* 除按钮、风格面板、换肤擦除层、灰字之外，其余节点一律不渲染 */
+html[data-style="bare"] body > *:not(.style-toggle):not(.style-deck):not(.style-wipe):not(.bare-note) {
+  display: none !important;
+}
+
+html[data-style="bare"] .style-toggle {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 70;
+  width: 38px;
+  height: 38px;
+  border: 1px solid #ecece7;
+  border-radius: 3px;
+  background: #ffffff;
+  color: #c6c6c1;
+  box-shadow: none;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+html[data-style="bare"] .style-toggle:hover,
+html[data-style="bare"] .style-toggle[aria-expanded="true"] {
+  color: #8f8f89;
+  border-color: #d8d8d2;
+  box-shadow: none;
+}
+
+html[data-style="bare"] .style-toggle:focus-visible {
+  outline: 1px solid #cfcfc9;
+  outline-offset: 3px;
+}
+
+html[data-style="bare"] .style-toggle__grid i {
+  border-radius: 0;
+}
+
+html[data-style="bare"] .bare-note {
+  position: fixed;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 0 24px;
+  color: #adada8;
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 1.9;
+  letter-spacing: 0.18em;
+  text-align: center;
+  text-shadow: none;
+  user-select: text;
+}

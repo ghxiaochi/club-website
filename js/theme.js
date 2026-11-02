@@ -167,7 +167,8 @@
 
   /* 内联脚本已经设过一次；这里兜底，防止内联脚本被拦或页面被缓存。
      黑客风固定在深夜：就算本地存的是浅色，这里也直接压成 dark。 */
-  if (root.dataset.style === "hacker") {
+  /* 黑客风和控制台都只有夜里那一档：一个纯黑终端，一个炭黑仪器面板 */
+  if (root.dataset.style === "hacker" || root.dataset.style === "console") {
     apply("dark");
   } else {
     apply(root.dataset.theme === "dark" ? "dark" : "light");
@@ -182,13 +183,17 @@
     const style = (event.detail && event.detail.style) || root.dataset.style || "default";
     if (activeTransition) return;
 
-    if (style === "hacker") {
+    if (style === "hacker" || style === "console") {
       apply("dark");
       return;
     }
 
+    /* 用户从没手动选过深浅色时，stored 是空的：
+       离开黑客/像素风就该回到系统偏好，而不是一直停在被强制的深色 */
     const stored = readStored();
-    if (stored && root.dataset.theme !== stored) apply(stored);
+    const fallback = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    const target = stored || fallback;
+    if (root.dataset.theme !== target) apply(target);
   });
 
   function toggleTheme() {

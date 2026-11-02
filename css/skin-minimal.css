@@ -1,0 +1,234 @@
+/* HNYZ · minimal：只在切到这套风格时下载 */
+
+
+html[data-style="minimal"] .style-toggle {
+  border-radius: 2px;
+}
+
+html[data-style="minimal"] .style-toggle__grid i {
+  border-radius: 0;
+  background: var(--text);
+}
+
+/* ---------------------------------------------------------
+   3. 极简风
+   --------------------------------------------------------- */
+html[data-style="minimal"] {
+  --bg: #fbfbf8;
+  --bg-deep: #f3f3ef;
+  --panel: #ffffff;
+  --panel-2: #f7f7f3;
+  --panel-3: #f0f0eb;
+  --border: #e3e3dd;
+  --border-strong: #c8c8bf;
+  --text: #161614;
+  --text-soft: #3c3c38;
+  --muted: #67675f;
+  /* 原来是 #7d7d74，对 #fbfbf8 只有 4.01:1 —— 只够大字号。
+     这个变量全站 20 处用在 12~14px 的标签、面包屑、元信息上，
+     小字必须过 4.5。提到 #72726a（4.68 / 对白卡 4.85），
+     仍然比 --muted 淡一档，层级没丢。 */
+  --dim: #72726a;
+  --blue: #111110;
+  --blue-bright: #000000;
+  --green: #4d4d47;
+  --green-bright: #2c2c28;
+  --orange: #6d5a3e;
+  --red: #a33a30;
+  --purple: #5b5b55;
+  --blue-soft: rgba(17, 17, 16, 0.05);
+  --green-soft: rgba(17, 17, 16, 0.05);
+  --radius-sm: 2px;
+  --radius: 2px;
+  --radius-lg: 3px;
+  --glow-blue: none;
+  --glow-green: none;
+  --shadow-card: none;
+  color-scheme: light;
+}
+
+html[data-style="minimal"][data-theme="dark"] {
+  --bg: #0d0d0c;
+  --bg-deep: #080807;
+  --panel: #141413;
+  --panel-2: #191918;
+  --panel-3: #1e1e1c;
+  --border: #2b2b28;
+  --border-strong: #44443f;
+  --text: #f3f3ee;
+  --text-soft: #d4d4cd;
+  --muted: #a3a39a;
+  --dim: #85857c;
+  --blue: #f3f3ee;
+  --blue-bright: #ffffff;
+  --green: #c9c9c1;
+  --green-bright: #e8e8e1;
+  --orange: #d8c7a6;
+  --red: #ff8f82;
+  --purple: #c9c9c1;
+  --blue-soft: rgba(255, 255, 255, 0.06);
+  --green-soft: rgba(255, 255, 255, 0.06);
+  color-scheme: dark;
+}
+
+html[data-style="minimal"] body {
+  background: var(--bg);
+  background-image: none;
+}
+
+html[data-style="minimal"] .bg-orbs,
+html[data-style="minimal"] .bg-orbs__dots,
+html[data-style="minimal"] .bg-icons,
+html[data-style="minimal"] .hnyz-glow,
+html[data-style="minimal"] .hnyz-pet,
+html[data-style="minimal"] .hnyz-avatar,
+html[data-style="minimal"] .pet-summon,
+html[data-style="minimal"] .pet-tomb-veil,
+html[data-style="minimal"] .click-fx,
+html[data-style="minimal"] .skin-bubbles,
+html[data-style="minimal"] .hero-tags,
+html[data-style="minimal"] .eyebrow-dot,
+html[data-style="minimal"] .hero-rotator,
+html[data-style="minimal"] .gallery-entry__index {
+  display: none !important;
+}
+
+html[data-style="minimal"] .site-header,
+html[data-style="minimal"] .site-header.is-scrolled {
+  background: var(--bg);
+  border-bottom-color: var(--border);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+
+html[data-style="minimal"] .site-footer {
+  background: var(--bg);
+  border-top-color: var(--border);
+}
+
+html[data-style="minimal"] .section--soft {
+  background: var(--bg-deep);
+}
+
+html[data-style="minimal"] .brand-mark,
+html[data-style="minimal"] .nav-toggle,
+html[data-style="minimal"] .theme-toggle,
+html[data-style="minimal"] .sound-toggle,
+html[data-style="minimal"] .style-toggle {
+  box-shadow: none;
+  background: transparent;
+}
+
+html[data-style="minimal"] .nav-cta {
+  border-color: var(--text);
+  background: transparent;
+  color: var(--text);
+}
+
+html[data-style="minimal"] .nav-cta:hover {
+  background: var(--text);
+  color: var(--bg);
+  box-shadow: none;
+}
+
+html[data-style="minimal"] .accent-text {
+  color: var(--text);
+  text-shadow: none;
+}
+
+html[data-style="minimal"] .hero h1,
+html[data-style="minimal"] .section-head h2,
+html[data-style="minimal"] .archive-head h1 {
+  font-weight: 620;
+  letter-spacing: -0.03em;
+}
+
+html[data-style="minimal"] .quick-card,
+html[data-style="minimal"] .do-card,
+html[data-style="minimal"] .project-card,
+html[data-style="minimal"] .agenda-card,
+html[data-style="minimal"] .wall-card,
+html[data-style="minimal"] .join-panel,
+html[data-style="minimal"] .join-contact,
+html[data-style="minimal"] .faq-item,
+html[data-style="minimal"] .member-profile,
+html[data-style="minimal"] .archive-group,
+html[data-style="minimal"] .gallery-card,
+html[data-style="minimal"] .project-group {
+  background: var(--panel);
+  background-image: none;
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+html[data-style="minimal"] .project-card:hover,
+html[data-style="minimal"] .quick-card:hover,
+html[data-style="minimal"] .do-card:hover {
+  transform: none;
+  border-color: var(--text);
+  box-shadow: none;
+}
+
+html[data-style="minimal"] .button--primary {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
+  box-shadow: none;
+}
+
+html[data-style="minimal"] .button--primary:hover {
+  background: var(--text-soft);
+  border-color: var(--text-soft);
+  transform: none;
+  box-shadow: none;
+}
+
+html[data-style="minimal"] .button--secondary {
+  background: transparent;
+  border-color: var(--border-strong);
+  color: var(--text-soft);
+}
+
+html[data-style="minimal"] .button--secondary:hover {
+  border-color: var(--text);
+  color: var(--text);
+  box-shadow: none;
+  transform: none;
+}
+
+html[data-style="minimal"] .quick-path {
+  background: var(--panel-2);
+}
+
+html[data-style="minimal"] .cover-placeholder {
+  background: var(--panel-2);
+}
+
+html[data-style="minimal"] .cover-placeholder::before {
+  opacity: 0.35;
+}
+
+html[data-style="minimal"] .site-footer {
+  padding-bottom: 24px;
+}
+
+/* 极简风：小恐龙也走黑白 */
+html[data-style="minimal"] .dino-run {
+  --dino-ink: #171715;
+  --dino-accent: #6f6f66;
+  --dino-dim: #b9b9b0;
+  --dino-ground: rgba(23, 23, 21, 0.28);
+  background: #f7f7f3;
+  background-image: none;
+  border-top-color: #e3e3dd;
+}
+
+html[data-style="minimal"][data-theme="dark"] .dino-run {
+  --dino-ink: #f0f0e9;
+  --dino-accent: #b9b9b0;
+  --dino-dim: #4c4c46;
+  --dino-ground: rgba(240, 240, 233, 0.24);
+  background: #10100f;
+  border-top-color: #2b2b28;
+}

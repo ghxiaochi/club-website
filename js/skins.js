@@ -1,10 +1,11 @@
 /* =========================================================
    HNYZ · 风格系统
    ---------------------------------------------------------
-   四个皮肤：
+   五个皮肤：
      default  现在的蓝白科技风
      minimal  去装饰的极简风
      hacker   深色终端黑客风（代码雨 / 气泡 / 进度条）
+     console  控制台风：炭黑 + 米白 + 单一橙，自带实时调参面板
      bare     棍木：整页空白，只留右上角的风格按钮和一句灰字
    顶栏的方块打开一个竖向卡片面板，切换时用整屏向上擦除。
    选择写进 localStorage，四个页面共用。
@@ -14,17 +15,19 @@
   "use strict";
 
   const KEY = "hnyz:style";
-  const STYLES = ["default", "minimal", "hacker", "bare"];
+  const STYLES = ["default", "minimal", "hacker", "console", "bare"];
   const LABELS = {
     default: "DEFAULT",
     minimal: "MINIMAL",
     hacker: "HACKER",
+    console: "CONSOLE",
     bare: "BARE"
   };
   const NAMES = {
     default: "蓝白科技",
     minimal: "极简",
     hacker: "黑客终端",
+    console: "控制台",
     bare: "棍木"
   };
 
@@ -48,6 +51,83 @@
 
   current = readStored();
   root.dataset.style = current;
+
+  /* -------------------------------------------------------
+     按需下载：只有真的用到才付这份字节
+     -------------------------------------------------------
+     1. 三套皮肤的样式各自一个文件（skins.css 只留面板和公共部分），
+        默认皮肤的用户完全不用下载它们。
+     2. 代码雨只在黑客风下画，别的皮肤一行都不需要，
+        所以从各页 HTML 里撤掉了 matrix.js，改在这里注入。
+     ------------------------------------------------------- */
+  const SKIN_CSS = {
+    hacker: "css/skin-hacker.css",
+    minimal: "css/skin-minimal.css",
+    bare: "css/skin-bare.css",
+    console: "css/console.css"
+  };
+  const VERSION = "20261119";
+
+  const cssReady = new Map();
+
+  /* 返回一个「样式已经生效」的 promise。
+     head 里的预置脚本会同步插一份，那种情况下 resolve 立刻完成；
+     运行时切皮肤才走动态插入。 */
+  function ensureSkinCss(name) {
+    const href = SKIN_CSS[name];
+    if (!href) return Promise.resolve();
+    if (cssReady.has(name)) return cssReady.get(name);
+
+    const existing = document.querySelector(`link[data-skin-css="${name}"]`);
+    if (existing) {
+      const done = Promise.resolve();
+      cssReady.set(name, done);
+      return done;
+    }
+
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = `${href}?v=${VERSION}`;
+    link.dataset.skinCss = name;
+
+    const done = new Promise((resolve) => {
+      link.addEventListener("load", resolve, { once: true });
+      link.addEventListener("error", resolve, { once: true });
+      /* 兜底：网络卡住也不能把换肤流程永远挂住 */
+      window.setTimeout(resolve, 2500);
+    });
+
+    document.head.appendChild(link);
+    cssReady.set(name, done);
+    return done;
+  }
+
+  let matrixRequested = false;
+
+  function ensureMatrix() {
+    if (matrixRequested) return;
+    matrixRequested = true;
+    const script = document.createElement("script");
+    script.src = "js/matrix.js?v=20261119";
+    script.async = true;
+    document.body.appendChild(script);
+  }
+
+  /* 控制台的调参面板是一整块独立逻辑，只有这套皮肤需要 */
+  let consoleRequested = false;
+
+  function ensureConsole() {
+    if (consoleRequested) return;
+    consoleRequested = true;
+    const script = document.createElement("script");
+    script.src = `js/console.js?v=${VERSION}`;
+    script.async = true;
+    document.body.appendChild(script);
+  }
+
+  if (current !== "default") ensureSkinCss(current);
+  if (current === "hacker") ensureMatrix();
+  if (current === "console") ensureConsole();
 
 
   /* -------------------------------------------------------
@@ -92,10 +172,22 @@
   /* 顶部滚动进度 */
   let progressRaf = 0;
 
+  /* 每次滚动都读 scrollHeight 会强制同步布局：滚动本身就是最忙的时刻，
+     这一读等于把刚排好的版面再算一遍。页面高度只会在窗口变化、
+     图片加载、卡片渲染时变，所以缓存起来，用 ResizeObserver 更新。 */
+  let scrollMax = 0;
+  let lastProgress = -1;
+
+  function measurePage() {
+    scrollMax = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+  }
+
   function flushProgress() {
     progressRaf = 0;
-    const max = document.documentElement.scrollHeight - window.innerHeight;
-    const value = max > 0 ? Math.min(1, window.scrollY / max) : 0;
+    const value = scrollMax > 0 ? Math.min(1, window.scrollY / scrollMax) : 0;
+    /* 值没变就不写：CSS 变量一改，整条进度条都要重算样式 */
+    if (Math.abs(value - lastProgress) < 0.0005) return;
+    lastProgress = value;
     progress.style.setProperty("--skin-progress", value.toFixed(4));
   }
 
@@ -104,7 +196,19 @@
     progressRaf = window.requestAnimationFrame(flushProgress);
   }, { passive: true });
 
-  window.addEventListener("resize", flushProgress, { passive: true });
+  window.addEventListener("resize", () => {
+    measurePage();
+    flushProgress();
+  }, { passive: true });
+
+  measurePage();
+
+  /* 图片撑开高度、卡片异步插入都会改变页面总高 */
+  if ("ResizeObserver" in window) {
+    new ResizeObserver(measurePage).observe(document.body);
+  } else {
+    window.addEventListener("load", measurePage, { once: true });
+  }
 
   /* -------------------------------------------------------
      二、风格面板
@@ -162,8 +266,20 @@
           <button class="style-card__apply" type="button" data-style-pick="hacker">应用此风格</button>
         </article>
 
+        <article class="style-card" data-style-option="console">
+          <div class="style-card__top"><span>04 / CONSOLE</span><span class="style-card__current">当前风格</span></div>
+          <div class="style-card__glyph style-card__glyph--console" aria-hidden="true">⌘_</div>
+          <p class="style-card__kicker">LIVE_TUNING</p>
+          <h3 class="style-card__title">控制台</h3>
+          <p class="style-card__desc">炭黑、米白、一个橙。带上调参面板：扫描线、色相、字号、行高、正文宽度都能自己拨。</p>
+          <div class="style-card__swatches" aria-hidden="true">
+            <i style="--c:#0a0a0b"></i><i style="--c:#f07b38"></i><i style="--c:#f2ece1"></i>
+          </div>
+          <button class="style-card__apply" type="button" data-style-pick="console">应用此风格</button>
+        </article>
+
         <article class="style-card" data-style-option="bare">
-          <div class="style-card__top"><span>04 / BARE</span><span class="style-card__current">当前风格</span></div>
+          <div class="style-card__top"><span>05 / BARE</span><span class="style-card__current">当前风格</span></div>
           <div class="style-card__glyph style-card__glyph--bare" aria-hidden="true"><span></span></div>
           <p class="style-card__kicker">NOTHING_HERE</p>
           <h3 class="style-card__title">棍木</h3>
@@ -178,7 +294,8 @@
         <button class="style-deck__dot" type="button" data-style-dot="0" aria-label="第 1 个：蓝白科技" aria-current="true"></button>
         <button class="style-deck__dot" type="button" data-style-dot="1" aria-label="第 2 个：极简"></button>
         <button class="style-deck__dot" type="button" data-style-dot="2" aria-label="第 3 个：黑客终端"></button>
-        <button class="style-deck__dot" type="button" data-style-dot="3" aria-label="第 4 个：棍木"></button>
+        <button class="style-deck__dot" type="button" data-style-dot="3" aria-label="第 4 个：控制台"></button>
+        <button class="style-deck__dot" type="button" data-style-dot="4" aria-label="第 5 个：棍木"></button>
       </div>
 
       <p class="style-deck__hint">上下滑动 / ↑ ↓ 切换 · Esc 关闭</p>
@@ -405,6 +522,9 @@
   function commit(next) {
     current = next;
     root.dataset.style = next;
+
+    if (next === "hacker") ensureMatrix();
+    if (next === "console") ensureConsole();
     setBareMode(next === "bare");
 
     /* 黑客风固定深夜：主题由 theme.js 监听 hnyz:stylechange 统一处理，
@@ -459,6 +579,11 @@
       closeDeck();
       return;
     }
+
+    /* 新皮肤的样式先到位，再开始转场：
+       否则幕布揭到一半，样式还在路上，露出的是半套旧样式 */
+    await ensureSkinCss(next);
+    if (next === "console") ensureConsole();
 
     if (reduce.matches) {
       closeDeck();

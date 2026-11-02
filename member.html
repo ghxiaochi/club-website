@@ -28,13 +28,25 @@
     })();
   </script>
   <script>
-    /* 风格预置：首帧前挂上上次选的皮肤，避免先闪一下默认风 */
+    /* 风格预置：首帧前挂上上次选的皮肤，避免先闪一下默认风。
+       皮肤样式各自一个文件，只有真的用这套风格才下载；
+       这里同步插进 head，浏览器会在首绘前加载完，不会跳一下。 */
     (function () {
       try {
         var style = localStorage.getItem("hnyz:style");
-        if (style === "minimal" || style === "hacker") {
-          document.documentElement.dataset.style = style;
-        }
+        var sheet = {
+          hacker: "css/skin-hacker.css",
+          minimal: "css/skin-minimal.css",
+          bare: "css/skin-bare.css",
+          console: "css/console.css"
+        }[style];
+        if (!sheet) return;
+        document.documentElement.dataset.style = style;
+        var link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = sheet + "?v=20261119";
+        link.setAttribute("data-skin-css", style);
+        document.head.appendChild(link);
       } catch (error) { /* 隐私模式下忽略 */ }
     })();
   </script>
@@ -54,6 +66,9 @@
   <meta name="twitter:description" content="社团成员的个人主页：个人简介 + 自己的项目。">
   <meta name="twitter:image" content="https://hnyzbcs.de5.net/images/og-cover.jpg">
   <meta name="twitter:image:alt" content="HNYZ 衡南一中编程社：把想法，写成代码。">
+  <!-- 项目卡片要连 GitHub 接口，提前把 DNS + TLS 握手做掉 -->
+  <link rel="preconnect" href="https://api.github.com" crossorigin>
+  <link rel="dns-prefetch" href="https://giscus.app">
   <link rel="canonical" href="https://hnyzbcs.de5.net/member.html">
 
   <title>成员主页｜HNYZ · 衡南一中编程社</title>
@@ -66,55 +81,84 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="stylesheet" href="css/style.css?v=20261117">
-  <link rel="stylesheet" href="css/pet.css?v=20261117">
-  <link rel="stylesheet" href="css/personal.css?v=20261117">
-  <link rel="stylesheet" href="css/member.css?v=20261117">
-  <link rel="stylesheet" href="css/avatar-pet.css?v=20261117">
-  <link rel="stylesheet" href="css/skins.css?v=20261117">
-  <link rel="stylesheet" href="css/type.css?v=20261117">
-  <link rel="stylesheet" href="css/motion.css?v=20261117">
-  <link rel="stylesheet" href="css/dino.css?v=20261117">
+  <link rel="stylesheet" href="css/style.css?v=20261119">
+  <link rel="stylesheet" href="css/pet.css?v=20261119">
+  <link rel="stylesheet" href="css/personal.css?v=20261119">
+  <link rel="stylesheet" href="css/member.css?v=20261119">
+  <link rel="stylesheet" href="css/avatar-pet.css?v=20261119">
+  <link rel="stylesheet" href="css/skins.css?v=20261119">
+  <link rel="stylesheet" href="css/type.css?v=20261119">
+  <link rel="stylesheet" href="css/motion.css?v=20261119">
+  <!-- dino.css 在首屏折叠线以下（页脚跑道），先按低优先级下载，不挡住首屏渲染 -->
+  <link rel="preload" href="css/dino.css?v=20261119" as="style" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/dino.css?v=20261119"></noscript>
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
-  <script src="js/sfx.js?v=20261117" defer></script>
-  <script src="js/theme.js?v=20261117" defer></script>
-  <script src="js/theme-icon.js?v=20261117" defer></script>
-  <script src="js/members.js?v=20261117" defer></script>
-  <script src="js/main.js?v=20261117" defer></script>
-  <script src="js/pet.js?v=20261117" defer></script>
-  <script src="js/member.js?v=20261117" defer></script>
-  <script src="js/avatar-pet.js?v=20261117" defer></script>
-  <script src="js/personal.js?v=20261117" defer></script>
-  <script src="js/click-fx.js?v=20261117" defer></script>
-  <script src="js/skins.js?v=20261117" defer></script>
-  <script src="js/matrix.js?v=20261117" defer></script>
-  <script src="js/copy.js?v=20261117" defer></script>
-  <script src="js/pwa.js?v=20261117" defer></script>
+  <script src="js/sfx.js?v=20261119" defer></script>
+  <script src="js/theme.js?v=20261119" defer></script>
+  <script src="js/theme-icon.js?v=20261119" defer></script>
+  <script src="js/members.js?v=20261119" defer></script>
+  <script src="js/main.js?v=20261119" defer></script>
+  <script src="js/pet.js?v=20261119" defer></script>
+  <script src="js/member.js?v=20261119" defer></script>
+  <script src="js/avatar-pet.js?v=20261119" defer></script>
+  <script src="js/personal.js?v=20261119" defer></script>
+  <script src="js/click-fx.js?v=20261119" defer></script>
+  <script src="js/skins.js?v=20261119" defer></script>
+  <script src="js/copy.js?v=20261119" defer></script>
+  <script src="js/pwa.js?v=20261119" defer></script>
   <script>
-    /* 页脚跑道不参与首屏：等 load 之后浏览器空闲了再拉脚本，
-       用户提前往下滚也会立刻加载。少 80KB 的解析，首屏能早一点可交互。 */
+    /* 页脚跑道和留言板都在折叠线以下：等它们真的接近视口再加载，
+       首屏不为这 100KB 付任何代价。提前 800px 开始拉，滚到底时已经就位。 */
     (function () {
-      var loaded = false;
-      function loadDino() {
-        if (loaded) return;
-        loaded = true;
+      var dino = false;
+      var guestbook = false;
+
+      function inject(src) {
         var script = document.createElement("script");
-        script.src = "js/dino.js?v=20261117";
+        script.src = src;
         script.async = true;
         document.body.appendChild(script);
       }
-      /* 等浏览器真空闲再注入：固定 1.5 秒的定时器很可能正好撞上首屏滚动或点击，
-         解析这 80KB 就变成一次能感觉到的卡顿。idle 回调只在主线程闲下来时才跑。 */
-      function whenIdle() {
-        if ("requestIdleCallback" in window) {
-          window.requestIdleCallback(loadDino, { timeout: 3000 });
-        } else {
-          window.setTimeout(loadDino, 1200);
-        }
+
+      function loadDino() {
+        if (dino) return;
+        dino = true;
+        inject("js/dino.js?v=20261119");
       }
-      window.addEventListener("load", whenIdle, { once: true });
-      window.addEventListener("scroll", loadDino, { once: true, passive: true });
+
+      function loadGuestbook() {
+        if (guestbook) return;
+        guestbook = true;
+        inject("js/guestbook.js?v=20261119");
+      }
+
+      function watch(el, fn) {
+        /* 这页没有这块内容（只有首页有留言板），当作已处理，别再拉脚本 */
+        if (!el) return true;
+        if (!("IntersectionObserver" in window)) return false;
+        var io = new IntersectionObserver(function (entries) {
+          for (var i = 0; i < entries.length; i += 1) {
+            if (!entries[i].isIntersecting) continue;
+            io.disconnect();
+            fn();
+            return;
+          }
+        }, { rootMargin: "800px 0px" });
+        io.observe(el);
+        return true;
+      }
+
+      var okDino = watch(document.querySelector("[data-dino-run]"), loadDino);
+      var okBook = watch(document.querySelector("[data-guestbook-body]"), loadGuestbook);
+
+      /* 老内核没有 IntersectionObserver：退回「一滚就加载」 */
+      if (!okDino || !okBook) {
+        window.addEventListener("scroll", function () {
+          if (!okDino) loadDino();
+          if (!okBook) loadGuestbook();
+        }, { once: true, passive: true });
+      }
     })();
   </script>
 </head>
@@ -274,7 +318,7 @@
     <div class="hnyz-pet__board" aria-hidden="true"></div>
     <button class="hnyz-pet__stage" type="button" data-hnyz-pet-trigger aria-label="和衡南一中校徽打个招呼">
       <span class="hnyz-pet__badge-wrap" data-hnyz-pet-badge aria-hidden="true">
-        <img class="hnyz-pet__badge" src="images/pet/badge-school-hd.webp" alt="" width="360" height="360">
+        <img class="hnyz-pet__badge" src="images/pet/badge-school-128.webp" srcset="images/pet/badge-school-128.webp 128w, images/pet/badge-school-256.webp 256w" sizes="64px" alt="" width="128" height="128" decoding="async">
       </span>
     </button>
     <p class="hnyz-pet__speech" data-hnyz-pet-speech role="status" aria-live="polite"></p>
@@ -284,7 +328,7 @@
   <div class="hnyz-avatar" data-hnyz-avatar>
     <p class="hnyz-avatar__speech" data-hnyz-avatar-speech role="status" aria-live="polite"></p>
     <button class="hnyz-avatar__button" type="button" data-hnyz-avatar-trigger aria-label="和东方马也互动">
-      <img class="hnyz-avatar__img" src="images/pet/ghxiaochi-avatar.webp" alt="东方马也的像素头像" width="648" height="954">
+      <img class="hnyz-avatar__img" src="images/pet/ghxiaochi-avatar-192.webp" srcset="images/pet/ghxiaochi-avatar-128.webp 128w, images/pet/ghxiaochi-avatar-192.webp 192w, images/pet/ghxiaochi-avatar-384.webp 384w" sizes="60px" alt="东方马也的像素头像" width="192" height="283" decoding="async">
       <span class="hnyz-avatar__name" aria-hidden="true">东方马也</span>
     </button>
   </div>

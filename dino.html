@@ -22,6 +22,29 @@
   <!-- 榜单数据来自 data/ladder.json，由 .github/workflows/ladder.yml
        汇总带 [DINO] 标题的 Issues 生成，页面不需要任何后端。 -->
 
+  <script>
+    /* 风格预置：这一页本来就是终端的底子，控制台风跟过来最顺；
+       其余皮肤在这页没有对应样式（也不需要），维持深色原样。 */
+    (function () {
+      try {
+        if (localStorage.getItem("hnyz:style") !== "console") return;
+        document.documentElement.dataset.style = "console";
+        var link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = "css/console.css?v=20261119";
+        link.setAttribute("data-skin-css", "console");
+        document.head.appendChild(link);
+
+        /* 这一页没有顶栏（也就没有风格按钮），调参面板靠右上角的浮动按钮
+           和 C 键打开，所以直接把面板脚本挂上，不等 skins.js */
+        var panel = document.createElement("script");
+        panel.src = "js/console.js?v=20261119";
+        panel.async = true;
+        document.head.appendChild(panel);
+      } catch (error) { /* 隐私模式下忽略 */ }
+    })();
+  </script>
+
   <link rel="canonical" href="https://hnyzbcs.de5.net/dino.html">
   <meta property="og:title" content="DINO_RUN 天梯｜HNYZ">
   <meta property="og:description" content="跑一局像素小恐龙，看你能排到第几。">
@@ -38,9 +61,9 @@
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="application-name" content="HNYZ">
 
-  <link rel="stylesheet" href="css/style.css?v=20261117">
-  <link rel="stylesheet" href="css/dino.css?v=20261117">
-  <link rel="stylesheet" href="css/ladder.css?v=20261117">
+  <link rel="stylesheet" href="css/style.css?v=20261119">
+  <link rel="stylesheet" href="css/dino.css?v=20261119">
+  <link rel="stylesheet" href="css/ladder.css?v=20261119">
 </head>
 <body class="ladder-page">
 
@@ -125,7 +148,7 @@
 
   </main>
 
-  <script src="js/dino.js?v=20261117" defer></script>
-  <script src="js/ladder.js?v=20261117" defer></script>
+  <script src="js/dino.js?v=20261119" defer></script>
+  <script src="js/ladder.js?v=20261119" defer></script>
 </body>
 </html>

@@ -62,9 +62,13 @@ club-website/
 │   ├── avatar-pet.css      # 左下角像素头像彩蛋样式
 │   ├── characters.css      # 音游角色舞台与立绘
 │   ├── guestbook.css       # 留言板外框（终端风的标题条、等待态、降级文案）
-│   └── ladder.css          # 天梯页两栏布局与榜单（刻意不用 clamp/inset，照顾旧内核）
+│   ├── ladder.css          # 天梯页两栏布局与榜单（刻意不用 clamp/inset，照顾旧内核）
+│   ├── skin-hacker.css     # 黑客风覆盖（22KB，只在切到该皮肤时加载）
+│   ├── skin-minimal.css    # 极简风覆盖（6KB，同上）
+│   ├── skin-bare.css       # 棍木覆盖（2KB，同上）
+│   └── console.css         # 控制台风（炭黑 + 米白 + 单一橙，含调参面板样式，同上）
 ├── assets/
-│   └── moon-sun-sprite.png # 60 帧月亮/太阳雪碧图（3240×54）
+│   └── moon-sun-sprite.webp # 60 帧月亮/太阳雪碧图（3240×54，无损 webp）
 ├── fonts/                  # 游戏原版像素字体（来自 assets.7z）
 │   ├── anim-title.ttf      # 大标题
 │   └── anim-pixel.ttf      # 副标题 / 小字
@@ -79,8 +83,9 @@ club-website/
 │   ├── gallery.js          # 图集渲染与灯箱
 │   ├── theme.js            # 深浅色主题切换与记忆
 │   ├── skins.js            # 网页风格切换面板、竖向卡片、擦除转场、棍木的按钮搬运
-│   ├── dino.js             # 页脚像素小恐龙（金币 / 连击 / 星空，等级已移除）
+│   ├── dino.js             # 页脚像素小恐龙（金币 / 连击 / 星空，等级已移除；距视口 800px 才加载）
 │   ├── matrix.js           # 黑客风的数字雨（只在 hacker 皮肤下启动）
+│   ├── console.js          # 控制台皮肤的调参面板（15 个旋钮 / 预设 / 导入导出，只在那套皮肤下启动）
 │   ├── copy.js             # 三套文案，按风格替换 data-copy 节点（棍木没有文案可换）
 │   ├── theme-icon.js       # 主题按钮的月亮 / 太阳雪碧图帧动画
 │   ├── personal.js         # 打字机标语、滚动渐显、卡片倾斜、彩蛋
@@ -298,6 +303,26 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 浏览器要求先有用户操作才允许播声音，所以第一次点击之后才会出声。头部有一个喇叭按钮，可以全局静音，状态存在 `localStorage`（`hnyz:sound`）。
 
+### 2026-11 这一轮：无损瘦身
+
+只动「什么时候下载、下载多大」，不改任何视觉：
+
+| 项 | 之前 | 现在 | 做法 |
+|---|---|---|---|
+| 首屏总字节（弱网 1.6Mbps + 4× CPU） | 599 KB | 363 KB | 见下 |
+| 首屏请求数 | 29 | 24 | 样式拆包 + 脚本按需 |
+| FCP / LCP | 1760 ms | 1396 ms | 折叠线下资源不再挡首屏 |
+| 头像 | 648×954，49 KB，实际显示 24–60px | 128/192/384 三档 webp，7–22 KB | `srcset` + `sizes`，按屏密度挑 |
+| 校徽 | 360×360，30 KB，显示 53px | 128/256 两档，8–18 KB | 同上 |
+| 日月精灵条 | PNG 47 KB | 无损 webp 21 KB | 全透明通道无损压缩 |
+| 首屏 CSS | 198 KB（9 个文件全阻塞） | 145 KB（`dino.css` / `guestbook.css` 改异步） | `media="print"` 低优先级下载，`onload` 切回 |
+| 皮肤 CSS | 56 KB 全量 | 26 KB 公共 + 按需 | 四套皮肤拆成独立文件 |
+| `matrix.js` | 4 个页面无条件加载 | 只在 `hacker` 皮肤加载 | `skins.js` 注入 |
+| `dino.js` / `guestbook.js` | `load` 后空闲加载（约 100 KB） | 滚到距它们 800px 才加载 | `IntersectionObserver` |
+| 滚动进度条 | 每帧读 `scrollHeight`（强制同步布局） | 缓存高度，`ResizeObserver` 更新 | 值没变就不写 CSS 变量 |
+
+小恐龙和留言板都在折叠线以下，`IntersectionObserver` 提前 800px 预取；老内核没有 IO 就退回「一滚就加载」。这样首屏的 JS 从 17 个脚本降到 15 个，长任务只剩首屏渲染那一次（4× CPU 下 238ms，桌面约 60ms）。
+
 ### 性能上做了什么
 
 - 背景小图标等页面空闲（`requestIdleCallback`）再生成，数量 30 → 20，不抢首屏
@@ -329,9 +354,9 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 > 所有动效都尊重 `prefers-reduced-motion`：系统开启「减少动态效果」时，渐显、打字机、倾斜、光晕全部停用，内容直接可见。
 
-### 网页风格（四套皮肤）
+### 网页风格（五套皮肤）
 
-页面右上角顶栏有一个四格小方块，点开是一块全屏面板：四张竖向卡片，上下滑动 / ↑↓ 切换，中间那张就是当前风格。
+页面右上角顶栏有一个四格小方块，点开是一块全屏面板：五张竖向卡片，上下滑动 / ↑↓ 切换，中间那张就是当前风格。
 
 切换是**两块幕布的接力**，不是「面板淡出、幕布再升起」两段各走各的：
 
@@ -349,12 +374,16 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 | `default` 蓝白科技 | 原来的样子，光斑、角色排、校徽、动效全保留 | 什么都不改 |
 | `minimal` 极简 | 纯黑白灰、直角、去阴影，隐藏光斑 / 装饰图标 / 贴纸 / 校徽 | `html[data-style="minimal"]` 变量 + 隐藏清单 |
 | `hacker` 黑客终端 | 纯黑底，背景只有一整屏代码雨和一层漂浮的气泡，等宽字 + 荧光绿；跑道里的天也永远是纯黑，太阳、月亮统一荧光绿（金币仍是琥珀色） | `html[data-style="hacker"]` 变量 + `js/matrix.js` 画布 + `.skin-bubbles` + `skyPal` |
+| `console` 控制台 | 炭黑底 + 米白字 + **一个**橙色（原本的蓝/绿/紫在这里都收成同一色相，靠明度区分）。全站等宽、宽字距、零圆角、零渐变；每个小节标题自动带 `[01]` 编号，滚动时一层极淡的 CRT 扫描线，四角有 HUD 角标。**顶栏多一个 ⌘ 按钮，打开实时调参面板**：15 个旋钮（扫描线、色相、底色/文字明度、字号、行高、正文宽度、标题字距、面板宽与不透明度……），改完即时生效、存在本机，可导出/导入 JSON。 | `html[data-style="console"]` 变量 + `css/console.css` + `js/console.js`，**只有这套皮肤会下载**；视觉参考 world.execute(me) 歌词 MV 的三墨配色与 HALOFLUX 的控制台排版 |
 | `bare` 棍木 | 全白空白页，没有内容、颜色和链接，中间一句灰字，右上角只剩风格按钮 | `html[data-style="bare"]` 隐藏 `body` 下所有节点 + 按钮搬到 `body` |
 
 - 选择存在 `localStorage`（key：`hnyz:style`），四个页面共用；`<head>` 里有内联脚本做首帧预置，刷新不会闪一下默认皮肤。
+- **皮肤样式按需下载**：`skins.css` 只留风格面板、转场幕布和公共部分（26KB），四套皮肤的覆盖规则各自拆成 `css/skin-hacker.css`（22KB）、`skin-minimal.css`（6KB）、`skin-bare.css`（2KB）、`console.css`（36KB，含调参面板样式）。默认皮肤的用户一个字节都不付；切到别的皮肤时，`<head>` 的预置脚本会在首绘前同步插一份 `<link>`（只对非默认皮肤的用户付费），运行时切换则由 `skins.js` 先 `await` 样式就绪、再开始幕布转场——否则幕布揭开时样式还在路上，会露出半套旧样式。
+- 拆包前后用 CSSOM 逐条比对过：`default 113 条 / hacker 205 条 / minimal 139 条 / bare 121 条`，与拆分前的期望规则集完全一致（多 0 条、少 0 条）。
 - 切到 `hacker` 时如果当前是浅色主题，会自动切到深色（否则只有半屏是黑的），并同步写 `hnyz:theme`。
 - 换肤会派发 `hnyz:stylechange` 事件，小恐龙、Canvas 相关组件收到后按新的 CSS 变量重画贴图。
 - 键盘 `Esc` 关闭面板；面板打开时背景滚动锁定。
+- `console` 皮肤的调参面板：顶栏 ⌘ 或按 `C` 开合，桌面是右侧抽屉、窄屏是底部抽屉（点遮罩收起）。15 个参数全部直接写 `<html>` 的 CSS 变量，不重绘任何画面；三个内置预设 A 炭黑橙 / B 琥珀纸 / C 磷光青，可导出成 JSON 贴给别人。天梯页没有顶栏，所以那边是右下角的浮动按钮，脚本由页面自己的预置片段挂上。
 
 `bare`（棍木）是故意做成「什么都没有」的：`html[data-style="bare"] body > *:not(.style-toggle):not(.style-deck):not(.style-wipe):not(.bare-note)` 一条规则把正文、顶栏、页脚、跑道、校徽、装饰层全部 `display: none`，`html` 与 `body` 锁死一屏并强制白底（深色主题在这里也压成白）。按钮本身在 `<header>` 里，父级一藏它也跟着没了，所以 `skins.js` 在进入这个风格时把 `[data-style-toggle]` 挪到 `body` 下、固定到右上角，切走时再按记下的原位置插回顶栏。
 
@@ -404,7 +433,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 ### 主题按钮：月亮 / 太阳的变形
 
-顶栏那颗按钮不再是两张静态 SVG，而是一张 60 帧雪碧图（`assets/moon-sun-sprite.png`，3240×54，每帧 54px，显示 18px）：
+顶栏那颗按钮不再是两张静态 SVG，而是一张 60 帧雪碧图（`assets/moon-sun-sprite.webp`，3240×54，每帧 54px，显示 18px）：
 
 - 动效本身是「月亮 → 收缩成圆 → 张开成太阳 → 再收回去」，原素材两秒一循环
 - 静止时**不空转**：浅色主题停在第 40 帧（太阳），深色主题停在第 0 帧（月亮）
