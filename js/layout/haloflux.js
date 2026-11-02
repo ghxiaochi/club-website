@@ -67,6 +67,8 @@
     return fallback;
   }
 
+  var isLight = false;
+
   function readColors() {
     var host = canvas.parentElement || canvas;
     var cs = getComputedStyle(host);
@@ -75,7 +77,8 @@
     pal.bg = parseColor(cs.getPropertyValue("--ck-bg"), pal.bg);
 
     var lum = 0.299 * pal.bg[0] + 0.587 * pal.bg[1] + 0.114 * pal.bg[2];
-    INK = lum > 140 ? [14, 15, 18] : [232, 236, 244];
+    isLight = lum > 140;
+    INK = isLight ? [14, 15, 18] : [232, 236, 244];
   }
 
   /* ---------- 尺寸 ---------- */
@@ -251,7 +254,8 @@
     }
 
     curves = [];
-    var N = Math.min(4200, Math.round((1600 + (W * H) / 900) * CFG.web));
+    /* 纸白皮肤下同密度的线会糊成一片灰雾，减到四成刚好 */
+    var N = Math.min(4200, Math.round((1600 + (W * H) / 900) * CFG.web * (isLight ? 0.42 : 1)));
 
     for (var k = 0; k < N; k += 1) {
       var a1 = rnd() * TAU;
@@ -748,7 +752,7 @@
     var mid = (R + RO) / 2;
 
     /* 环带底：一条粗圆弧，把面板和背后的光切开 */
-    ctx.strokeStyle = rgba(pal.bg, 0.97);
+    ctx.strokeStyle = rgba(pal.bg, 0.93);
     ctx.lineWidth = BAND;
     ctx.beginPath();
     ctx.arc(0, 0, mid, 0, TAU);
@@ -856,9 +860,26 @@
 
     while (left > 0) {
       var n = Math.min(left, o.n[0] + ((rnd() * (o.n[1] - o.n[0])) | 0));
+
+      /* 束内每条线的相对位置（-1..1）、角抖动、以及轻微的高度差。
+         抖动是预先生成的：每帧随机的话线条会一直闪，看着像噪声。 */
+      var tn = [];
+      var jit = [];
+      var ww = [];
+      for (var q = 0; q < n; q += 1) {
+        tn.push(n > 1 ? (q / (n - 1)) * 2 - 1 : 0);
+        jit.push(gauss() * o.step * 0.4);
+        ww.push(rr(0.55, 1.35));
+      }
+
       ws.push({
         i0: (rnd() * nb) | 0,
         n: n,
+        tn: tn,
+        jit: jit,
+        wt: ww,
+        spread: rr(0.75, 1.85),
+        gap: rnd() < 0.2 ? rr(1.6, 3.8) : 0,
         len: rr(0.22, 0.92),
         prof: profile(n),
         ph: rnd() * TAU,
@@ -867,16 +888,41 @@
       });
       left -= n;
     }
-    return { o: o, ws: ws, off: rnd() * TAU };
+    /* 静态方位包络：整圈分 48 格，用几条随机正弦叠出高低。
+       没有它，所有束长一样，整圈就成了等距梳齿。 */
+    var EN = new Float32Array(48);
+    var h = [rr(1, 3), rr(2, 5), rr(3, 6), rr(4, 8)];
+    var ph = [rnd() * TAU, rnd() * TAU, rnd() * TAU, rnd() * TAU];
+    for (var e = 0; e < 48; e += 1) {
+      var ang = (e / 48) * TAU;
+      var v = 0.72
+        + 0.28 * Math.sin(ang * h[0] + ph[0])
+        + 0.2 * Math.sin(ang * h[1] + ph[1])
+        + 0.15 * Math.sin(ang * h[2] + ph[2])
+        + 0.09 * Math.sin(ang * h[3] + ph[3]);
+      EN[e] = clamp(v, 0.34, 1.5);
+    }
+
+    return { o: o, ws: ws, off: rnd() * TAU, env: EN };
+  }
+
+  /* 查方位包络（环形线性插值，避免 48 个台阶被看出来） */
+  function envAt(L, a) {
+    var f = (a / TAU) * 48;
+    var i0 = f | 0;
+    var t = f - i0;
+    var v0 = L.env[i0 & 47];
+    var v1 = L.env[(i0 + 1) & 47];
+    return v0 + (v1 - v0) * t;
   }
 
   function buildOuter() {
     strandLayers = [
-      { step: 0.235, rot: 0.38, lum: 0.26, lw: 0.5, len: 1.9, lines: 760, n: [18, 70], top: 0.2 },
-      { step: 0.175, rot: 0.68, lum: 0.5, lw: 0.75, len: 1.72, lines: 660, n: [14, 60], top: 0.3 },
-      { step: 0.13, rot: 1.0, lum: 1.15, lw: 1.0, len: 1.62, lines: 600, n: [12, 52], top: 0.36 },
+      { step: 0.235, rot: 0.38, lum: 0.26, lw: 0.5, len: 1.9, lines: 980, n: [18, 70], top: 0.2 },
+      { step: 0.175, rot: 0.68, lum: 0.5, lw: 0.75, len: 1.72, lines: 860, n: [14, 60], top: 0.3 },
+      { step: 0.13, rot: 1.0, lum: 1.15, lw: 1.0, len: 1.62, lines: 780, n: [12, 52], top: 0.36 },
       { step: 0.42, rot: 1.0, lum: 0.85, lw: 1.75, len: 1.35, lines: 150, n: [3, 12], top: 0.34 },
-      { step: 0.13, rot: 1.0, lum: 0.8, lw: 0.9, len: 1.55, lines: 520, n: [12, 58], top: 0.32 }
+      { step: 0.13, rot: 1.0, lum: 0.8, lw: 0.9, len: 1.55, lines: 680, n: [12, 58], top: 0.32 }
     ].map(mkLayer);
     strandLayers[4].wave = true;
 
@@ -884,6 +930,7 @@
     flares = [];
     dashes = [];
     pulses = [];
+    bursts = [];
 
     /* 根部闪光用的光斑，预渲染一次 */
     glowSprite = offscreen(64, 64, 1);
@@ -914,41 +961,120 @@
       var L = strandLayers[li];
       var o = L.o;
 
-      for (var tier = 0; tier < 3; tier += 1) {
+      /* 拆成 6 组：3 个亮度档 × 近/远两段。
+         近段亮、远段淡，光束才有「射出去、然后散掉」的方向感 */
+      for (var grp = 0; grp < 6; grp += 1) {
+        var tier = grp % 3;
+        var far = grp >= 3;
         ctx.beginPath();
         var drew = false;
 
         for (var j = 0; j < L.ws.length; j += 1) {
           var w = L.ws[j];
-          var tl = w.lum > 0.75 ? 2 : w.lum > 0.5 ? 1 : 0;
-          if (tl !== tier) continue;
+          if ((w.lum > 0.75 ? 2 : w.lum > 0.5 ? 1 : 0) !== tier) continue;
 
           var breath = 0.5 + 0.5 * Math.sin(clock * 1.15 + w.ph);
           var gain = 0.72 + breath * 0.5;
           gain *= 0.72 + beat.env * 0.6;
+          if (o.wave) gain *= 0.7 + 0.6 * Math.abs(Math.sin(clock * 2.1 + w.ph));
+
+          /* 楔形：环边几乎收成一点，往外越走越开。
+             这是「迸发」和「梳齿」的分界——平行线只会像百叶窗 */
+          var half = o.step * 0.5 * w.spread;
 
           for (var k = 0; k < w.n; k += 1) {
-            var a = (w.i0 + k) * o.step + L.off + ringRot * o.rot;
-            var g2 = gain + waveAt(a) * 0.9;
-            if (o.wave) g2 *= 0.7 + 0.6 * Math.abs(Math.sin(clock * 2.1 + w.ph));
-            var len = band * o.len * w.len * w.prof[k] * clamp(g2, 0.18, 2.4);
+            var a = (w.i0 + k) * o.step + k * w.gap + w.jit[k] + L.off + ringRot * o.rot;
+            var g2 = gain + waveAt(a) * 1.1;
+            var len = band * o.len * w.len * w.prof[k] * w.wt[k]
+              * envAt(L, a) * clamp(g2, 0.18, 2.6);
+            if (len < 3) continue;
+
             var r0 = RO + 2;
-            var r1 = r0 + len;
-            var ca = lcos(a);
-            var sa = lsin(a);
-            ctx.moveTo(ca * r0, sa * r0);
-            ctx.lineTo(ca * r1, sa * r1);
+            var ga = far ? 0.42 : 0;
+            var gb = far ? 1 : 0.42;
+            var ra = r0 + len * ga;
+            var rb = r0 + len * gb;
+
+            /* 张开量随半径线性增长，两段在 0.4len 处自然衔接 */
+            var an = a + w.tn[k] * half * ga * 1.45;
+            var af = a + w.tn[k] * half * gb * 1.45;
+
+            ctx.moveTo(lcos(an) * ra, lsin(an) * ra);
+            ctx.lineTo(lcos(af) * rb, lsin(af) * rb);
             drew = true;
           }
         }
 
         if (!drew) continue;
-        var alpha = [0.17, 0.4, 0.82][tier] * o.lum;
+        var base = [0.17, 0.4, 0.82][tier] * o.lum;
+        var alpha = far ? base * 0.62 : base * 1.35;
+        if (isLight) alpha *= 1.75;
         ctx.strokeStyle = li % 2 === 0 ? rgba(INK, alpha) : rgba(mix(pal.a, INK, 0.45), alpha);
-        ctx.lineWidth = o.lw * (0.72 + tier * 0.22);
+        ctx.lineWidth = o.lw * (0.72 + tier * 0.22) * (far ? 1.05 : 1.35);
         ctx.stroke();
       }
     }
+  }
+
+  /* ---------- 节拍爆发 ----------
+     一记重拍，从环的某一段向外炸开一组锥形短光，
+     0.9 秒内冲出去再散掉。整圈均匀的光束之外，
+     必须有这种「局部炸开」的东西，才像在迸发。 */
+  var bursts = [];
+
+  function drawBurst(dt) {
+    if (beat.env > 0.55 && bursts.length < 4 && rnd() < 0.55) {
+      var nn = 18 + ((rnd() * 28) | 0);
+      var lines = [];
+      for (var i = 0; i < nn; i += 1) {
+        lines.push({
+          t: ((i / (nn - 1)) * 2 - 1) + gauss() * 0.04,
+          s: rr(0.35, 1),
+          w: rr(0.55, 1.5)
+        });
+      }
+      bursts.push({ a: rnd() * TAU, w: rr(0.1, 0.32), lines: lines, L: 0.9, max: 0.9 });
+    }
+
+    for (var b = bursts.length - 1; b >= 0; b -= 1) {
+      var B = bursts[b];
+      B.L -= dt;
+      if (B.L <= 0) { bursts.splice(b, 1); continue; }
+
+      var pr = 1 - B.L / B.max;
+      var fade = Math.pow(1 - pr, 1.7);
+      var reach = (RMAX - RO) * (0.3 + pr * 0.85);
+
+      ctx.beginPath();
+      for (var j = 0; j < B.lines.length; j += 1) {
+        var ln = B.lines[j];
+        var aa = B.a + ln.t * B.w;
+        var ra = RO + 3 + pr * 16 * ln.s;
+        var rb = ra + reach * ln.s;
+        var ca = lcos(aa);
+        var sa = lsin(aa);
+        /* 末端稍微甩开一点，直线太硬，像针不像光 */
+        ctx.moveTo(ca * ra, sa * ra);
+        ctx.lineTo(ca * rb - sa * reach * 0.045 * ln.t, sa * rb + ca * reach * 0.045 * ln.t);
+      }
+      ctx.strokeStyle = rgba(mix(pal.b, INK, 0.25), 0.55 * fade);
+      ctx.lineWidth = 1.15;
+      ctx.stroke();
+    }
+  }
+
+  /* 环外的大范围辉光。没有这层，光束就是黑底上的几根细线；
+     有了它，右侧整片是「发光的空气」，线才有穿透感。 */
+  function drawAura() {
+    var g = ctx.createRadialGradient(0, 0, RO * 0.92, 0, 0, RMAX * 0.72);
+    g.addColorStop(0, rgba(pal.a, 0.13 + beat.env * 0.05));
+    g.addColorStop(0.22, rgba(pal.a, 0.055));
+    g.addColorStop(0.55, rgba(pal.a, 0.016));
+    g.addColorStop(1, rgba(pal.a, 0));
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(0, 0, RMAX * 0.72, 0, TAU);
+    ctx.fill();
   }
 
   function drawDashes(dt) {
@@ -973,10 +1099,10 @@
 
   function drawHaze(dt) {
     /* 宽光带：几条很淡的扇区，随节拍换角度、换色调 */
-    if (hazes.length < 5 && rnd() < 0.02) {
+    if (hazes.length < 7 && rnd() < 0.05) {
       hazes.push({
         a: rnd() * TAU,
-        w: rr(0.12, 0.5),
+        w: rr(0.16, 0.62),
         life: rr(2.2, 4.5),
         L: 0,
         tint: (rnd() * 3) | 0,
@@ -995,7 +1121,7 @@
       var col = [mix(pal.a, INK, 0.4), INK, pal.b][h.tint];
 
       var grd = ctx.createRadialGradient(0, 0, RO * 0.9, 0, 0, RMAX * 0.9);
-      grd.addColorStop(0, rgba(col, 0.3 * fade));
+      grd.addColorStop(0, rgba(col, 0.34 * fade));
       grd.addColorStop(0.4, rgba(col, 0.11 * fade));
       grd.addColorStop(1, rgba(col, 0));
 
@@ -1133,6 +1259,15 @@
     cx = W * (small ? 0.5 : 0.38);
     cy = H * 0.5;
 
+    /* 黑客皮肤的舞台只占左边一列，右半被日志栏压着。
+       环按舞台宽度收一号，否则整段弧线都藏到面板底下 */
+    if (document.documentElement.dataset.style === "hacker" && !small) {
+      R *= 0.78;
+      BAND = R * 0.2 * clamp(CFG.ring, 0.8, 1.3);
+      RO = R + BAND;
+      cx = W * 0.28;
+    }
+
     buildWeb();
     buildSlots();
     buildOuter();
@@ -1166,7 +1301,9 @@
     ctx.translate(cx, cy);
 
     drawHaze(dt);
+    drawAura();
     drawStrands();
+    drawBurst(dt);
     drawDashes(dt);
 
     drawWeb(dt);

@@ -44,7 +44,7 @@
         document.documentElement.dataset.style = style;
         var link = document.createElement("link");
         link.rel = "stylesheet";
-        link.href = sheet + "?v=20261122";
+        link.href = sheet + "?v=20261123";
         link.setAttribute("data-skin-css", style);
         document.head.appendChild(link);
       } catch (error) { /* 隐私模式下忽略 */ }
@@ -82,38 +82,38 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="stylesheet" href="css/base/style.css?v=20261122">
-  <link rel="stylesheet" href="css/layout/cockpit.css?v=20261122">
-  <link rel="stylesheet" href="css/layout/frames.css?v=20261122">
-  <link rel="stylesheet" href="css/ui/pet.css?v=20261122">
-  <link rel="stylesheet" href="css/ui/personal.css?v=20261122">
-  <link rel="stylesheet" href="css/ui/avatar-pet.css?v=20261122">
-  <link rel="stylesheet" href="css/ui/skins.css?v=20261122">
-  <link rel="stylesheet" href="css/base/type.css?v=20261122">
-  <link rel="stylesheet" href="css/base/motion.css?v=20261122">
+  <link rel="stylesheet" href="css/base/style.css?v=20261123">
+  <link rel="stylesheet" href="css/layout/cockpit.css?v=20261123">
+  <link rel="stylesheet" href="css/layout/frames.css?v=20261123">
+  <link rel="stylesheet" href="css/ui/pet.css?v=20261123">
+  <link rel="stylesheet" href="css/ui/personal.css?v=20261123">
+  <link rel="stylesheet" href="css/ui/avatar-pet.css?v=20261123">
+  <link rel="stylesheet" href="css/ui/skins.css?v=20261123">
+  <link rel="stylesheet" href="css/base/type.css?v=20261123">
+  <link rel="stylesheet" href="css/base/motion.css?v=20261123">
   <!-- dino.css 在首屏折叠线以下（页脚跑道），先按低优先级下载，不挡住首屏渲染 -->
-  <link rel="preload" href="css/ui/dino.css?v=20261122" as="style" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/ui/dino.css?v=20261122"></noscript>
+  <link rel="preload" href="css/ui/dino.css?v=20261123" as="style" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/ui/dino.css?v=20261123"></noscript>
   <!-- guestbook.css 在首屏折叠线以下（页脚跑道），先按低优先级下载，不挡住首屏渲染 -->
-  <link rel="preload" href="css/ui/guestbook.css?v=20261122" as="style" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/ui/guestbook.css?v=20261122"></noscript>
+  <link rel="preload" href="css/ui/guestbook.css?v=20261123" as="style" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/ui/guestbook.css?v=20261123"></noscript>
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <!-- 项目卡片、全部项目折叠页和复制按钮由 js/core/main.js 驱动 -->
-  <script src="js/core/sfx.js?v=20261122" defer></script>
-  <script src="js/core/theme.js?v=20261122" defer></script>
-  <script src="js/core/theme-icon.js?v=20261122" defer></script>
-  <script src="js/ui/members.js?v=20261122" defer></script>
-  <script src="js/core/main.js?v=20261122" defer></script>
-  <script src="js/ui/pet.js?v=20261122" defer></script>
-  <script src="js/ui/avatar-pet.js?v=20261122" defer></script>
-  <script src="js/ui/personal.js?v=20261122" defer></script>
-  <script src="js/core/click-fx.js?v=20261122" defer></script>
-  <script src="js/layout/skins.js?v=20261122" defer></script>
-  <script src="js/core/copy.js?v=20261122" defer></script>
-  <script src="js/core/pwa.js?v=20261122" defer></script>
-  <script src="js/layout/cockpit.js?v=20261122" defer></script>
-  <script src="js/layout/haloflux.js?v=20261122" defer></script>
+  <script src="js/core/sfx.js?v=20261123" defer></script>
+  <script src="js/core/theme.js?v=20261123" defer></script>
+  <script src="js/core/theme-icon.js?v=20261123" defer></script>
+  <script src="js/ui/members.js?v=20261123" defer></script>
+  <script src="js/core/main.js?v=20261123" defer></script>
+  <script src="js/ui/pet.js?v=20261123" defer></script>
+  <script src="js/ui/avatar-pet.js?v=20261123" defer></script>
+  <script src="js/ui/personal.js?v=20261123" defer></script>
+  <script src="js/core/click-fx.js?v=20261123" defer></script>
+  <script src="js/layout/skins.js?v=20261123" defer></script>
+  <script src="js/core/copy.js?v=20261123" defer></script>
+  <script src="js/core/pwa.js?v=20261123" defer></script>
+  <script src="js/layout/cockpit.js?v=20261123" defer></script>
+  <script src="js/layout/haloflux.js?v=20261123" defer></script>
   <script>
     /* 页脚跑道和留言板都在折叠线以下：等它们真的接近视口再加载。
        驾驶舱里滚动发生在舞台内部，所以观察器的 root 要指向 .ck-view，
@@ -133,13 +133,13 @@
       function loadDino() {
         if (dino) return;
         dino = true;
-        inject("js/ui/dino.js?v=20261122");
+        inject("js/ui/dino.js?v=20261123");
       }
 
       function loadGuestbook() {
         if (guestbook) return;
         guestbook = true;
-        inject("js/ui/guestbook.js?v=20261122");
+        inject("js/ui/guestbook.js?v=20261123");
       }
 
       function watch(el, fn) {
@@ -809,7 +809,7 @@
     <span class="ck-bar__hint">1–8 直达面板 · ESC 回顶</span>
     <div class="ck-bar__right">
       <span>© 2026 HNYZ</span>
-      <span>BUILD 20261122</span>
+      <span>BUILD 20261123</span>
     </div>
   </footer>
 
