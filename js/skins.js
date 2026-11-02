@@ -66,7 +66,7 @@
     bare: "css/skin-bare.css",
     console: "css/console.css"
   };
-  const VERSION = "20261119";
+  const VERSION = "20261203";
 
   const cssReady = new Map();
 
@@ -108,7 +108,7 @@
     if (matrixRequested) return;
     matrixRequested = true;
     const script = document.createElement("script");
-    script.src = "js/matrix.js?v=20261119";
+    script.src = "js/matrix.js?v=20261203";
     script.async = true;
     document.body.appendChild(script);
   }

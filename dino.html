@@ -31,14 +31,14 @@
         document.documentElement.dataset.style = "console";
         var link = document.createElement("link");
         link.rel = "stylesheet";
-        link.href = "css/console.css?v=20261119";
+        link.href = "css/console.css?v=20261203";
         link.setAttribute("data-skin-css", "console");
         document.head.appendChild(link);
 
         /* 这一页没有顶栏（也就没有风格按钮），调参面板靠右上角的浮动按钮
            和 C 键打开，所以直接把面板脚本挂上，不等 skins.js */
         var panel = document.createElement("script");
-        panel.src = "js/console.js?v=20261119";
+        panel.src = "js/console.js?v=20261203";
         panel.async = true;
         document.head.appendChild(panel);
       } catch (error) { /* 隐私模式下忽略 */ }
@@ -61,9 +61,9 @@
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="application-name" content="HNYZ">
 
-  <link rel="stylesheet" href="css/style.css?v=20261119">
-  <link rel="stylesheet" href="css/dino.css?v=20261119">
-  <link rel="stylesheet" href="css/ladder.css?v=20261119">
+  <link rel="stylesheet" href="css/style.css?v=20261203">
+  <link rel="stylesheet" href="css/dino.css?v=20261203">
+  <link rel="stylesheet" href="css/ladder.css?v=20261203">
 </head>
 <body class="ladder-page">
 
@@ -148,7 +148,7 @@
 
   </main>
 
-  <script src="js/dino.js?v=20261119" defer></script>
-  <script src="js/ladder.js?v=20261119" defer></script>
+  <script src="js/dino.js?v=20261203" defer></script>
+  <script src="js/ladder.js?v=20261203" defer></script>
 </body>
 </html>
