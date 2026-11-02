@@ -54,6 +54,7 @@
   --shadow-card: 0 20px 48px rgba(0, 0, 0, 0.45);
   color-scheme: dark;
 
+  position: relative;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto auto;
   height: 100vh;
@@ -94,6 +95,9 @@ html.ck-on .hnyz-ticker {
   padding: 0 16px;
   border-bottom: 1px solid var(--ck-line);
   background: var(--ck-bg-head);
+  background: color-mix(in srgb, var(--ck-bg-head) 84%, transparent);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
 }
 
 .ck-brand {
@@ -245,16 +249,38 @@ html.ck-on .hnyz-ticker {
   position: relative;
   min-height: 0;
   overflow: hidden;
-  background: var(--ck-bg);
+  background: transparent;
 }
 
+/* 画布铺满整个驾驶舱：光场是底图，UI 浮在上面 */
 .ck-halo {
   position: absolute;
   inset: 0;
+  z-index: 0;
   width: 100%;
   height: 100%;
   display: block;
-  opacity: 0.92;
+  opacity: 1;
+  pointer-events: none;
+}
+
+/* 全屏遮罩：首屏很薄让光场透出来，往下读时加厚 */
+.ck::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: rgba(var(--ck-veil-rgb), var(--ck-veil, 0.4));
+}
+
+/* 三层 UI 全部压在画布之上 */
+.ck-head,
+.ck-stage,
+.ck-deck,
+.ck-bar {
+  position: relative;
+  z-index: 2;
 }
 
 /* 扫描线 + 边缘压暗，压在所有内容之上但不挡点击 */
@@ -990,10 +1016,7 @@ html.ck-on .ck-view .dino-run:not(.dino-run--arena) {
 
 /* ---------- 8. 内容区遮罩：让光场在字后面留一点影 ---------- */
 .ck-view {
-  /* --ck-veil 由 cockpit.js 跟着滚动改：首屏很薄，光场透出来；
-     往下滚逐渐加厚，读文字时字底下是实的 */
-  --ck-veil: 0.34;
-  background: rgba(var(--ck-veil-rgb), var(--ck-veil));
+  /* 遮罩已提到 .ck::before，这里只管底部淡出 */
   -webkit-mask-image: linear-gradient(180deg, #000 93%, transparent 100%);
   mask-image: linear-gradient(180deg, #000 93%, transparent 100%);
 }

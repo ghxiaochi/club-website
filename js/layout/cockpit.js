@@ -223,8 +223,11 @@
   function veil() {
     /* 首屏 0.3 → 滚过 420px 到 0.95。光场只在开场当主角 */
     var t = Math.min(1, view.scrollTop / 420);
-    var v = 0.3 + t * 0.65;
-    view.style.setProperty("--ck-veil", v.toFixed(3));
+    /* 纸白皮肤的光场本来就淡，遮罩再厚就看不见了 */
+    var light = document.documentElement.dataset.style === "minimal";
+    var v = (light ? 0.24 : 0.4) + t * (light ? 0.7 : 0.55);
+    /* 遮罩挂在 .ck 上（全屏），不是内容区 */
+    root.style.setProperty("--ck-veil", v.toFixed(3));
   }
 
   view.addEventListener(

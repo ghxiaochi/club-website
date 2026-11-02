@@ -1,0 +1,266 @@
+/* =========================================================
+   HNYZ · 骨架变体（FRAMES）
+   ---------------------------------------------------------
+   同一份 HTML，四套皮肤四种排布。这一层只管「块怎么摆」，
+   颜色全部交给 css/skins/*.css。
+
+     default   四行货车：状态头 / 舞台 / 四列面板 / 状态条
+     minimal   三行：极简头 / 全屏舞台 / 一行索引
+     hacker    两列：舞台在左，面板竖排成侧栏
+     console   四行，但面板压成八格机架，右侧浮出调参台
+   ========================================================= */
+
+/* ---------- 0. 先把四个区域命名，后面各皮肤只改 areas ---------- */
+.ck {
+  grid-template-areas:
+    "head"
+    "stage"
+    "deck"
+    "bar";
+}
+
+.ck-head { grid-area: head; }
+.ck-stage { grid-area: stage; }
+.ck-deck { grid-area: deck; }
+.ck-bar { grid-area: bar; }
+
+/* =========================================================
+   MINIMAL · 极简
+   顶部只剩品牌，KPI 全部收起；底部四块面板变成一行细索引，
+   只留序号和标题，正文和说明隐藏。
+   ========================================================= */
+html[data-style="minimal"] .ck:not(.ck--flat) {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "head"
+    "stage"
+    "deck";
+}
+
+html[data-style="minimal"] .ck-bar {
+  display: none;
+}
+
+html[data-style="minimal"] .ck-head {
+  grid-template-columns: minmax(0, 1fr) auto;
+  height: 46px;
+  border-bottom: 0;
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+html[data-style="minimal"] .ck-kpi {
+  display: none;
+}
+
+html[data-style="minimal"] .ck-deck {
+  display: flex;
+  gap: 0;
+  padding: 0 clamp(16px, 3vw, 44px) 22px;
+  border-top: 0;
+  background: transparent;
+}
+
+html[data-style="minimal"] .ck-p {
+  flex: 1 1 0;
+  height: auto;
+  min-width: 0;
+  padding: 9px 14px 0 0;
+  border: 0;
+  border-top: 1px solid var(--ck-line);
+  background: transparent;
+}
+
+html[data-style="minimal"] .ck-p:hover,
+html[data-style="minimal"] .ck-p:focus-visible {
+  background: transparent;
+  border-top-color: var(--ck-accent);
+}
+
+html[data-style="minimal"] .ck-p.is-on {
+  border-top-color: var(--ck-accent);
+  border-top-width: 2px;
+}
+
+html[data-style="minimal"] .ck-p.is-on::before {
+  display: none;
+}
+
+html[data-style="minimal"] .ck-p__h {
+  font-size: 9px;
+  letter-spacing: 0.16em;
+}
+
+html[data-style="minimal"] .ck-p__body,
+html[data-style="minimal"] .ck-p__cap {
+  display: none;
+}
+
+/* =========================================================
+   HACKER · 终端
+   舞台占左列，面板竖排成右侧侧栏，每块只剩一行标题，
+   像 tail 一直在滚的日志列表。
+   ========================================================= */
+html[data-style="hacker"] .ck:not(.ck--flat) {
+  grid-template-columns: minmax(0, 1fr) clamp(236px, 21vw, 320px);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "head head"
+    "stage deck"
+    "bar bar";
+}
+
+html[data-style="hacker"] .ck-deck {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  border-top: 0;
+  border-left: 1px solid var(--ck-line);
+  background: var(--ck-bg-head);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ck-line-2) transparent;
+}
+
+html[data-style="hacker"] .ck-p {
+  flex: 0 0 auto;
+  height: auto;
+  gap: 0;
+  padding: 9px 12px 8px;
+  border: 0;
+  border-bottom: 1px solid var(--ck-line);
+  background: transparent;
+}
+
+html[data-style="hacker"] .ck-p:hover,
+html[data-style="hacker"] .ck-p:focus-visible {
+  background: var(--ck-panel);
+  border-color: var(--ck-line);
+  border-bottom-color: var(--ck-line);
+}
+
+html[data-style="hacker"] .ck-p.is-on {
+  border-color: var(--ck-line);
+  border-bottom-color: var(--ck-line);
+  background: var(--ck-panel-2);
+}
+
+html[data-style="hacker"] .ck-p.is-on::before {
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 100%;
+}
+
+html[data-style="hacker"] .ck-p__h {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+
+html[data-style="hacker"] .ck-p__h::before {
+  content: "▸";
+  margin-right: 5px;
+  color: var(--ck-accent);
+  opacity: 0.55;
+}
+
+html[data-style="hacker"] .ck-p.is-on .ck-p__h::before {
+  opacity: 1;
+}
+
+html[data-style="hacker"] .ck-p__body,
+html[data-style="hacker"] .ck-p__cap {
+  display: none;
+}
+
+/* =========================================================
+   CONSOLE · 控制台
+   面板压成八格机架，一格一条读数；状态条留在最下面当
+   设备灯排。调参面板自己浮在右下。
+   ========================================================= */
+html[data-style="console"] .ck-deck {
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 4px;
+  padding: 5px 10px 0;
+}
+
+html[data-style="console"] .ck-p {
+  height: clamp(64px, 9vh, 86px);
+  gap: 2px;
+  padding: 5px 7px 4px;
+}
+
+html[data-style="console"] .ck-p__h {
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+}
+
+html[data-style="console"] .ck-p__h em {
+  display: none;
+}
+
+html[data-style="console"] .ck-p__h span {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+html[data-style="console"] .ck-p__body {
+  font-size: 8px;
+  line-height: 1.4;
+}
+
+html[data-style="console"] .ck-p__cap {
+  display: none;
+}
+
+/* ---------- 窄屏：所有皮肤回到单列，面板恢复成网格 ---------- */
+@media (max-width: 900px) {
+  html[data-style="hacker"] .ck:not(.ck--flat) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "head"
+      "stage"
+      "deck"
+      "bar";
+  }
+
+  html[data-style="hacker"] .ck-deck {
+    flex-direction: row;
+    border-left: 0;
+    border-top: 1px solid var(--ck-line);
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  html[data-style="hacker"] .ck-p {
+    flex: 0 0 auto;
+    border-bottom: 0;
+    border-right: 1px solid var(--ck-line);
+  }
+
+  html[data-style="console"] .ck-deck {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  html[data-style="minimal"] .ck-deck {
+    padding-bottom: 14px;
+  }
+
+  html[data-style="minimal"] .ck-p__h {
+    font-size: 8px;
+  }
+
+  html[data-style="console"] .ck-deck {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  html[data-style="console"] .ck-p {
+    height: 58px;
+  }
+}
