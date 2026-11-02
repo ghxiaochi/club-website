@@ -71,7 +71,12 @@ html[data-style="minimal"][data-theme="dark"] {
   color-scheme: dark;
 }
 
-html[data-style="minimal"] body {
+html[data-style="minimal"] .ck-stage::after {
+  background: linear-gradient(180deg, transparent, var(--ck-bg));
+}
+
+html[data-style="minimal"] body,
+html[data-style="minimal"].ck-on body {
   background: var(--bg);
   background-image: none;
 }
@@ -240,7 +245,11 @@ html[data-style="minimal"][data-theme="dark"] .dino-run {
    极简风在这套结构里是「白纸上的仪表」：线更细、颜色更少，
    强调色直接退成墨色，只靠字重和间距分层。
    ========================================================= */
-html[data-style="minimal"] .ck {
+/* 变量同时挂到 html 上：控制台面板挂在 body 下，不在 .ck 里，
+     否则拿不到这组颜色，会掉回默认的蓝 */
+html[data-style="minimal"],
+html[data-style="minimal"].ck-on,
+html[data-style="minimal"].ck-on .ck {
   --ck-veil-rgb: 251, 251, 248;
   --ck-bg: #fbfbf8;
   --ck-bg-head: #f5f5f1;

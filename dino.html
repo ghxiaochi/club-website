@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" class="ck-on">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -27,20 +27,40 @@
        皮肤样式各自一个文件，只有真的用这套风格才下载。 */
     (function () {
       try {
-        var style = localStorage.getItem("hnyz:style");
+        var style = localStorage.getItem("hnyz:style") || "default";
         var sheet = {
           hacker: "css/skins/skin-hacker.css",
           minimal: "css/skins/skin-minimal.css",
-          bare: "css/skins/skin-bare.css",
-          console: "css/skins/console.css"
+          bare: "css/skins/skin-bare.css"
         }[style];
-        if (!sheet) return;
-        document.documentElement.dataset.style = style;
-        var link = document.createElement("link");
-        link.rel = "stylesheet";
-        link.href = sheet + "?v=20261123";
-        link.setAttribute("data-skin-css", style);
-        document.head.appendChild(link);
+
+        /* 默认皮肤也要写上：布局靠 html[data-style] 分流，缺了会落到驾驶舱那套 */
+        var rootEl = document.documentElement;
+        rootEl.dataset.style = style;
+
+        /* 驾驶舱骨架只给黑客风和极简风。默认皮肤不挂 ck-on，
+           cockpit.css 里那套「整页不滚 + 旧变量转暗」就全部失效，
+           回到原始的蓝白长页面。 */
+        if (style === "hacker" || style === "minimal") {
+          rootEl.classList.add("ck-on");
+        }
+
+        if (sheet) {
+          var link = document.createElement("link");
+          link.rel = "stylesheet";
+          link.href = sheet + "?v=20261124";
+          link.setAttribute("data-skin-css", style);
+          document.head.appendChild(link);
+        }
+
+        /* 全屏舞台只服务黑客风，别的皮肤一个字节都不下。
+           引擎自己会等 DOM 就绪再抓 canvas，所以这里可以先插。 */
+        if (style === "hacker") {
+          var stage = document.createElement("script");
+          stage.src = "js/layout/haloflux.js?v=20261124";
+          stage.async = false;
+          document.head.appendChild(stage);
+        }
       } catch (error) { /* 隐私模式下忽略 */ }
     })();
   </script>
@@ -61,11 +81,12 @@
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="application-name" content="HNYZ">
 
-  <link rel="stylesheet" href="css/base/style.css?v=20261123">
-  <link rel="stylesheet" href="css/layout/cockpit.css?v=20261123">
-  <link rel="stylesheet" href="css/layout/frames.css?v=20261123">
-  <link rel="stylesheet" href="css/ui/dino.css?v=20261123">
-  <link rel="stylesheet" href="css/ui/ladder.css?v=20261123">
+  <link rel="stylesheet" href="css/base/style.css?v=20261124">
+  <link rel="stylesheet" href="css/layout/cockpit.css?v=20261124">
+  <link rel="stylesheet" href="css/layout/frames.css?v=20261124">
+  <link rel="stylesheet" href="css/layout/console-panel.css?v=20261124">
+  <link rel="stylesheet" href="css/ui/dino.css?v=20261124">
+  <link rel="stylesheet" href="css/ui/ladder.css?v=20261124">
 </head>
 <body class="ladder-page ck-on-body">
 
@@ -181,17 +202,17 @@
     <span class="ck-bar__hint">空格 / ↑ / 点画布起跳 · 死了填昵称上榜</span>
     <div class="ck-bar__right">
       <span>© 2026 HNYZ</span>
-      <span>BUILD 20261123</span>
+      <span>BUILD 20261124</span>
     </div>
   </footer>
 
   </div>
 
-  <script src="js/core/theme.js?v=20261123" defer></script>
-  <script src="js/core/sfx.js?v=20261123" defer></script>
-  <script src="js/layout/haloflux.js?v=20261123" defer></script>
-  <script src="js/layout/skins.js?v=20261123" defer></script>
-  <script src="js/ui/dino.js?v=20261123" defer></script>
-  <script src="js/ui/ladder.js?v=20261123" defer></script>
+  <script src="js/core/theme.js?v=20261124" defer></script>
+  <script src="js/core/sfx.js?v=20261124" defer></script>
+  <script src="js/layout/skins.js?v=20261124" defer></script>
+  <script src="js/layout/console.js?v=20261124" defer></script>
+  <script src="js/ui/dino.js?v=20261124" defer></script>
+  <script src="js/ui/ladder.js?v=20261124" defer></script>
 </body>
 </html>

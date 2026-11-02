@@ -1,12 +1,14 @@
 /* =========================================================
    HNYZ · 风格系统
    ---------------------------------------------------------
-   五个皮肤：
-     default  现在的蓝白科技风
-     minimal  去装饰的极简风
-     hacker   深色终端黑客风（代码雨 / 气泡 / 进度条）
-     console  控制台风：炭黑 + 米白 + 单一橙，自带实时调参面板
-     bare     棍木：整页空白，只留右上角的风格按钮和一句灰字
+   四套皮肤，四套完全不同的框架：
+     default  蓝白科技：普通站点，整页滚动，没有舞台
+     minimal  极简：三行骨架，内容满宽，底部一条细索引
+     hacker   黑客终端：全屏驾驶舱，唯一的 haloflux 舞台
+     bare     棍木：整页空白，只留右上角的退出按钮
+
+   「控制台」不是皮肤，是任何皮肤下都能按 C 打开的调参面板
+   （js/layout/console.js），它调的是舞台引擎的参数。
    顶栏的方块打开一个竖向卡片面板，切换时用整屏向上擦除。
    选择写进 localStorage，四个页面共用。
    ========================================================= */
@@ -15,19 +17,17 @@
   "use strict";
 
   const KEY = "hnyz:style";
-  const STYLES = ["default", "minimal", "hacker", "console", "bare"];
+  const STYLES = ["default", "minimal", "hacker", "bare"];
   const LABELS = {
     default: "DEFAULT",
     minimal: "MINIMAL",
     hacker: "HACKER",
-    console: "CONSOLE",
     bare: "BARE"
   };
   const NAMES = {
     default: "蓝白科技",
     minimal: "极简",
     hacker: "黑客终端",
-    console: "控制台",
     bare: "棍木"
   };
 
@@ -51,6 +51,7 @@
 
   current = readStored();
   root.dataset.style = current;
+  root.classList.toggle("ck-on", current === "hacker" || current === "minimal");
 
   /* -------------------------------------------------------
      按需下载：只有真的用到才付这份字节
@@ -63,10 +64,9 @@
   const SKIN_CSS = {
     hacker: "css/skins/skin-hacker.css",
     minimal: "css/skins/skin-minimal.css",
-    bare: "css/skins/skin-bare.css",
-    console: "css/skins/console.css"
+    bare: "css/skins/skin-bare.css"
   };
-  const VERSION = "20261119";
+  const VERSION = "20261124";
 
   const cssReady = new Map();
 
@@ -113,21 +113,26 @@
     document.body.appendChild(script);
   }
 
-  /* 控制台的调参面板是一整块独立逻辑，只有这套皮肤需要 */
-  let consoleRequested = false;
+  /* 全屏舞台只有黑客风有。别的皮肤连这个脚本都不下载。
+     head 的预置脚本已经在首屏插过一份，这里只处理运行时切过去的情况。 */
+  let stageRequested = false;
 
-  function ensureConsole() {
-    if (consoleRequested) return;
-    consoleRequested = true;
+  function ensureStage() {
+    if (stageRequested || window.HNYZ_STAGE) return;
+    if (document.querySelector("script[data-ck-stage]")) return;
+    stageRequested = true;
     const script = document.createElement("script");
-    script.src = `js/skins/console.js?v=${VERSION}`;
+    script.src = `js/layout/haloflux.js?v=${VERSION}`;
     script.async = true;
+    script.dataset.ckStage = "";
     document.body.appendChild(script);
   }
 
   if (current !== "default") ensureSkinCss(current);
-  if (current === "hacker") ensureMatrix();
-  if (current === "console") ensureConsole();
+  if (current === "hacker") {
+    ensureMatrix();
+    ensureStage();
+  }
 
 
   /* -------------------------------------------------------
@@ -235,7 +240,7 @@
           <div class="style-card__glyph style-card__glyph--default" aria-hidden="true">&lt;/&gt;</div>
           <p class="style-card__kicker">BLUE_TECH</p>
           <h3 class="style-card__title">蓝白科技</h3>
-          <p class="style-card__desc">现在这套蓝白配色。光斑、角色排、桌宠和全部动效都保留。</p>
+          <p class="style-card__desc">普通站点：顶部导航、整页滚动、蓝白配色。没有舞台，读起来最快。</p>
           <div class="style-card__swatches" aria-hidden="true">
             <i style="--c:#f5f9ff"></i><i style="--c:#2563eb"></i><i style="--c:#0f2744"></i>
           </div>
@@ -259,23 +264,11 @@
           <div class="style-card__glyph style-card__glyph--hacker" aria-hidden="true">&gt;_</div>
           <p class="style-card__kicker">ROOT_ACCESS</p>
           <h3 class="style-card__title">黑客终端</h3>
-          <p class="style-card__desc">纯黑终端、荧光绿和一整屏落下来的代码雨，其余什么都没有。</p>
+          <p class="style-card__desc">全屏驾驶舱 + haloflux 舞台：编织核心、数据环带、向外迸发的光束，按 C 调参。</p>
           <div class="style-card__swatches" aria-hidden="true">
             <i style="--c:#030705"></i><i style="--c:#39ff88"></i><i style="--c:#00e5ff"></i>
           </div>
           <button class="style-card__apply" type="button" data-style-pick="hacker">应用此风格</button>
-        </article>
-
-        <article class="style-card" data-style-option="console">
-          <div class="style-card__top"><span>04 / CONSOLE</span><span class="style-card__current">当前风格</span></div>
-          <div class="style-card__glyph style-card__glyph--console" aria-hidden="true">⌘_</div>
-          <p class="style-card__kicker">LIVE_TUNING</p>
-          <h3 class="style-card__title">控制台</h3>
-          <p class="style-card__desc">炭黑、米白、一个橙。带上调参面板：扫描线、色相、字号、行高、正文宽度都能自己拨。</p>
-          <div class="style-card__swatches" aria-hidden="true">
-            <i style="--c:#0a0a0b"></i><i style="--c:#f07b38"></i><i style="--c:#f2ece1"></i>
-          </div>
-          <button class="style-card__apply" type="button" data-style-pick="console">应用此风格</button>
         </article>
 
         <article class="style-card" data-style-option="bare">
@@ -294,8 +287,7 @@
         <button class="style-deck__dot" type="button" data-style-dot="0" aria-label="第 1 个：蓝白科技" aria-current="true"></button>
         <button class="style-deck__dot" type="button" data-style-dot="1" aria-label="第 2 个：极简"></button>
         <button class="style-deck__dot" type="button" data-style-dot="2" aria-label="第 3 个：黑客终端"></button>
-        <button class="style-deck__dot" type="button" data-style-dot="3" aria-label="第 4 个：控制台"></button>
-        <button class="style-deck__dot" type="button" data-style-dot="4" aria-label="第 5 个：棍木"></button>
+        <button class="style-deck__dot" type="button" data-style-dot="3" aria-label="第 4 个：棍木"></button>
       </div>
 
       <p class="style-deck__hint">上下滑动 / ↑ ↓ 切换 · Esc 关闭</p>
@@ -523,8 +515,13 @@
     current = next;
     root.dataset.style = next;
 
-    if (next === "hacker") ensureMatrix();
-    if (next === "console") ensureConsole();
+    /* 骨架只在黑客 / 极简下挂：默认皮肤要回到普通站点 */
+    root.classList.toggle("ck-on", next === "hacker" || next === "minimal");
+
+    if (next === "hacker") {
+      ensureMatrix();
+      ensureStage();
+    }
     setBareMode(next === "bare");
 
     /* 黑客风固定深夜：主题由 theme.js 监听 hnyz:stylechange 统一处理，
@@ -583,7 +580,7 @@
     /* 新皮肤的样式先到位，再开始转场：
        否则幕布揭到一半，样式还在路上，露出的是半套旧样式 */
     await ensureSkinCss(next);
-    if (next === "console") ensureConsole();
+
 
     if (reduce.matches) {
       closeDeck();

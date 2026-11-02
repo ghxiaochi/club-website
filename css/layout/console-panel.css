@@ -1,0 +1,369 @@
+/* =========================================================
+   HNYZ · 控制台（CONSOLE）
+   ---------------------------------------------------------
+   这不是一套皮肤。它是舞台引擎的调参台：任何皮肤下按 C
+   （或点顶栏 CONSOLE）都能拉出来，实时改节拍、编织密度、
+   环径、光束、辉光、运镜。
+
+   视觉按 Industrial / Utility 走：
+     · 等宽字，标签小、字距宽，数值右对齐并用 tabular-nums
+     · 分组靠 1px 线切，不靠留白堆
+     · 滑块是细轨 + 方块柄，没有圆角，没有阴影
+     · 所有颜色读 --ck-*，跟着当前皮肤走
+   ========================================================= */
+
+/* ---------- 1. 触发按钮 ---------- */
+.ck-cx-btn {
+  display: none;
+}
+
+html[data-style="hacker"] .ck-cx-btn {
+  display: inline-flex;
+}
+
+.ck-cx-btn[aria-expanded="true"] {
+  color: var(--ck-accent) !important;
+  border-color: var(--ck-accent) !important;
+}
+
+/* ---------- 2. 面板本体 ---------- */
+.ck-cx {
+  position: fixed;
+  z-index: 90;
+  right: 16px;
+  bottom: 46px;
+  width: min(344px, calc(100vw - 32px));
+  max-height: min(560px, calc(100vh - 120px));
+  display: flex;
+  flex-direction: column;
+  background: color-mix(in srgb, var(--ck-panel, #0e0f12) 96%, transparent);
+  border: 1px solid var(--ck-line, #25282e);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  font-family: var(--mono, ui-monospace, monospace);
+  color: var(--ck-text, #cfd2d8);
+  transform-origin: right bottom;
+  animation: ck-cx-in 0.18s ease-out;
+}
+
+.ck-cx[hidden] {
+  display: none;
+}
+
+@keyframes ck-cx-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ck-cx { animation: none; }
+}
+
+/* 顶部的机读标识条 */
+.ck-cx__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--ck-line, #25282e);
+}
+
+.ck-cx__id {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.ck-cx__id b {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--ck-white, #f4f5f7);
+}
+
+.ck-cx__id span {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--ck-dim, #6b6f78);
+}
+
+.ck-cx__x {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--ck-line, #25282e);
+  background: transparent;
+  color: var(--ck-dim, #6b6f78);
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.ck-cx__x:hover {
+  color: var(--ck-white, #f4f5f7);
+  border-color: var(--ck-line-2, #3a3e46);
+}
+
+.ck-cx__x:focus-visible {
+  outline: 1px solid var(--ck-accent, #7fb3ff);
+  outline-offset: 2px;
+}
+
+/* 预设 */
+.ck-cx__presets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--ck-line, #25282e);
+}
+
+.ck-cx__presets button {
+  padding: 7px 2px;
+  border: 0;
+  border-right: 1px solid var(--ck-line, #25282e);
+  background: transparent;
+  color: var(--ck-dim, #6b6f78);
+  font-family: inherit;
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.ck-cx__presets button:last-child {
+  border-right: 0;
+}
+
+.ck-cx__presets button:hover {
+  color: var(--ck-white, #f4f5f7);
+  background: rgba(127, 179, 255, 0.06);
+}
+
+.ck-cx__presets button.is-on {
+  color: var(--ck-accent, #7fb3ff);
+  background: rgba(127, 179, 255, 0.1);
+}
+
+.ck-cx__presets button:focus-visible {
+  outline: 1px solid var(--ck-accent, #7fb3ff);
+  outline-offset: -2px;
+}
+
+/* 参数区 */
+.ck-cx__body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ck-line-2, #3a3e46) transparent;
+}
+
+.ck-cx__grp {
+  border-bottom: 1px solid var(--ck-line, #25282e);
+  padding: 6px 0 8px;
+}
+
+.ck-cx__grp > h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 12px 6px;
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  color: var(--ck-faint, #3f434a);
+  text-transform: uppercase;
+}
+
+.ck-cx__grp > h4::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--ck-line, #25282e);
+}
+
+/* 一行：标签 · 滑块 · 数值 */
+.ck-cx__row {
+  display: grid;
+  grid-template-columns: 66px minmax(0, 1fr) 42px;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 12px;
+}
+
+.ck-cx__row label {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--ck-dim, #6b6f78);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ck-cx__row.is-dirty label {
+  color: var(--ck-accent, #7fb3ff);
+}
+
+.ck-cx__row output {
+  font-size: 9.5px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--ck-white, #f4f5f7);
+}
+
+/* 滑块：细轨 + 方块柄 */
+.ck-cx__row input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 14px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.ck-cx__row input[type="range"]::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--ck-line-2, #3a3e46);
+}
+
+.ck-cx__row input[type="range"]::-moz-range-track {
+  height: 2px;
+  background: var(--ck-line-2, #3a3e46);
+}
+
+.ck-cx__row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 9px;
+  height: 13px;
+  margin-top: -5.5px;
+  border: 1px solid var(--ck-accent, #7fb3ff);
+  background: var(--ck-bg, #08090b);
+}
+
+.ck-cx__row input[type="range"]::-moz-range-thumb {
+  width: 9px;
+  height: 13px;
+  border: 1px solid var(--ck-accent, #7fb3ff);
+  border-radius: 0;
+  background: var(--ck-bg, #08090b);
+}
+
+.ck-cx__row input[type="range"]:focus-visible {
+  outline: 1px solid var(--ck-accent, #7fb3ff);
+  outline-offset: 3px;
+}
+
+/* 开关行 */
+.ck-cx__row--sw {
+  grid-template-columns: 66px minmax(0, 1fr) 42px;
+}
+
+.ck-cx__sw {
+  justify-self: start;
+  position: relative;
+  width: 34px;
+  height: 14px;
+  padding: 0;
+  border: 1px solid var(--ck-line-2, #3a3e46);
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.ck-cx__sw i {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 8px;
+  height: 8px;
+  background: var(--ck-faint, #3f434a);
+  transition: transform 0.15s, background 0.15s;
+}
+
+.ck-cx__sw[aria-checked="true"] {
+  border-color: var(--ck-accent, #7fb3ff);
+  background: rgba(127, 179, 255, 0.1);
+}
+
+.ck-cx__sw[aria-checked="true"] i {
+  transform: translateX(19px);
+  background: var(--ck-accent, #7fb3ff);
+}
+
+.ck-cx__sw:focus-visible {
+  outline: 1px solid var(--ck-accent, #7fb3ff);
+  outline-offset: 2px;
+}
+
+/* 底部：读数 + 提示 */
+.ck-cx__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 12px;
+  border-top: 1px solid var(--ck-line, #25282e);
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  color: var(--ck-faint, #3f434a);
+}
+
+.ck-cx__foot kbd {
+  padding: 1px 4px;
+  border: 1px solid var(--ck-line, #25282e);
+  font-family: inherit;
+  font-size: 8px;
+  color: var(--ck-dim, #6b6f78);
+}
+
+.ck-cx__reset {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ck-dim, #6b6f78);
+  font-family: inherit;
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.ck-cx__reset:hover {
+  color: var(--ck-accent, #7fb3ff);
+}
+
+/* 没有舞台时的说明 */
+.ck-cx__note {
+  padding: 18px 12px;
+  font-size: 9.5px;
+  line-height: 1.9;
+  color: var(--ck-dim, #6b6f78);
+}
+
+.ck-cx__note b {
+  color: var(--ck-accent, #7fb3ff);
+  font-weight: 500;
+}
+
+/* ---------- 3. 窄屏：面板贴底 ---------- */
+@media (max-width: 640px) {
+  .ck-cx {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-height: 62vh;
+    border-left: 0;
+    border-right: 0;
+    border-bottom: 0;
+    animation: none;
+  }
+}

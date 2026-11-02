@@ -18,6 +18,16 @@
 (function () {
   "use strict";
 
+  /* 脚本由 <head> 的预置脚本按需注入，可能比 body 先跑到。
+     那时 canvas 还不存在，等 DOM 就绪再启动。 */
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot, { once: true });
+  } else {
+    boot();
+  }
+
+  function boot() {
+
   var canvas = document.querySelector("[data-ck-halo]");
   if (!canvas) return;
   var ctx = canvas.getContext("2d", { alpha: true });
@@ -1429,5 +1439,19 @@
   if (reduce.matches) draw(0);
   else start();
 
-  window.HNYZ_STAGE = { stop: stop, start: start, cfg: CFG, redraw: function () { draw(0.016); } };
+  window.HNYZ_STAGE = {
+    stop: stop,
+    start: start,
+    cfg: CFG,
+    redraw: function () { draw(0.016); },
+    /* 改密度 / 环径这类参数后必须重建缓存，光改 CFG 看不出来 */
+    rebuild: function () {
+      readColors();
+      buildWeb();
+      buildSlots();
+      buildOuter();
+      resize();
+    }
+  };
+  }
 })();

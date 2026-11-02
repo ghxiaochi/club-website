@@ -726,7 +726,11 @@ html[data-style="hacker"][data-theme="light"] .site-header .brand-copy strong {
    .ck 里的变量管的是结构层，这里把它整段换掉，
    页面骨架（顶栏 / 舞台 / 面板 / 状态条）会跟着皮肤走。
    ========================================================= */
-html[data-style="hacker"] .ck {
+/* 变量同时挂到 html 上：控制台面板挂在 body 下，不在 .ck 里，
+     否则拿不到这组颜色，会掉回默认的蓝 */
+html[data-style="hacker"],
+html[data-style="hacker"].ck-on,
+html[data-style="hacker"].ck-on .ck {
   --ck-veil-rgb: 2, 6, 4;
   --ck-bg: #020604;
   --ck-bg-head: #030a06;
