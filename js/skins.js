@@ -4,7 +4,7 @@
    四个皮肤：
      default  现在的蓝白科技风
      minimal  去装饰的极简风
-     hacker   数据实验室：全屏节拍舞台 + 面板网格 + 调参台
+     hacker   深色终端：原版长页面 + 页底的舞台壁纸 + 右上角调参按钮
      bare     棍木：整页空白，只留右上角的风格按钮和一句灰字
    顶栏的方块打开一个竖向卡片面板，切换时用整屏向上擦除。
    选择写进 localStorage，四个页面共用。
@@ -24,7 +24,7 @@
   const NAMES = {
     default: "蓝白科技",
     minimal: "极简",
-    hacker: "数据实验室",
+    hacker: "黑客终端",
     bare: "棍木"
   };
 
@@ -61,7 +61,7 @@
     minimal: "css/skin-minimal.css",
     bare: "css/skin-bare.css"
   };
-  const VERSION = "20261130";
+  const VERSION = "20261201";
 
   const cssReady = new Map();
 
@@ -97,9 +97,8 @@
     return done;
   }
 
-  /* 黑客风不是一套 CSS 皮肤，而是一整页实验室版式：
-     顶栏 KPI、全屏舞台、面板网格都由 lab.js 现搭，
-     所以这里只负责把它请进来 */
+  /* 黑客风多一层页底壁纸：画布和控制板在 lab.js 里，
+     只在这套风格下才下载，切走时它自己收干净 */
   let labRequested = false;
 
   function ensureLab() {
@@ -242,9 +241,9 @@
         <article class="style-card" data-style-option="hacker">
           <div class="style-card__top"><span>03 / HACKER</span><span class="style-card__current">当前风格</span></div>
           <div class="style-card__glyph style-card__glyph--hacker" aria-hidden="true">&gt;_</div>
-          <p class="style-card__kicker">BEAT_DRIVEN</p>
-          <h3 class="style-card__title">数据实验室</h3>
-          <p class="style-card__desc">全屏节拍舞台：编织核心、旋转数据环、外侧楔形光束，四个系统同一个拍子。</p>
+          <p class="style-card__kicker">TERMINAL</p>
+          <h3 class="style-card__title">黑客终端</h3>
+          <p class="style-card__desc">深色终端配原版长页面，页底压着一块会呼吸的节拍舞台当壁纸，右上角多一枚调参按钮。</p>
           <div class="style-card__swatches" aria-hidden="true">
             <i style="--c:#030705"></i><i style="--c:#39ff88"></i><i style="--c:#00e5ff"></i>
           </div>

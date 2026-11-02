@@ -95,7 +95,7 @@
   var W = 0, H = 0, cx = 0, cy = 0;
   var R = 0, RO = 0, RMAX = 0, BAND = 0;
 
-  var CFG = { tempo: 1, web: 1, ring: 1, beam: 1, cam: 1, glow: 1 };
+  var CFG = { tempo: 1, web: 1, ring: 1, beam: .62, cam: 1, glow: .9 };
   var dprCap = 1.5;
 
   /* ---------- 节拍 ----------
@@ -266,7 +266,7 @@
     /* 纸白皮肤下同密度的线会糊成一片灰雾，减到四成刚好 */
     /* 线数跟着半径的平方走：环缩小后还用原来的条数，
        整个核心会糊成一团静电噪声，看不出「编织」 */
-    var N = Math.min(3200, Math.round(1000 * Math.pow(R / 300, 2) * CFG.web * (isLight ? 0.42 : 1)));
+    var N = Math.min(3200, Math.round(620 * Math.pow(R / 300, 1.4) * CFG.web * (isLight ? 0.42 : 1)));
 
     for (var k = 0; k < N; k += 1) {
       var a1 = rnd() * TAU;
@@ -283,7 +283,7 @@
       var layer = isBase ? -1 : (rnd() * 3) | 0;
       var g2 = layer < 0 ? b : webLayers[layer].g;
 
-      var al = (isBase ? 0.03 + Math.pow(rnd(), 2.6) * 0.3 : 0.06 + Math.pow(rnd(), 2) * 0.34) * CFG.glow;
+      var al = (isBase ? 0.05 + Math.pow(rnd(), 2.4) * 0.4 : 0.1 + Math.pow(rnd(), 1.8) * 0.44) * CFG.glow;
       var pickK = rnd();
       if (pickK < 0.05) g2.strokeStyle = rgba(pal.b, al);
       else if (pickK < 0.1) g2.strokeStyle = rgba(mix(pal.a, pal.b, 0.4), al);
@@ -297,7 +297,7 @@
     }
 
     /* 中心加密：短曲线只落在内圈，堆出「核」的密度 */
-    var dense = Math.round(420 * Math.pow(R / 300, 2) * CFG.web);
+    var dense = Math.round(320 * Math.pow(R / 300, 1.3) * CFG.web);
     for (var d0 = 0; d0 < dense; d0 += 1) {
       var dA1 = rnd() * TAU;
       var dA2 = dA1 + rr(0.4, Math.PI);
@@ -316,18 +316,32 @@
     var nb = webBase.g;
     nb.font = "6px " + MONO;
     nb.textBaseline = "middle";
+    /* 环向丝：一圈圈绕在核心外层的线。
+       放射线给方向，环线给体积——两组叠在一起才像「织」，
+       只有放射线就成了一团炸开的毛。 */
+    for (var rf = 0; rf < 76; rf += 1) {
+      var rr0 = R * (0.1 + Math.pow(rnd(), 0.72) * 0.86);
+      var a0f = rnd() * TAU;
+      var spanf = 0.45 + rnd() * 1.9;
+      nb.strokeStyle = rgba(mix(INK, pal.a, 0.2), 0.07 + rnd() * 0.16);
+      nb.lineWidth = 0.5 + rnd() * 0.6;
+      nb.beginPath();
+      nb.arc(0, 0, rr0, a0f, a0f + spanf);
+      nb.stroke();
+    }
+
     /* 长丝：二十四根横跨核心的大弧。
        随机短线给的是纹理，这几根给的是「丝」——
        有它们，核心才不是一团噪点，而是一张绷紧的网。 */
-    for (var fs = 0; fs < 44; fs += 1) {
-      var sA1 = (fs / 44) * TAU + rr(-0.12, 0.12);
+    for (var fs = 0; fs < 58; fs += 1) {
+      var sA1 = (fs / 58) * TAU + rr(-0.12, 0.12);
       var sSpan = rr(0.9, 2.5);
       var sA2 = sA1 + sSpan;
       var sR1 = R * rr(0.9, 0.99);
       var sR2 = R * rr(0.9, 0.99);
       var sCx = gauss() * R * 0.28;
       var sCy = gauss() * R * 0.28;
-      nb.strokeStyle = rgba(mix(INK, pal.a, 0.7), rr(0.09, 0.22));
+      nb.strokeStyle = rgba(mix(INK, pal.a, 0.32), rr(0.1, 0.26));
       nb.lineWidth = rr(0.6, 1.1);
       nb.beginPath();
       nb.moveTo(Math.cos(sA1) * sR1, Math.sin(sA1) * sR1);
@@ -416,9 +430,9 @@
     coreGlow = offscreen(size, size, 0.5);
     var cg = coreGlow.g;
     var gr = cg.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, R);
-    gr.addColorStop(0, rgba(pal.a, 0.42));
-    gr.addColorStop(0.22, rgba(pal.a, 0.18));
-    gr.addColorStop(0.6, rgba(pal.a, 0.04));
+    gr.addColorStop(0, rgba(pal.a, 0.2));
+    gr.addColorStop(0.22, rgba(pal.a, 0.1));
+    gr.addColorStop(0.6, rgba(pal.a, 0.05));
     gr.addColorStop(1, rgba(pal.a, 0));
     cg.fillStyle = gr;
     cg.fillRect(0, 0, size, size);
@@ -1175,8 +1189,8 @@
       var col = [mix(pal.a, INK, 0.4), INK, pal.b][h.tint];
 
       var grd = ctx.createRadialGradient(0, 0, RO * 0.9, 0, 0, RMAX * 0.9);
-      grd.addColorStop(0, rgba(col, 0.34 * fade));
-      grd.addColorStop(0.4, rgba(col, 0.11 * fade));
+      grd.addColorStop(0, rgba(col, 0.2 * fade));
+      grd.addColorStop(0.4, rgba(col, 0.06 * fade));
       grd.addColorStop(1, rgba(col, 0));
 
       ctx.fillStyle = grd;
@@ -1309,15 +1323,18 @@
     if (W < 24 || H < 24) return;
 
     var small = W < 780;
-    /* 环整只留在舞台里，光束再往画外跑：
-       环径按短边定，宽屏上另外压一道 0.30W 的上限，
-       免得 21:9 的屏幕上环被拉成一条横带。 */
-    R = Math.min(H * (small ? 0.42 : 0.365), W * (small ? 0.44 : 0.30));
+    /* 壁纸模式：环心压在画面底边之外，只露出上半截弧。
+       半径先按宽度定（宽屏上环宽约 0.92W，弧线从左右两侧升起），
+       再按高度压一道上限，保证环顶落在画面 55% 附近，
+       上面留给正文，下面才是这张壁纸。 */
+    R = Math.min(W * (small ? 0.34 : 0.22), H * (small ? 0.21 : 0.30));
     BAND = R * 0.2 * clamp(CFG.ring, 0.8, 1.3);
     RO = R + BAND;
     RMAX = Math.hypot(W, H) * 1.05;
     cx = W * 0.5;
-    cy = H * 0.5;
+    /* 核心坐在底边偏上一点：上半露出画面，下半压进画外，
+       读起来像一台从页底升起来的装置，而不是贴上去的一张图 */
+    cy = H * 1.03;
 
     buildWeb();
     buildSlots();

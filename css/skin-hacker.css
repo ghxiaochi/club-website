@@ -1,677 +1,910 @@
-/* =========================================================
-   HNYZ · 黑客风 = 数据实验室
-   ---------------------------------------------------------
-   这不是给现有页面换一层配色，而是一整页另起的版式：
-     顶栏   品牌 + 五个 KPI + 时钟
-     舞台   全屏画布，编织核心 / 数据环带 / 外侧光束同拍
-     面板   四格：动态、索引、节拍、加入
-   原来的页头、正文、桌宠全在这一套里让位，切回别的风格
-   时整块拆掉，DOM 恢复原样（见 js/lab.js）。
-   ========================================================= */
+/* HNYZ · hacker：只在切到这套风格时下载 */
 
+
+html[data-style="hacker"] .style-toggle {
+  border-radius: 2px;
+  border-color: rgba(57, 255, 136, 0.42);
+  background: #061009;
+  color: #39ff88;
+  box-shadow: 0 0 0 1px rgba(57, 255, 136, 0.08), 0 0 18px rgba(57, 255, 136, 0.12);
+}
+
+html[data-style="hacker"] .style-toggle:hover,
+html[data-style="hacker"] .style-toggle[aria-expanded="true"] {
+  border-color: #39ff88;
+  box-shadow: 0 0 0 1px #39ff88, 0 0 26px rgba(57, 255, 136, 0.32);
+}
+
+html[data-style="hacker"] .style-toggle__grid i {
+  border-radius: 0;
+  background: #39ff88;
+}
+
+html[data-style="hacker"] .skin-bubbles {
+  display: block;
+  opacity: 1;
+}
+
+html[data-style="hacker"][data-theme="light"] .skin-bubbles i {
+  border-color: rgba(10, 143, 74, 0.32);
+  background: radial-gradient(
+    circle at 34% 26%,
+    rgba(10, 143, 74, 0.1) 0 14%,
+    rgba(10, 143, 74, 0.04) 40%,
+    transparent 66%
+  );
+  box-shadow: inset 0 0 18px rgba(10, 143, 74, 0.08);
+}
+
+html[data-style="hacker"][data-theme="light"] .skin-bubbles i::after {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+html[data-style="hacker"] .skin-progress {
+  opacity: 0.9;
+}
+
+/* ---------------------------------------------------------
+   4. 黑客风
+   --------------------------------------------------------- */
 html[data-style="hacker"] {
-  --lab-bg: #08090b;
-  --lab-bg-2: #0a0b0d;
-  --lab-panel: #0c0e12;
-  --lab-line: #23262d;
-  --lab-line-2: #343943;
-  --lab-text: #c9ced8;
-  --lab-dim: #7b818d;
-  --lab-faint: #545a66;
-  --lab-ink: #f2f4f8;
-  --lab-accent: #7fb3ff;
-  --lab-accent-2: #98e0cf;
-  --lab-warn: #f0a6c6;
-  --lab-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans Mono", monospace;
-  --lab-sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-  background: var(--lab-bg);
+  --bg: #030705;
+  --bg-deep: #010302;
+  --panel: #071009;
+  --panel-2: #0a140d;
+  --panel-3: #0d1a11;
+  --border: rgba(92, 255, 150, 0.18);
+  --border-strong: rgba(92, 255, 150, 0.42);
+  --text: #d9ffe5;
+  --text-soft: #a9e9be;
+  --muted: #7bbd92;
+  --dim: #5d9b73;
+  --blue: #39ff88;
+  --blue-bright: #8bffb4;
+  --green: #39ff88;
+  --green-bright: #7dffab;
+  --orange: #ffd166;
+  --red: #ff6b6b;
+  --purple: #c084fc;
+  --blue-soft: rgba(57, 255, 136, 0.1);
+  --green-soft: rgba(57, 255, 136, 0.12);
+  --radius-sm: 2px;
+  --radius: 2px;
+  --radius-lg: 4px;
+  --glow-blue: 0 0 0 1px rgba(57, 255, 136, 0.16), 0 0 26px rgba(57, 255, 136, 0.16);
+  --glow-green: 0 0 26px rgba(57, 255, 136, 0.2);
+  --shadow-card: 0 0 0 1px rgba(57, 255, 136, 0.05), 0 24px 56px rgba(0, 0, 0, 0.66);
+  /* 页底那块舞台壁纸的取色：跟这套皮肤的荧光绿走，不另起一套蓝 */
+  --lab-accent: #35ff9e;
+  --lab-accent-2: #9fe8ff;
+  --lab-bg: #010403;
+  color-scheme: dark;
 }
 
-/* 实验室挂上之后，其余一切都让位。
-   只留风格面板（dialog）和换肤幕布，它们必须浮在最上层。 */
+html[data-style="hacker"][data-theme="light"] {
+  --bg: #eef7f0;
+  --bg-deep: #e4f1e8;
+  --panel: #f9fffb;
+  --panel-2: #f0faf3;
+  --panel-3: #e7f6ec;
+  --border: rgba(9, 110, 52, 0.2);
+  --border-strong: rgba(9, 110, 52, 0.45);
+  --text: #082414;
+  --text-soft: #14472a;
+  --muted: #3d6d50;
+  --dim: #5b846a;
+  --blue: #0a8f4a;
+  --blue-bright: #067a3d;
+  --green: #0a8f4a;
+  --green-bright: #067a3d;
+  --blue-soft: rgba(10, 143, 74, 0.1);
+  --green-soft: rgba(10, 143, 74, 0.12);
+  --glow-blue: 0 0 0 1px rgba(10, 143, 74, 0.16), 0 0 24px rgba(10, 143, 74, 0.1);
+  --glow-green: 0 0 22px rgba(10, 143, 74, 0.14);
+  --shadow-card: 0 0 0 1px rgba(10, 143, 74, 0.05), 0 18px 42px rgba(10, 60, 30, 0.1);
+  color-scheme: light;
+}
+
 html[data-style="hacker"] body {
-  margin: 0;
-  height: 100vh;
-  overflow: hidden;
-  background: var(--lab-bg);
-  color: var(--lab-text);
+  /* 纯黑底，只留一点顶部冷光。没有网格、没有贴图 */
+  background-color: #010403;
+  background-image: radial-gradient(
+    ellipse 120% 70% at 50% -18%,
+    rgba(24, 92, 52, 0.38),
+    transparent 68%
+  );
+  background-size: auto;
+  background-attachment: fixed;
 }
 
-html[data-style="hacker"] body > *:not(.lab):not(.lab-cx):not(dialog):not(.style-wipe):not(script):not(noscript):not(template) {
+html[data-style="hacker"][data-theme="light"] body {
+  background-color: #f3faf5;
+  background-image: radial-gradient(
+    ellipse 120% 70% at 50% -18%,
+    rgba(10, 143, 74, 0.14),
+    transparent 68%
+  );
+}
+
+/* 背景里只留代码雨和气泡：光斑和图标阵列都不出现在黑客风 */
+html[data-style="hacker"] .bg-orbs,
+html[data-style="hacker"] .bg-icons {
   display: none !important;
 }
 
-/* ---------- 骨架 ---------- */
-html[data-style="hacker"] .lab {
-  position: fixed;
-  inset: 0;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  background: var(--lab-bg);
-  color: var(--lab-text);
-  font-family: var(--lab-mono);
-  font-size: 12px;
+/* 右下角校徽的浅蓝底板在黑客风里改成暗绿终端 */
+html[data-style="hacker"] .hnyz-pet__board {
+  border-color: rgba(57, 255, 136, 0.45);
+  background: radial-gradient(circle at 50% 38%, #07160e 0%, #04100a 58%, #020a06 100%);
+  box-shadow:
+    0 16px 38px rgba(0, 0, 0, 0.6),
+    inset 0 0 24px rgba(57, 255, 136, 0.14);
+  opacity: 0.94;
+}
+
+html[data-style="hacker"] .hnyz-pet__board::before {
+  background-image:
+    linear-gradient(rgba(57, 255, 136, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57, 255, 136, 0.09) 1px, transparent 1px);
+}
+
+html[data-style="hacker"] .hnyz-pet__board::after {
+  border-color: rgba(57, 255, 136, 0.24);
+}
+
+html[data-style="hacker"] .hnyz-pet__speech {
+  background: rgba(3, 14, 8, 0.92);
+  border-color: rgba(57, 255, 136, 0.35);
+  color: #baffd0;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+
+html[data-style="hacker"] .site-header,
+html[data-style="hacker"] .site-header.is-scrolled {
+  background: rgba(3, 8, 5, 0.88);
+  border-bottom-color: rgba(57, 255, 136, 0.18);
+  box-shadow: 0 1px 0 rgba(57, 255, 136, 0.04), 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+
+html[data-style="hacker"][data-theme="light"] .site-header,
+html[data-style="hacker"][data-theme="light"] .site-header.is-scrolled {
+  background: rgba(238, 247, 240, 0.9);
+}
+
+html[data-style="hacker"] .brand-mark {
+  border-radius: 2px;
+  border-color: rgba(57, 255, 136, 0.4);
+  background: #061009;
+  color: #39ff88;
+  box-shadow: inset 0 0 18px rgba(57, 255, 136, 0.1);
+}
+
+html[data-style="hacker"] .brand-copy strong,
+html[data-style="hacker"] .section-head h2::before,
+html[data-style="hacker"] .eyebrow,
+html[data-style="hacker"] .card-label,
+html[data-style="hacker"] .quick-path {
+  font-family: var(--mono);
+}
+
+html[data-style="hacker"] .brand-copy strong {
+  letter-spacing: 0.22em;
+  color: #8bffb4;
+}
+
+html[data-style="hacker"] .section-head h2::before {
+  content: "// ";
+  color: rgba(57, 255, 136, 0.7);
+  font-weight: 500;
+}
+
+html[data-style="hacker"] .accent-text {
+  color: var(--blue);
+  text-shadow: 0 0 34px rgba(57, 255, 136, 0.3);
+}
+
+html[data-style="hacker"] .site-footer {
+  background: rgba(2, 6, 4, 0.86);
+  border-top-color: rgba(57, 255, 136, 0.18);
+}
+
+html[data-style="hacker"] .section--soft {
+  background: rgba(4, 10, 6, 0.72);
+  border-top-color: rgba(57, 255, 136, 0.1);
+  border-bottom-color: rgba(57, 255, 136, 0.1);
+}
+
+html[data-style="hacker"] .quick-card,
+html[data-style="hacker"] .do-card,
+html[data-style="hacker"] .project-card,
+html[data-style="hacker"] .agenda-card,
+html[data-style="hacker"] .wall-card,
+html[data-style="hacker"] .join-panel,
+html[data-style="hacker"] .join-contact,
+html[data-style="hacker"] .faq-item,
+html[data-style="hacker"] .member-profile,
+html[data-style="hacker"] .archive-group,
+html[data-style="hacker"] .gallery-card,
+html[data-style="hacker"] .project-group {
+  background: linear-gradient(180deg, rgba(9, 17, 11, 0.96), rgba(4, 9, 6, 0.94));
+  background-image: linear-gradient(180deg, rgba(9, 17, 11, 0.96), rgba(4, 9, 6, 0.94));
+  border-color: rgba(57, 255, 136, 0.16);
+  box-shadow: 0 0 0 1px rgba(57, 255, 136, 0.03), 0 22px 50px rgba(0, 0, 0, 0.55);
+}
+
+html[data-style="hacker"][data-theme="light"] .quick-card,
+html[data-style="hacker"][data-theme="light"] .do-card,
+html[data-style="hacker"][data-theme="light"] .project-card,
+html[data-style="hacker"][data-theme="light"] .agenda-card,
+html[data-style="hacker"][data-theme="light"] .wall-card,
+html[data-style="hacker"][data-theme="light"] .join-panel,
+html[data-style="hacker"][data-theme="light"] .join-contact,
+html[data-style="hacker"][data-theme="light"] .faq-item,
+html[data-style="hacker"][data-theme="light"] .member-profile,
+html[data-style="hacker"][data-theme="light"] .archive-group,
+html[data-style="hacker"][data-theme="light"] .gallery-card,
+html[data-style="hacker"][data-theme="light"] .project-group {
+  background: rgba(249, 255, 251, 0.88);
+  background-image: none;
+  border-color: rgba(10, 143, 74, 0.18);
+  box-shadow: 0 0 0 1px rgba(10, 143, 74, 0.03), 0 18px 40px rgba(10, 60, 30, 0.08);
+}
+
+html[data-style="hacker"] .project-card:hover,
+html[data-style="hacker"] .quick-card:hover,
+html[data-style="hacker"] .do-card:hover {
+  border-color: rgba(57, 255, 136, 0.55);
+  box-shadow: 0 0 0 1px rgba(57, 255, 136, 0.18), 0 0 34px rgba(57, 255, 136, 0.12),
+    0 26px 56px rgba(0, 0, 0, 0.6);
+}
+
+html[data-style="hacker"] .quick-path {
+  background: rgba(57, 255, 136, 0.04);
+  border-bottom-color: rgba(57, 255, 136, 0.14);
+  color: #7dffab;
+}
+
+html[data-style="hacker"] .cover-placeholder {
+  background:
+    radial-gradient(circle at 78% 24%, rgba(57, 255, 136, 0.14), transparent 44%),
+    linear-gradient(135deg, #061009 0%, #081a0e 55%, #030805 100%);
+}
+
+html[data-style="hacker"] .cover-placeholder::before {
+  background-image:
+    linear-gradient(rgba(57, 255, 136, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57, 255, 136, 0.12) 1px, transparent 1px);
+}
+
+html[data-style="hacker"] .button--primary {
+  border-color: #39ff88;
+  background: #39ff88;
+  color: #02130a;
+  box-shadow: 0 0 0 1px rgba(57, 255, 136, 0.4), 0 10px 26px rgba(57, 255, 136, 0.22);
+}
+
+html[data-style="hacker"] .button--primary:hover {
+  background: #8bffb4;
+  border-color: #8bffb4;
+  color: #02130a;
+  box-shadow: 0 0 0 1px rgba(57, 255, 136, 0.6), 0 12px 34px rgba(57, 255, 136, 0.32);
+}
+
+html[data-style="hacker"] .button--secondary {
+  border-color: rgba(57, 255, 136, 0.36);
+  background: rgba(57, 255, 136, 0.04);
+  color: #a9e9be;
+}
+
+html[data-style="hacker"] .button--secondary:hover {
+  border-color: #39ff88;
+  color: #8bffb4;
+  box-shadow: 0 0 24px rgba(57, 255, 136, 0.16);
+}
+
+html[data-style="hacker"] .nav-cta {
+  border-color: rgba(57, 255, 136, 0.4);
+  background: rgba(57, 255, 136, 0.06);
+  color: #8bffb4;
+}
+
+html[data-style="hacker"] .nav-cta:hover {
+  background: rgba(57, 255, 136, 0.12);
+  border-color: #39ff88;
+  color: #baffd0;
+}
+
+html[data-style="hacker"] .theme-toggle,
+html[data-style="hacker"] .sound-toggle {
+  border-radius: 2px;
+  border-color: rgba(57, 255, 136, 0.28);
+  background: #061009;
+  color: #7dffab;
+}
+
+html[data-style="hacker"] .theme-toggle:hover,
+html[data-style="hacker"] .sound-toggle:hover {
+  border-color: #39ff88;
+  color: #d9ffe5;
+  box-shadow: 0 0 0 4px rgba(57, 255, 136, 0.08);
+}
+
+html[data-style="hacker"] .nav-toggle {
+  border-radius: 2px;
+  border-color: rgba(57, 255, 136, 0.28);
+  background: #061009;
+}
+
+html[data-style="hacker"] .nav-toggle span {
+  background: #7dffab;
+}
+
+html[data-style="hacker"] .quick-line,
+html[data-style="hacker"] .join-qr {
+  background: rgba(6, 16, 9, 0.8);
+}
+
+/* 亮色终端里，这两行不能还是黑的，否则字和底一样深 */
+html[data-style="hacker"][data-theme="light"] .quick-line,
+html[data-style="hacker"][data-theme="light"] .join-qr {
+  background: rgba(255, 255, 255, 0.66);
+}
+
+html[data-style="hacker"] .dino-run {
+  --dino-ink: #baffd0;
+  --dino-accent: #39ff88;
+  --dino-dim: #2f6b46;
+  --dino-ground: rgba(57, 255, 136, 0.35);
+  background-color: #020604;
+  background-image:
+    radial-gradient(ellipse 70% 120% at 50% 110%, rgba(57, 255, 136, 0.12), transparent 70%),
+    linear-gradient(rgba(57, 255, 136, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57, 255, 136, 0.05) 1px, transparent 1px);
+  background-size: auto, 28px 28px, 28px 28px;
+  border-top-color: rgba(57, 255, 136, 0.22);
+}
+
+html[data-style="hacker"][data-theme="light"] .dino-run {
+  --dino-ink: #0a3a1d;
+  --dino-accent: #0a8f4a;
+  --dino-dim: #79a98b;
+  --dino-ground: rgba(10, 143, 74, 0.28);
+  background-color: #f2fbf4;
+  background-image:
+    radial-gradient(ellipse 70% 120% at 50% 110%, rgba(10, 143, 74, 0.1), transparent 70%),
+    linear-gradient(rgba(10, 143, 74, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(10, 143, 74, 0.06) 1px, transparent 1px);
+  background-size: auto, 28px 28px, 28px 28px;
+  border-top-color: rgba(10, 143, 74, 0.2);
+}
+
+html[data-style="hacker"] main,
+html[data-style="hacker"] .site-footer {
+  position: relative;
   z-index: 1;
 }
 
-/* ---------- 顶栏 ---------- */
-html[data-style="hacker"] .lab-head {
-  display: grid;
-  grid-template-columns: minmax(212px, 1.35fr) minmax(0, 3fr) auto;
-  align-items: center;
-  gap: 0 14px;
-  padding: 9px 14px;
-  border-bottom: 1px solid var(--lab-line);
-  background: var(--lab-bg-2);
+/* 标题前的提示符：从 // 换成 > */
+html[data-style="hacker"] .section-head h2::before {
+  content: "> ";
+  color: rgba(57, 255, 136, 0.75);
 }
 
-html[data-style="hacker"] .lab-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-  color: inherit;
-  text-decoration: none;
+html[data-style="hacker"] .eyebrow::before {
+  content: "$ ";
+  color: rgba(57, 255, 136, 0.62);
 }
 
-html[data-style="hacker"] .lab-brand__mark {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  flex: 0 0 30px;
-  border: 1px solid var(--lab-line-2);
-  color: var(--lab-accent);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: -1px;
+/* 主按钮做成一条命令，末尾跟一个会闪的光标 */
+html[data-style="hacker"] .button--primary::before {
+  content: "> ";
+  opacity: 0.72;
 }
 
-html[data-style="hacker"] .lab-brand__name {
-  display: block;
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 1.2px;
-  color: var(--lab-ink);
-  white-space: nowrap;
-}
-
-html[data-style="hacker"] .lab-brand__name i {
-  color: var(--lab-faint);
-  font-style: normal;
-  padding: 0 2px;
-}
-
-html[data-style="hacker"] .lab-brand em {
-  display: block;
-  margin-top: 2px;
-  font-size: 8px;
-  font-style: normal;
-  letter-spacing: 1.4px;
-  color: var(--lab-dim);
-  white-space: nowrap;
-}
-
-html[data-style="hacker"] .lab-kpis {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 2px;
-  min-width: 0;
-}
-
-html[data-style="hacker"] .lab-kpi {
-  position: relative;
-  min-width: 0;
-  padding: 0 8px 7px;
-  border-bottom: 1px solid var(--lab-line);
-}
-
-html[data-style="hacker"] .lab-kpi i {
-  display: block;
-  height: 2px;
-  margin-top: 6px;
-  background: var(--lab-accent);
-  transform-origin: left center;
-  transform: scaleX(var(--seg, .4));
-  opacity: .8;
-}
-
-html[data-style="hacker"] .lab-kpi--b i { background: var(--lab-accent-2); }
-html[data-style="hacker"] .lab-kpi--w i { background: var(--lab-warn); }
-
-html[data-style="hacker"] .lab-kpi b i {
-  font-style: normal;
-  color: var(--lab-faint);
-}
-
-html[data-style="hacker"] .lab-kpi b i {
-  font-style: normal;
-  color: var(--lab-faint);
-}
-
-html[data-style="hacker"] .lab-kpi b {
-  display: block;
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 1.3px;
-  color: var(--lab-dim);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-html[data-style="hacker"] .lab-kpi span {
-  display: block;
-  margin-top: 2px;
-  font-size: 15px;
-  font-weight: 800;
-  line-height: 1.1;
-  color: var(--lab-ink);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-html[data-style="hacker"] .lab-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-html[data-style="hacker"] .lab-nav {
-  display: flex;
-  gap: 10px;
-  margin-right: 4px;
-  font-size: 9px;
-  letter-spacing: 1px;
-}
-
-html[data-style="hacker"] .lab-nav a {
-  color: var(--lab-dim);
-  text-decoration: none;
-  padding: 3px 0;
-  border-bottom: 1px solid transparent;
-}
-
-html[data-style="hacker"] .lab-nav a:hover,
-html[data-style="hacker"] .lab-nav a:focus-visible {
-  color: var(--lab-ink);
-  border-bottom-color: var(--lab-accent);
-  outline: none;
-}
-
-html[data-style="hacker"] .lab-nav a[aria-current="page"] {
-  color: var(--lab-accent);
-}
-
-html[data-style="hacker"] .lab-clock {
-  font-size: 11px;
-  letter-spacing: 1.6px;
-  color: var(--lab-text);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-/* 风格按钮挪进实验室顶栏，尺寸按这一套重来 */
-html[data-style="hacker"] .lab-actions [data-style-toggle] {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  border: 1px solid var(--lab-line-2);
-  border-radius: 0;
-  background: transparent;
-  color: var(--lab-text);
-  cursor: pointer;
-}
-
-html[data-style="hacker"] .lab-actions [data-style-toggle]:hover,
-html[data-style="hacker"] .lab-actions [data-style-toggle][aria-expanded="true"] {
-  border-color: var(--lab-accent);
-  color: var(--lab-ink);
-}
-
-html[data-style="hacker"] .lab-actions [data-style-toggle] .style-toggle__grid {
-  display: grid;
-  grid-template-columns: repeat(2, 5px);
-  grid-template-rows: repeat(2, 5px);
-  gap: 2px;
-}
-
-html[data-style="hacker"] .lab-actions [data-style-toggle] .style-toggle__grid i {
+html[data-style="hacker"] .button--primary::after {
+  content: "";
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  margin-left: 2px;
   background: currentColor;
-  border-radius: 0;
+  vertical-align: -0.12em;
+  animation: hackerCaret 1.15s steps(1, end) infinite;
 }
 
-/* ---------- 舞台 ---------- */
-html[data-style="hacker"] .lab-stage {
+/* 卡片左上角切一个角，像终端分屏的边框 */
+html[data-style="hacker"] .quick-card,
+html[data-style="hacker"] .do-card,
+html[data-style="hacker"] .faq-item,
+html[data-style="hacker"] .join-panel {
   position: relative;
-  min-height: 0;
-  overflow: hidden;
-  background:
-    radial-gradient(120% 90% at 32% 50%, rgba(127, 179, 255, .07), transparent 62%),
-    var(--lab-bg);
 }
 
-html[data-style="hacker"] .lab-stage canvas {
+html[data-style="hacker"] .quick-card::before,
+html[data-style="hacker"] .do-card::before,
+html[data-style="hacker"] .faq-item::before,
+html[data-style="hacker"] .join-panel::before {
+  content: "";
   position: absolute;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  border-top: 1px solid rgba(57, 255, 136, 0.55);
+  border-left: 1px solid rgba(57, 255, 136, 0.55);
+  pointer-events: none;
+}@media (prefers-reduced-motion: reduce){
+
+  html[data-style="hacker"] .button--primary::after {
+    animation: none;
+  }}
+
+/* =========================================================
+   黑客风 · 质感层
+   ---------------------------------------------------------
+   背景清空之后，剩下的高级感只能靠“准”：
+   0.5px 的高光、等比的字距、只在需要时亮起来的一点点绿。
+   这一段落写在最后，专门覆盖前面黑客风的分支。
+   ========================================================= */
+
+html[data-style="hacker"] {
+  /* 所有的圆角都只留 2px，像终端窗口 */
+  --radius-sm: 1px;
+  --radius: 2px;
+  --radius-lg: 2px;
+}
+
+html[data-style="hacker"] ::selection {
+  background: rgba(57, 255, 136, 0.26);
+  color: #f2fff7;
+}
+
+html[data-style="hacker"] .site-header,
+html[data-style="hacker"] .site-header.is-scrolled {
+  background: rgba(2, 6, 4, 0.72);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  border-bottom-color: rgba(57, 255, 136, 0.14);
+  box-shadow: none;
+}
+
+html[data-style="hacker"][data-theme="light"] .site-header,
+html[data-style="hacker"][data-theme="light"] .site-header.is-scrolled {
+  background: rgba(243, 250, 245, 0.78);
+  border-bottom-color: rgba(10, 143, 74, 0.16);
+}
+
+/* 顶栏里的字，全部往等宽和字距那边靠 */
+html[data-style="hacker"] .brand-copy span,
+html[data-style="hacker"] .nav-links a,
+html[data-style="hacker"] .nav-cta {
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+}
+
+html[data-style="hacker"] .nav-links a {
+  position: relative;
+}
+
+/* 导航悬停：一条从左边长出来的下划线，而不是换颜色 */
+html[data-style="hacker"] .nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2px;
+  height: 1px;
+  background: #39ff88;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html[data-style="hacker"] .nav-links a:hover::after,
+html[data-style="hacker"] .nav-links a[aria-current="page"]::after {
+  transform: scaleX(1);
+}
+
+/* 卡片：一条 1px 的顶部高光，比加一圈发光更干净 */
+html[data-style="hacker"] .quick-card,
+html[data-style="hacker"] .do-card,
+html[data-style="hacker"] .project-card,
+html[data-style="hacker"] .agenda-card,
+html[data-style="hacker"] .wall-card,
+html[data-style="hacker"] .join-panel,
+html[data-style="hacker"] .join-contact,
+html[data-style="hacker"] .faq-item,
+html[data-style="hacker"] .member-profile,
+html[data-style="hacker"] .archive-group,
+html[data-style="hacker"] .gallery-card,
+html[data-style="hacker"] .project-group {
+  border-color: rgba(57, 255, 136, 0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(57, 255, 136, 0.07),
+    0 18px 44px rgba(0, 0, 0, 0.5);
+}
+
+html[data-style="hacker"] .quick-card:hover,
+html[data-style="hacker"] .do-card:hover,
+html[data-style="hacker"] .project-card:hover {
+  border-color: rgba(57, 255, 136, 0.42);
+  box-shadow:
+    inset 0 1px 0 rgba(57, 255, 136, 0.14),
+    0 0 0 1px rgba(57, 255, 136, 0.1),
+    0 24px 54px rgba(0, 0, 0, 0.55);
+}
+
+/* 小标签：`$ 名称` 的终端注释口吻，字距拉开。
+   eyebrow 里可能是一条命令，所以不强制大写 */
+html[data-style="hacker"] .eyebrow,
+html[data-style="hacker"] .card-label,
+html[data-style="hacker"] .section-label {
+  letter-spacing: 0.22em;
+  font-size: 0.66rem;
+}
+
+html[data-style="hacker"] .eyebrow {
+  text-transform: none;
+  font-weight: 400;
+}
+
+html[data-style="hacker"] .card-label,
+html[data-style="hacker"] .section-label {
+  text-transform: uppercase;
+}
+
+html[data-style="hacker"] .section-head h2::before,
+html[data-style="hacker"] .eyebrow::before {
+  font-weight: 400;
+}
+
+/* 正文里的链接：一条虚线，像 man page 里的交叉引用 */
+html[data-style="hacker"] main a:not(.button):not(.nav-cta):not(.project-card):not(.gallery-card):not(.wall-card) {
+  text-decoration: underline;
+  text-decoration-color: rgba(57, 255, 136, 0.4);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+html[data-style="hacker"] main a:not(.button):not(.nav-cta):hover {
+  text-decoration-color: #39ff88;
+}
+
+/* 分隔线：短划线，不是整条实线 */
+html[data-style="hacker"] .quick-line,
+html[data-style="hacker"] hr {
+  border-color: rgba(57, 255, 136, 0.16);
+  border-style: dashed;
+}
+
+/* 风格面板在黑客风里也换成终端窗口：直角、细边、一点点内发光 */
+html[data-style="hacker"] .style-deck {
+  background: rgba(2, 6, 4, 0.94);
+}
+
+html[data-style="hacker"] .style-card {
+  border-radius: 2px;
+  background:
+    radial-gradient(ellipse 90% 46% at 50% 0%, rgba(57, 255, 136, 0.06), transparent 70%),
+    linear-gradient(180deg, rgba(8, 15, 10, 0.97), rgba(3, 7, 5, 0.98));
+}
+
+html[data-style="hacker"] .style-card.is-active {
+  box-shadow: 0 0 0 1px rgba(57, 255, 136, 0.55), 0 30px 70px rgba(0, 0, 0, 0.6);
+}
+
+html[data-style="hacker"] .style-card__glyph--hacker {
+  border-radius: 2px;
+}@media (max-width: 760px){
+  html[data-style="hacker"] .matrix-rain.is-on {
+    opacity: 0.62;
+  }}
+
+/* 日间的黑客风：荧光绿放在白底上会糊掉，按钮全部换成深绿 */
+html[data-style="hacker"][data-theme="light"] .button--primary {
+  border-color: #0a8f4a;
+  background: #0a8f4a;
+  color: #f4fff8;
+  box-shadow: 0 10px 24px rgba(10, 143, 74, 0.22);
+}
+
+html[data-style="hacker"][data-theme="light"] .button--primary:hover {
+  border-color: #08753d;
+  background: #08753d;
+  color: #ffffff;
+}
+
+html[data-style="hacker"][data-theme="light"] .button--secondary {
+  border-color: rgba(10, 143, 74, 0.42);
+  background: rgba(255, 255, 255, 0.72);
+  color: #0a6b3a;
+}
+
+html[data-style="hacker"][data-theme="light"] .button--secondary:hover {
+  border-color: #0a8f4a;
+  background: rgba(10, 143, 74, 0.08);
+  color: #064f2b;
+}
+
+html[data-style="hacker"][data-theme="light"] .nav-cta {
+  border-color: rgba(10, 143, 74, 0.45);
+  background: rgba(10, 143, 74, 0.08);
+  color: #0a6b3a;
+}
+
+html[data-style="hacker"][data-theme="light"] .nav-cta:hover {
+  border-color: #0a8f4a;
+  background: rgba(10, 143, 74, 0.16);
+  color: #054427;
+}
+
+html[data-style="hacker"][data-theme="light"] .nav-toggle {
+  border-color: rgba(10, 143, 74, 0.35);
+  background: #ffffff;
+}
+
+html[data-style="hacker"][data-theme="light"] .nav-toggle span {
+  background: #0a6b3a;
+}
+
+html[data-style="hacker"][data-theme="light"] .theme-toggle,
+html[data-style="hacker"][data-theme="light"] .sound-toggle {
+  border-color: rgba(10, 143, 74, 0.3);
+  background: #ffffff;
+  color: #0a6b3a;
+}
+
+/* =========================================================
+   黑客风 · 日间修正
+   ---------------------------------------------------------
+   深色皮肤里那些「近黑底 + 荧光字」的段落，在日间不能原样保留：
+   深字压在深底上，正文直接消失。这里把浅色段落和页脚翻回纸面，
+   只留下细绿边、等宽字和代码雨，作为黑客风的识别度。
+   ========================================================= */
+
+html[data-style="hacker"][data-theme="light"] .section--soft {
+  background: rgba(230, 245, 235, 0.78);
+  border-top-color: rgba(10, 143, 74, 0.12);
+  border-bottom-color: rgba(10, 143, 74, 0.12);
+}
+
+html[data-style="hacker"][data-theme="light"] .site-footer {
+  background: rgba(238, 248, 241, 0.92);
+  border-top-color: rgba(10, 143, 74, 0.18);
+}
+
+html[data-style="hacker"][data-theme="light"] .site-footer .brand-copy strong,
+html[data-style="hacker"][data-theme="light"] .footer-brand .brand-copy strong {
+  color: #0a6b3a;
+}
+
+html[data-style="hacker"][data-theme="light"] .quick-path {
+  background: rgba(10, 143, 74, 0.06);
+  border-bottom-color: rgba(10, 143, 74, 0.16);
+  color: #0a6b3a;
+}
+
+/* 卡片在纸面上用浅阴影，不要沿用深色皮肤的 0 0 44px 黑 */
+html[data-style="hacker"][data-theme="light"] .quick-card,
+html[data-style="hacker"][data-theme="light"] .do-card,
+html[data-style="hacker"][data-theme="light"] .project-card,
+html[data-style="hacker"][data-theme="light"] .agenda-card,
+html[data-style="hacker"][data-theme="light"] .wall-card,
+html[data-style="hacker"][data-theme="light"] .join-panel,
+html[data-style="hacker"][data-theme="light"] .join-contact,
+html[data-style="hacker"][data-theme="light"] .faq-item,
+html[data-style="hacker"][data-theme="light"] .member-profile,
+html[data-style="hacker"][data-theme="light"] .archive-group,
+html[data-style="hacker"][data-theme="light"] .gallery-card,
+html[data-style="hacker"][data-theme="light"] .project-group {
+  border-color: rgba(10, 143, 74, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 14px 34px rgba(10, 60, 30, 0.08);
+}
+
+html[data-style="hacker"][data-theme="light"] .quick-card:hover,
+html[data-style="hacker"][data-theme="light"] .do-card:hover,
+html[data-style="hacker"][data-theme="light"] .project-card:hover {
+  border-color: rgba(10, 143, 74, 0.42);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 0 0 1px rgba(10, 143, 74, 0.1),
+    0 20px 44px rgba(10, 60, 30, 0.12);
+}
+
+/* 代码雨在白底上会抢正文，压一档，但仍然看得见 */
+html[data-style="hacker"][data-theme="light"] .matrix-rain.is-on {
+  opacity: 0.82;
+}
+
+/* 顶栏品牌字：日间不能再用荧光绿，否则白底上几乎是白的 */
+html[data-style="hacker"][data-theme="light"] .site-header .brand-copy strong {
+  color: #0a6b3a;
+}
+/* =========================================================
+   舞台壁纸
+   ---------------------------------------------------------
+   一张固定画布铺在页面底下，页面照常滚动：文案、板块、卡片
+   全在它上面，黑客原本那套内容一个都没改。画布只在选中这套
+   风格时下载，切走时停帧藏起来。
+   ========================================================= */
+html[data-style="hacker"] .lab-bg {
+  position: fixed;
   inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .88;
+}
+
+html[data-style="hacker"] .lab-bg[hidden] {
+  display: none;
+}
+
+html[data-style="hacker"] .lab-bg canvas {
+  display: block;
   width: 100%;
   height: 100%;
-  display: block;
+  /* 壁纸不该像截图：轻微虚化，把细线融成光雾 */
+  filter: blur(0.7px) saturate(1.06);
 }
 
-/* 扫描线：很淡，只为了让整块画布有「屏幕」的质感 */
-html[data-style="hacker"] .lab-stage::after {
+/* 页底的地平线辉光：让环像「从地面升起来」，而不是贴了一张图 */
+html[data-style="hacker"] .lab-bg::before {
   content: "";
   position: absolute;
   inset: 0;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(0, 0, 0, .16) 0 1px,
-    transparent 1px 3px
+  background: radial-gradient(
+    ellipse 46% 22% at 50% 100%,
+    rgba(57, 255, 136, .14) 0%,
+    rgba(57, 255, 136, .05) 45%,
+    rgba(57, 255, 136, 0) 72%
   );
-  opacity: .5;
-}
-
-html[data-style="hacker"] .lab-hud {
-  position: absolute;
-  z-index: 2;
-  font-size: 9px;
-  letter-spacing: 1.1px;
-  color: var(--lab-text);
   pointer-events: none;
 }
 
-html[data-style="hacker"] .lab-hud--chk {
-  left: 12px;
-  top: 10px;
-  padding: 6px 9px;
-  border: 1px solid var(--lab-line-2);
-  background: rgba(8, 9, 11, .86);
-}
-
-html[data-style="hacker"] .lab-hud--chk b {
-  display: block;
-  margin-bottom: 4px;
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 1.3px;
-  color: var(--lab-dim);
-}
-
-html[data-style="hacker"] .lab-hud--chk span {
-  display: block;
-  color: var(--lab-ink);
-  font-variant-numeric: tabular-nums;
-}
-
-html[data-style="hacker"] .lab-hud--chk em {
-  display: block;
-  margin-top: 3px;
-  font-style: normal;
-  color: var(--lab-dim);
-}
-
-html[data-style="hacker"] .lab-hud--beat {
-  left: 12px;
-  bottom: 10px;
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-html[data-style="hacker"] .lab-hud--beat b {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: 0;
-  color: var(--lab-ink);
-  font-variant-numeric: tabular-nums;
-}
-
-html[data-style="hacker"] .lab-hud--beat small {
-  font-size: 8px;
-  letter-spacing: 1.2px;
-  color: var(--lab-dim);
-}
-
-/* 节拍点：四个小方块按拍亮 */
-html[data-style="hacker"] .lab-pips {
-  display: inline-flex;
-  gap: 4px;
-  margin-left: 2px;
-  vertical-align: 2px;
-}
-
-html[data-style="hacker"] .lab-pips i {
-  width: 5px;
-  height: 5px;
-  background: var(--lab-line-2);
-  transition: background .12s linear;
-}
-
-html[data-style="hacker"] .lab-pips i.is-on {
-  background: var(--lab-accent);
-}
-
-html[data-style="hacker"] .lab-hud--status {
-  right: 12px;
-  bottom: 10px;
-  text-align: right;
-}
-
-html[data-style="hacker"] .lab-hud--status b {
-  display: block;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 1.2px;
-  color: var(--lab-ink);
-}
-
-html[data-style="hacker"] .lab-hud--status span {
-  display: block;
-  margin-top: 3px;
-  color: var(--lab-dim);
-}
-
-html[data-style="hacker"] .lab-hud--fps {
-  right: 12px;
-  top: 10px;
-  color: var(--lab-dim);
-  font-variant-numeric: tabular-nums;
-}
-
-/* CONSOLE 按钮 */
-html[data-style="hacker"] .lab-console-btn {
+/* 字要压在光上面还能读：从上到下由实到透，
+   底边再收一道，让壁纸在页脚附近慢慢沉下去。 */
+html[data-style="hacker"] .lab-bg::after {
+  content: "";
   position: absolute;
-  z-index: 3;
-  right: 52px;
-  top: 10px;
+  inset: 0;
+  background:
+    /* 聚光：视线收到页底中间那台装置上，两侧和远处压下去 */
+    radial-gradient(
+      ellipse 62% 42% at 50% 96%,
+      rgba(1, 4, 3, 0) 0%,
+      rgba(1, 4, 3, .28) 52%,
+      rgba(1, 4, 3, .72) 82%,
+      rgba(1, 4, 3, .88) 100%
+    ),
+    /* 纵向：上面留给正文，越往下越透 */
+    linear-gradient(
+      to bottom,
+      rgba(1, 4, 3, .995) 0%,
+      rgba(1, 4, 3, .97) 40%,
+      rgba(1, 4, 3, .82) 56%,
+      rgba(1, 4, 3, .34) 72%,
+      rgba(1, 4, 3, .06) 100%
+    );
+}
+
+/* 页面内容浮在壁纸之上；正文区块自己不铺底色，
+   否则一层层把画面盖死，只剩缝里漏光。 */
+html[data-style="hacker"] .site-header,
+html[data-style="hacker"] main,
+html[data-style="hacker"] .site-footer,
+html[data-style="hacker"] .hnyz-pet {
+  position: relative;
+  z-index: 1;
+}
+
+html[data-style="hacker"] main,
+html[data-style="hacker"] .section,
+html[data-style="hacker"] .section--soft {
+  background-color: transparent;
+}
+
+/* 卡片是半透明的：壁纸能透上来，字仍然清楚 */
+html[data-style="hacker"] .quick-card,
+html[data-style="hacker"] .do-card,
+html[data-style="hacker"] .project-card,
+html[data-style="hacker"] .agenda-card,
+html[data-style="hacker"] .wall-card,
+html[data-style="hacker"] .join-panel,
+html[data-style="hacker"] .join-contact,
+html[data-style="hacker"] .faq-item,
+html[data-style="hacker"] .member-profile,
+html[data-style="hacker"] .archive-group,
+html[data-style="hacker"] .gallery-card,
+html[data-style="hacker"] .project-group {
+  background-color: rgba(4, 12, 7, .74);
+}
+
+html[data-style="hacker"] .site-header,
+html[data-style="hacker"] .site-header.is-scrolled {
+  background: rgba(2, 6, 4, .82);
+  backdrop-filter: blur(8px);
+}
+
+html[data-style="hacker"] .site-footer {
+  background-color: rgba(1, 4, 3, .78);
+}
+
+/* =========================================================
+   控制板：右上角风格按钮旁边多出来的一枚
+   ========================================================= */
+html[data-style="hacker"] .lab-cx-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 9px;
-  border: 1px solid var(--lab-line-2);
-  background: rgba(8, 9, 11, .82);
-  color: var(--lab-text);
-  font-family: inherit;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 2px;
+  background: #061009;
+  color: var(--blue);
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
   font-size: 9px;
-  letter-spacing: 1.2px;
+  font-weight: 600;
+  letter-spacing: 1.1px;
+  line-height: 1;
   cursor: pointer;
+  transition: border-color .18s ease, box-shadow .18s ease, color .18s ease;
 }
 
-html[data-style="hacker"] .lab-console-btn:hover,
-html[data-style="hacker"] .lab-console-btn[aria-expanded="true"] {
-  border-color: var(--lab-accent);
-  color: var(--lab-ink);
+html[data-style="hacker"] .lab-cx-btn svg {
+  width: 17px;
+  height: 17px;
+  display: block;
 }
 
-html[data-style="hacker"] .lab-console-btn kbd {
-  padding: 1px 4px;
-  border: 1px solid var(--lab-line);
-  color: var(--lab-dim);
-  font-family: inherit;
-  font-size: 8px;
+html[data-style="hacker"] .lab-cx-btn:hover,
+html[data-style="hacker"] .lab-cx-btn[aria-expanded="true"] {
+  border-color: var(--blue);
+  color: var(--text);
+  box-shadow: 0 0 0 1px rgba(57, 255, 136, .22), 0 0 20px rgba(57, 255, 136, .22);
 }
 
-/* ---------- 面板 ---------- */
-html[data-style="hacker"] .lab-panels {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  padding: 8px 12px 12px;
-  border-top: 1px solid var(--lab-line);
-  background: var(--lab-bg-2);
-}
-
-html[data-style="hacker"] .lab-p {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  height: clamp(124px, 19vh, 172px);
-  padding: 7px 10px 6px;
-  border: 1px solid var(--lab-line);
-  background: var(--lab-panel);
-  overflow: hidden;
-}
-
-html[data-style="hacker"] .lab-p > h2 {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-  margin: 0 0 6px;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 1.4px;
-  color: var(--lab-ink);
-  white-space: nowrap;
-}
-
-html[data-style="hacker"] .lab-p > h2 span {
-  color: var(--lab-faint);
-  font-weight: 500;
-  letter-spacing: .8px;
-}
-
-html[data-style="hacker"] .lab-p__body {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
-html[data-style="hacker"] .lab-p__cap {
-  margin-top: auto;
-  padding-top: 4px;
-  font-size: 8px;
-  letter-spacing: .8px;
-  color: var(--lab-dim);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* 动态日志 */
-html[data-style="hacker"] .lab-feed {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  height: 100%;
-  font-size: 9px;
-  line-height: 1.55;
-  overflow: hidden;
-}
-
-html[data-style="hacker"] .lab-feed div {
-  display: flex;
-  gap: 6px;
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  color: var(--lab-dim);
-}
-
-html[data-style="hacker"] .lab-feed div span {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-html[data-style="hacker"] .lab-feed div b {
-  color: var(--lab-faint);
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-}
-
-html[data-style="hacker"] .lab-feed div:last-child {
-  color: var(--lab-ink);
-}
-
-/* 索引行 */
-html[data-style="hacker"] .lab-rows {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-}
-
-html[data-style="hacker"] .lab-row {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 2.5px 0;
-  border-bottom: 1px dotted rgba(255, 255, 255, .06);
-  color: var(--lab-text);
-  text-decoration: none;
-  min-width: 0;
-}
-
-html[data-style="hacker"] .lab-row:last-child { border-bottom: 0; }
-
-html[data-style="hacker"] .lab-row i {
-  flex: 0 0 auto;
-  font-style: normal;
-  font-size: 8px;
-  color: var(--lab-faint);
-  font-variant-numeric: tabular-nums;
-}
-
-html[data-style="hacker"] .lab-row span {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 10px;
-}
-
-html[data-style="hacker"] a.lab-row:hover span {
-  color: var(--lab-accent);
-}
-
-html[data-style="hacker"] .lab-row em {
-  flex: 0 0 auto;
-  font-style: normal;
-  font-size: 8px;
-  letter-spacing: .8px;
-  color: var(--lab-dim);
-}
-
-html[data-style="hacker"] .lab-row--thumb {
-  gap: 8px;
-  padding: 3px 0;
-}
-
-html[data-style="hacker"] .lab-row--thumb img {
-  width: 26px;
-  height: 18px;
-  flex: 0 0 26px;
-  object-fit: cover;
-  border: 1px solid var(--lab-line-2);
-}
-
-/* 加入卡 */
-html[data-style="hacker"] .lab-join {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  height: 100%;
-  font-size: 9px;
-}
-
-html[data-style="hacker"] .lab-join dl {
-  display: grid;
-  grid-template-columns: 58px 1fr;
-  gap: 2px 6px;
-  margin: 0;
-}
-
-html[data-style="hacker"] .lab-join dt {
-  color: var(--lab-dim);
-  letter-spacing: .8px;
-}
-
-html[data-style="hacker"] .lab-join dd {
-  margin: 0;
-  color: var(--lab-ink);
-  font-variant-numeric: tabular-nums;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-html[data-style="hacker"] .lab-join__btns {
-  display: flex;
-  gap: 6px;
-  margin-top: auto;
-}
-
-html[data-style="hacker"] .lab-btn {
-  flex: 1;
-  padding: 5px 6px;
-  border: 1px solid var(--lab-line-2);
-  background: transparent;
-  color: var(--lab-text);
-  font-family: inherit;
-  font-size: 9px;
-  letter-spacing: 1px;
-  text-align: center;
-  text-decoration: none;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-html[data-style="hacker"] .lab-btn:hover,
-html[data-style="hacker"] .lab-btn:focus-visible {
-  border-color: var(--lab-accent);
-  color: var(--lab-ink);
-  outline: none;
-}
-
-html[data-style="hacker"] .lab-btn--primary {
-  border-color: var(--lab-accent);
-  background: rgba(127, 179, 255, .12);
-  color: var(--lab-ink);
-}
-
-/* ---------- 调参台 ---------- */
 html[data-style="hacker"] .lab-cx {
   position: fixed;
-  z-index: 40;
-  right: 14px;
-  top: 52px;
-  max-height: calc(100vh - 300px);
+  z-index: 60;
+  top: 74px;
+  right: 18px;
+  width: min(326px, calc(100vw - 28px));
+  max-height: calc(100vh - 110px);
   overflow: auto;
-  width: min(330px, calc(100vw - 28px));
-  border: 1px solid var(--lab-line-2);
-  background: rgba(9, 10, 13, .97);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, .5);
-  font-family: var(--lab-mono);
-  color: var(--lab-text);
+  border: 1px solid var(--border-strong);
+  background: rgba(3, 9, 6, .97);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .62);
+  color: var(--text);
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
 }
 
-html[data-style="hacker"] .lab-cx[hidden] { display: none; }
+html[data-style="hacker"] .lab-cx[hidden] {
+  display: none;
+}
 
 html[data-style="hacker"] .lab-cx__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 7px 10px;
-  border-bottom: 1px solid var(--lab-line);
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
   font-size: 9px;
-  letter-spacing: 1.4px;
-  color: var(--lab-ink);
+  letter-spacing: 1.3px;
+  color: var(--text-soft);
 }
 
 html[data-style="hacker"] .lab-cx__head button {
   width: 20px;
   height: 20px;
   padding: 0;
-  border: 1px solid var(--lab-line-2);
+  border: 1px solid var(--border-strong);
   background: transparent;
-  color: var(--lab-dim);
+  color: var(--muted);
   font-family: inherit;
   font-size: 12px;
   line-height: 1;
@@ -679,28 +912,28 @@ html[data-style="hacker"] .lab-cx__head button {
 }
 
 html[data-style="hacker"] .lab-cx__head button:hover {
-  border-color: var(--lab-accent);
-  color: var(--lab-ink);
+  border-color: var(--blue);
+  color: var(--text);
 }
 
 html[data-style="hacker"] .lab-cx__body {
-  padding: 9px 10px 10px;
+  padding: 10px 11px 12px;
 }
 
 html[data-style="hacker"] .lab-cx__knob {
   display: grid;
-  grid-template-columns: 44px 1fr 34px;
+  grid-template-columns: 46px 1fr 34px;
   align-items: center;
   gap: 8px;
-  padding: 3px 0;
+  padding: 4px 0;
   font-size: 8px;
   letter-spacing: 1.1px;
-  color: var(--lab-dim);
+  color: var(--muted);
 }
 
 html[data-style="hacker"] .lab-cx__knob output {
   text-align: right;
-  color: var(--lab-text);
+  color: var(--text);
   font-variant-numeric: tabular-nums;
 }
 
@@ -716,12 +949,12 @@ html[data-style="hacker"] .lab-cx__knob input[type="range"] {
 
 html[data-style="hacker"] .lab-cx__knob input[type="range"]::-webkit-slider-runnable-track {
   height: 2px;
-  background: var(--lab-line-2);
+  background: var(--border-strong);
 }
 
 html[data-style="hacker"] .lab-cx__knob input[type="range"]::-moz-range-track {
   height: 2px;
-  background: var(--lab-line-2);
+  background: var(--border-strong);
 }
 
 html[data-style="hacker"] .lab-cx__knob input[type="range"]::-webkit-slider-thumb {
@@ -731,7 +964,7 @@ html[data-style="hacker"] .lab-cx__knob input[type="range"]::-webkit-slider-thum
   margin-top: -5px;
   border: 0;
   border-radius: 0;
-  background: var(--lab-accent);
+  background: var(--blue);
 }
 
 html[data-style="hacker"] .lab-cx__knob input[type="range"]::-moz-range-thumb {
@@ -739,130 +972,57 @@ html[data-style="hacker"] .lab-cx__knob input[type="range"]::-moz-range-thumb {
   height: 12px;
   border: 0;
   border-radius: 0;
-  background: var(--lab-accent);
+  background: var(--blue);
 }
 
 html[data-style="hacker"] .lab-cx__presets {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 5px;
-  margin-top: 10px;
+  margin-top: 11px;
 }
 
 html[data-style="hacker"] .lab-cx__presets button {
-  padding: 4px 2px;
-  border: 1px solid var(--lab-line-2);
+  padding: 5px 2px;
+  border: 1px solid var(--border-strong);
   background: transparent;
-  color: var(--lab-dim);
+  color: var(--muted);
   font-family: inherit;
   font-size: 8px;
-  letter-spacing: .8px;
+  letter-spacing: .9px;
   cursor: pointer;
 }
 
 html[data-style="hacker"] .lab-cx__presets button:hover {
-  border-color: var(--lab-accent);
-  color: var(--lab-ink);
+  border-color: var(--blue);
+  color: var(--text);
 }
 
 html[data-style="hacker"] .lab-cx__note {
-  margin: 8px 0 0;
+  margin: 9px 0 0;
   font-size: 8px;
-  line-height: 1.5;
-  color: var(--lab-faint);
+  line-height: 1.6;
+  color: var(--dim);
 }
 
-/* ---------- 窄屏 ---------- */
-@media (max-width: 1080px) {
-  html[data-style="hacker"] body {
-    height: auto;
-    overflow: auto;
+@media (max-width: 720px) {
+  /* 手机屏窄，同样的亮度会压到数字和按钮上 */
+  html[data-style="hacker"] .lab-bg {
+    opacity: .72;
   }
 
-  html[data-style="hacker"] .lab {
-    position: static;
-    height: auto;
-    min-height: 100vh;
-    grid-template-rows: auto 58vh auto;
+  html[data-style="hacker"] .lab-cx-btn {
+    height: 30px;
+    padding: 0 7px;
+    font-size: 8px;
   }
-
-  html[data-style="hacker"] .lab-head {
-    grid-template-columns: 1fr auto;
-    grid-template-areas:
-      "brand actions"
-      "kpis kpis";
-    gap: 8px 10px;
-    padding: 9px 12px 8px;
-  }
-
-  html[data-style="hacker"] .lab-brand { grid-area: brand; }
-  html[data-style="hacker"] .lab-actions { grid-area: actions; }
-  html[data-style="hacker"] .lab-kpis {
-    grid-area: kpis;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-
-  html[data-style="hacker"] .lab-nav { display: none; }
 
   html[data-style="hacker"] .lab-cx {
-    position: fixed;
     top: auto;
     bottom: 12px;
     left: 12px;
     right: 12px;
     width: auto;
-    max-height: 46vh;
+    max-height: 52vh;
   }
-
-  html[data-style="hacker"] .lab-panels {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  html[data-style="hacker"] .lab-p {
-    height: auto;
-    min-height: 118px;
-  }
-}
-
-@media (max-width: 560px) {
-  html[data-style="hacker"] .lab { grid-template-rows: auto 54vh auto; }
-
-  /* 五格挤在 390px 里，中文注释只会被截成「项…」，窄屏只留英文 */
-  html[data-style="hacker"] .lab-kpi b { font-size: 7px; letter-spacing: .8px; }
-  html[data-style="hacker"] .lab-kpi b i { display: none; }
-  html[data-style="hacker"] .lab-kpi { padding: 0 5px 6px; }
-  html[data-style="hacker"] .lab-kpi span { font-size: 13px; }
-
-  html[data-style="hacker"] .lab-hud--chk { display: none; }
-  html[data-style="hacker"] .lab-hud--fps { display: none; }
-
-  /* 舞台矮，四角不能全摆：只留左下拍号、右下状态、右上按钮 */
-  html[data-style="hacker"] .lab-hud--beat { left: 10px; bottom: 8px; gap: 6px; }
-  html[data-style="hacker"] .lab-hud--beat b { font-size: 16px; }
-  html[data-style="hacker"] .lab-hud--beat small:last-of-type { display: none; }
-  html[data-style="hacker"] .lab-hud--status { right: 10px; bottom: 8px; }
-  html[data-style="hacker"] .lab-hud--status span { display: none; }
-  html[data-style="hacker"] .lab-console-btn { right: 10px; top: 8px; bottom: auto; }
-
-  html[data-style="hacker"] .lab-panels { grid-template-columns: 1fr; }
-}
-
-/* ---------- 减少动效 ---------- */
-@media (prefers-reduced-motion: reduce) {
-  html[data-style="hacker"] .lab-pips i { transition: none; }
-}
-
-/* =========================================================
-   风格面板里的黑客卡：换成这一套的蓝，不再是终端绿
-   ========================================================= */
-html[data-style="hacker"] .style-card__glyph--hacker {
-  border-color: rgba(127, 179, 255, .55);
-  background: #06090f;
-  color: var(--lab-accent);
-  box-shadow: 0 0 0 1px rgba(127, 179, 255, .12), 0 0 40px rgba(127, 179, 255, .16),
-    inset 0 0 28px rgba(127, 179, 255, .07);
-}
-
-html[data-style="hacker"] .style-card[data-style-option="hacker"][data-current="true"] {
-  border-color: rgba(127, 179, 255, .5);
 }
