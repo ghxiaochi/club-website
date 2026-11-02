@@ -22,49 +22,6 @@
   <!-- 榜单数据来自 data/ladder.json，由 .github/workflows/ladder.yml
        汇总带 [DINO] 标题的 Issues 生成，页面不需要任何后端。 -->
 
-  <script>
-    /* 风格预置：首帧前挂上上次选的皮肤，避免先闪一下默认风。
-       皮肤样式各自一个文件，只有真的用这套风格才下载。 */
-    (function () {
-      try {
-        var style = localStorage.getItem("hnyz:style") || "default";
-        var sheet = {
-          hacker: "css/skins/skin-hacker.css",
-          minimal: "css/skins/skin-minimal.css",
-          bare: "css/skins/skin-bare.css"
-        }[style];
-
-        /* 默认皮肤也要写上：布局靠 html[data-style] 分流，缺了会落到驾驶舱那套 */
-        var rootEl = document.documentElement;
-        rootEl.dataset.style = style;
-
-        /* 驾驶舱骨架只给黑客风和极简风。默认皮肤不挂 ck-on，
-           cockpit.css 里那套「整页不滚 + 旧变量转暗」就全部失效，
-           回到原始的蓝白长页面。 */
-        if (style === "hacker" || style === "minimal") {
-          rootEl.classList.add("ck-on");
-        }
-
-        if (sheet) {
-          var link = document.createElement("link");
-          link.rel = "stylesheet";
-          link.href = sheet + "?v=20261124";
-          link.setAttribute("data-skin-css", style);
-          document.head.appendChild(link);
-        }
-
-        /* 全屏舞台只服务黑客风，别的皮肤一个字节都不下。
-           引擎自己会等 DOM 就绪再抓 canvas，所以这里可以先插。 */
-        if (style === "hacker") {
-          var stage = document.createElement("script");
-          stage.src = "js/layout/haloflux.js?v=20261124";
-          stage.async = false;
-          document.head.appendChild(stage);
-        }
-      } catch (error) { /* 隐私模式下忽略 */ }
-    })();
-  </script>
-
   <link rel="canonical" href="https://hnyzbcs.de5.net/dino.html">
   <meta property="og:title" content="DINO_RUN 天梯｜HNYZ">
   <meta property="og:description" content="跑一局像素小恐龙，看你能排到第几。">
@@ -81,43 +38,22 @@
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="application-name" content="HNYZ">
 
-  <link rel="stylesheet" href="css/base/style.css?v=20261124">
-  <link rel="stylesheet" href="css/layout/cockpit.css?v=20261124">
-  <link rel="stylesheet" href="css/layout/frames.css?v=20261124">
-  <link rel="stylesheet" href="css/layout/console-panel.css?v=20261124">
-  <link rel="stylesheet" href="css/ui/dino.css?v=20261124">
-  <link rel="stylesheet" href="css/ui/ladder.css?v=20261124">
+  <link rel="stylesheet" href="css/style.css?v=20261130">
+  <link rel="stylesheet" href="css/dino.css?v=20261130">
+  <link rel="stylesheet" href="css/ladder.css?v=20261130">
 </head>
-<body class="ladder-page ck-on-body">
+<body class="ladder-page">
 
-  <div class="ck ck--flat" data-ck>
-
-  <canvas class="ck-halo" data-ck-halo aria-hidden="true"></canvas>
-
-  <header class="ck-head">
-    <a class="ck-brand" href="index.html">
-      <b>HNYZ<i>/</i>天梯</b>
-      <span>DINO_RUN · 08-BIT · GITHUB ISSUE LADDER</span>
+  <header class="ladder-head">
+    <a class="ladder-head__back" href="./">
+      <span aria-hidden="true">←</span> 返回首页
     </a>
-    <div class="ck-kpis">
-      <div class="ck-kpi"><em>TOP SCORE</em><b class="is-accent" data-ck-top>999,999</b><u><i class="is-accent" data-ck-seg="100"></i></u></div>
-      <div class="ck-kpi"><em>PLAYERS</em><b data-ck-players>01</b><u><i data-ck-seg="26"></i></u></div>
-      <div class="ck-kpi"><em>YOUR BEST</em><b data-ck-best>--</b><u><i data-ck-seg="8"></i></u></div>
-      <div class="ck-kpi"><em>SPEED</em><b data-ck-speed>×1</b><u><i data-ck-seg="44"></i></u></div>
-      <div class="ck-kpi"><em>LINK</em><b class="is-live">ISSUE</b><u><i data-ck-seg="72"></i></u></div>
-    </div>
-    <div class="ck-sys">
-      <span class="ck-sys__clock" data-ck-clock>--:--:--</span>
-      <button class="ck-sys__btn" type="button" data-style-toggle aria-label="切换网页风格" aria-haspopup="dialog" aria-expanded="false" title="切换风格">STYLE</button>
-      <button class="ck-sys__btn" type="button" data-theme-toggle aria-label="切换深浅色" aria-pressed="false" title="深浅色">DAY</button>
-      <button class="ck-sys__btn" type="button" data-sound-toggle aria-label="关闭音效" aria-pressed="true" title="音效">SFX</button>
-    </div>
+    <p class="ladder-head__brand">
+      DINO_RUN <span>// 天梯</span>
+    </p>
   </header>
 
-  <main class="ck-stage ck-stage--flat" id="main" tabindex="-1">
-    <div class="ck-corners" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-
-    <div class="ladder" data-ladder>
+  <main class="ladder" data-ladder>
 
     <!-- ---------- 左：游戏 ---------- -->
     <section class="ladder-play" aria-labelledby="ladder-title">
@@ -187,32 +123,9 @@
       </p>
     </aside>
 
-    </div>
-    <div class="ck-scan" aria-hidden="true"></div>
   </main>
 
-  <footer class="ck-bar">
-    <nav class="ck-tabs" aria-label="页面切换">
-      <a href="index.html">HOME</a>
-      <a href="projects.html">PROJECTS</a>
-      <a href="member.html">MEMBER</a>
-      <a href="gallery.html">GALLERY</a>
-      <a href="dino.html" aria-current="page">LADDER</a>
-    </nav>
-    <span class="ck-bar__hint">空格 / ↑ / 点画布起跳 · 死了填昵称上榜</span>
-    <div class="ck-bar__right">
-      <span>© 2026 HNYZ</span>
-      <span>BUILD 20261124</span>
-    </div>
-  </footer>
-
-  </div>
-
-  <script src="js/core/theme.js?v=20261124" defer></script>
-  <script src="js/core/sfx.js?v=20261124" defer></script>
-  <script src="js/layout/skins.js?v=20261124" defer></script>
-  <script src="js/layout/console.js?v=20261124" defer></script>
-  <script src="js/ui/dino.js?v=20261124" defer></script>
-  <script src="js/ui/ladder.js?v=20261124" defer></script>
+  <script src="js/dino.js?v=20261130" defer></script>
+  <script src="js/ladder.js?v=20261130" defer></script>
 </body>
 </html>

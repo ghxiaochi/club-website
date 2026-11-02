@@ -140,7 +140,7 @@
   bottom: 0; /* fallback: 旧内核 */
   left: 0; /* fallback: 旧内核 */
   inset: 0;
-  background-image: url("../../images/decor/animdustry.jpg");
+  background-image: url("../images/decor/animdustry.jpg");
   background-size: cover;
   background-position: center 24%;
 }

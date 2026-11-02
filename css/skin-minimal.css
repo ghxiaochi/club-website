@@ -71,12 +71,7 @@ html[data-style="minimal"][data-theme="dark"] {
   color-scheme: dark;
 }
 
-html[data-style="minimal"] .ck-stage::after {
-  background: linear-gradient(180deg, transparent, var(--ck-bg));
-}
-
-html[data-style="minimal"] body,
-html[data-style="minimal"].ck-on body {
+html[data-style="minimal"] body {
   background: var(--bg);
   background-image: none;
 }
@@ -236,58 +231,4 @@ html[data-style="minimal"][data-theme="dark"] .dino-run {
   --dino-ground: rgba(240, 240, 233, 0.24);
   background: #10100f;
   border-top-color: #2b2b28;
-}
-
-
-/* =========================================================
-   驾驶舱骨架配色：纸白
-   ---------------------------------------------------------
-   极简风在这套结构里是「白纸上的仪表」：线更细、颜色更少，
-   强调色直接退成墨色，只靠字重和间距分层。
-   ========================================================= */
-/* 变量同时挂到 html 上：控制台面板挂在 body 下，不在 .ck 里，
-     否则拿不到这组颜色，会掉回默认的蓝 */
-html[data-style="minimal"],
-html[data-style="minimal"].ck-on,
-html[data-style="minimal"].ck-on .ck {
-  --ck-veil-rgb: 251, 251, 248;
-  --ck-bg: #fbfbf8;
-  --ck-bg-head: #f5f5f1;
-  --ck-panel: #ffffff;
-  --ck-panel-2: #f7f7f3;
-  --ck-line: #e4e4dd;
-  --ck-line-2: #c9c9c0;
-  --ck-text: #2c2c28;
-  --ck-dim: #7d7d73;
-  --ck-faint: #a9a99f;
-  --ck-white: #14140f;
-  --ck-accent: #14140f;
-  --ck-accent-2: #6f6f64;
-
-  --bg: #fbfbf8;
-  --bg-deep: #f4f4f0;
-  --panel: #ffffff;
-  --panel-2: #f7f7f3;
-  --panel-3: #f0f0ea;
-  --border: #e4e4dd;
-  --border-strong: #c9c9c0;
-  --text: #1d1d19;
-  --text-soft: #3a3a34;
-  --muted: #7d7d73;
-  --dim: #8f8f85;
-  --blue: #14140f;
-  --blue-bright: #000000;
-  --green: #4a4a42;
-  --blue-soft: rgba(20, 20, 15, 0.05);
-}
-
-/* 白底上扫描线要用暗线，否则看不见 */
-html[data-style="minimal"] .ck-scan {
-  background:
-    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.018) 0 1px, transparent 1px 3px),
-    radial-gradient(ellipse at 50% 46%, transparent 62%, rgba(0, 0, 0, 0.04) 100%);
-}
-
-html[data-style="minimal"] .ck-halo {
-  opacity: 0.5;
 }

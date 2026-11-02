@@ -49,7 +49,7 @@
 
   const state = { rampage: false, dead: false, scale: 1 };
 
-  /* 音效模块（js/core/sfx.js），没加载时静默降级 */
+  /* 音效模块（js/sfx.js），没加载时静默降级 */
   const sfx = window.HNYZ_SFX || { play() {}, stop() {} };
   const TOMB_CLICKS = 5;
   let tombClicks = 0;

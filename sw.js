@@ -18,7 +18,7 @@
    发版时改 VERSION，旧缓存会在 activate 里被清掉。
    ========================================================= */
 
-const VERSION = "20261124";
+const VERSION = "20261130";
 const CACHE = `hnyz-v${VERSION}`;
 
 /* 站内根路径：用 "./" 就地解析，
@@ -42,29 +42,23 @@ const CORE = [
   "./manifest.webmanifest",
   "./data/repos.json",
   "./data/ladder.json",
-  `./css/base/style.css${V}`,
-  `./css/layout/cockpit.css${V}`,
-  `./css/layout/frames.css${V}`,
-  `./css/layout/console-panel.css${V}`,
-  `./css/base/type.css${V}`,
-  `./css/base/motion.css${V}`,
-  `./css/ui/skins.css${V}`,
-  `./css/ui/personal.css${V}`,
-  `./css/ui/pet.css${V}`,
-  `./css/ui/avatar-pet.css${V}`,
-  `./css/ui/guestbook.css${V}`,
-  `./css/ui/ladder.css${V}`,
-  `./js/core/main.js${V}`,
-  `./js/ui/members.js${V}`,
-  `./js/core/copy.js${V}`,
-  `./js/core/theme.js${V}`,
-  `./js/layout/skins.js${V}`,
-  `./js/core/pwa.js${V}`,
-  `./js/layout/cockpit.js${V}`,
-  `./js/layout/console.js${V}`,
-  `./js/layout/haloflux.js${V}`,
-  `./js/ui/guestbook.js${V}`,
-  `./js/ui/ladder.js${V}`,
+  `./css/style.css${V}`,
+  `./css/type.css${V}`,
+  `./css/motion.css${V}`,
+  `./css/skins.css${V}`,
+  `./css/personal.css${V}`,
+  `./css/pet.css${V}`,
+  `./css/avatar-pet.css${V}`,
+  `./css/guestbook.css${V}`,
+  `./css/ladder.css${V}`,
+  `./js/main.js${V}`,
+  `./js/members.js${V}`,
+  `./js/copy.js${V}`,
+  `./js/theme.js${V}`,
+  `./js/skins.js${V}`,
+  `./js/pwa.js${V}`,
+  `./js/guestbook.js${V}`,
+  `./js/ladder.js${V}`,
   "./images/favicon.svg",
   "./images/icon-192.png"
 ];

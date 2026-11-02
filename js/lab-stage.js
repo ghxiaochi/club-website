@@ -1,8 +1,7 @@
 /* =========================================================
-   HNYZ · 全屏舞台引擎（HALOFLUX）
+   HNYZ · 数据实验室舞台引擎
    ---------------------------------------------------------
-   一个全屏、节拍驱动的科幻数据可视化，四个系统由同一个
-   节拍环境变量驱动：
+   黑客风独占的一块画布，四个系统由同一个节拍环境变量驱动：
 
      1. 节拍时钟   不均匀的 1/8 拍序列，不是等分网格
      2. 编织核心   两千多条二次贝塞尔在圆内交织，跑着光点
@@ -12,8 +11,8 @@
    节拍打在每个系统上：核心分层闪烁、环带急停、光束以波的
    形式沿圆周传播、环内成组光束扫过。
 
-   版式参考 HALOFLUX by Ryder191（PolyForm Noncommercial 1.0.0）。
-   算法与绘制为本项目自写，未复制其源码。
+   版式思路参考 HALOFLUX by Ryder191（PolyForm Noncommercial 1.0.0）。
+   算法、绘制与全部代码为本项目自写，未复制其源码。
    ========================================================= */
 (function () {
   "use strict";
@@ -28,7 +27,7 @@
 
   function boot() {
 
-  var canvas = document.querySelector("[data-ck-halo]");
+  var canvas = document.querySelector("[data-lab-halo]");
   if (!canvas) return;
   var ctx = canvas.getContext("2d", { alpha: true });
   if (!ctx) return;
@@ -82,9 +81,9 @@
   function readColors() {
     var host = canvas.parentElement || canvas;
     var cs = getComputedStyle(host);
-    pal.a = parseColor(cs.getPropertyValue("--ck-accent"), pal.a);
-    pal.b = parseColor(cs.getPropertyValue("--ck-accent-2"), pal.b);
-    pal.bg = parseColor(cs.getPropertyValue("--ck-bg"), pal.bg);
+    pal.a = parseColor(cs.getPropertyValue("--lab-accent"), pal.a);
+    pal.b = parseColor(cs.getPropertyValue("--lab-accent-2"), pal.b);
+    pal.bg = parseColor(cs.getPropertyValue("--lab-bg"), pal.bg);
 
     var lum = 0.299 * pal.bg[0] + 0.587 * pal.bg[1] + 0.114 * pal.bg[2];
     isLight = lum > 140;
@@ -247,8 +246,8 @@
 
     var b = webBase.g;
     var g0 = b.createRadialGradient(0, 0, R * 0.08, 0, 0, R);
-    g0.addColorStop(0, rgba(mix(pal.bg, pal.a, 0.07), 1));
-    g0.addColorStop(0.7, rgba(pal.bg, 1));
+    g0.addColorStop(0, rgba(mix(pal.bg, pal.a, 0.16), 1));
+    g0.addColorStop(0.62, rgba(mix(pal.bg, pal.a, 0.04), 1));
     g0.addColorStop(1, rgba(pal.bg, 1));
     b.fillStyle = g0;
     b.beginPath();
@@ -259,13 +258,15 @@
     for (var c = 0; c < all.length; c += 1) {
       all[c].g.save();
       all[c].g.beginPath();
-      all[c].g.arc(0, 0, R - 0.5, 0, TAU);
+      all[c].g.arc(0, 0, Math.max(0.5, R - 0.5), 0, TAU);
       all[c].g.clip();
     }
 
     curves = [];
     /* 纸白皮肤下同密度的线会糊成一片灰雾，减到四成刚好 */
-    var N = Math.min(4200, Math.round((1600 + (W * H) / 900) * CFG.web * (isLight ? 0.42 : 1)));
+    /* 线数跟着半径的平方走：环缩小后还用原来的条数，
+       整个核心会糊成一团静电噪声，看不出「编织」 */
+    var N = Math.min(3200, Math.round(1000 * Math.pow(R / 300, 2) * CFG.web * (isLight ? 0.42 : 1)));
 
     for (var k = 0; k < N; k += 1) {
       var a1 = rnd() * TAU;
@@ -296,7 +297,7 @@
     }
 
     /* 中心加密：短曲线只落在内圈，堆出「核」的密度 */
-    var dense = Math.round(700 * CFG.web);
+    var dense = Math.round(420 * Math.pow(R / 300, 2) * CFG.web);
     for (var d0 = 0; d0 < dense; d0 += 1) {
       var dA1 = rnd() * TAU;
       var dA2 = dA1 + rr(0.4, Math.PI);
@@ -312,11 +313,54 @@
       b.stroke();
     }
 
-    /* 节点：小圆环 + 编号，让核心像一张被测量的图 */
     var nb = webBase.g;
     nb.font = "6px " + MONO;
     nb.textBaseline = "middle";
-    for (var m = 0; m < 56; m += 1) {
+    /* 长丝：二十四根横跨核心的大弧。
+       随机短线给的是纹理，这几根给的是「丝」——
+       有它们，核心才不是一团噪点，而是一张绷紧的网。 */
+    for (var fs = 0; fs < 44; fs += 1) {
+      var sA1 = (fs / 44) * TAU + rr(-0.12, 0.12);
+      var sSpan = rr(0.9, 2.5);
+      var sA2 = sA1 + sSpan;
+      var sR1 = R * rr(0.9, 0.99);
+      var sR2 = R * rr(0.9, 0.99);
+      var sCx = gauss() * R * 0.28;
+      var sCy = gauss() * R * 0.28;
+      nb.strokeStyle = rgba(mix(INK, pal.a, 0.7), rr(0.09, 0.22));
+      nb.lineWidth = rr(0.6, 1.1);
+      nb.beginPath();
+      nb.moveTo(Math.cos(sA1) * sR1, Math.sin(sA1) * sR1);
+      nb.quadraticCurveTo(sCx, sCy, Math.cos(sA2) * sR2, Math.sin(sA2) * sR2);
+      nb.stroke();
+    }
+
+    /* 结构线：几道同心弧 + 一圈辐条。
+       纯随机曲线只会是噪声，有了这几根骨架才读得出「编织」 */
+    var rings = [0.36, 0.52, 0.68, 0.84];
+    for (var r0i = 0; r0i < rings.length; r0i += 1) {
+      var rr0 = R * rings[r0i];
+      nb.strokeStyle = rgba(INK, 0.16 + r0i * 0.03);
+      nb.lineWidth = 0.8;
+      nb.setLineDash([1.5, 5]);
+      nb.beginPath();
+      nb.arc(0, 0, rr0, 0, TAU);
+      nb.stroke();
+      nb.setLineDash([]);
+    }
+
+    for (var sp = 0; sp < 18; sp += 1) {
+      var sa = (sp / 18) * TAU + 0.11;
+      nb.strokeStyle = rgba(INK, 0.055);
+      nb.lineWidth = 0.6;
+      nb.beginPath();
+      nb.moveTo(Math.cos(sa) * R * 0.2, Math.sin(sa) * R * 0.2);
+      nb.lineTo(Math.cos(sa) * R * 0.97, Math.sin(sa) * R * 0.97);
+      nb.stroke();
+    }
+
+    /* 节点：小圆环 + 编号，让核心像一张被测量的图 */
+    for (var m = 0; m < 40; m += 1) {
       var rad = Math.sqrt(rnd()) * R * 0.9;
       var ang = rnd() * TAU;
       var px = Math.cos(ang) * rad;
@@ -372,8 +416,8 @@
     coreGlow = offscreen(size, size, 0.5);
     var cg = coreGlow.g;
     var gr = cg.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, R);
-    gr.addColorStop(0, rgba(pal.a, 0.3));
-    gr.addColorStop(0.22, rgba(pal.a, 0.13));
+    gr.addColorStop(0, rgba(pal.a, 0.42));
+    gr.addColorStop(0.22, rgba(pal.a, 0.18));
     gr.addColorStop(0.6, rgba(pal.a, 0.04));
     gr.addColorStop(1, rgba(pal.a, 0));
     cg.fillStyle = gr;
@@ -928,11 +972,11 @@
 
   function buildOuter() {
     strandLayers = [
-      { step: 0.235, rot: 0.38, lum: 0.26, lw: 0.5, len: 1.9, lines: 980, n: [18, 70], top: 0.2 },
-      { step: 0.175, rot: 0.68, lum: 0.5, lw: 0.75, len: 1.72, lines: 860, n: [14, 60], top: 0.3 },
-      { step: 0.13, rot: 1.0, lum: 1.15, lw: 1.0, len: 1.62, lines: 780, n: [12, 52], top: 0.36 },
-      { step: 0.42, rot: 1.0, lum: 0.85, lw: 1.75, len: 1.35, lines: 150, n: [3, 12], top: 0.34 },
-      { step: 0.13, rot: 1.0, lum: 0.8, lw: 0.9, len: 1.55, lines: 680, n: [12, 58], top: 0.32 }
+      { step: 0.235, rot: 0.38, lum: 0.2, lw: 0.5, len: 1.9, lines: 430, n: [18, 70], top: 0.2 },
+      { step: 0.175, rot: 0.68, lum: 0.38, lw: 0.75, len: 1.72, lines: 380, n: [14, 60], top: 0.3 },
+      { step: 0.13, rot: 1.0, lum: 0.86, lw: 1.0, len: 1.62, lines: 330, n: [12, 52], top: 0.36 },
+      { step: 0.42, rot: 1.0, lum: 0.6, lw: 1.75, len: 1.35, lines: 70, n: [3, 12], top: 0.34 },
+      { step: 0.13, rot: 1.0, lum: 0.58, lw: 0.9, len: 1.55, lines: 280, n: [12, 58], top: 0.32 }
     ].map(mkLayer);
     strandLayers[4].wave = true;
 
@@ -1016,7 +1060,7 @@
         }
 
         if (!drew) continue;
-        var base = [0.17, 0.4, 0.82][tier] * o.lum;
+        var base = [0.085, 0.2, 0.42][tier] * o.lum;
         var alpha = far ? base * 0.62 : base * 1.35;
         if (isLight) alpha *= 1.75;
         ctx.strokeStyle = li % 2 === 0 ? rgba(INK, alpha) : rgba(mix(pal.a, INK, 0.45), alpha);
@@ -1260,23 +1304,20 @@
     canvas.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
+    /* 刚插进 DOM 的那一帧量到的是 0×0：这时候算出来的半径是负数，
+       画弧会直接抛异常，整个引擎就停在那儿了。等有尺寸再画。 */
+    if (W < 24 || H < 24) return;
+
     var small = W < 780;
-    /* 环要大到出画：只留一段弧横在画面里，剩下交给环外光束 */
-    R = small ? H * 0.58 : Math.max(H * 0.58, W * 0.30);
+    /* 环整只留在舞台里，光束再往画外跑：
+       环径按短边定，宽屏上另外压一道 0.30W 的上限，
+       免得 21:9 的屏幕上环被拉成一条横带。 */
+    R = Math.min(H * (small ? 0.42 : 0.365), W * (small ? 0.44 : 0.30));
     BAND = R * 0.2 * clamp(CFG.ring, 0.8, 1.3);
     RO = R + BAND;
     RMAX = Math.hypot(W, H) * 1.05;
-    cx = W * (small ? 0.5 : 0.38);
+    cx = W * 0.5;
     cy = H * 0.5;
-
-    /* 黑客皮肤的舞台只占左边一列，右半被日志栏压着。
-       环按舞台宽度收一号，否则整段弧线都藏到面板底下 */
-    if (document.documentElement.dataset.style === "hacker" && !small) {
-      R *= 0.78;
-      BAND = R * 0.2 * clamp(CFG.ring, 0.8, 1.3);
-      RO = R + BAND;
-      cx = W * 0.28;
-    }
 
     buildWeb();
     buildSlots();
@@ -1320,6 +1361,15 @@
     drawComets(dt);
     drawRing(dt);
     drawFlares(dt);
+
+    /* 压边：光束打到画框边上收一点，舞台才有镜头感，
+       不然四周一片白，环反而被淹掉 */
+    var vg = ctx.createRadialGradient(0, 0, RO, 0, 0, Math.max(W, H) * 0.72);
+    vg.addColorStop(0, rgba(pal.bg, 0));
+    vg.addColorStop(0.55, rgba(pal.bg, 0.12));
+    vg.addColorStop(1, rgba(pal.bg, 0.62));
+    ctx.fillStyle = vg;
+    ctx.fillRect(-W, -H, W * 3, H * 3);
 
     /* 中心准星：标出"这里是被测量的点" */
     ctx.strokeStyle = rgba(pal.a, 0.22);
@@ -1428,12 +1478,6 @@
     draw(0.016);
   });
 
-  /* 滚动阅读时让位：相机回全景 */
-  var view = document.querySelector("[data-ck-view]");
-  if (view) {
-    view.addEventListener("scroll", function () { camHold = 1.2; }, { passive: true });
-  }
-
   readColors();
   resize();
   if (reduce.matches) draw(0);
@@ -1443,6 +1487,8 @@
     stop: stop,
     start: start,
     cfg: CFG,
+    /* 给顶栏读数用：第几拍、当下包络、每分钟拍数 */
+    beat: function () { return { n: beat.n, env: beat.env, bpm: Math.round(60 / (0.225 / CFG.tempo) / 2) }; },
     redraw: function () { draw(0.016); },
     /* 改密度 / 环径这类参数后必须重建缓存，光改 CFG 看不出来 */
     rebuild: function () {

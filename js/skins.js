@@ -1,14 +1,11 @@
 /* =========================================================
    HNYZ · 风格系统
    ---------------------------------------------------------
-   四套皮肤，四套完全不同的框架：
-     default  蓝白科技：普通站点，整页滚动，没有舞台
-     minimal  极简：三行骨架，内容满宽，底部一条细索引
-     hacker   黑客终端：全屏驾驶舱，唯一的 haloflux 舞台
-     bare     棍木：整页空白，只留右上角的退出按钮
-
-   「控制台」不是皮肤，是任何皮肤下都能按 C 打开的调参面板
-   （js/layout/console.js），它调的是舞台引擎的参数。
+   四个皮肤：
+     default  现在的蓝白科技风
+     minimal  去装饰的极简风
+     hacker   数据实验室：全屏节拍舞台 + 面板网格 + 调参台
+     bare     棍木：整页空白，只留右上角的风格按钮和一句灰字
    顶栏的方块打开一个竖向卡片面板，切换时用整屏向上擦除。
    选择写进 localStorage，四个页面共用。
    ========================================================= */
@@ -27,7 +24,7 @@
   const NAMES = {
     default: "蓝白科技",
     minimal: "极简",
-    hacker: "黑客终端",
+    hacker: "数据实验室",
     bare: "棍木"
   };
 
@@ -51,22 +48,20 @@
 
   current = readStored();
   root.dataset.style = current;
-  root.classList.toggle("ck-on", current === "hacker" || current === "minimal");
 
   /* -------------------------------------------------------
      按需下载：只有真的用到才付这份字节
      -------------------------------------------------------
      1. 三套皮肤的样式各自一个文件（skins.css 只留面板和公共部分），
         默认皮肤的用户完全不用下载它们。
-     2. 代码雨只在黑客风下画，别的皮肤一行都不需要，
-        所以从各页 HTML 里撤掉了 matrix.js，改在这里注入。
+     2. 黑客风整页由 lab.js 现搭，也只在选中它时才下载。
      ------------------------------------------------------- */
   const SKIN_CSS = {
-    hacker: "css/skins/skin-hacker.css",
-    minimal: "css/skins/skin-minimal.css",
-    bare: "css/skins/skin-bare.css"
+    hacker: "css/skin-hacker.css",
+    minimal: "css/skin-minimal.css",
+    bare: "css/skin-bare.css"
   };
-  const VERSION = "20261124";
+  const VERSION = "20261130";
 
   const cssReady = new Map();
 
@@ -102,44 +97,29 @@
     return done;
   }
 
-  let matrixRequested = false;
+  /* 黑客风不是一套 CSS 皮肤，而是一整页实验室版式：
+     顶栏 KPI、全屏舞台、面板网格都由 lab.js 现搭，
+     所以这里只负责把它请进来 */
+  let labRequested = false;
 
-  function ensureMatrix() {
-    if (matrixRequested) return;
-    matrixRequested = true;
+  function ensureLab() {
+    if (labRequested) return;
+    labRequested = true;
     const script = document.createElement("script");
-    script.src = "js/skins/matrix.js?v=20261119";
-    script.async = true;
-    document.body.appendChild(script);
-  }
-
-  /* 全屏舞台只有黑客风有。别的皮肤连这个脚本都不下载。
-     head 的预置脚本已经在首屏插过一份，这里只处理运行时切过去的情况。 */
-  let stageRequested = false;
-
-  function ensureStage() {
-    if (stageRequested || window.HNYZ_STAGE) return;
-    if (document.querySelector("script[data-ck-stage]")) return;
-    stageRequested = true;
-    const script = document.createElement("script");
-    script.src = `js/layout/haloflux.js?v=${VERSION}`;
-    script.async = true;
-    script.dataset.ckStage = "";
+    script.src = `js/lab.js?v=${VERSION}`;
+    script.async = false;
     document.body.appendChild(script);
   }
 
   if (current !== "default") ensureSkinCss(current);
-  if (current === "hacker") {
-    ensureMatrix();
-    ensureStage();
-  }
+  if (current === "hacker") ensureLab();
 
 
   /* -------------------------------------------------------
-     一、黑客风的背景层：一层漂浮的气泡
+     一、背景层：一层漂浮的气泡
      -------------------------------------------------------
-     代码雨在 js/skins/matrix.js 里画，气泡放在 DOM 里用 CSS 动，
-     只跑 transform，便宜且不会和画布抢帧。
+     气泡放在 DOM 里用 CSS 动，只跑 transform，
+     便宜且不会和画布抢帧。
      尺寸、位置、速度、延迟都写死在行内，刷新也不会变。
      ------------------------------------------------------- */
   const bubbles = document.createElement("div");
@@ -240,7 +220,7 @@
           <div class="style-card__glyph style-card__glyph--default" aria-hidden="true">&lt;/&gt;</div>
           <p class="style-card__kicker">BLUE_TECH</p>
           <h3 class="style-card__title">蓝白科技</h3>
-          <p class="style-card__desc">普通站点：顶部导航、整页滚动、蓝白配色。没有舞台，读起来最快。</p>
+          <p class="style-card__desc">现在这套蓝白配色。光斑、角色排、桌宠和全部动效都保留。</p>
           <div class="style-card__swatches" aria-hidden="true">
             <i style="--c:#f5f9ff"></i><i style="--c:#2563eb"></i><i style="--c:#0f2744"></i>
           </div>
@@ -262,17 +242,18 @@
         <article class="style-card" data-style-option="hacker">
           <div class="style-card__top"><span>03 / HACKER</span><span class="style-card__current">当前风格</span></div>
           <div class="style-card__glyph style-card__glyph--hacker" aria-hidden="true">&gt;_</div>
-          <p class="style-card__kicker">ROOT_ACCESS</p>
-          <h3 class="style-card__title">黑客终端</h3>
-          <p class="style-card__desc">全屏驾驶舱 + haloflux 舞台：编织核心、数据环带、向外迸发的光束，按 C 调参。</p>
+          <p class="style-card__kicker">BEAT_DRIVEN</p>
+          <h3 class="style-card__title">数据实验室</h3>
+          <p class="style-card__desc">全屏节拍舞台：编织核心、旋转数据环、外侧楔形光束，四个系统同一个拍子。</p>
           <div class="style-card__swatches" aria-hidden="true">
             <i style="--c:#030705"></i><i style="--c:#39ff88"></i><i style="--c:#00e5ff"></i>
           </div>
           <button class="style-card__apply" type="button" data-style-pick="hacker">应用此风格</button>
         </article>
 
+
         <article class="style-card" data-style-option="bare">
-          <div class="style-card__top"><span>05 / BARE</span><span class="style-card__current">当前风格</span></div>
+          <div class="style-card__top"><span>04 / BARE</span><span class="style-card__current">当前风格</span></div>
           <div class="style-card__glyph style-card__glyph--bare" aria-hidden="true"><span></span></div>
           <p class="style-card__kicker">NOTHING_HERE</p>
           <h3 class="style-card__title">棍木</h3>
@@ -515,13 +496,7 @@
     current = next;
     root.dataset.style = next;
 
-    /* 骨架只在黑客 / 极简下挂：默认皮肤要回到普通站点 */
-    root.classList.toggle("ck-on", next === "hacker" || next === "minimal");
-
-    if (next === "hacker") {
-      ensureMatrix();
-      ensureStage();
-    }
+    if (next === "hacker") ensureLab();
     setBareMode(next === "bare");
 
     /* 黑客风固定深夜：主题由 theme.js 监听 hnyz:stylechange 统一处理，
@@ -580,7 +555,7 @@
     /* 新皮肤的样式先到位，再开始转场：
        否则幕布揭到一半，样式还在路上，露出的是半套旧样式 */
     await ensureSkinCss(next);
-
+    if (next === "hacker") ensureLab();
 
     if (reduce.matches) {
       closeDeck();

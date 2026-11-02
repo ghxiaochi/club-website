@@ -2,13 +2,13 @@
    HNYZ · 衡南一中编程社 — 页面交互
    ---------------------------------------------------------
    这份脚本负责：
-   1. 读取 js/ui/members.js 的 HNYZ_MEMBERS，用 Promise.all 并发请求 GitHub API
+   1. 读取 js/members.js 的 HNYZ_MEMBERS，用 Promise.all 并发请求 GitHub API
    2. 渲染赛博风项目卡片（封面、简介、语言、Stars、Forks）
    3. 处理 403 限流 / 404 仓库不存在 / 网络异常，自动降级
    4. QQ 群号、邮箱一键复制
    5. 移动端导航、页头滚动状态、页脚年份
 
-   想换展示的项目，只改 js/ui/members.js 即可。
+   想换展示的项目，只改 js/members.js 即可。
    不需要后端，也不需要构建工具。
    ========================================================= */
 
@@ -25,7 +25,7 @@
      title    : 可选，卡片上显示的中文项目名；不填就用仓库名。
      desc     : 可选，本地简介。GitHub 仓库没写简介时用它兜底。
      ======================================================= */
-  /* 项目清单在 js/ui/members.js，避免和页面逻辑混在一起 */
+  /* 项目清单在 js/members.js，避免和页面逻辑混在一起 */
   const members = Array.isArray(window.HNYZ_MEMBERS) ? window.HNYZ_MEMBERS : [];
 
   const API_BASE = "https://api.github.com/repos";
@@ -430,7 +430,7 @@
     if (!projects.length) {
       const empty = document.createElement("p");
       empty.className = "project-empty";
-      empty.textContent = "项目清单还是空的，先在 js/ui/members.js 里填入一个 GitHub 仓库吧。";
+      empty.textContent = "项目清单还是空的，先在 js/members.js 里填入一个 GitHub 仓库吧。";
       grid.appendChild(empty);
     } else {
       const fragment = document.createDocumentFragment();
@@ -601,7 +601,7 @@
     return cacheHits ? "CACHE" : "GITHUB_API";
   }
 
-  /* 成员主页横幅：数据在 js/ui/members.js 的 HNYZ_PROFILES 里，
+  /* 成员主页横幅：数据在 js/members.js 的 HNYZ_PROFILES 里，
      main.js 只负责渲染；没有配置横幅的成员不显示这一块。 */
   function createMemberProfile(user) {
     const profiles = window.HNYZ_PROFILES || {};
@@ -754,7 +754,7 @@
     if (!grouped.length) {
       const empty = document.createElement("p");
       empty.className = "project-empty";
-      empty.textContent = "项目清单还是空的，先在 js/ui/members.js 里填入一个 GitHub 仓库吧。";
+      empty.textContent = "项目清单还是空的，先在 js/members.js 里填入一个 GitHub 仓库吧。";
       groupsRoot.appendChild(empty);
       groupsRoot.setAttribute("aria-busy", "false");
       if (count) count.textContent = "0 MEMBERS // 0 REPOS";

@@ -1,0 +1,868 @@
+/* =========================================================
+   HNYZ · 黑客风 = 数据实验室
+   ---------------------------------------------------------
+   这不是给现有页面换一层配色，而是一整页另起的版式：
+     顶栏   品牌 + 五个 KPI + 时钟
+     舞台   全屏画布，编织核心 / 数据环带 / 外侧光束同拍
+     面板   四格：动态、索引、节拍、加入
+   原来的页头、正文、桌宠全在这一套里让位，切回别的风格
+   时整块拆掉，DOM 恢复原样（见 js/lab.js）。
+   ========================================================= */
+
+html[data-style="hacker"] {
+  --lab-bg: #08090b;
+  --lab-bg-2: #0a0b0d;
+  --lab-panel: #0c0e12;
+  --lab-line: #23262d;
+  --lab-line-2: #343943;
+  --lab-text: #c9ced8;
+  --lab-dim: #7b818d;
+  --lab-faint: #545a66;
+  --lab-ink: #f2f4f8;
+  --lab-accent: #7fb3ff;
+  --lab-accent-2: #98e0cf;
+  --lab-warn: #f0a6c6;
+  --lab-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans Mono", monospace;
+  --lab-sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  background: var(--lab-bg);
+}
+
+/* 实验室挂上之后，其余一切都让位。
+   只留风格面板（dialog）和换肤幕布，它们必须浮在最上层。 */
+html[data-style="hacker"] body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--lab-bg);
+  color: var(--lab-text);
+}
+
+html[data-style="hacker"] body > *:not(.lab):not(.lab-cx):not(dialog):not(.style-wipe):not(script):not(noscript):not(template) {
+  display: none !important;
+}
+
+/* ---------- 骨架 ---------- */
+html[data-style="hacker"] .lab {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  background: var(--lab-bg);
+  color: var(--lab-text);
+  font-family: var(--lab-mono);
+  font-size: 12px;
+  z-index: 1;
+}
+
+/* ---------- 顶栏 ---------- */
+html[data-style="hacker"] .lab-head {
+  display: grid;
+  grid-template-columns: minmax(212px, 1.35fr) minmax(0, 3fr) auto;
+  align-items: center;
+  gap: 0 14px;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--lab-line);
+  background: var(--lab-bg-2);
+}
+
+html[data-style="hacker"] .lab-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+html[data-style="hacker"] .lab-brand__mark {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  border: 1px solid var(--lab-line-2);
+  color: var(--lab-accent);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+
+html[data-style="hacker"] .lab-brand__name {
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: var(--lab-ink);
+  white-space: nowrap;
+}
+
+html[data-style="hacker"] .lab-brand__name i {
+  color: var(--lab-faint);
+  font-style: normal;
+  padding: 0 2px;
+}
+
+html[data-style="hacker"] .lab-brand em {
+  display: block;
+  margin-top: 2px;
+  font-size: 8px;
+  font-style: normal;
+  letter-spacing: 1.4px;
+  color: var(--lab-dim);
+  white-space: nowrap;
+}
+
+html[data-style="hacker"] .lab-kpis {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 2px;
+  min-width: 0;
+}
+
+html[data-style="hacker"] .lab-kpi {
+  position: relative;
+  min-width: 0;
+  padding: 0 8px 7px;
+  border-bottom: 1px solid var(--lab-line);
+}
+
+html[data-style="hacker"] .lab-kpi i {
+  display: block;
+  height: 2px;
+  margin-top: 6px;
+  background: var(--lab-accent);
+  transform-origin: left center;
+  transform: scaleX(var(--seg, .4));
+  opacity: .8;
+}
+
+html[data-style="hacker"] .lab-kpi--b i { background: var(--lab-accent-2); }
+html[data-style="hacker"] .lab-kpi--w i { background: var(--lab-warn); }
+
+html[data-style="hacker"] .lab-kpi b i {
+  font-style: normal;
+  color: var(--lab-faint);
+}
+
+html[data-style="hacker"] .lab-kpi b i {
+  font-style: normal;
+  color: var(--lab-faint);
+}
+
+html[data-style="hacker"] .lab-kpi b {
+  display: block;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 1.3px;
+  color: var(--lab-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+html[data-style="hacker"] .lab-kpi span {
+  display: block;
+  margin-top: 2px;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--lab-ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+html[data-style="hacker"] .lab-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+html[data-style="hacker"] .lab-nav {
+  display: flex;
+  gap: 10px;
+  margin-right: 4px;
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+
+html[data-style="hacker"] .lab-nav a {
+  color: var(--lab-dim);
+  text-decoration: none;
+  padding: 3px 0;
+  border-bottom: 1px solid transparent;
+}
+
+html[data-style="hacker"] .lab-nav a:hover,
+html[data-style="hacker"] .lab-nav a:focus-visible {
+  color: var(--lab-ink);
+  border-bottom-color: var(--lab-accent);
+  outline: none;
+}
+
+html[data-style="hacker"] .lab-nav a[aria-current="page"] {
+  color: var(--lab-accent);
+}
+
+html[data-style="hacker"] .lab-clock {
+  font-size: 11px;
+  letter-spacing: 1.6px;
+  color: var(--lab-text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* 风格按钮挪进实验室顶栏，尺寸按这一套重来 */
+html[data-style="hacker"] .lab-actions [data-style-toggle] {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--lab-line-2);
+  border-radius: 0;
+  background: transparent;
+  color: var(--lab-text);
+  cursor: pointer;
+}
+
+html[data-style="hacker"] .lab-actions [data-style-toggle]:hover,
+html[data-style="hacker"] .lab-actions [data-style-toggle][aria-expanded="true"] {
+  border-color: var(--lab-accent);
+  color: var(--lab-ink);
+}
+
+html[data-style="hacker"] .lab-actions [data-style-toggle] .style-toggle__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 5px);
+  grid-template-rows: repeat(2, 5px);
+  gap: 2px;
+}
+
+html[data-style="hacker"] .lab-actions [data-style-toggle] .style-toggle__grid i {
+  background: currentColor;
+  border-radius: 0;
+}
+
+/* ---------- 舞台 ---------- */
+html[data-style="hacker"] .lab-stage {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 32% 50%, rgba(127, 179, 255, .07), transparent 62%),
+    var(--lab-bg);
+}
+
+html[data-style="hacker"] .lab-stage canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* 扫描线：很淡，只为了让整块画布有「屏幕」的质感 */
+html[data-style="hacker"] .lab-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, .16) 0 1px,
+    transparent 1px 3px
+  );
+  opacity: .5;
+}
+
+html[data-style="hacker"] .lab-hud {
+  position: absolute;
+  z-index: 2;
+  font-size: 9px;
+  letter-spacing: 1.1px;
+  color: var(--lab-text);
+  pointer-events: none;
+}
+
+html[data-style="hacker"] .lab-hud--chk {
+  left: 12px;
+  top: 10px;
+  padding: 6px 9px;
+  border: 1px solid var(--lab-line-2);
+  background: rgba(8, 9, 11, .86);
+}
+
+html[data-style="hacker"] .lab-hud--chk b {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 1.3px;
+  color: var(--lab-dim);
+}
+
+html[data-style="hacker"] .lab-hud--chk span {
+  display: block;
+  color: var(--lab-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-style="hacker"] .lab-hud--chk em {
+  display: block;
+  margin-top: 3px;
+  font-style: normal;
+  color: var(--lab-dim);
+}
+
+html[data-style="hacker"] .lab-hud--beat {
+  left: 12px;
+  bottom: 10px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+html[data-style="hacker"] .lab-hud--beat b {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0;
+  color: var(--lab-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-style="hacker"] .lab-hud--beat small {
+  font-size: 8px;
+  letter-spacing: 1.2px;
+  color: var(--lab-dim);
+}
+
+/* 节拍点：四个小方块按拍亮 */
+html[data-style="hacker"] .lab-pips {
+  display: inline-flex;
+  gap: 4px;
+  margin-left: 2px;
+  vertical-align: 2px;
+}
+
+html[data-style="hacker"] .lab-pips i {
+  width: 5px;
+  height: 5px;
+  background: var(--lab-line-2);
+  transition: background .12s linear;
+}
+
+html[data-style="hacker"] .lab-pips i.is-on {
+  background: var(--lab-accent);
+}
+
+html[data-style="hacker"] .lab-hud--status {
+  right: 12px;
+  bottom: 10px;
+  text-align: right;
+}
+
+html[data-style="hacker"] .lab-hud--status b {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: var(--lab-ink);
+}
+
+html[data-style="hacker"] .lab-hud--status span {
+  display: block;
+  margin-top: 3px;
+  color: var(--lab-dim);
+}
+
+html[data-style="hacker"] .lab-hud--fps {
+  right: 12px;
+  top: 10px;
+  color: var(--lab-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* CONSOLE 按钮 */
+html[data-style="hacker"] .lab-console-btn {
+  position: absolute;
+  z-index: 3;
+  right: 52px;
+  top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border: 1px solid var(--lab-line-2);
+  background: rgba(8, 9, 11, .82);
+  color: var(--lab-text);
+  font-family: inherit;
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  cursor: pointer;
+}
+
+html[data-style="hacker"] .lab-console-btn:hover,
+html[data-style="hacker"] .lab-console-btn[aria-expanded="true"] {
+  border-color: var(--lab-accent);
+  color: var(--lab-ink);
+}
+
+html[data-style="hacker"] .lab-console-btn kbd {
+  padding: 1px 4px;
+  border: 1px solid var(--lab-line);
+  color: var(--lab-dim);
+  font-family: inherit;
+  font-size: 8px;
+}
+
+/* ---------- 面板 ---------- */
+html[data-style="hacker"] .lab-panels {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  padding: 8px 12px 12px;
+  border-top: 1px solid var(--lab-line);
+  background: var(--lab-bg-2);
+}
+
+html[data-style="hacker"] .lab-p {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: clamp(124px, 19vh, 172px);
+  padding: 7px 10px 6px;
+  border: 1px solid var(--lab-line);
+  background: var(--lab-panel);
+  overflow: hidden;
+}
+
+html[data-style="hacker"] .lab-p > h2 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  color: var(--lab-ink);
+  white-space: nowrap;
+}
+
+html[data-style="hacker"] .lab-p > h2 span {
+  color: var(--lab-faint);
+  font-weight: 500;
+  letter-spacing: .8px;
+}
+
+html[data-style="hacker"] .lab-p__body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+html[data-style="hacker"] .lab-p__cap {
+  margin-top: auto;
+  padding-top: 4px;
+  font-size: 8px;
+  letter-spacing: .8px;
+  color: var(--lab-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 动态日志 */
+html[data-style="hacker"] .lab-feed {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  font-size: 9px;
+  line-height: 1.55;
+  overflow: hidden;
+}
+
+html[data-style="hacker"] .lab-feed div {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  color: var(--lab-dim);
+}
+
+html[data-style="hacker"] .lab-feed div span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+html[data-style="hacker"] .lab-feed div b {
+  color: var(--lab-faint);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-style="hacker"] .lab-feed div:last-child {
+  color: var(--lab-ink);
+}
+
+/* 索引行 */
+html[data-style="hacker"] .lab-rows {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+html[data-style="hacker"] .lab-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 2.5px 0;
+  border-bottom: 1px dotted rgba(255, 255, 255, .06);
+  color: var(--lab-text);
+  text-decoration: none;
+  min-width: 0;
+}
+
+html[data-style="hacker"] .lab-row:last-child { border-bottom: 0; }
+
+html[data-style="hacker"] .lab-row i {
+  flex: 0 0 auto;
+  font-style: normal;
+  font-size: 8px;
+  color: var(--lab-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-style="hacker"] .lab-row span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+}
+
+html[data-style="hacker"] a.lab-row:hover span {
+  color: var(--lab-accent);
+}
+
+html[data-style="hacker"] .lab-row em {
+  flex: 0 0 auto;
+  font-style: normal;
+  font-size: 8px;
+  letter-spacing: .8px;
+  color: var(--lab-dim);
+}
+
+html[data-style="hacker"] .lab-row--thumb {
+  gap: 8px;
+  padding: 3px 0;
+}
+
+html[data-style="hacker"] .lab-row--thumb img {
+  width: 26px;
+  height: 18px;
+  flex: 0 0 26px;
+  object-fit: cover;
+  border: 1px solid var(--lab-line-2);
+}
+
+/* 加入卡 */
+html[data-style="hacker"] .lab-join {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  height: 100%;
+  font-size: 9px;
+}
+
+html[data-style="hacker"] .lab-join dl {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  gap: 2px 6px;
+  margin: 0;
+}
+
+html[data-style="hacker"] .lab-join dt {
+  color: var(--lab-dim);
+  letter-spacing: .8px;
+}
+
+html[data-style="hacker"] .lab-join dd {
+  margin: 0;
+  color: var(--lab-ink);
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html[data-style="hacker"] .lab-join__btns {
+  display: flex;
+  gap: 6px;
+  margin-top: auto;
+}
+
+html[data-style="hacker"] .lab-btn {
+  flex: 1;
+  padding: 5px 6px;
+  border: 1px solid var(--lab-line-2);
+  background: transparent;
+  color: var(--lab-text);
+  font-family: inherit;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+html[data-style="hacker"] .lab-btn:hover,
+html[data-style="hacker"] .lab-btn:focus-visible {
+  border-color: var(--lab-accent);
+  color: var(--lab-ink);
+  outline: none;
+}
+
+html[data-style="hacker"] .lab-btn--primary {
+  border-color: var(--lab-accent);
+  background: rgba(127, 179, 255, .12);
+  color: var(--lab-ink);
+}
+
+/* ---------- 调参台 ---------- */
+html[data-style="hacker"] .lab-cx {
+  position: fixed;
+  z-index: 40;
+  right: 14px;
+  top: 52px;
+  max-height: calc(100vh - 300px);
+  overflow: auto;
+  width: min(330px, calc(100vw - 28px));
+  border: 1px solid var(--lab-line-2);
+  background: rgba(9, 10, 13, .97);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .5);
+  font-family: var(--lab-mono);
+  color: var(--lab-text);
+}
+
+html[data-style="hacker"] .lab-cx[hidden] { display: none; }
+
+html[data-style="hacker"] .lab-cx__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--lab-line);
+  font-size: 9px;
+  letter-spacing: 1.4px;
+  color: var(--lab-ink);
+}
+
+html[data-style="hacker"] .lab-cx__head button {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid var(--lab-line-2);
+  background: transparent;
+  color: var(--lab-dim);
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+html[data-style="hacker"] .lab-cx__head button:hover {
+  border-color: var(--lab-accent);
+  color: var(--lab-ink);
+}
+
+html[data-style="hacker"] .lab-cx__body {
+  padding: 9px 10px 10px;
+}
+
+html[data-style="hacker"] .lab-cx__knob {
+  display: grid;
+  grid-template-columns: 44px 1fr 34px;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+  font-size: 8px;
+  letter-spacing: 1.1px;
+  color: var(--lab-dim);
+}
+
+html[data-style="hacker"] .lab-cx__knob output {
+  text-align: right;
+  color: var(--lab-text);
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-style="hacker"] .lab-cx__knob input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 14px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+html[data-style="hacker"] .lab-cx__knob input[type="range"]::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--lab-line-2);
+}
+
+html[data-style="hacker"] .lab-cx__knob input[type="range"]::-moz-range-track {
+  height: 2px;
+  background: var(--lab-line-2);
+}
+
+html[data-style="hacker"] .lab-cx__knob input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 8px;
+  height: 12px;
+  margin-top: -5px;
+  border: 0;
+  border-radius: 0;
+  background: var(--lab-accent);
+}
+
+html[data-style="hacker"] .lab-cx__knob input[type="range"]::-moz-range-thumb {
+  width: 8px;
+  height: 12px;
+  border: 0;
+  border-radius: 0;
+  background: var(--lab-accent);
+}
+
+html[data-style="hacker"] .lab-cx__presets {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+  margin-top: 10px;
+}
+
+html[data-style="hacker"] .lab-cx__presets button {
+  padding: 4px 2px;
+  border: 1px solid var(--lab-line-2);
+  background: transparent;
+  color: var(--lab-dim);
+  font-family: inherit;
+  font-size: 8px;
+  letter-spacing: .8px;
+  cursor: pointer;
+}
+
+html[data-style="hacker"] .lab-cx__presets button:hover {
+  border-color: var(--lab-accent);
+  color: var(--lab-ink);
+}
+
+html[data-style="hacker"] .lab-cx__note {
+  margin: 8px 0 0;
+  font-size: 8px;
+  line-height: 1.5;
+  color: var(--lab-faint);
+}
+
+/* ---------- 窄屏 ---------- */
+@media (max-width: 1080px) {
+  html[data-style="hacker"] body {
+    height: auto;
+    overflow: auto;
+  }
+
+  html[data-style="hacker"] .lab {
+    position: static;
+    height: auto;
+    min-height: 100vh;
+    grid-template-rows: auto 58vh auto;
+  }
+
+  html[data-style="hacker"] .lab-head {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "brand actions"
+      "kpis kpis";
+    gap: 8px 10px;
+    padding: 9px 12px 8px;
+  }
+
+  html[data-style="hacker"] .lab-brand { grid-area: brand; }
+  html[data-style="hacker"] .lab-actions { grid-area: actions; }
+  html[data-style="hacker"] .lab-kpis {
+    grid-area: kpis;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  html[data-style="hacker"] .lab-nav { display: none; }
+
+  html[data-style="hacker"] .lab-cx {
+    position: fixed;
+    top: auto;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-height: 46vh;
+  }
+
+  html[data-style="hacker"] .lab-panels {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  html[data-style="hacker"] .lab-p {
+    height: auto;
+    min-height: 118px;
+  }
+}
+
+@media (max-width: 560px) {
+  html[data-style="hacker"] .lab { grid-template-rows: auto 54vh auto; }
+
+  /* 五格挤在 390px 里，中文注释只会被截成「项…」，窄屏只留英文 */
+  html[data-style="hacker"] .lab-kpi b { font-size: 7px; letter-spacing: .8px; }
+  html[data-style="hacker"] .lab-kpi b i { display: none; }
+  html[data-style="hacker"] .lab-kpi { padding: 0 5px 6px; }
+  html[data-style="hacker"] .lab-kpi span { font-size: 13px; }
+
+  html[data-style="hacker"] .lab-hud--chk { display: none; }
+  html[data-style="hacker"] .lab-hud--fps { display: none; }
+
+  /* 舞台矮，四角不能全摆：只留左下拍号、右下状态、右上按钮 */
+  html[data-style="hacker"] .lab-hud--beat { left: 10px; bottom: 8px; gap: 6px; }
+  html[data-style="hacker"] .lab-hud--beat b { font-size: 16px; }
+  html[data-style="hacker"] .lab-hud--beat small:last-of-type { display: none; }
+  html[data-style="hacker"] .lab-hud--status { right: 10px; bottom: 8px; }
+  html[data-style="hacker"] .lab-hud--status span { display: none; }
+  html[data-style="hacker"] .lab-console-btn { right: 10px; top: 8px; bottom: auto; }
+
+  html[data-style="hacker"] .lab-panels { grid-template-columns: 1fr; }
+}
+
+/* ---------- 减少动效 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html[data-style="hacker"] .lab-pips i { transition: none; }
+}
+
+/* =========================================================
+   风格面板里的黑客卡：换成这一套的蓝，不再是终端绿
+   ========================================================= */
+html[data-style="hacker"] .style-card__glyph--hacker {
+  border-color: rgba(127, 179, 255, .55);
+  background: #06090f;
+  color: var(--lab-accent);
+  box-shadow: 0 0 0 1px rgba(127, 179, 255, .12), 0 0 40px rgba(127, 179, 255, .16),
+    inset 0 0 28px rgba(127, 179, 255, .07);
+}
+
+html[data-style="hacker"] .style-card[data-style-option="hacker"][data-current="true"] {
+  border-color: rgba(127, 179, 255, .5);
+}

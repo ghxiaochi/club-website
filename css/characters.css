@@ -1,12 +1,12 @@
 @font-face {
   font-family: "AnimTitle";
-  src: url("../../fonts/anim-title.ttf") format("truetype");
+  src: url("../fonts/anim-title.ttf") format("truetype");
   font-display: swap;
 }
 
 @font-face {
   font-family: "AnimPixel";
-  src: url("../../fonts/anim-pixel.ttf") format("truetype");
+  src: url("../fonts/anim-pixel.ttf") format("truetype");
   font-display: swap;
 }
 
@@ -266,7 +266,7 @@
 /* =========================================================
    角色卡（对应游戏 splash）
    ---------------------------------------------------------
-   底纹交给 canvas（js/core/splash-scene.js）按 units.nim 重画：
+   底纹交给 canvas（js/splash-scene.js）按 units.nim 重画：
    条纹 / 扇形 / 套叠菱形 + 多边形 + 三角环 + 放射线 + bloom 粒子。
    这里只负责角色、标题、技能、Back 这些 DOM 层。
    ========================================================= */

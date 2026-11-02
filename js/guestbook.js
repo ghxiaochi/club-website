@@ -165,7 +165,7 @@
       "<ol>",
       "<li>仓库 <code>Settings → General → Features</code> 打开 <code>Discussions</code></li>",
       "<li>给仓库装上 <code>giscus</code> App（github.com/apps/giscus）</li>",
-      "<li>去 <code>giscus.app</code> 填仓库名，把生成的 <code>category</code> 与 <code>category-id</code> 抄进 <code>js/ui/guestbook.js</code></li>",
+      "<li>去 <code>giscus.app</code> 填仓库名，把生成的 <code>category</code> 与 <code>category-id</code> 抄进 <code>js/guestbook.js</code></li>",
       "</ol>"
     ].join("");
 
@@ -276,11 +276,7 @@
         io.disconnect();
         render();
       }
-    }, {
-      rootMargin: "500px 0px",
-      /* 驾驶舱里滚动发生在舞台内部，用窗口当 root 永远等不到相交 */
-      root: document.querySelector("[data-ck-view]") || null
-    });
+    }, { rootMargin: "500px 0px" });
     io.observe(body);
   } else {
     render();

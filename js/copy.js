@@ -166,7 +166,7 @@
     "archive-foot-note": {
       minimal: "想上榜？发链接。",
       hacker:
-        "// 想把自己的仓库并入索引？在群里丢一个远端地址，或者直接改 js/ui/members.js 里的 HNYZ_MEMBERS。"
+        "// 想把自己的仓库并入索引？在群里丢一个远端地址，或者直接改 js/members.js 里的 HNYZ_MEMBERS。"
     },
     "archive-foot-link": {
       minimal: "加入",
@@ -198,7 +198,7 @@
     "gallery-foot-note": {
       minimal: "放文件，加一行。",
       hacker:
-        "// 投稿：把文件放进 images/gallery/，在 js/ui/gallery-data.js 追加一条记录。合并前请先 rebase。"
+        "// 投稿：把文件放进 images/gallery/，在 js/gallery-data.js 追加一条记录。合并前请先 rebase。"
     },
     "gallery-foot-link": {
       minimal: "加入",

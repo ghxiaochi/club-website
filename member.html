@@ -33,40 +33,19 @@
        这里同步插进 head，浏览器会在首绘前加载完，不会跳一下。 */
     (function () {
       try {
-        var style = localStorage.getItem("hnyz:style") || "default";
+        var style = localStorage.getItem("hnyz:style");
         var sheet = {
-          hacker: "css/skins/skin-hacker.css",
-          minimal: "css/skins/skin-minimal.css",
-          bare: "css/skins/skin-bare.css"
+          hacker: "css/skin-hacker.css",
+          minimal: "css/skin-minimal.css",
+          bare: "css/skin-bare.css"
         }[style];
-
-        /* 默认皮肤也要写上：布局靠 html[data-style] 分流，缺了会落到驾驶舱那套 */
-        var rootEl = document.documentElement;
-        rootEl.dataset.style = style;
-
-        /* 驾驶舱骨架只给黑客风和极简风。默认皮肤不挂 ck-on，
-           cockpit.css 里那套「整页不滚 + 旧变量转暗」就全部失效，
-           回到原始的蓝白长页面。 */
-        if (style === "hacker" || style === "minimal") {
-          rootEl.classList.add("ck-on");
-        }
-
-        if (sheet) {
-          var link = document.createElement("link");
-          link.rel = "stylesheet";
-          link.href = sheet + "?v=20261124";
-          link.setAttribute("data-skin-css", style);
-          document.head.appendChild(link);
-        }
-
-        /* 全屏舞台只服务黑客风，别的皮肤一个字节都不下。
-           引擎自己会等 DOM 就绪再抓 canvas，所以这里可以先插。 */
-        if (style === "hacker") {
-          var stage = document.createElement("script");
-          stage.src = "js/layout/haloflux.js?v=20261124";
-          stage.async = false;
-          document.head.appendChild(stage);
-        }
+        if (!sheet) return;
+        document.documentElement.dataset.style = style;
+        var link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = sheet + "?v=20261130";
+        link.setAttribute("data-skin-css", style);
+        document.head.appendChild(link);
       } catch (error) { /* 隐私模式下忽略 */ }
     })();
   </script>
@@ -101,42 +80,35 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="stylesheet" href="css/base/style.css?v=20261124">
-  <link rel="stylesheet" href="css/layout/cockpit.css?v=20261124">
-  <link rel="stylesheet" href="css/layout/frames.css?v=20261124">
-  <link rel="stylesheet" href="css/layout/console-panel.css?v=20261124">
-  <link rel="stylesheet" href="css/ui/pet.css?v=20261124">
-  <link rel="stylesheet" href="css/ui/personal.css?v=20261124">
-  <link rel="stylesheet" href="css/ui/member.css?v=20261124">
-  <link rel="stylesheet" href="css/ui/avatar-pet.css?v=20261124">
-  <link rel="stylesheet" href="css/ui/skins.css?v=20261124">
-  <link rel="stylesheet" href="css/base/type.css?v=20261124">
-  <link rel="stylesheet" href="css/base/motion.css?v=20261124">
+  <link rel="stylesheet" href="css/style.css?v=20261130">
+  <link rel="stylesheet" href="css/pet.css?v=20261130">
+  <link rel="stylesheet" href="css/personal.css?v=20261130">
+  <link rel="stylesheet" href="css/member.css?v=20261130">
+  <link rel="stylesheet" href="css/avatar-pet.css?v=20261130">
+  <link rel="stylesheet" href="css/skins.css?v=20261130">
+  <link rel="stylesheet" href="css/type.css?v=20261130">
+  <link rel="stylesheet" href="css/motion.css?v=20261130">
   <!-- dino.css 在首屏折叠线以下（页脚跑道），先按低优先级下载，不挡住首屏渲染 -->
-  <link rel="preload" href="css/ui/dino.css?v=20261124" as="style" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/ui/dino.css?v=20261124"></noscript>
+  <link rel="preload" href="css/dino.css?v=20261130" as="style" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/dino.css?v=20261130"></noscript>
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
-  <script src="js/core/sfx.js?v=20261124" defer></script>
-  <script src="js/core/theme.js?v=20261124" defer></script>
-  <script src="js/core/theme-icon.js?v=20261124" defer></script>
-  <script src="js/ui/members.js?v=20261124" defer></script>
-  <script src="js/core/main.js?v=20261124" defer></script>
-  <script src="js/ui/pet.js?v=20261124" defer></script>
-  <script src="js/ui/member.js?v=20261124" defer></script>
-  <script src="js/ui/avatar-pet.js?v=20261124" defer></script>
-  <script src="js/ui/personal.js?v=20261124" defer></script>
-  <script src="js/core/click-fx.js?v=20261124" defer></script>
-  <script src="js/layout/skins.js?v=20261124" defer></script>
-  <script src="js/core/copy.js?v=20261124" defer></script>
-  <script src="js/core/pwa.js?v=20261124" defer></script>
-  <script src="js/layout/cockpit.js?v=20261124" defer></script>
-  <script src="js/layout/console.js?v=20261124" defer></script>
+  <script src="js/sfx.js?v=20261130" defer></script>
+  <script src="js/theme.js?v=20261130" defer></script>
+  <script src="js/theme-icon.js?v=20261130" defer></script>
+  <script src="js/members.js?v=20261130" defer></script>
+  <script src="js/main.js?v=20261130" defer></script>
+  <script src="js/pet.js?v=20261130" defer></script>
+  <script src="js/member.js?v=20261130" defer></script>
+  <script src="js/avatar-pet.js?v=20261130" defer></script>
+  <script src="js/personal.js?v=20261130" defer></script>
+  <script src="js/click-fx.js?v=20261130" defer></script>
+  <script src="js/skins.js?v=20261130" defer></script>
+  <script src="js/copy.js?v=20261130" defer></script>
+  <script src="js/pwa.js?v=20261130" defer></script>
   <script>
-    /* 页脚跑道和留言板都在折叠线以下：等它们真的接近视口再加载。
-       驾驶舱里滚动发生在舞台内部，所以观察器的 root 要指向 .ck-view，
-       而且这段脚本在 <head> 里跑，那时候 body 还没解析完，
-       必须等 DOMContentLoaded 之后再取节点。 */
+    /* 页脚跑道和留言板都在折叠线以下：等它们真的接近视口再加载，
+       首屏不为这 100KB 付任何代价。提前 800px 开始拉，滚到底时已经就位。 */
     (function () {
       var dino = false;
       var guestbook = false;
@@ -151,16 +123,17 @@
       function loadDino() {
         if (dino) return;
         dino = true;
-        inject("js/ui/dino.js?v=20261124");
+        inject("js/dino.js?v=20261130");
       }
 
       function loadGuestbook() {
         if (guestbook) return;
         guestbook = true;
-        inject("js/ui/guestbook.js?v=20261124");
+        inject("js/guestbook.js?v=20261130");
       }
 
       function watch(el, fn) {
+        /* 这页没有这块内容（只有首页有留言板），当作已处理，别再拉脚本 */
         if (!el) return true;
         if (!("IntersectionObserver" in window)) return false;
         var io = new IntersectionObserver(function (entries) {
@@ -170,31 +143,20 @@
             fn();
             return;
           }
-        }, {
-          rootMargin: "800px 0px",
-          root: document.querySelector("[data-ck-view]") || null
-        });
+        }, { rootMargin: "800px 0px" });
         io.observe(el);
         return true;
       }
 
-      function start() {
-        var okDino = watch(document.querySelector("[data-dino-run]"), loadDino);
-        var okBook = watch(document.querySelector("[data-guestbook-body]"), loadGuestbook);
+      var okDino = watch(document.querySelector("[data-dino-run]"), loadDino);
+      var okBook = watch(document.querySelector("[data-guestbook-body]"), loadGuestbook);
 
-        /* 老内核没有 IntersectionObserver：退回「一滚就加载」 */
-        if (!okDino || !okBook) {
-          window.addEventListener("scroll", function () {
-            if (!okDino) loadDino();
-            if (!okBook) loadGuestbook();
-          }, { once: true, passive: true });
-        }
-      }
-
-      if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", start);
-      } else {
-        start();
+      /* 老内核没有 IntersectionObserver：退回「一滚就加载」 */
+      if (!okDino || !okBook) {
+        window.addEventListener("scroll", function () {
+          if (!okDino) loadDino();
+          if (!okBook) loadGuestbook();
+        }, { once: true, passive: true });
       }
     })();
   </script>
@@ -209,37 +171,67 @@
 
   <a class="skip-link" href="#main">跳到主要内容</a>
 
+  <header class="site-header" data-header>
+    <div class="container header-inner">
+      <a class="brand" href="index.html" aria-label="衡南一中编程社首页">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="m9 6-5 6 5 6M15 6l5 6-5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="brand-copy">
+          <strong>HNYZ</strong>
+          <span>衡南一中编程社</span>
+        </span>
+      </a>
 
-  <div class="ck" data-ck>
 
-  <canvas class="ck-halo" data-ck-halo aria-hidden="true"></canvas>
-
-  <header class="ck-head">
-    <a class="ck-brand" href="index.html">
-      <b>HNYZ<i>/</i>编程社</b>
-      <span>HENGNAN NO.1 · STUDENT DEV CLUB · COCKPIT</span>
-    </a>
-    <div class="ck-kpis">
-      <div class="ck-kpi"><em>MEMBER</em><b>01</b><u><i data-ck-seg="100"></i></u></div>
-      <div class="ck-kpi"><em>REPOS</em><b data-ck-stat="repos">--</b><u><i data-ck-seg="62"></i></u></div>
-      <div class="ck-kpi"><em>ROLE</em><b>社长</b><u><i data-ck-seg="88"></i></u></div>
-      <div class="ck-kpi"><em>SINCE</em><b class="is-accent">2024</b><u><i class="is-accent" data-ck-seg="74"></i></u></div>
-      <div class="ck-kpi"><em>PROFILE</em><b class="is-live">LIVE</b><u><i data-ck-seg="58"></i></u></div>
-    </div>
-    <div class="ck-sys">
-      <span class="ck-sys__clock" data-ck-clock>--:--:--</span>
-      <button class="ck-sys__btn" type="button" data-style-toggle aria-label="切换网页风格" aria-haspopup="dialog" aria-expanded="false" title="切换风格">STYLE</button>
-      <button class="ck-sys__btn" type="button" data-theme-toggle aria-label="切换深浅色" aria-pressed="false" title="深浅色">DAY</button>
-      <button class="ck-sys__btn" type="button" data-sound-toggle aria-label="关闭音效" aria-pressed="true" title="音效">SFX</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航" data-nav>
+        <ul class="nav-list">
+          <li><a href="index.html#about">关于</a></li>
+          <li><a href="index.html#what-we-do">我们做什么</a></li>
+          <li><a href="index.html#projects">项目</a></li>
+          <li><a href="projects.html">全部项目</a></li>
+          <li><a href="gallery.html">图集</a></li>
+          <li><a href="index.html#schedule">活动</a></li>
+          <li><a href="index.html#wall">资源墙</a></li>
+          <li><a href="index.html#faq">FAQ</a></li>
+          <li><a href="index.html#guestbook">留言板</a></li>
+        </ul>
+        <a class="nav-cta" href="index.html#join">
+          加入我们
+          <span aria-hidden="true">↗</span>
+        </a>
+      </nav>
+      <div class="header-actions">
+        <button class="sound-toggle" type="button" data-sound-toggle aria-label="关闭音效" aria-pressed="true" title="关闭音效">
+          <svg class="sound-toggle__icon sound-toggle__icon--on" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 9.4h3L12 5.4v13.2L7 14.6H4z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="M16 9.2a4.2 4.2 0 0 1 0 5.6M18.6 6.6a7.6 7.6 0 0 1 0 10.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+          <svg class="sound-toggle__icon sound-toggle__icon--off" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 9.4h3L12 5.4v13.2L7 14.6H4z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="m16 9.6 5 4.8m0-4.8-5 4.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button class="style-toggle" type="button" data-style-toggle aria-label="切换网页风格" aria-haspopup="dialog" aria-expanded="false" title="切换风格">
+          <span class="style-toggle__grid" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        </button>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换到深色模式" aria-pressed="false" title="切换到深色模式">
+          <span class="theme-toggle__flip" aria-hidden="true"></span>
+        </button>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="打开导航菜单" data-nav-toggle>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
     </div>
   </header>
 
-  <main class="ck-stage" id="main" tabindex="-1">
-    <div class="ck-corners" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-    <div class="ck-view" data-ck-view>
+  <main id="main" tabindex="-1">
     <section class="section member-page" data-member-root>
       <div class="container">
-        <div id="member-hero" data-ck-panel-src data-ck-title="成员主页" data-ck-cap="PROFILE" aria-busy="true"></div>
+        <div id="member-hero" aria-busy="true"></div>
 
         <div class="member-projects-head">
           <!-- 这一行是小号等宽标签，视觉上就是分区标题，但用的是 p。
@@ -253,31 +245,10 @@
           </p>
         </div>
 
-        <div class="project-grid" id="member-projects" data-ck-panel-src data-ck-title="TA 的作品" data-ck-cap="PROJECTS" aria-busy="true"></div>
+        <div class="project-grid" id="member-projects" aria-busy="true"></div>
       </div>
     </section>
-    </div>
-    <div class="ck-scan" aria-hidden="true"></div>
   </main>
-
-  <section class="ck-deck" data-ck-deck aria-label="页面面板"></section>
-
-  <footer class="ck-bar">
-    <nav class="ck-tabs" aria-label="页面切换">
-      <a href="index.html">HOME</a>
-      <a href="projects.html">PROJECTS</a>
-      <a href="member.html" aria-current="page">MEMBER</a>
-      <a href="gallery.html">GALLERY</a>
-      <a href="dino.html">LADDER</a>
-    </nav>
-    <span class="ck-bar__hint">1–8 直达面板 · ESC 回顶</span>
-    <div class="ck-bar__right">
-      <span>© 2026 HNYZ</span>
-      <span>BUILD 20261124</span>
-    </div>
-  </footer>
-
-  </div>
 
   <footer class="site-footer">
     <div class="container footer-inner">
@@ -313,7 +284,7 @@
     </div>
   </footer>
 
-  <!-- 页脚小恐龙：自动起跳躲仙人掌，画布由 js/ui/dino.js 驱动 -->
+  <!-- 页脚小恐龙：自动起跳躲仙人掌，画布由 js/dino.js 驱动 -->
   <section class="dino-run" data-dino-run data-mode="auto" aria-labelledby="dino-run-title">
     <div class="container dino-run__inner">
       <div class="dino-run__main">
