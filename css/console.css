@@ -939,7 +939,7 @@ html[data-style="console"][data-cx-hud="1"] .cx-hud {
 .cx-trigger--float {
   position: fixed;
   right: 16px;
-  bottom: 16px;
+  bottom: 38px;
   z-index: 55;
   width: 36px;
   height: 36px;
@@ -1453,4 +1453,24 @@ html[data-style="console"] .style-card__swatches i {
 
 html[data-style="console"] .style-card__glyph--console {
   letter-spacing: 0.08em;
+}
+
+
+/* =========================================================
+   驾驶舱骨架配色：炭黑 + 单一橙
+   ========================================================= */
+html[data-style="console"] .ck {
+  --ck-veil-rgb: 10, 10, 11;
+  --ck-bg: #0a0a0b;
+  --ck-bg-head: #08080a;
+  --ck-panel: #0e0e10;
+  --ck-panel-2: #141416;
+  --ck-line: #26262a;
+  --ck-line-2: #3a3a40;
+  --ck-text: #cfd2d8;
+  --ck-dim: #746f68;
+  --ck-faint: #4a4640;
+  --ck-white: #f2ece1;
+  --ck-accent: #f07b38;
+  --ck-accent-2: #f2ece1;
 }

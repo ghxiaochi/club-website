@@ -718,3 +718,48 @@ html[data-style="hacker"][data-theme="light"] .matrix-rain.is-on {
 html[data-style="hacker"][data-theme="light"] .site-header .brand-copy strong {
   color: #0a6b3a;
 }
+
+
+/* =========================================================
+   驾驶舱骨架配色：黑底 + 荧光绿
+   ---------------------------------------------------------
+   .ck 里的变量管的是结构层，这里把它整段换掉，
+   页面骨架（顶栏 / 舞台 / 面板 / 状态条）会跟着皮肤走。
+   ========================================================= */
+html[data-style="hacker"] .ck {
+  --ck-veil-rgb: 2, 6, 4;
+  --ck-bg: #020604;
+  --ck-bg-head: #030a06;
+  --ck-panel: #040d08;
+  --ck-panel-2: #06140c;
+  --ck-line: #0f3524;
+  --ck-line-2: #1a5a3a;
+  --ck-text: #8affc0;
+  --ck-dim: #3f9c6a;
+  --ck-faint: #2a6b4a;
+  --ck-white: #dcffee;
+  --ck-accent: #39ff88;
+  --ck-accent-2: #7dffb0;
+
+  --bg: #020604;
+  --bg-deep: #010403;
+  --panel: #040d08;
+  --panel-2: #06140c;
+  --panel-3: #081a10;
+  --border: #0f3524;
+  --border-strong: #1a5a3a;
+  --text: #8affc0;
+  --text-soft: #6fe0a5;
+  --muted: #3f9c6a;
+  --dim: #2f7a52;
+  --blue: #39ff88;
+  --blue-bright: #7dffb0;
+  --green: #39ff88;
+  --blue-soft: rgba(57, 255, 136, 0.1);
+}
+
+html[data-style="hacker"] .ck-scan {
+  background:
+    repeating-linear-gradient(0deg, rgba(57, 255, 136, 0.04) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at 50% 46%, transparent 52%, rgba(0, 0, 0, 0.7) 100%);
+}

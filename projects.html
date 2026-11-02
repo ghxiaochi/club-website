@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="ck-on">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -84,6 +84,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="stylesheet" href="css/style.css?v=20261119">
+  <link rel="stylesheet" href="css/cockpit.css?v=20261120">
   <link rel="stylesheet" href="css/pet.css?v=20261119">
   <link rel="stylesheet" href="css/avatar-pet.css?v=20261119">
   <link rel="stylesheet" href="css/skins.css?v=20261119">
@@ -111,6 +112,8 @@
   <script src="js/skins.js?v=20261119" defer></script>
   <script src="js/copy.js?v=20261119" defer></script>
   <script src="js/pwa.js?v=20261119" defer></script>
+  <script src="js/cockpit.js?v=20261120" defer></script>
+  <script src="js/halo.js?v=20261120" defer></script>
   <script>
     /* 页脚跑道和留言板都在折叠线以下：等它们真的接近视口再加载，
        首屏不为这 100KB 付任何代价。提前 800px 开始拉，滚到底时已经就位。 */
@@ -176,67 +179,36 @@
 
   <a class="skip-link" href="#main">跳到主要内容</a>
 
-  <header class="site-header" data-header>
-    <div class="container header-inner">
-      <a class="brand" href="index.html" aria-label="衡南一中编程社首页">
-        <span class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none">
-            <path d="m9 6-5 6 5 6M15 6l5 6-5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </span>
-        <span class="brand-copy">
-          <strong>HNYZ</strong>
-          <span>衡南一中编程社</span>
-        </span>
-      </a>
 
+  <div class="ck" data-ck>
 
-      <nav class="site-nav" id="site-nav" aria-label="主导航" data-nav>
-        <ul class="nav-list">
-          <li><a href="index.html#about">关于</a></li>
-          <li><a href="index.html#what-we-do">我们做什么</a></li>
-          <li><a href="index.html#projects">项目</a></li>
-          <li><a href="projects.html" aria-current="page">全部项目</a></li>
-          <li><a href="gallery.html">图集</a></li>
-          <li><a href="index.html#schedule">活动</a></li>
-          <li><a href="index.html#wall">资源墙</a></li>
-          <li><a href="index.html#faq">FAQ</a></li>
-          <li><a href="index.html#guestbook">留言板</a></li>
-        </ul>
-        <a class="nav-cta" href="index.html#join">
-          加入我们
-          <span aria-hidden="true">↗</span>
-        </a>
-      </nav>
-      <div class="header-actions">
-        <button class="sound-toggle" type="button" data-sound-toggle aria-label="关闭音效" aria-pressed="true" title="关闭音效">
-          <svg class="sound-toggle__icon sound-toggle__icon--on" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M4 9.4h3L12 5.4v13.2L7 14.6H4z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-            <path d="M16 9.2a4.2 4.2 0 0 1 0 5.6M18.6 6.6a7.6 7.6 0 0 1 0 10.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-          </svg>
-          <svg class="sound-toggle__icon sound-toggle__icon--off" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M4 9.4h3L12 5.4v13.2L7 14.6H4z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-            <path d="m16 9.6 5 4.8m0-4.8-5 4.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-          </svg>
-        </button>
-        <button class="style-toggle" type="button" data-style-toggle aria-label="切换网页风格" aria-haspopup="dialog" aria-expanded="false" title="切换风格">
-          <span class="style-toggle__grid" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-        </button>
-        <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换到深色模式" aria-pressed="false" title="切换到深色模式">
-          <span class="theme-toggle__flip" aria-hidden="true"></span>
-        </button>
-        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="打开导航菜单" data-nav-toggle>
-          <span></span>
-          <span></span>
-        </button>
-      </div>
+  <header class="ck-head">
+    <a class="ck-brand" href="index.html">
+      <b>HNYZ<i>/</i>编程社</b>
+      <span>HENGNAN NO.1 · STUDENT DEV CLUB · COCKPIT</span>
+    </a>
+    <div class="ck-kpis">
+      <div class="ck-kpi"><em>REPOS</em><b data-ck-stat="repos">05</b><u><i data-ck-seg="72"></i></u></div>
+      <div class="ck-kpi"><em>FILTERS</em><b>ALL</b><u><i data-ck-seg="40"></i></u></div>
+      <div class="ck-kpi"><em>LANGUAGES</em><b>04</b><u><i data-ck-seg="58"></i></u></div>
+      <div class="ck-kpi"><em>SOURCE</em><b class="is-accent">GITHUB</b><u><i class="is-accent" data-ck-seg="100"></i></u></div>
+      <div class="ck-kpi"><em>CACHE</em><b class="is-live">STATIC</b><u><i data-ck-seg="66"></i></u></div>
+    </div>
+    <div class="ck-sys">
+      <span class="ck-sys__clock" data-ck-clock>--:--:--</span>
+      <button class="ck-sys__btn" type="button" data-style-toggle aria-label="切换网页风格" aria-haspopup="dialog" aria-expanded="false" title="切换风格">STYLE</button>
+      <button class="ck-sys__btn" type="button" data-theme-toggle aria-label="切换深浅色" aria-pressed="false" title="深浅色">DAY</button>
+      <button class="ck-sys__btn" type="button" data-sound-toggle aria-label="关闭音效" aria-pressed="true" title="音效">SFX</button>
     </div>
   </header>
 
-  <main id="main" tabindex="-1">
+  <main class="ck-stage" id="main" tabindex="-1">
+    <canvas class="ck-halo" data-ck-halo aria-hidden="true"></canvas>
+    <div class="ck-corners" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <div class="ck-view" data-ck-view>
     <section class="section archive" aria-labelledby="archive-title">
       <div class="container">
-        <div class="archive-head">
+        <div class="archive-head" data-ck-panel-src data-ck-title="全部仓库" data-ck-cap="OVERVIEW">
           <p class="eyebrow">
             <span class="eyebrow-dot" aria-hidden="true"></span>
             <span data-copy="archive-eyebrow">PROJECT_ARCHIVE // ALL_MEMBERS</span>
@@ -258,7 +230,7 @@
           </div>
         </div>
 
-        <section class="char-stage" aria-labelledby="char-stage-title">
+        <section class="char-stage" aria-labelledby="char-stage-title" data-ck-panel-src data-ck-title="角色展示" data-ck-cap="CHARACTERS">
           <div class="char-stage__stripes" aria-hidden="true"></div>
 
           <div class="char-stage__units" data-char-stage role="group" aria-label="角色列表"></div>
@@ -279,7 +251,7 @@
 
         <p class="render-note" id="render-note" role="status" hidden></p>
 
-        <div class="project-groups" id="project-groups" aria-busy="true">
+        <div class="project-groups" id="project-groups" data-ck-panel-src data-ck-title="按语言分组" data-ck-cap="REPOS" aria-busy="true">
           <p class="loading-state"><span class="loading-dot" aria-hidden="true"></span> 正在读取成员列表…</p>
         </div>
 
@@ -295,7 +267,28 @@
         </div>
       </div>
     </section>
+    </div>
+    <div class="ck-scan" aria-hidden="true"></div>
   </main>
+
+  <section class="ck-deck" data-ck-deck aria-label="页面面板"></section>
+
+  <footer class="ck-bar">
+    <nav class="ck-tabs" aria-label="页面切换">
+      <a href="index.html">HOME</a>
+      <a href="projects.html" aria-current="page">PROJECTS</a>
+      <a href="member.html">MEMBER</a>
+      <a href="gallery.html">GALLERY</a>
+      <a href="dino.html">LADDER</a>
+    </nav>
+    <span class="ck-bar__hint">1–8 直达面板 · ESC 回顶</span>
+    <div class="ck-bar__right">
+      <span>© 2026 HNYZ</span>
+      <span>BUILD 20261120</span>
+    </div>
+  </footer>
+
+  </div>
 
   <footer class="site-footer">
     <div class="container footer-inner">

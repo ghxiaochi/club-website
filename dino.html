@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="ck-on">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -23,24 +23,24 @@
        汇总带 [DINO] 标题的 Issues 生成，页面不需要任何后端。 -->
 
   <script>
-    /* 风格预置：这一页本来就是终端的底子，控制台风跟过来最顺；
-       其余皮肤在这页没有对应样式（也不需要），维持深色原样。 */
+    /* 风格预置：首帧前挂上上次选的皮肤，避免先闪一下默认风。
+       皮肤样式各自一个文件，只有真的用这套风格才下载。 */
     (function () {
       try {
-        if (localStorage.getItem("hnyz:style") !== "console") return;
-        document.documentElement.dataset.style = "console";
+        var style = localStorage.getItem("hnyz:style");
+        var sheet = {
+          hacker: "css/skin-hacker.css",
+          minimal: "css/skin-minimal.css",
+          bare: "css/skin-bare.css",
+          console: "css/console.css"
+        }[style];
+        if (!sheet) return;
+        document.documentElement.dataset.style = style;
         var link = document.createElement("link");
         link.rel = "stylesheet";
-        link.href = "css/console.css?v=20261119";
-        link.setAttribute("data-skin-css", "console");
+        link.href = sheet + "?v=20261120";
+        link.setAttribute("data-skin-css", style);
         document.head.appendChild(link);
-
-        /* 这一页没有顶栏（也就没有风格按钮），调参面板靠右上角的浮动按钮
-           和 C 键打开，所以直接把面板脚本挂上，不等 skins.js */
-        var panel = document.createElement("script");
-        panel.src = "js/console.js?v=20261119";
-        panel.async = true;
-        document.head.appendChild(panel);
       } catch (error) { /* 隐私模式下忽略 */ }
     })();
   </script>
@@ -61,22 +61,39 @@
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="application-name" content="HNYZ">
 
-  <link rel="stylesheet" href="css/style.css?v=20261119">
+  <link rel="stylesheet" href="css/style.css?v=20261120">
+  <link rel="stylesheet" href="css/cockpit.css?v=20261120">
   <link rel="stylesheet" href="css/dino.css?v=20261119">
   <link rel="stylesheet" href="css/ladder.css?v=20261119">
 </head>
-<body class="ladder-page">
+<body class="ladder-page ck-on-body">
 
-  <header class="ladder-head">
-    <a class="ladder-head__back" href="./">
-      <span aria-hidden="true">←</span> 返回首页
+  <div class="ck ck--flat" data-ck>
+
+  <header class="ck-head">
+    <a class="ck-brand" href="index.html">
+      <b>HNYZ<i>/</i>天梯</b>
+      <span>DINO_RUN · 08-BIT · GITHUB ISSUE LADDER</span>
     </a>
-    <p class="ladder-head__brand">
-      DINO_RUN <span>// 天梯</span>
-    </p>
+    <div class="ck-kpis">
+      <div class="ck-kpi"><em>TOP SCORE</em><b class="is-accent" data-ck-top>999,999</b><u><i class="is-accent" data-ck-seg="100"></i></u></div>
+      <div class="ck-kpi"><em>PLAYERS</em><b data-ck-players>01</b><u><i data-ck-seg="26"></i></u></div>
+      <div class="ck-kpi"><em>YOUR BEST</em><b data-ck-best>--</b><u><i data-ck-seg="8"></i></u></div>
+      <div class="ck-kpi"><em>SPEED</em><b data-ck-speed>×1</b><u><i data-ck-seg="44"></i></u></div>
+      <div class="ck-kpi"><em>LINK</em><b class="is-live">ISSUE</b><u><i data-ck-seg="72"></i></u></div>
+    </div>
+    <div class="ck-sys">
+      <span class="ck-sys__clock" data-ck-clock>--:--:--</span>
+      <button class="ck-sys__btn" type="button" data-style-toggle aria-label="切换网页风格" aria-haspopup="dialog" aria-expanded="false" title="切换风格">STYLE</button>
+      <button class="ck-sys__btn" type="button" data-theme-toggle aria-label="切换深浅色" aria-pressed="false" title="深浅色">DAY</button>
+      <button class="ck-sys__btn" type="button" data-sound-toggle aria-label="关闭音效" aria-pressed="true" title="音效">SFX</button>
+    </div>
   </header>
 
-  <main class="ladder" data-ladder>
+  <main class="ck-stage ck-stage--flat" id="main" tabindex="-1">
+    <div class="ck-corners" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+
+    <div class="ladder" data-ladder>
 
     <!-- ---------- 左：游戏 ---------- -->
     <section class="ladder-play" aria-labelledby="ladder-title">
@@ -146,9 +163,31 @@
       </p>
     </aside>
 
+    </div>
+    <div class="ck-scan" aria-hidden="true"></div>
   </main>
 
-  <script src="js/dino.js?v=20261119" defer></script>
-  <script src="js/ladder.js?v=20261119" defer></script>
+  <footer class="ck-bar">
+    <nav class="ck-tabs" aria-label="页面切换">
+      <a href="index.html">HOME</a>
+      <a href="projects.html">PROJECTS</a>
+      <a href="member.html">MEMBER</a>
+      <a href="gallery.html">GALLERY</a>
+      <a href="dino.html" aria-current="page">LADDER</a>
+    </nav>
+    <span class="ck-bar__hint">空格 / ↑ / 点画布起跳 · 死了填昵称上榜</span>
+    <div class="ck-bar__right">
+      <span>© 2026 HNYZ</span>
+      <span>BUILD 20261120</span>
+    </div>
+  </footer>
+
+  </div>
+
+  <script src="js/theme.js?v=20261120" defer></script>
+  <script src="js/sfx.js?v=20261120" defer></script>
+  <script src="js/skins.js?v=20261120" defer></script>
+  <script src="js/dino.js?v=20261120" defer></script>
+  <script src="js/ladder.js?v=20261120" defer></script>
 </body>
 </html>
