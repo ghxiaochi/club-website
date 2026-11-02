@@ -279,10 +279,9 @@ body.is-dino-visible .hnyz-pet {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 13%, #000 92%, transparent 100%);
-  mask-image: linear-gradient(180deg, transparent 0, #000 13%, #000 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 20%, #000 88%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 20%, #000 88%, transparent 100%);
   overscroll-behavior: contain;
-  scroll-snap-type: y mandatory;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }
@@ -292,11 +291,11 @@ body.is-dino-visible .hnyz-pet {
 }
 
 /* 末尾补一段空白，最后一张卡也能滚到正中间 */
+/* 尾巴留一点空，最后一张卡也能滚到中间 */
 .style-deck__viewport::after {
   content: "";
   display: block;
-  height: calc((100% - 555px) / 2); /* fallback: 旧内核 */
-  height: max(0px, calc((100% - 555px) / 2));
+  height: 24px;
 }
 
 .style-card {
@@ -307,27 +306,25 @@ body.is-dino-visible .hnyz-pet {
   align-items: center;
   justify-content: flex-start;
   gap: 10px;
-  width: calc(100% - 52px); /* fallback: 旧内核 */
+  /* 卡片高度交给内容决定：以前写死 540px，屏一矮内容就顶出去，
+     手表上只剩 40px 一条缝。改成自适应，多高都完整。 */
+  width: calc(100% - 48px); /* fallback: 旧内核 */
   max-width: 360px; /* fallback: 旧内核 */
-  width: min(360px, calc(100% - 52px));
-  height: calc(100% - 30px); /* fallback: 旧内核 */
-  max-height: 540px; /* fallback: 旧内核 */
-  height: min(540px, calc(100% - 30px));
-  margin: 15px auto;
-  padding: 58px 26px 30px;
-  scroll-snap-align: center;
-  scroll-snap-stop: always;
+  width: min(360px, calc(100% - 48px));
+  height: auto;
+  margin: 10px auto;
+  padding: 34px 24px 24px;
   text-align: center;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 30px;
+  border-radius: 26px;
   background:
     radial-gradient(ellipse 80% 40% at 50% 0%, rgba(255, 255, 255, 0.055), transparent 70%),
     linear-gradient(180deg, rgba(15, 20, 18, 0.95), rgba(6, 9, 7, 0.97));
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3), 0 34px 80px rgba(0, 0, 0, 0.55);
-  opacity: 0.38;
-  transform: scale(0.94);
-  transition: opacity 0.45s ease, transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.4s ease, box-shadow 0.4s ease;
+  opacity: 0.22;
+  /* 只做透明度和描边的变化：缩放会在滚动容器里反复触发重排，
+     低端机上一抽一抽的，就是这里来的 */
+  transition: opacity 0.35s ease, border-color 0.35s ease;
 }
 
 .style-card[data-style-option="default"] { --card-accent: rgba(96, 165, 250, 0.55); }
@@ -355,7 +352,6 @@ body.is-dino-visible .hnyz-pet {
 
 .style-card.is-active {
   opacity: 1;
-  transform: scale(1);
   box-shadow: 0 0 0 1px var(--card-accent), 0 34px 90px rgba(0, 0, 0, 0.62);
 }
 
@@ -816,6 +812,112 @@ html[data-style] .style-deck.is-handoff {
 @media (max-width: 380px){
   .style-deck__dots {
     display: none;
+  }
+}
+
+/* 矮屏 / 手表：一屏塞不下一张标准卡。所有尺寸按屏高收，
+   标题栏、提示语、色点依次让位，卡片本身必须完整。 */
+@media (max-height: 560px), (max-width: 300px){
+  .style-deck__shell {
+    padding: 6px 0;
+  }
+
+  .style-deck__head {
+    padding: 0 12px 4px;
+    gap: 8px;
+  }
+
+  .style-deck__kicker {
+    display: none;
+  }
+
+  .style-deck__title {
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+  }
+
+  .style-deck__close {
+    width: 28px;
+    height: 28px;
+  }
+
+  .style-card {
+    width: calc(100% - 16px);
+    margin: 6px auto;
+    padding: 16px 12px 14px;
+    gap: 6px;
+    border-radius: 14px;
+  }
+
+  .style-card__top {
+    top: 6px;
+    left: 12px;
+    right: 12px;
+    font-size: 0.48rem;
+    letter-spacing: 0.08em;
+  }
+
+  .style-card__glyph {
+    width: 46px; /* fallback: 旧内核 */
+    width: clamp(38px, 16vw, 52px);
+    height: 46px; /* fallback: 旧内核 */
+    height: clamp(38px, 16vw, 52px);
+    font-size: 0.95rem;
+    margin-bottom: 0;
+  }
+
+  .style-card__kicker {
+    font-size: 0.5rem;
+    letter-spacing: 0.12em;
+  }
+
+  .style-card__title {
+    font-size: 1rem;
+  }
+
+  .style-card__desc {
+    font-size: 0.66rem;
+    line-height: 1.5;
+    max-width: 26ch;
+  }
+
+  .style-card__swatches i {
+    width: 11px;
+    height: 11px;
+  }
+
+  .style-card__apply {
+    min-height: 30px;
+    padding: 0 14px;
+    font-size: 0.66rem;
+  }
+
+  .style-deck__hint,
+  .style-deck__dots {
+    display: none;
+  }
+}
+
+/* 手表再窄一档：只留编号、名字和按钮，其余全砍 */
+@media (max-width: 240px){
+  .style-card__desc,
+  .style-card__swatches,
+  .style-card__kicker,
+  .style-card__current,
+  .style-deck__title {
+    display: none;
+  }
+
+  .style-deck__head {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    left: auto;
+    padding: 0;
+  }
+
+  .style-card__title {
+    font-size: 0.95rem;
   }
 }
 

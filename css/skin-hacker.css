@@ -731,10 +731,14 @@ html[data-style="hacker"][data-theme="light"] .site-header .brand-copy strong {
    ========================================================= */
 html[data-style="hacker"] .lab-bg {
   position: fixed;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: .88;
+  overflow: hidden;
 }
 
 html[data-style="hacker"] .lab-bg[hidden] {
@@ -745,48 +749,30 @@ html[data-style="hacker"] .lab-bg canvas {
   display: block;
   width: 100%;
   height: 100%;
-  /* 壁纸不该像截图：轻微虚化，把细线融成光雾 */
-  filter: blur(0.7px) saturate(1.06);
+  /* 只让光留下来：screen 混合把画布上那片深色底投成透明，
+     剩下的线才是壁纸，而不是一块压在字后面的黑饼 */
+  mix-blend-mode: screen;
+  /* 壁纸的分寸：能看见在动，但眼睛还是先落在字上 */
+  opacity: .17;
+  filter: blur(2px) saturate(.82);
 }
 
-/* 页底的地平线辉光：让环像「从地面升起来」，而不是贴了一张图 */
-html[data-style="hacker"] .lab-bg::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    ellipse 46% 22% at 50% 100%,
-    rgba(57, 255, 136, .14) 0%,
-    rgba(57, 255, 136, .05) 45%,
-    rgba(57, 255, 136, 0) 72%
-  );
-  pointer-events: none;
-}
-
-/* 字要压在光上面还能读：从上到下由实到透，
-   底边再收一道，让壁纸在页脚附近慢慢沉下去。 */
+/* 四周收一圈边，中间留白：环在正中，边缘要淡出去才不像贴图 */
 html[data-style="hacker"] .lab-bg::after {
   content: "";
   position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
-  background:
-    /* 聚光：视线收到页底中间那台装置上，两侧和远处压下去 */
-    radial-gradient(
-      ellipse 62% 42% at 50% 96%,
-      rgba(1, 4, 3, 0) 0%,
-      rgba(1, 4, 3, .28) 52%,
-      rgba(1, 4, 3, .72) 82%,
-      rgba(1, 4, 3, .88) 100%
-    ),
-    /* 纵向：上面留给正文，越往下越透 */
-    linear-gradient(
-      to bottom,
-      rgba(1, 4, 3, .995) 0%,
-      rgba(1, 4, 3, .97) 40%,
-      rgba(1, 4, 3, .82) 56%,
-      rgba(1, 4, 3, .34) 72%,
-      rgba(1, 4, 3, .06) 100%
-    );
+  background: radial-gradient(
+    ellipse 74% 64% at 50% 48%,
+    rgba(1, 4, 3, 0) 0%,
+    rgba(1, 4, 3, .12) 58%,
+    rgba(1, 4, 3, .52) 86%,
+    rgba(1, 4, 3, .74) 100%
+  );
 }
 
 /* 页面内容浮在壁纸之上；正文区块自己不铺底色，
@@ -1006,11 +992,6 @@ html[data-style="hacker"] .lab-cx__note {
 }
 
 @media (max-width: 720px) {
-  /* 手机屏窄，同样的亮度会压到数字和按钮上 */
-  html[data-style="hacker"] .lab-bg {
-    opacity: .72;
-  }
-
   html[data-style="hacker"] .lab-cx-btn {
     height: 30px;
     padding: 0 7px;
@@ -1024,5 +1005,17 @@ html[data-style="hacker"] .lab-cx__note {
     right: 12px;
     width: auto;
     max-height: 52vh;
+  }
+}
+
+/* 手表：页头只有四个位置，控制板先撤（它调的那些参数在小屏上也看不出来） */
+@media (max-width: 320px) {
+  html[data-style="hacker"] .lab-cx-btn {
+    display: none;
+  }
+
+  html[data-style="hacker"] .lab-bg canvas {
+    opacity: .12;
+    filter: blur(1.4px) saturate(.8);
   }
 }

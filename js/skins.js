@@ -61,7 +61,7 @@
     minimal: "css/skin-minimal.css",
     bare: "css/skin-bare.css"
   };
-  const VERSION = "20261201";
+  const VERSION = "20261202";
 
   const cssReady = new Map();
 
@@ -243,7 +243,7 @@
           <div class="style-card__glyph style-card__glyph--hacker" aria-hidden="true">&gt;_</div>
           <p class="style-card__kicker">TERMINAL</p>
           <h3 class="style-card__title">黑客终端</h3>
-          <p class="style-card__desc">深色终端配原版长页面，页底压着一块会呼吸的节拍舞台当壁纸，右上角多一枚调参按钮。</p>
+          <p class="style-card__desc">深色终端配原版长页面，整页背后铺一块会呼吸的节拍光场当壁纸，右上角多一枚调参按钮。</p>
           <div class="style-card__swatches" aria-hidden="true">
             <i style="--c:#030705"></i><i style="--c:#39ff88"></i><i style="--c:#00e5ff"></i>
           </div>
@@ -311,10 +311,15 @@
   }
 
   /* 卡片高度 = 视口高度 - 上下 margin，用 offsetTop 算中心，避免受布局细节影响 */
+  let programmaticUntil = 0;
+
   function scrollToCard(index, smooth) {
     const card = cards[index];
     if (!card) return;
     const top = card.offsetTop - (viewport.clientHeight - card.offsetHeight) / 2;
+    /* 平滑滚动期间别让滚动回调改活跃卡：两边互相推，
+       低端机上就是来回抽的那一下 */
+    programmaticUntil = Date.now() + (smooth && !reduce.matches ? 700 : 120);
     viewport.scrollTo({
       top: Math.max(0, top),
       behavior: smooth && !reduce.matches ? "smooth" : "auto"
@@ -323,6 +328,7 @@
 
   function syncActiveFromScroll() {
     if (!viewport.clientHeight) return;
+    if (Date.now() < programmaticUntil) return;
     const mid = viewport.scrollTop + viewport.clientHeight / 2;
     let best = 0;
     let bestGap = Infinity;

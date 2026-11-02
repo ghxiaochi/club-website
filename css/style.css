@@ -2332,6 +2332,209 @@ code {
   }
 }
 
+/* ---------------------------------------------------------
+   手表：200–320px 的小屏（Wear OS / 各家的手表浏览器）
+   ---------------------------------------------------------
+   屏幕上只有一个拇指宽，36px 的按钮和 48px 的标题都是灾难。
+   这里的目标不是好看，是「读得完、点得着、不横向溢出」。 */
+/* 窄屏上悬浮的「召唤」按钮会压到正文，先收起来 */
+@media (max-width: 420px) {
+  .pet-summon {
+    display: none;
+  }
+}
+
+@media (max-width: 320px) {
+  body {
+    min-width: 0;
+  }
+
+  html {
+    scroll-padding-top: 56px;
+  }
+
+  .container {
+    width: calc(100% - 16px);
+  }
+
+  /* 毛玻璃在手表上又慢又糊，直接给实色 */
+  .site-header,
+  .site-header.is-scrolled {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .header-inner {
+    min-height: 46px;
+    gap: 6px;
+  }
+
+  .brand {
+    gap: 6px;
+  }
+
+  .brand-mark {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+  }
+
+  .brand-mark svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .brand-copy strong {
+    font-size: 0.76rem;
+    letter-spacing: 0.02em;
+  }
+
+  .header-actions {
+    gap: 3px;
+  }
+
+  .sound-toggle,
+  .theme-toggle,
+  .style-toggle,
+  .nav-toggle {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    border-radius: 6px;
+  }
+
+  .section {
+    padding: 32px 0;
+  }
+
+  .section-head h2,
+  .hero h1 {
+    letter-spacing: -0.02em;
+  }
+
+  .hero h1 {
+    font-size: 1.55rem;
+    line-height: 1.16;
+    margin-bottom: 12px;
+  }
+
+  .section-head h2 {
+    font-size: 1.02rem;
+    line-height: 1.25;
+  }
+
+  .hero-lead,
+  .section-lead,
+  .do-card p,
+  .quick-desc,
+  .faq-a {
+    font-size: 0.74rem;
+    line-height: 1.7;
+  }
+
+  .eyebrow {
+    font-size: 0.54rem;
+    letter-spacing: 0.1em;
+  }
+
+  .hero-actions {
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .button {
+    min-height: 38px;
+    padding: 0 12px;
+    font-size: 0.74rem;
+  }
+
+  .quick-card,
+  .do-card,
+  .faq-item,
+  .join-panel,
+  .join-contact {
+    padding: 14px;
+    border-radius: 10px;
+  }
+
+  .hero-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hero-stat {
+    padding: 8px 0;
+    border-left: 0;
+  }
+
+  .hero-stat:nth-child(n + 2) {
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* 装饰在这个尺寸上只剩下干扰 */
+  .bg-orbs,
+  .bg-icons,
+  .skin-bubbles,
+  .hnyz-pet,
+  .hnyz-avatar,
+  .avatar-pet,
+  .pet-summon,
+  .hnyz-ticker,
+  .hero-rotator {
+    display: none !important;
+  }
+
+  /* 声音开关和「加入我们」在手表上没有意义，先让位给导航按钮。
+     选择器要压过 personal.css 里的 .sound-toggle（它比本文件晚加载） */
+  .header-actions .sound-toggle,
+  .site-nav .nav-cta {
+    display: none;
+  }
+
+  /* 邮箱这类长字符串在 200px 里必然溢出，允许断行 */
+  .quick-value,
+  .join-contact a,
+  .join-line a,
+  a[href^="mailto:"] {
+    white-space: normal;
+    word-break: break-all;
+  }
+
+  .quick-line {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 2px;
+  }
+
+  .quick-line > * {
+    min-width: 0;
+  }
+
+  /* 跑道留着，但压到一条：手表上还跑得动 */
+  .dino-run__stage {
+    height: 96px;
+  }
+
+  .dino-run__bar {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .dino-run__hud {
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    font-size: 0.5rem;
+  }
+
+  .dino-run__kicker {
+    font-size: 0.5rem;
+    letter-spacing: 0.06em;
+  }
+
+  .dino-run__hint {
+    font-size: 0.5rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

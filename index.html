@@ -3,6 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 兜底排版：万一外链 CSS 被浏览器/代理拦掉（国产内核里偶尔会这样，
+       整站只剩裸文字），至少还有一套能读的骨架。正常加载时会被后面的样式表覆盖。 -->
+  <style>
+    body{margin:0;background:#f4f8ff;color:#0b1b33;
+      font:16px/1.75 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;}
+    .container{width:calc(100% - 40px);max-width:1180px;margin:0 auto;}
+    .site-header{background:#fff;border-bottom:1px solid #dbe5f5;}
+    .header-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:64px;flex-wrap:wrap;}
+    .brand{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none;font-weight:700;}
+    .brand-mark{width:34px;height:34px;border:1px solid #cfdcf2;border-radius:6px;display:inline-block;}
+    .nav-list{display:flex;flex-wrap:wrap;gap:14px;margin:0;padding:0;list-style:none;}
+    .nav-list a{color:inherit;text-decoration:none;font-size:14px;}
+    .hero,.section{padding:36px 0;}
+    h1{font-size:2rem;line-height:1.2;margin:0 0 12px;}
+    h2{font-size:1.35rem;line-height:1.3;margin:0 0 10px;}
+    h3{font-size:1.05rem;line-height:1.35;margin:0 0 8px;}
+    p{margin:0 0 12px;}
+    ul,ol{margin:0 0 12px;padding-left:1.2em;}
+    img,canvas{max-width:100%;height:auto;}
+    .button{display:inline-block;padding:10px 16px;border:1px solid #cfdcf2;border-radius:8px;
+      color:inherit;text-decoration:none;}
+    .quick-card,.do-card,.project-card,.faq-item,.join-panel,.gallery-card,.agenda-card{
+      border:1px solid #dbe5f5;border-radius:10px;padding:16px;background:#fff;}
+    .site-footer{border-top:1px solid #dbe5f5;padding:24px 0;font-size:14px;}
+  </style>
   <meta name="description" content="HNYZ · 衡南一中编程社是一个面向全校学生的极客编程社团，教学内容以 Arduino 硬件编程为主线。我们通过项目、每周两次、每次一小时的活动和资源墙，一起把想法写成代码。">
   <meta name="theme-color" content="#f5f9ff">
   <script>
@@ -43,7 +68,7 @@
         document.documentElement.dataset.style = style;
         var link = document.createElement("link");
         link.rel = "stylesheet";
-        link.href = sheet + "?v=20261201";
+        link.href = sheet + "?v=20261202";
         link.setAttribute("data-skin-css", style);
         document.head.appendChild(link);
       } catch (error) { /* 隐私模式下忽略 */ }
@@ -81,38 +106,36 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="stylesheet" href="css/style.css?v=20261201">
-  <link rel="stylesheet" href="css/pet.css?v=20261201">
-  <link rel="stylesheet" href="css/personal.css?v=20261201">
-  <link rel="stylesheet" href="css/avatar-pet.css?v=20261201">
-  <link rel="stylesheet" href="css/skins.css?v=20261201">
-  <link rel="stylesheet" href="css/type.css?v=20261201">
-  <link rel="stylesheet" href="css/motion.css?v=20261201">
-  <!-- dino.css 在首屏折叠线以下（页脚跑道），先按低优先级下载，不挡住首屏渲染 -->
-  <link rel="preload" href="css/dino.css?v=20261201" as="style" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/dino.css?v=20261201"></noscript>
-  <!-- guestbook.css 在首屏折叠线以下（页脚跑道），先按低优先级下载，不挡住首屏渲染 -->
-  <link rel="preload" href="css/guestbook.css?v=20261201" as="style" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/guestbook.css?v=20261201"></noscript>
+  <link rel="stylesheet" href="css/style.css?v=20261202">
+  <link rel="stylesheet" href="css/pet.css?v=20261202">
+  <link rel="stylesheet" href="css/personal.css?v=20261202">
+  <link rel="stylesheet" href="css/avatar-pet.css?v=20261202">
+  <link rel="stylesheet" href="css/skins.css?v=20261202">
+  <link rel="stylesheet" href="css/type.css?v=20261202">
+  <link rel="stylesheet" href="css/motion.css?v=20261202">
+  <!-- dino.css 只画页脚那条跑道：普通样式表，别用 preload 花招，
+       老内核里 rel=preload 不会转成样式表，小恐龙会整个不见 -->
+  <link rel="stylesheet" href="css/dino.css?v=20261202">
+  <link rel="stylesheet" href="css/guestbook.css?v=20261202">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <!-- 项目卡片、全部项目折叠页和复制按钮由 js/main.js 驱动 -->
-  <script src="js/sfx.js?v=20261201" defer></script>
-  <script src="js/theme.js?v=20261201" defer></script>
-  <script src="js/theme-icon.js?v=20261201" defer></script>
-  <script src="js/members.js?v=20261201" defer></script>
-  <script src="js/main.js?v=20261201" defer></script>
-  <script src="js/pet.js?v=20261201" defer></script>
-  <script src="js/avatar-pet.js?v=20261201" defer></script>
-  <script src="js/personal.js?v=20261201" defer></script>
-  <script src="js/click-fx.js?v=20261201" defer></script>
-  <script src="js/skins.js?v=20261201" defer></script>
-  <script src="js/copy.js?v=20261201" defer></script>
-  <script src="js/pwa.js?v=20261201" defer></script>
+  <script src="js/sfx.js?v=20261202" defer></script>
+  <script src="js/theme.js?v=20261202" defer></script>
+  <script src="js/theme-icon.js?v=20261202" defer></script>
+  <script src="js/members.js?v=20261202" defer></script>
+  <script src="js/main.js?v=20261202" defer></script>
+  <script src="js/pet.js?v=20261202" defer></script>
+  <script src="js/avatar-pet.js?v=20261202" defer></script>
+  <script src="js/personal.js?v=20261202" defer></script>
+  <script src="js/click-fx.js?v=20261202" defer></script>
+  <script src="js/skins.js?v=20261202" defer></script>
+  <script src="js/copy.js?v=20261202" defer></script>
+  <script src="js/pwa.js?v=20261202" defer></script>
   <script>
     /* 页脚跑道和留言板都在折叠线以下：等它们真的接近视口再加载，
        首屏不为这 100KB 付任何代价。提前 800px 开始拉，滚到底时已经就位。 */
-    (function () {
+    function bootLazySections() {
       var dino = false;
       var guestbook = false;
 
@@ -126,13 +149,13 @@
       function loadDino() {
         if (dino) return;
         dino = true;
-        inject("js/dino.js?v=20261201");
+        inject("js/dino.js?v=20261202");
       }
 
       function loadGuestbook() {
         if (guestbook) return;
         guestbook = true;
-        inject("js/guestbook.js?v=20261201");
+        inject("js/guestbook.js?v=20261202");
       }
 
       function watch(el, fn) {
@@ -161,7 +184,15 @@
           if (!okBook) loadGuestbook();
         }, { once: true, passive: true });
       }
-    })();
+    }
+
+    /* 这段脚本在 head 里，DOM 还没解析完：必须等 DOM 就位再找那些区块，
+       否则 querySelector 全是 null，小恐龙和留言板永远不会被加载。 */
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", bootLazySections);
+    } else {
+      bootLazySections();
+    }
   </script>
 </head>
 <body>

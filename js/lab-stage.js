@@ -1323,18 +1323,18 @@
     if (W < 24 || H < 24) return;
 
     var small = W < 780;
-    /* 壁纸模式：环心压在画面底边之外，只露出上半截弧。
-       半径先按宽度定（宽屏上环宽约 0.92W，弧线从左右两侧升起），
-       再按高度压一道上限，保证环顶落在画面 55% 附近，
-       上面留给正文，下面才是这张壁纸。 */
-    R = Math.min(W * (small ? 0.34 : 0.22), H * (small ? 0.21 : 0.30));
+    /* 壁纸模式：整块光场居中，环心就在视口正中，
+       半径按短边定，宽屏上是一枚完整的环，不裁边、不偏左。
+       高度再压一道：手机竖屏时环不至于顶到状态栏。 */
+    R = Math.min(W * (small ? 0.42 : 0.34), H * (small ? 0.30 : 0.34));
+    R = Math.max(72, R);
     BAND = R * 0.2 * clamp(CFG.ring, 0.8, 1.3);
     RO = R + BAND;
-    RMAX = Math.hypot(W, H) * 1.05;
+    /* 光束再远也要留在画里：半径收在短边的 0.62 倍内 */
+    RMAX = Math.min(Math.hypot(W, H) * 0.62, Math.min(W, H) * 0.9);
     cx = W * 0.5;
-    /* 核心坐在底边偏上一点：上半露出画面，下半压进画外，
-       读起来像一台从页底升起来的装置，而不是贴上去的一张图 */
-    cy = H * 1.03;
+    /* 正中间，略微上移一点点，给下面的正文留呼吸 */
+    cy = H * 0.48;
 
     buildWeb();
     buildSlots();
@@ -1379,12 +1379,11 @@
     drawRing(dt);
     drawFlares(dt);
 
-    /* 压边：光束打到画框边上收一点，舞台才有镜头感，
-       不然四周一片白，环反而被淹掉 */
-    var vg = ctx.createRadialGradient(0, 0, RO, 0, 0, Math.max(W, H) * 0.72);
+    /* 压边：只在四周收一圈，中间那圈线要留着，它才是壁纸的主体 */
+    var vg = ctx.createRadialGradient(0, 0, RO * 1.05, 0, 0, Math.max(W, H) * 0.78);
     vg.addColorStop(0, rgba(pal.bg, 0));
-    vg.addColorStop(0.55, rgba(pal.bg, 0.12));
-    vg.addColorStop(1, rgba(pal.bg, 0.62));
+    vg.addColorStop(0.6, rgba(pal.bg, 0.07));
+    vg.addColorStop(1, rgba(pal.bg, 0.34));
     ctx.fillStyle = vg;
     ctx.fillRect(-W, -H, W * 3, H * 3);
 
