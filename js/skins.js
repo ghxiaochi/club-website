@@ -222,10 +222,15 @@
   }
 
   /* 卡片高度 = 视口高度 - 上下 margin，用 offsetTop 算中心，避免受布局细节影响 */
+  let programmaticUntil = 0;
+
   function scrollToCard(index, smooth) {
     const card = cards[index];
     if (!card) return;
     const top = card.offsetTop - (viewport.clientHeight - card.offsetHeight) / 2;
+    /* 平滑滚动期间别让滚动回调改活跃卡：两边互相推，
+       低端机上就是来回抽的那一下 */
+    programmaticUntil = Date.now() + (smooth && !reduce.matches ? 700 : 120);
     viewport.scrollTo({
       top: Math.max(0, top),
       behavior: smooth && !reduce.matches ? "smooth" : "auto"
@@ -233,6 +238,7 @@
   }
 
   function syncActiveFromScroll() {
+    if (Date.now() < programmaticUntil) return;
     if (!viewport.clientHeight) return;
     const mid = viewport.scrollTop + viewport.clientHeight / 2;
     let best = 0;

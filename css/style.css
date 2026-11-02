@@ -2387,3 +2387,183 @@ code {
 
   color-scheme: dark;
 }
+
+/* ---------------------------------------------------------
+   手表：≤340px（Wear OS / 各家表盘浏览器）
+   ---------------------------------------------------------
+   body 原本有 min-width:320px，220px 的屏直接横向溢出。
+   这里的目标不是好看，是「读得完、点得着、不横向溢出」。
+   --------------------------------------------------------- */
+@media (max-width: 340px) {
+  body {
+    min-width: 0;
+  }
+
+  html {
+    scroll-padding-top: 56px;
+  }
+
+  .container {
+    width: calc(100% - 16px);
+  }
+
+  /* 毛玻璃在表盘上又慢又糊，直接给实色 */
+  .site-header,
+  .site-header.is-scrolled {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .header-inner {
+    min-height: 46px;
+    gap: 6px;
+  }
+
+  .brand {
+    gap: 6px;
+  }
+
+  .brand-mark {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+  }
+
+  .brand-mark svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .brand-copy strong {
+    font-size: 0.76rem;
+    letter-spacing: 0.02em;
+  }
+
+  .header-actions {
+    gap: 3px;
+  }
+
+  /* 声音开关、调参台和「加入我们」在表盘上没有意义，让位给导航 */
+  .header-actions .sound-toggle,
+  .header-actions .cx-trigger,
+  .site-nav .nav-cta {
+    display: none;
+  }
+
+  /* 选择器带上 .header-actions：皮肤里的按钮规则比单类选择器更靠后 */
+  .header-actions .sound-toggle,
+  .header-actions .theme-toggle,
+  .header-actions .style-toggle,
+  .header-actions .nav-toggle {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    border-radius: 6px;
+  }
+
+  .section {
+    padding: 32px 0;
+  }
+
+  .hero h1 {
+    font-size: 1.55rem;
+    line-height: 1.16;
+    margin-bottom: 12px;
+  }
+
+  .section-head h2 {
+    font-size: 1.02rem;
+    line-height: 1.25;
+  }
+
+  .hero-lead,
+  .section-lead,
+  .do-card p,
+  .quick-desc,
+  .faq-a {
+    font-size: 0.74rem;
+    line-height: 1.7;
+  }
+
+  .eyebrow {
+    font-size: 0.54rem;
+    letter-spacing: 0.1em;
+  }
+
+  .hero-actions {
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .button {
+    min-height: 38px;
+    padding: 0 12px;
+    font-size: 0.74rem;
+  }
+
+  .quick-card,
+  .do-card,
+  .faq-item,
+  .join-panel,
+  .join-contact {
+    padding: 14px;
+    border-radius: 10px;
+  }
+
+  .hero-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hero-stat {
+    padding: 8px 0;
+    border-left: 0;
+  }
+
+  /* 长邮箱和代码行在 200px 里必然溢出，允许断行 */
+  a[href^="mailto:"],
+  .quick-value,
+  .join-contact a,
+  .join-line a {
+    white-space: normal;
+    word-break: break-all;
+  }
+
+  .code-line {
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-wrap: anywhere;
+  }
+
+  /* 装饰在这个尺寸上只剩干扰 */
+  .bg-orbs,
+  .skin-bubbles,
+  .hnyz-pet,
+  .hnyz-avatar,
+  .avatar-pet,
+  .pet-summon,
+  .hnyz-ticker,
+  .hero-rotator {
+    display: none !important;
+  }
+
+  /* 跑道留着，但压成一条 */
+  .dino-run__stage {
+    height: 96px;
+  }
+
+  .dino-run__bar {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .dino-run__hud {
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    font-size: 0.5rem;
+  }
+
+  .dino-run__kicker,
+  .dino-run__hint {
+    font-size: 0.5rem;
+  }
+}
