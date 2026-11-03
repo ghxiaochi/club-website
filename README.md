@@ -39,108 +39,7 @@
 
 ---
 
-## 2. 文件结构
-
-```text
-club-website/
-├── index.html              # 首页
-├── projects.html           # 全部项目页（按成员折叠）
-├── gallery.html            # 图集页（瀑布流 + 灯箱）
-├── member.html             # 成员页
-├── dino.html               # 天梯页：可玩的小恐龙 + 排行榜
-├── halo.html               # 「光场」皮肤本体：HALOFLUX 的移植版（整屏 canvas 光场）
-├── 404.html                # 终端风 404（Pages 找不到路径时返回，站内任意深度都能用）
-├── manifest.webmanifest    # PWA 清单（名称、图标、快捷方式）
-├── sw.js                   # Service Worker：页面网络优先、资源缓存优先
-├── css/
-│   ├── style.css           # 全站样式（蓝白科技风）
-│   ├── personal.css        # 深色主题、动效、彩蛋样式（在 style.css 之后加载）
-│   ├── skins.css           # 五套网页风格（默认 / 极简 / 黑客 / 光场 / 棍木）的皮肤层
-│   ├── skin-halo.css       # 光场皮肤：全屏 iframe 挂载 halo.html，站点内容让位
-│   ├── dino.css            # 页脚小恐龙跑道、日间/夜间配色
-│   ├── type.css            # 三套风格的字体栈（标题衬线 / 等宽 / 几何无衬线；棍木只有一行灰字）
-│   ├── motion.css          # 弹性动效层（统一回弹曲线，最后加载）
-│   ├── pet.css             # 右下角校徽背景板样式
-│   ├── avatar-pet.css      # 左下角像素头像彩蛋样式
-│   ├── characters.css      # 音游角色舞台与立绘
-│   ├── guestbook.css       # 留言板外框（终端风的标题条、等待态、降级文案）
-│   └── ladder.css          # 天梯页两栏布局与榜单（刻意不用 clamp/inset，照顾旧内核）
-├── assets/
-│   └── moon-sun-sprite.png # 60 帧月亮/太阳雪碧图（3240×54）
-├── fonts/                  # 游戏原版像素字体（来自 assets.7z）
-│   ├── anim-title.ttf      # 大标题
-│   └── anim-pixel.ttf      # 副标题 / 小字
-├── audio/                  # 游戏原版音效（MP3 单声道，共约 104KB）
-│   ├── jump / pat / hit    # 扫过跳一下 / 右键戳 / 未解锁
-│   ├── back / view         # 关闭角色卡 / 打开角色卡的小曲
-├── js/
-│   ├── sfx.js              # 音效池与开关（跟随鼠标点击播放，可静音）
-│   ├── members.js          # 项目清单 + 成员主页横幅配置（唯一需要手动维护的数据）
-│   ├── main.js             # GitHub API、缓存、卡片渲染、折叠、交互
-│   ├── gallery-data.js     # 图集清单（加图改这里）
-│   ├── gallery.js          # 图集渲染与灯箱
-│   ├── theme.js            # 深浅色主题切换与记忆
-│   ├── skins.js            # 网页风格切换面板、竖向卡片、擦除转场、光场 iframe 的挂载/卸载、棍木的按钮搬运
-│   ├── dino.js             # 页脚像素小恐龙（金币 / 连击 / 星空，等级已移除）
-│   ├── matrix.js           # 黑客风的数字雨（只在 hacker 皮肤下启动）
-│   ├── copy.js             # 三套文案，按风格替换 data-copy 节点（棍木没有文案可换）
-│   ├── theme-icon.js       # 主题按钮的月亮 / 太阳雪碧图帧动画
-│   ├── personal.js         # 打字机标语、滚动渐显、卡片倾斜、彩蛋
-│   ├── pet.js              # 校徽滚动旋转、点击说话
-│   ├── avatar-pet.js       # 头像点击台词与彩蛋
-│   ├── guestbook.js        # 留言板：滚动到附近才加载 giscus，并跟随皮肤换主题
-│   ├── pwa.js              # Service Worker 注册（load 之后空闲时）
-│   └── ladder.js           # 天梯：读 data/ladder.json、渲染、死亡后拼 GitHub Issue 链接
-├── data/
-│   ├── repos.json          # 项目快照（每天由 GitHub Actions 重写，前端优先读它）
-│   └── ladder.json         # 天梯榜单（Actions 汇总 Issues 生成，页面只读）
-├── scripts/
-│   ├── fetch-repos.mjs     # 抓取仓库数据 → data/repos.json
-│   └── compat-fallback.mjs # 给 clamp/min/max/inset 补旧内核 fallback（幂等）
-├── .github/
-│   └── workflows/
-│       ├── refresh-repos.yml  # 每天 05:17 跑一次上面的脚本
-│       └── ladder.yml         # 天梯：Issue 提交 → 汇总写回 data/ladder.json
-├── images/
-│   ├── favicon.svg
-│   ├── icon-192.png        # PWA 图标
-│   ├── icon-512.png
-│   ├── icon-maskable-512.png
-│   ├── apple-touch-icon.png
-│   ├── og-cover.jpg        # 1200×630 分享图（76KB，原来是 305KB 的 PNG）
-│   ├── project-website.svg # 社团官网封面
-│   ├── project-zaco.svg    # Zaco 猜数字封面
-│   ├── characters/          # 角色素材
-│   │   ├── art-*.webp       # 高精度立绘（结果页用，8 张约 400KB）
-│   │   ├── unit-*.webp      # 像素站位图（游戏原版，每个 300B 左右）
-│   │   ├── unit-alpha.webp  # 已解锁的 4 个 + 各自的 -hit 挨打帧
-│   │   ├── unit-mono.webp
-│   │   ├── unit-oct.webp
-│   │   ├── unit-crawler.webp
-│   │   └── unit-zenith / quad / oxynoe / sei.webp  # 未解锁角色
-│   ├── decor/               # 背景图标（灰度、已去底）
-│   │   ├── icon-badge.webp
-│   │   ├── icon-arduino.webp
-│   │   └── icon-token.webp
-│   ├── gallery/             # 图集素材
-│   │   ├── meme-cup.webp    # 梗图（已去底）
-│   │   ├── meme-dizzy.webp
-│   │   ├── meme-wink.webp
-│   ├── personal/
-│   │   ├── sticker-2.webp   # ghxiaochi 主页贴纸（已去底）
-│   │   ├── sticker-3.webp
-│   │   └── sticker-4.webp
-│   └── pet/
-│       ├── badge-school-hd.webp  # 高清校徽
-│       └── ghxiaochi-avatar.webp # 像素头像彩蛋
-├── robots.txt
-├── sitemap.xml
-└── README.md
-```
-
----
-
-## 3. 开屏与首屏位置
+## 2. 开屏与首屏位置
 
 打开首页时会先显示约 0.8 秒的开屏（`{ }` + HNYZ + 口号），同时脚本把页面**直接定位到「关于」这一块**，不做平滑滚动：
 
@@ -148,7 +47,7 @@ club-website/
 - 打开时会清掉 URL 里残留的 `#join` 之类锚点，防止一进来就跳到页尾
 - 想改成打开时停在顶部首屏，把 `index.html` 里 `place()` 中的 `document.getElementById("about")` 换成 `null` 即可
 
-## 4. 本地预览
+## 3. 本地预览
 
 ### 方式 A：直接打开
 
@@ -170,7 +69,7 @@ npx serve .
 
 ---
 
-## 5. 修改项目卡片
+## 4. 修改项目卡片
 
 打开 `js/members.js`，只改 `window.HNYZ_MEMBERS` 数组：
 
@@ -231,7 +130,7 @@ window.HNYZ_MEMBERS = [
 
 ---
 
-## 6. 数据与异常兜底
+## 5. 数据与异常兜底
 
 首页使用 `Promise.all` 并发请求前 6 个仓库：
 
@@ -265,7 +164,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 ---
 
-## 7. 修改品牌 / 联系方式
+## 6. 修改品牌 / 联系方式
 
 全局搜索替换即可：
 
@@ -282,7 +181,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 ---
 
-## 8. 音效
+## 7. 音效
 
 `js/sfx.js` 是一个小音效池：每个音效预载 1–3 个实例，轮着播，所以快速连点不会互相打断。素材是 Animdustry 原版 `assets/sounds` 与 `assets/music`，转成单声道 MP3（96kbps，iOS 也能放）后总共约 104KB，全部懒加载。
 
@@ -305,7 +204,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 - 立绘等 `decode()` 完成再显示，且在空闲时预载，点开不卡
 - 暴走、弹球期间自动暂停背景动画并关闭头部毛玻璃（见「个性化与彩蛋」）
 
-## 9. 个性化与彩蛋
+## 8. 个性化与彩蛋
 
 这一层由 `css/personal.css` + `js/theme.js` + `js/personal.js` 组成，**不改动 `style.css`**，删掉这三行引用即可完全回到原版。
 
@@ -495,7 +394,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 深色配色是 `css/personal.css` 顶部的 `[data-theme="dark"]` 变量块，覆盖 `style.css` 里 `:root` 的同名变量。改深色只需要动这一块；少数组件在 `style.css` 里写死了浅色，已在 `personal.css` 里单独覆盖：次要按钮、联系卡标题栏、占位封面、校徽底板、页脚、移动端菜单，以及 **`.section--soft` 区块底色**（这一条曾经导致深色模式下出现一块灰白板、白字看不清，已修复）。
 
-## 10. 往图集里加图
+## 9. 往图集里加图
 
 1. 把图片放进 `images/gallery/`
 2. 打开 `js/gallery-data.js`，在数组末尾加一条：
@@ -510,7 +409,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 建议短边 ≥ 800px；透明底的贴纸类图片会自动在白色相纸里居中显示，不会变形。想删掉某张，删掉数组里那一项即可（首页 ghxiaochi 个人页的贴纸在 `js/members.js` 的 `HNYZ_PROFILES` 里，两者互不影响）。
 
-## 11. 换主题色
+## 10. 换主题色
 
 所有颜色集中在 `css/style.css` 顶部的 `:root`：
 
@@ -546,7 +445,7 @@ ghxiaochi 的个人主页横幅配置在 `js/members.js` 的 `window.HNYZ_PROFIL
 
 ---
 
-## 12. 部署到 GitHub Pages
+## 11. 部署到 GitHub Pages
 
 ### 首次部署
 
@@ -579,7 +478,7 @@ Pages 会自动重新构建。如果页面还是旧版本，先强制刷新（`C
 
 ---
 
-## 13. 验收清单
+## 12. 验收清单
 
 - [ ] 本地打开 `index.html` 能看到完整首页
 - [ ] 首页项目卡片由 GitHub API 渲染，最多 6 张
@@ -624,7 +523,7 @@ Pages 会自动重新构建。如果页面还是旧版本，先强制刷新（`C
 
 ---
 
-## 14. FAQ
+## 13. FAQ
 
 **Q：为什么卡片显示 `DEGRADED`？**  
 A：GitHub API 返回了 403（限流）、404 或网络异常，页面自动用了本地缓存或 `js/members.js` 里的字段降级渲染。stars / forks 未知时显示 `—`，不会假装成 0。
@@ -640,11 +539,11 @@ A：可以，`members` 没有数量上限。首页只展示前 6 个；更多项
 
 ---
 
-## 15. PWA、404 与项目快照
+## 14. PWA、404 与项目快照
 
 这一节的三件事都是「补上缺的那块拼图」，彼此独立，可以单独关掉。
 
-### 15.1 添加到主屏幕（manifest + Service Worker）
+### 14.1 添加到主屏幕（manifest + Service Worker）
 
 `manifest.webmanifest` 提供名称、图标和三个快捷方式（项目 / 图集 / 成员）。
 `sw.js` 负责离线，策略按资源类型分工：
@@ -684,7 +583,7 @@ navigator.serviceWorker.getRegistrations().then(list => list.forEach(r => r.unre
 > 不是主脚本，主脚本本来就每次回源。本站 `sw.js` 没有 `import`，
 > 所以这个参数目前不改变行为，留着是为了以后加子脚本时不踩坑。
 
-### 15.2 404 页
+### 14.2 404 页
 
 `404.html` 会被 GitHub Pages 用在**任意深度**的错误路径上，所以它不能用相对路径
 （`/foo/bar` 下 `css/style.css` 会被解析到 `/foo/css/…`）。
@@ -694,7 +593,7 @@ navigator.serviceWorker.getRegistrations().then(list => list.forEach(r => r.unre
 页面本身不依赖 `style.css`，样式全内联（约 4KB gzip），断网也能立刻打开；
 配色跟随 `localStorage` 里的主题，黑客风下自动切成纯黑 + 荧光绿。
 
-### 15.3 项目数据不再吃 API 额度
+### 14.3 项目数据不再吃 API 额度
 
 匿名 GitHub API 只有 **60 次/小时/IP**，纳新季一个班同时打开页面就能打光。
 现在改成两级：
@@ -718,11 +617,11 @@ GITHUB_TOKEN=ghp_xxx node scripts/fetch-repos.mjs
 
 ---
 
-## 16. 留言板（Giscus）
+## 15. 留言板（Giscus）
 
 留言数据存在仓库的 **Discussions** 里，没有后端、没有数据库，删库才会消失。
 
-### 16.1 接线状态
+### 15.1 接线状态
 
 已接线（2026-10-30），配置写在 `js/guestbook.js` 的 `CONFIG` 里：
 
@@ -747,7 +646,7 @@ GITHUB_TOKEN=ghp_xxx node scripts/fetch-repos.mjs
 > 本站有三套文案，同一个区块的标题在极简 / 黑客风下是不一样的。
 > 按标题映射的话，同一个人换个皮肤再来留言，会开出第二个 discussion，评论被劈成两半。
 
-### 16.2 它是怎么加载的
+### 15.2 它是怎么加载的
 
 - 用 `IntersectionObserver` 盯着留言板，滚到 500px 以内才插 `giscus.app/client.js`；
   首屏不为它付任何代价。
@@ -775,12 +674,12 @@ GITHUB_TOKEN=ghp_xxx node scripts/fetch-repos.mjs
 
 ---
 
-## 17. 像素小恐龙天梯榜
+## 16. 像素小恐龙天梯榜
 
 首页页脚那条跑道是**自动巡航**的装饰：恐龙自己躲仙人掌，你不用管。
 想自己跑，点跑道右上角的「天梯 →」，进 `dino.html`。
 
-### 17.1 这个页面有什么
+### 16.1 这个页面有什么
 
 | 区域 | 内容 |
 |---|---|
@@ -794,7 +693,7 @@ GITHUB_TOKEN=ghp_xxx node scripts/fetch-repos.mjs
 
 没有等级、没有电脑对手。榜上每一条都是真人提交的。
 
-### 17.2 榜是怎么来的
+### 16.2 榜是怎么来的
 
 没有后端，也没有数据库。整条链路就三步：
 
@@ -819,7 +718,7 @@ GITHUB_TOKEN=ghp_xxx node scripts/fetch-repos.mjs
 - **提交要 GitHub 账号**，而且会离开页面去 GitHub；
 - **从提交到上榜约 1 分钟**（Actions 跑一次 + Pages 部署）。
 
-### 17.3 榜单怎么维护
+### 16.3 榜单怎么维护
 
 - 榜首那条「东方马也 999999」写死在 `ladder.yml` 的 `SEED` 常量里，每次重算都会带上，
   不来自任何 Issue；
@@ -830,22 +729,22 @@ GITHUB_TOKEN=ghp_xxx node scripts/fetch-repos.mjs
 因为 Actions 会 `git push` 回仓库，本地改 `data/ladder.json` 只影响你本机，
 下次有人提交就被覆盖了。
 
-### 17.4 防刷到什么程度
+### 16.4 防刷到什么程度
 
 Issue 的 body 是玩家自己写的，**分数可以随便填**。
 能保证的只有「得有一个 GitHub 账号」，拦不住愿意开小号的人。
 社团站的量级，这个成本已经够高，所以没做额外校验。
 
-### 17.5 本地怎么看
+### 16.5 本地怎么看
 
 `data/ladder.json` 就是个静态文件，改完直接打开 `dino.html` 就能看到效果，
 不需要任何服务。提交链路要推到 GitHub 才有 Actions，本地测不了。
 
-## 18. 旧内核兼容（国产浏览器 / 老 WebView）
+## 17. 旧内核兼容（国产浏览器 / 老 WebView）
 
 现象是「在 A 浏览器好好的，换个浏览器就排版崩成一列 / 动画乱 / 样式像全丢了」。
 
-### 18.1 根因不是一个，是三个叠在一起
+### 17.1 根因不是一个，是三个叠在一起
 
 **一、`skins.css` 里有一个多余的右花括号。**
 
@@ -872,7 +771,7 @@ Chromium 79 以下不认识这三个函数，处理方式不是「忽略这个�
 **三、`inset` 简写（Chromium 87+）失效。** 48 处定位一起消失，
 全屏层、浮层、装饰角标全部错位。
 
-### 18.2 怎么修的
+### 17.2 怎么修的
 
 `scripts/compat-fallback.mjs` 会扫一遍 `css/`，给每条含 `clamp/min/max` 的声明
 **在前面补一条静态值**；`inset` 则展开成 `top/right/bottom/left` 四行：
@@ -898,7 +797,7 @@ font-size: clamp(3rem, 5.8vw, 5.15rem);
 
 改完的兼容底线：**Chromium 69 / iOS Safari 12**。
 
-### 18.3 改了 CSS 之后要重跑
+### 17.3 改了 CSS 之后要重跑
 
 ```bash
 node scripts/compat-fallback.mjs --dry   # 先看会改多少条
@@ -907,7 +806,7 @@ node scripts/compat-fallback.mjs         # 写入
 
 脚本是幂等的：已经补过 fallback 的声明会跳过，不会越跑越长。
 
-### 18.4 已知没做的两件事
+### 17.4 已知没做的两件事
 
 - **flex 的 `gap`**（Chromium 84+）：旧内核里 flex 容器的 `gap` 不生效，
   元素会紧贴。全站 100 处，逐个换成 margin 会污染布局语义，
@@ -918,7 +817,7 @@ node scripts/compat-fallback.mjs         # 写入
 
 ---
 
-## 19. 光场皮肤（halo）
+## 18. 光场皮肤（halo）
 
 第五套皮肤，把 [HALOFLUX](https://github.com/Ryder191/haloflux) 整个「抄」了进来。原版是一个节拍驱动的深色光场：中央一圈数据环带、外侧光束、底部一排数据面板，全部在一块 canvas 里跑。我们只动了四刀：
 
@@ -927,24 +826,24 @@ node scripts/compat-fallback.mjs         # 写入
 3. **修空引用**：原版给 `.console` 返回按钮绑事件，嵌入场景里这个按钮不存在，会直接报错，改成判空
 4. **手表断点**：≤340px 时 header 改两列、KPI 收缩、次要面板隐藏
 
-### 19.1 怎么挂进来的
+### 18.1 怎么挂进来的
 
 `halo.html` 原样保留（单文件，脚本全内嵌），站点这边用 `css/skin-halo.css` + `js/skins.js` 的 `syncHalo()` 挂载：`html[data-style="halo"]` 下站点自己的内容全部 `display:none` 让位，一个 `position:fixed; inset:0` 的全屏 iframe 指向 `halo.html`。切走就 `remove()`，文档销毁，rAF 循环跟着真停，不留后台动画偷偷吃电。顶栏在 halo 下收缩成右上角一枚 32px 的风格按钮（半透明，压在 iframe 上还能点），面板打开时 iframe 压暗到 0.55 亮度。
 
 版本号走 `js/skins.js` 里的 `HALO_VERSION`，与页面引用、`sw.js` 预缓存三处同步 bump。
 
-### 19.2 为什么是 iframe 而不是并进页面
+### 18.2 为什么是 iframe 而不是并进页面
 
 试过直接并：HALOFLUX 是个自成一体的引擎，有自己的 canvas、自己的滚动容器、自己的面板吸附逻辑，跟站点的小恐龙、数字雨、滚动进度条挤在同一个文档里就互相打架（滚动回调互推，面板抽搐）。iframe 一隔，两边互相看不见，代价只是多一层文档。这层隔离换来的稳定，非常值。
 
-### 19.3 修过的两个坑
+### 18.3 修过的两个坑
 
 - **右侧白边**：body 的 `scrollbar-gutter: stable` 会留 15px 槽，iframe 因此窄一截，右边露出一条白。halo 下在 `html` 级把它关掉。
 - **首帧闪默认皮肤**：`<head>` 预置脚本原来只认 minimal/hacker，halo 下刷新会先画一遍默认页再换。`halo` 加进预置名单就好。
 
 ---
 
-## 20. 致谢
+## 19. 致谢
 
 有两样东西不是我们写的，都在这里说清楚：
 
