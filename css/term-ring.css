@@ -260,14 +260,15 @@ html[data-style="term"] .term-node.is-active .term-node__title {
 
 /* 只有转正的那块露摘要，其它保持一行 */
 html[data-style="term"] .term-node__more {
-  display: none;
   margin-top: 7px;
   padding-top: 7px;
   border-top: 1px solid var(--border);
   color: var(--muted);
   font-size: 0.68rem;
   line-height: 1.6;
-  /* 三行封顶，超出用省略号，不要把一个词从中间切开 */
+  /* 两行封顶再省略，不要把一个词从中间切开。
+     这里必须保持 -webkit-box，改成 display:block 会让 line-clamp 失效，
+     摘要会把整张卡撑高一倍 */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -290,16 +291,11 @@ html[data-style="term"] .term-node.is-active .term-node__title {
   white-space: normal;
 }
 
-html[data-style="term"] .term-node.is-active .term-node__more {
-  display: block;
-}
 
+
+html[data-style="term"] .term-node:not(.is-active) .term-node__more,
 html[data-style="term"] .term-node__more:empty {
   display: none !important;
-}
-
-html[data-style="term"] .term-node:not(.is-active) .term-node__more {
-  display: none;
 }
 
 /* 顶部那块左侧加一道竖线，像被标出来的当前行 */
