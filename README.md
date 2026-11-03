@@ -20,7 +20,7 @@
 - **活动节奏**：每周两次、每次 60 分钟，以及一次活动的流程
 - **资源墙**：C++ 菜鸟教程、微雪 ESP32 Wiki
 - **成员个人页**（`member.html?u=用户名`）：每个成员一个独立页面，横幅、简介、个性色（`HNYZ_PROFILES` 里的 `accent`）和 TA 的项目都在这里；「全部项目」页每个分组右侧有「个人主页 ↗」入口；页面左下角有桌宠，简介里点「（这里有一句话被涂掉了）」会露出彩蛋文案（`HNYZ_PROFILES` 的 `secret` 字段）
-- **Animdustry 角色排**：「全部项目」页顶部按游戏源码复刻了那一排小人——`#accce3 / #57639a` 斜条纹背景、8 个角色（全部解锁）站在深色地台上，贴图里烘焙了一层黑色描边。交互照搬游戏：**鼠标扫过依次跳一下**（`unit.jumping`，手机上手指划过同样会跳），音高不绑在「第几个小人」上，而是跟着指针的水平位置走——从左到右滑过整排会连续走完一条大调音阶（1.00 → 2.00 倍，刚好一个八度），滑得再快也不会漏音（触控板横向滑动同样有效）；**右键压扁并换「挨打」表情**（音高也跟着角色所在位置走）；**左键打开角色卡**——和游戏一样：人物先以约 1.75 倍出现、2.8 秒内缩到正常，全程上下浮动（背景光晕也跟着浮），先整体高亮再慢慢降回正常，标题/副标题用的是游戏原版像素字体（`fonts/anim-title.ttf` / `anim-pixel.ttf`）。开场背景按 `units.nim` 的绘制顺序重画，bloom 气泡带亮边和高光，线条与暗角也做了分层。音效同样是游戏原版的
+- **Animdustry 角色排**：「全部项目」页顶部按游戏源码复刻了那一排小人：`#accce3 / #57639a` 斜条纹背景、8 个角色（全部解锁）站在深色地台上，贴图里烘焙了一层黑色描边。交互照搬游戏：**鼠标扫过依次跳一下**（`unit.jumping`，手机上手指划过同样会跳）。音高不绑在「第几个小人」上，跟着指针的水平位置走，从左到右滑过整排会连续走完一条大调音阶（1.00 → 2.00 倍，刚好一个八度），滑得再快也不会漏音（触控板横向滑动同样有效）；**右键压扁并换「挨打」表情**（音高也跟着角色所在位置走）；**左键打开角色卡**，动画和游戏一样：人物先以约 1.75 倍出现、2.8 秒内缩到正常，全程上下浮动（背景光晕也跟着浮），先整体高亮再慢慢降回正常，标题/副标题用的是游戏原版像素字体（`fonts/anim-title.ttf` / `anim-pixel.ttf`）。开场背景按 `units.nim` 的绘制顺序重画，bloom 气泡带亮边和高光，线条与暗角也做了分层。音效同样是游戏原版的
 - **图集**（独立页 `gallery.html`）：瀑布流照片墙，可按梗图 / 社团筛选，点击开灯箱，← → 翻页、Esc 关闭；入口在首页最下方（加入区之后），一条细长长的横条
 - **常见问题**：原生 `<details>` FAQ
 - **加入我们**：QQ 群、邮箱、三步加入流程
@@ -336,13 +336,13 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 切换是**两块幕布的接力**，不是「面板淡出、幕布再升起」两段各走各的：
 
 1. 卡片先在 0.14 秒里散掉，面板底色收到不透明（原来 0.9 的黑幕在上移时会透出 10% 的旧页面，像一块脏玻璃）；
-2. 面板整块向上抽走，幕布在同一刻、用同一条曲线从下面顶上来——两者的位移都取 `--wipe-in`，延迟都取 `--wipe-handoff`，所以面板底边与幕布顶边始终是贴着的，中间不会漏出旧页面那一下；
+2. 面板整块向上抽走，幕布在同一刻、用同一条曲线从下面顶上来。两者的位移都取 `--wipe-in`，延迟都取 `--wipe-handoff`，所以面板底边与幕布顶边始终是贴着的，中间不会漏出旧页面那一下；
 3. 幕布盖满后换皮肤，重排、贴图重烘、画布重建全在这块不透明底下完成，再多等两帧把布局排空才揭幕（少了这两帧，揭幕会和一次几十毫秒的长任务同时起步，看上去「卡一下才开始走」）；
 4. 揭幕同样是 0.44 秒，字不淡出，跟着幕布一起滑出去。
 
 幕布颜色比落地页低半档色阶（极简 `#f2f1eb` vs 页面 `#fbfbf8`），否则白幕在白色上滑走等于没有转场；上沿还有一道 8% 的渐隐光，深色皮肤里就是唯一能看出「有东西在移动」的那条边。
 
-时长与曲线统一写在 `:root` 的 `--wipe-in / --wipe-out / --wipe-handoff / --wipe-ease-*` 里，JS 用 `getComputedStyle` 读同一份——之前 JS 写死 430ms、CSS 写 0.46s，幕布还差 30ms 没到位，底下就已经换完了。
+时长与曲线统一写在 `:root` 的 `--wipe-in / --wipe-out / --wipe-handoff / --wipe-ease-*` 里，JS 用 `getComputedStyle` 读同一份。之前 JS 写死 430ms、CSS 写 0.46s，幕布还差 30ms 没到位，底下就已经换完了。
 
 | 风格 | 观感 | 实现 |
 |---|---|---|
@@ -401,7 +401,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 - 跑道配色跟随主题：日间是浅蓝白底 + 深蓝恐龙，夜间是深底 + 亮恐龙，黑客风是绿色终端，极简风纯黑白。
 - 夜空星星用独立的月光白（`#e2ecff`；黑客风取荧光绿混白）：早先跟着 `--dino-ink` 走，而浅色主题的墨色是深蓝，压在纯黑夜空上等于没有。星星铺满整片天（不再挤在顶部一条缝），晚霞期间按 `duskAmt` 压到看不见，等天真的黑了才亮。
 - 尊重 `prefers-reduced-motion`：开启减少动效时不自动跑，点跑道 / 空格才跳；100 级直接给结局画面（不演陨石与爆炸），点「时间回溯」立刻重开。
-- 掉帧治理（跑道是同页面唯一持续重绘的 canvas）：星星从「逐颗 `shadowBlur`」改成两张预渲染小图；日月晕、火光、烟、焦痕、墓碑、陨石全部烘成离屏 canvas；天空渐变按尺寸缓存，每帧只算一次 `skyPhases()`；障碍 / 金币 / 粒子改用就地压缩（`compact()`）而不是每帧 `filter()` 新建数组。贴图烘焙延后到跑道第一次进入视口；`dino.js` 本身也不在首屏解析——四页都改成 `load` 之后交给 `requestIdleCallback` 注入脚本（3 秒兜底，用户提前滚动则立刻加载），绕开首屏那段交互窗口，最高分落盘按 2.5 秒节流（原先每涨一分就写一次 `localStorage`）。`window.__HNYZ_DINO__().perf` 会给出平滑后的 `update / draw` 毫秒数。
+- 掉帧治理（跑道是同页面唯一持续重绘的 canvas）：星星从「逐颗 `shadowBlur`」改成两张预渲染小图；日月晕、火光、烟、焦痕、墓碑、陨石全部烘成离屏 canvas；天空渐变按尺寸缓存，每帧只算一次 `skyPhases()`；障碍 / 金币 / 粒子改用就地压缩（`compact()`）而不是每帧 `filter()` 新建数组。贴图烘焙延后到跑道第一次进入视口；`dino.js` 本身也不在首屏解析：四页都改成 `load` 之后交给 `requestIdleCallback` 注入脚本（3 秒兜底，用户提前滚动则立刻加载），绕开首屏那段交互窗口，最高分落盘按 2.5 秒节流（原先每涨一分就写一次 `localStorage`）。`window.__HNYZ_DINO__().perf` 会给出平滑后的 `update / draw` 毫秒数。
 
 ### 主题按钮：月亮 / 太阳的变形
 
@@ -409,7 +409,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 - 动效本身是「月亮 → 收缩成圆 → 张开成太阳 → 再收回去」，原素材两秒一循环
 - 静止时**不空转**：浅色主题停在第 40 帧（太阳），深色主题停在第 0 帧（月亮）
-- 点击切换时沿雪碧图走最近的一头——月 → 日正放，日 → 月倒放，约 0.36 秒走完（40 帧 × 9ms，帧号按 ease-out 走，收尾慢下来），中途能看见收缩和张开
+- 点击切换时沿雪碧图走最近的一头：月 → 日正放，日 → 月倒放，约 0.36 秒走完（40 帧 × 9ms，帧号按 ease-out 走，收尾慢下来），中途能看见收缩和张开
 - 极简风加 `grayscale`，黑客风用 `hue-rotate(-90deg)` 把蓝转到荧光绿
 - 帧号由 `js/theme-icon.js` 用 `requestAnimationFrame` 推进；主题变更来自按钮、系统偏好或风格脚本都能接住（监听 `data-theme`）
 
@@ -467,17 +467,17 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 终端质感都在 `skins.css` 末尾的「质感层」：2px 直角、顶栏毛玻璃、导航下划线从左长出、卡片顶部 1px 内高光、分隔线改虚线、`::selection` 荧光绿。眉标保留小写（`$ whoami --verbose` 比 `$ WHOAMI --VERBOSE` 更像真的终端）。
 
-**黑客风没有白天**：主题被锁死在深色，日间那套浅色覆盖只作为兜底留在 `skins.css` 里。锁定分三处，任何一条路径进来都逃不掉——
+**黑客风没有白天**：主题被锁死在深色，日间那套浅色覆盖只作为兜底留在 `skins.css` 里。锁定分三处，任何一条路径进来都逃不掉：
 
 - 四个页面 `<head>` 的预置内联脚本：`localStorage` 里风格是 `hacker` 就直接把 `data-theme` 写成 `dark`，首帧不会闪浅色
 - `theme.js` 初始化兜底：内联脚本被拦时再压一次
 - `theme.js` 监听 `hnyz:stylechange`：切进黑客风立刻 `apply("dark")`；切出去时读回 `localStorage` 里用户自己选的那档深浅色（黑客风不覆盖这个偏好）
 
-在黑客风里点主题按钮不会切换，而是弹一个**拒绝终端**（`theme.js` 的 `openDeniedTerminal` + `skins.css` 的 `.hacker-term*`）：外观对齐真实终端——标题栏红黄绿三个圆点、`guest@hnyz-darknet: ~/theme` 路径、近黑底等宽字。第一行 `$ themectl set-mode light --force` 逐字敲出，然后十四行全英文报错按不均匀的间隔一行一行滚出（`permission denied`、`kernel: ioctl(THEME_SET_LIGHT) failed`、`fatal: the dark does not negotiate`……），最后逐字打出「黑客的世界，隐藏于暗网之下。」，停两秒自动关窗；Esc 或点击任意处也能提前关。期间 `overflow` 锁滚动，关窗时恢复，主题始终没变。
+在黑客风里点主题按钮不会切换，而是弹一个**拒绝终端**（`theme.js` 的 `openDeniedTerminal` + `skins.css` 的 `.hacker-term*`）。外观对齐真实终端：标题栏红黄绿三个圆点、`guest@hnyz-darknet: ~/theme` 路径、近黑底等宽字。第一行 `$ themectl set-mode light --force` 逐字敲出，然后十四行全英文报错按不均匀的间隔一行一行滚出（`permission denied`、`kernel: ioctl(THEME_SET_LIGHT) failed`、`fatal: the dark does not negotiate`……），最后逐字打出「黑客的世界，隐藏于暗网之下。」，停两秒自动关窗；Esc 或点击任意处也能提前关。期间 `overflow` 锁滚动，关窗时恢复，主题始终没变。
 
 ### 弹性动效
 
-`css/motion.css` 用一条统一曲线 `cubic-bezier(0.34, 1.56, 0.64, 1)`——第二控制点大于 1，位移会先冲过头再落回来，所以是「弹」的，不是「滑」的。
+`css/motion.css` 用一条统一曲线 `cubic-bezier(0.34, 1.56, 0.64, 1)`。第二控制点大于 1，位移会先冲过头再落回来，所以是「弹」的，不是「滑」的。
 
 | 位置 | 效果 |
 |---|---|
@@ -681,14 +681,14 @@ navigator.serviceWorker.getRegistrations().then(list => list.forEach(r => r.unre
 拼进注册 URL，每次发版 URL 都跟着变，绕过所有中间缓存。scope 仍是站点根目录。
 
 > 顺带记一笔：`updateViaCache: "none"` 管的是 `importScripts` 那一层，
-> 不是主脚本——主脚本本来就每次回源。本站 `sw.js` 没有 `import`，
+> 不是主脚本，主脚本本来就每次回源。本站 `sw.js` 没有 `import`，
 > 所以这个参数目前不改变行为，留着是为了以后加子脚本时不踩坑。
 
 ### 15.2 404 页
 
 `404.html` 会被 GitHub Pages 用在**任意深度**的错误路径上，所以它不能用相对路径
 （`/foo/bar` 下 `css/style.css` 会被解析到 `/foo/css/…`）。
-文件开头用一行 `<base href="/">` 把引用钉在站点根目录——
+文件开头用一行 `<base href="/">` 把引用钉在站点根目录：
 站点在自定义域名下，根就是 `/`；**如果哪天退回二级路径部署，这一行要跟着改**。
 
 页面本身不依赖 `style.css`，样式全内联（约 4KB gzip），断网也能立刻打开；
@@ -770,7 +770,7 @@ GITHUB_TOKEN=ghp_xxx node scripts/fetch-repos.mjs
   iframe 也改成 `display: block`，不然行盒底部会留几像素基线缝。
 - 20 秒还没收到 giscus 的响应就判定为连不上，换成降级文案。
   但有两条例外：`Discussion not found`（空站正常状态，giscus 会在第一条评论时自建）
-  不算失败；iframe 高度已经被撑起来时也不算失败——内容都渲染出来了，
+  不算失败；iframe 高度已经被撑起来时也不算失败，内容都渲染出来了，
   只是消息迟到，没必要把人推到「连不上」。
 
 ---
@@ -859,14 +859,14 @@ Issue 的 body 是玩家自己写的，**分数可以随便填**。
 
 Chrome 的 CSS 错误恢复很宽容，跳过它继续解析，所以本地怎么测都正常。
 国产内核与旧 WebKit 的恢复策略更粗暴，会把它当成外层块的结束，
-后面整段 `@media` 与皮肤定义一起被吞掉——这就是「样式像全丢了」。
+后面整段 `@media` 与皮肤定义一起被吞掉，这就是「样式像全丢了」。
 已删除。
 
 **二、`clamp()` / `min()` / `max()` 会让整条声明失效。**
 
 Chromium 79 以下不认识这三个函数，处理方式不是「忽略这个函数」，
 而是**丢掉整条声明**。本站有 109 处用到，于是：
-`font-size` 回落到 16px、`padding` 归零、`left/right` 失效——
+`font-size` 回落到 16px、`padding` 归零、`left/right` 失效，
 版式自然就塌成一列了。
 
 **三、`inset` 简写（Chromium 87+）失效。** 48 处定位一起消失，
@@ -893,7 +893,7 @@ font-size: clamp(3rem, 5.8vw, 5.15rem);
 | `aspect-ratio`（4 处） | 容器有内容撑高，不加兜底；封面靠 `img` 自然高度 |
 | `paint-order` 不支持 | `@supports not` 里把 `-webkit-text-stroke` 减半，避免描边吃字心 |
 | `backdrop-filter` 缺前缀 | 全部补 `-webkit-backdrop-filter` |
-| JS `?.`（2 处） | 改成 `a && a.b` 的老写法——可选链是 ES2020 **语法**，旧解析器整份脚本直接 SyntaxError |
+| JS `?.`（2 处） | 改成 `a && a.b` 的老写法。可选链是 ES2020 **语法**，旧解析器整份脚本直接 SyntaxError |
 | `ResizeObserver` | 加 `typeof` 判断，没有就退回 `window.resize` |
 
 改完的兼容底线：**Chromium 69 / iOS Safari 12**。
@@ -920,37 +920,36 @@ node scripts/compat-fallback.mjs         # 写入
 
 ## 19. 光场皮肤（halo）
 
-第五套皮肤，把 [HALOFLUX](https://github.com/Ryder191/haloflux) 整个「抄」了进来。
+第五套皮肤，把 [HALOFLUX](https://github.com/Ryder191/haloflux) 整个「抄」了进来。原版是一个节拍驱动的深色光场：中央一圈数据环带、外侧光束、底部一排数据面板，全部在一块 canvas 里跑。我们只动了四刀：
 
-### 19.1 它是怎么进来的
+1. **文案全换**：品牌、KPI、面板数据（动态 / 活动 / 代码 / 协作）换成社团自己的——项目 5 个、成员 3 人、板块 8 个、每周活动 2 次，代码面板放的是 Arduino `digitalWrite` 示例
+2. **删 BGM**：原版带背景音乐，自动播放那种，整块移除
+3. **修空引用**：原版给 `.console` 返回按钮绑事件，嵌入场景里这个按钮不存在，会直接报错，改成判空
+4. **手表断点**：≤340px 时 header 改两列、KPI 收缩、次要面板隐藏
 
-- `halo.html` 是 HALOFLUX 原版的完整拷贝（单文件，内嵌全部脚本），只做了四类改动：
-  1. **文案替换**：品牌、KPI、面板数据（动态 / 活动 / 代码 / 协作）全部换成社团内容——项目 5 个、成员 3 人、板块 8 个、每周活动 2 次；代码面板放的是 Arduino `digitalWrite` 示例
-  2. **删 BGM**：原版的背景音乐模块和音频标签整个移除，避免 autoplay 烦人
-  3. **修空引用**：原版给 `.console` 返回按钮绑事件，嵌入时按钮被移除会报错，改为判空
-  4. **手表断点**：≤340px 时 header 改两列、KPI 收缩、次要面板隐藏
-- `css/skin-halo.css` 负责挂载：`html[data-style="halo"]` 下站点内容全部 `display:none` 让位，`js/skins.js` 的 `syncHalo()` 创建一个 `position:fixed; inset:0` 的全屏 iframe 指向 `halo.html`；**切走即 `remove()`**——rAF 循环随文档销毁真正停掉，不留后台动画吃电。
-- 顶栏在 halo 下收缩成右上角一枚 32px 的风格按钮（半透明压在 iframe 上），面板打开时 iframe 压暗到 0.55 亮度。
-- 版本号走 `js/skins.js` 里的 `HALO_VERSION`，与页面引用、`sw.js` 预缓存三处同步 bump。
+### 19.1 怎么挂进来的
 
-### 19.2 为什么用 iframe 而不是直接并入页面
+`halo.html` 原样保留（单文件，脚本全内嵌），站点这边用 `css/skin-halo.css` + `js/skins.js` 的 `syncHalo()` 挂载：`html[data-style="halo"]` 下站点自己的内容全部 `display:none` 让位，一个 `position:fixed; inset:0` 的全屏 iframe 指向 `halo.html`。切走就 `remove()`，文档销毁，rAF 循环跟着真停，不留后台动画偷偷吃电。顶栏在 halo 下收缩成右上角一枚 32px 的风格按钮（半透明，压在 iframe 上还能点），面板打开时 iframe 压暗到 0.55 亮度。
 
-HALOFLUX 是一个**自成一体的节拍引擎**：自己的 canvas、自己的滚动容器、自己的面板吸附逻辑。直接并入会和站点的小恐龙、数字雨、滚动进度条互相打架（滚动回调互推、rAF 抢帧）。iframe 隔离后两边互不可见，代价只是多一层文档，稳定性换得非常值。
+版本号走 `js/skins.js` 里的 `HALO_VERSION`，与页面引用、`sw.js` 预缓存三处同步 bump。
 
-### 19.3 已修掉的两个坑
+### 19.2 为什么是 iframe 而不是并进页面
 
-- **右侧白边**：body 的 `scrollbar-gutter: stable` 会留 15px 槽，iframe 因此窄一截，右边露白。halo 下在 `html` 级把它关掉。
-- **首帧闪默认皮肤**：`<head>` 预置脚本原来只认 minimal/hacker，halo 下刷新会先画一遍默认页再换。已把 `halo` 加入预置。
+试过直接并：HALOFLUX 是个自成一体的引擎，有自己的 canvas、自己的滚动容器、自己的面板吸附逻辑，跟站点的小恐龙、数字雨、滚动进度条挤在同一个文档里就互相打架（滚动回调互推，面板抽搐）。iframe 一隔，两边互相看不见，代价只是多一层文档。这层隔离换来的稳定，非常值。
+
+### 19.3 修过的两个坑
+
+- **右侧白边**：body 的 `scrollbar-gutter: stable` 会留 15px 槽，iframe 因此窄一截，右边露出一条白。halo 下在 `html` 级把它关掉。
+- **首帧闪默认皮肤**：`<head>` 预置脚本原来只认 minimal/hacker，halo 下刷新会先画一遍默认页再换。`halo` 加进预置名单就好。
 
 ---
 
 ## 20. 致谢
 
-本站站在这些作品肩膀上，感谢原作者们的慷慨：
+有两样东西不是我们写的，都在这里说清楚：
 
-| 素材 / 代码 | 来源 | 授权与说明 |
-|---|---|---|
-| **HALOFLUX**（「光场」皮肤本体） | [Ryder191/haloflux](https://github.com/Ryder191/haloflux) · Copyright (c) 2026 Ryder191 (RYDER CODE / Ms MAIKEBAIs CAT) | [PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/)，**仅限非商业用途**。`halo.html` 保留原版权声明；本站为学校社团非营利站点，符合授权范围。转载或二创请保留声明并注明出处「HALOFLUX by Ryder191」 |
-| **Animdustry**（角色排、像素字体、音效） | [Anuken/animdustry](https://github.com/Anuken/animdustry) | 「全部项目」页的角色立绘（`images/characters/`）、原版像素字体（`fonts/anim-title.ttf` / `anim-pixel.ttf`）与音效（`audio/`）均取自该游戏素材，仅用于社团非营利展示 |
+**[HALOFLUX](https://github.com/Ryder191/haloflux) by Ryder191**（RYDER CODE / Ms MAIKEBAIs CAT），「光场」皮肤的本体，Copyright (c) 2026。按 [PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/) 授权，**只能非商业使用**。`halo.html` 文件头保留了原始声明；本站是学校社团的非营利站点，在授权范围内。转载或二创请保留声明，注明「HALOFLUX by Ryder191」。
 
-除此之外的所有代码都是社团手写的。如果你也想给自己的学校/组织网站加点这样的东西，请先读一遍上面两个项目的授权条款。
+**[Animdustry](https://github.com/Anuken/animdustry) by Anuken**。「全部项目」页那排角色、原版像素字体（`fonts/anim-title.ttf` / `anim-pixel.ttf`）和音效（`audio/`）都取自这个游戏，仅用于社团非营利展示。
+
+其余的代码都是社团手写的。想给自己的网站也加点这样的东西，先去读一遍上面两个项目的授权条款。
