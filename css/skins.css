@@ -1040,6 +1040,21 @@ body.is-dino-visible .hnyz-pet {
     inset 0 0 28px rgba(57, 255, 136, 0.08);
 }
 
+/* 光场：一枚环，和 halo.html 里那个环同色 */
+.style-card__glyph--halo {
+  border-radius: 50%;
+  border: 2px solid #98e0cf;
+  background: radial-gradient(circle at 50% 50%, rgba(152, 224, 207, 0.16), transparent 68%);
+  position: relative;
+}
+
+.style-card__glyph--halo span {
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  border: 1px solid rgba(240, 166, 198, 0.72);
+}
+
 .style-card__kicker {
   color: rgba(255, 255, 255, 0.4);
   font-family: var(--mono);

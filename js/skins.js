@@ -1,10 +1,11 @@
 /* =========================================================
    HNYZ · 风格系统
    ---------------------------------------------------------
-   四个皮肤：
+   五个皮肤：
      default  现在的蓝白科技风
      minimal  去装饰的极简风
      hacker   深色终端黑客风（代码雨 / 气泡 / 进度条）
+     halo     光场：整屏嵌入 halo.html（HALOFLUX 移植版）
      bare     棍木：整页空白，只留右上角的风格按钮和一句灰字
    顶栏的方块打开一个竖向卡片面板，切换时用整屏向上擦除。
    选择写进 localStorage，四个页面共用。
@@ -14,17 +15,19 @@
   "use strict";
 
   const KEY = "hnyz:style";
-  const STYLES = ["default", "minimal", "hacker", "bare"];
+  const STYLES = ["default", "minimal", "hacker", "halo", "bare"];
   const LABELS = {
     default: "DEFAULT",
     minimal: "MINIMAL",
     hacker: "HACKER",
+    halo: "HALO",
     bare: "BARE"
   };
   const NAMES = {
     default: "蓝白科技",
     minimal: "极简",
     hacker: "黑客终端",
+    halo: "光场",
     bare: "棍木"
   };
 
@@ -162,8 +165,20 @@
           <button class="style-card__apply" type="button" data-style-pick="hacker">应用此风格</button>
         </article>
 
+        <article class="style-card" data-style-option="halo">
+          <div class="style-card__top"><span>04 / HALO</span><span class="style-card__current">当前风格</span></div>
+          <div class="style-card__glyph style-card__glyph--halo" aria-hidden="true"><span></span></div>
+          <p class="style-card__kicker">BEAT_DRIVEN</p>
+          <h3 class="style-card__title">光场</h3>
+          <p class="style-card__desc">节拍驱动的光环、数据环带和外侧光束，整屏铺满；社团数据填进它的 KPI 与面板。</p>
+          <div class="style-card__swatches" aria-hidden="true">
+            <i style="--c:#08090b"></i><i style="--c:#98e0cf"></i><i style="--c:#f0a6c6"></i>
+          </div>
+          <button class="style-card__apply" type="button" data-style-pick="halo">应用此风格</button>
+        </article>
+
         <article class="style-card" data-style-option="bare">
-          <div class="style-card__top"><span>04 / BARE</span><span class="style-card__current">当前风格</span></div>
+          <div class="style-card__top"><span>05 / BARE</span><span class="style-card__current">当前风格</span></div>
           <div class="style-card__glyph style-card__glyph--bare" aria-hidden="true"><span></span></div>
           <p class="style-card__kicker">NOTHING_HERE</p>
           <h3 class="style-card__title">棍木</h3>
@@ -178,7 +193,8 @@
         <button class="style-deck__dot" type="button" data-style-dot="0" aria-label="第 1 个：蓝白科技" aria-current="true"></button>
         <button class="style-deck__dot" type="button" data-style-dot="1" aria-label="第 2 个：极简"></button>
         <button class="style-deck__dot" type="button" data-style-dot="2" aria-label="第 3 个：黑客终端"></button>
-        <button class="style-deck__dot" type="button" data-style-dot="3" aria-label="第 4 个：棍木"></button>
+        <button class="style-deck__dot" type="button" data-style-dot="3" aria-label="第 4 个：光场"></button>
+        <button class="style-deck__dot" type="button" data-style-dot="4" aria-label="第 5 个：棍木"></button>
       </div>
 
       <p class="style-deck__hint">上下滑动 / ↑ ↓ 切换 · Esc 关闭</p>
@@ -287,6 +303,16 @@
     next = Math.max(0, Math.min(cards.length - 1, next));
     scrollToCard(next, true);
     setActive(next);
+  });
+
+  /* 点卡片本体也算选中：以前只有底下的按钮能点，卡片一大片区域点下去没反应，
+     用户会以为面板卡住了。按钮仍然走应用，卡片只负责滚到中间并高亮。 */
+  cards.forEach((card, index) => {
+    card.addEventListener("click", (event) => {
+      if (event.target.closest("[data-style-pick]")) return;
+      scrollToCard(index, true);
+      setActive(index);
+    });
   });
 
   pickButtons.forEach((button) => {
@@ -408,10 +434,39 @@
     }
   }
 
+  /* -------------------------------------------------------
+     光场：整屏 iframe
+     -------------------------------------------------------
+     它是一整页独立的可视化（halo.html），不是一层背景。
+     切走时直接 remove，里面的 rAF 才会真正停下；
+     留在 DOM 里 hidden 只是不画，计时器还在跑。
+     ------------------------------------------------------- */
+  const HALO_VERSION = "20261205";
+  let haloFrame = null;
+
+  function syncHalo(on) {
+    if (on) {
+      if (!haloFrame) {
+        haloFrame = document.createElement("iframe");
+        haloFrame.className = "halo-frame";
+        haloFrame.setAttribute("title", "HNYZ 光场");
+        haloFrame.setAttribute("data-halo-frame", "");
+        haloFrame.setAttribute("loading", "eager");
+        haloFrame.src = `halo.html?v=${HALO_VERSION}`;
+        document.body.appendChild(haloFrame);
+      }
+      haloFrame.hidden = false;
+    } else if (haloFrame) {
+      haloFrame.remove();
+      haloFrame = null;
+    }
+  }
+
   function commit(next) {
     current = next;
     root.dataset.style = next;
     setBareMode(next === "bare");
+    syncHalo(next === "halo");
 
     /* 黑客风固定深夜：主题由 theme.js 监听 hnyz:stylechange 统一处理，
        这里不写 localStorage，用户原来选的深浅色在离开黑客风后还能回来 */
@@ -528,6 +583,7 @@
 
   /* 初始同步 */
   setBareMode(current === "bare");
+  syncHalo(current === "halo");
   syncCurrentUi();
   flushProgress();
   if (trigger) {

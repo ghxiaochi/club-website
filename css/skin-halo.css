@@ -1,0 +1,137 @@
+/* =========================================================
+   HNYZ · 风格：光场（halo）
+   ---------------------------------------------------------
+   把 halo.html 整屏嵌进来。那一页是 HALOFLUX 的移植版：
+   节拍驱动的光场、数据环带、外侧光束、八块数据面板。
+
+   这一层的职责只有三件：
+     1. 让站点自己的内容全部让位（不然会盖在 iframe 上）
+     2. iframe 铺满视口
+     3. 顶栏收缩成右上角一枚风格按钮，随时能切走
+
+   来源：HALOFLUX by Ryder191（PolyForm Noncommercial 1.0.0），
+   非商业用途，原版权声明保留在 halo.html 文件头。
+   ========================================================= */
+
+html[data-style="halo"] {
+  background: #08090b;
+  /* body 里有 scrollbar-gutter: stable，会一直留 15px 的槽；
+     iframe 因此窄 15px，右边露出白边。这里一起关掉。 */
+  overflow: hidden;
+  scrollbar-gutter: auto;
+}
+
+html[data-style="halo"] body {
+  background: #08090b;
+  background-image: none;
+  overflow: hidden;
+}
+
+/* 站点内容整体让位：iframe 要独占这一屏 */
+html[data-style="halo"] #main,
+html[data-style="halo"] .site-footer,
+html[data-style="halo"] .dino-run,
+html[data-style="halo"] .bg-orbs,
+html[data-style="halo"] .bg-icons,
+html[data-style="halo"] .hnyz-pet,
+html[data-style="halo"] .hnyz-avatar,
+html[data-style="halo"] .avatar-pet,
+html[data-style="halo"] .pet-summon,
+html[data-style="halo"] .hnyz-ticker,
+html[data-style="halo"] .scroll-progress,
+html[data-style="halo"] .boot,
+html[data-style="halo"] .skin-bubbles {
+  display: none !important;
+}
+
+/* 光场本体 */
+html[data-style="halo"] .halo-frame {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #08090b;
+  color-scheme: dark;
+}
+
+html[data-style="halo"] .halo-frame[hidden] {
+  display: none;
+}
+
+/* 顶栏只剩右上角一枚按钮：半透明，压在 iframe 上还能按 */
+html[data-style="halo"] .site-header,
+html[data-style="halo"] .site-header.is-scrolled {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: auto;
+  width: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  z-index: 6;
+}
+
+html[data-style="halo"] .header-inner {
+  width: auto;
+  min-height: 0;
+  margin: 8px 10px;
+  padding: 4px;
+  gap: 0;
+  border: 1px solid #2a2e35;
+  border-radius: 8px;
+  background: rgba(8, 9, 11, 0.82);
+}
+
+html[data-style="halo"] .site-header .brand,
+html[data-style="halo"] .site-header .nav-list,
+html[data-style="halo"] .site-header .nav-cta,
+html[data-style="halo"] .site-header .nav-toggle,
+html[data-style="halo"] .site-header .sound-toggle,
+html[data-style="halo"] .site-header .theme-toggle {
+  display: none !important;
+}
+
+html[data-style="halo"] .header-actions {
+  gap: 0;
+}
+
+html[data-style="halo"] .site-header .style-toggle {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 6px;
+  border-color: #3a3e46;
+  color: #cfd2d8;
+  background: none;
+}
+
+html[data-style="halo"] .site-header .style-toggle:hover {
+  border-color: #cfd2d8;
+  color: #fff;
+}
+
+/* 面板打开时，压暗 iframe 一点，别让动画抢焦点 */
+html[data-style="halo"].is-style-deck-open .halo-frame {
+  filter: brightness(0.55);
+}
+
+/* 手表：按钮再小一圈，仍旧点得着 */
+@media (max-width: 340px) {
+  html[data-style="halo"] .header-inner {
+    margin: 6px 6px;
+    padding: 3px;
+  }
+
+  html[data-style="halo"] .site-header .style-toggle {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+  }
+}

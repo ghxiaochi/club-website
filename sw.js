@@ -18,7 +18,7 @@
    发版时改 VERSION，旧缓存会在 activate 里被清掉。
    ========================================================= */
 
-const VERSION = "20261204";
+const VERSION = "20261205";
 const CACHE = `hnyz-v${VERSION}`;
 
 /* 站内根路径：用 "./" 就地解析，
@@ -46,6 +46,7 @@ const CORE = [
   `./css/type.css${V}`,
   `./css/motion.css${V}`,
   `./css/skins.css${V}`,
+  `./css/skin-halo.css${V}`,
   `./css/personal.css${V}`,
   `./css/pet.css${V}`,
   `./css/avatar-pet.css${V}`,
@@ -59,6 +60,8 @@ const CORE = [
   `./js/pwa.js${V}`,
   `./js/guestbook.js${V}`,
   `./js/ladder.js${V}`,
+  /* 光场是整页 iframe，地址里带同一个版本号；预缓存要连 ?v= 一起写 */
+  `./halo.html${V}`,
   "./images/favicon.svg",
   "./images/icon-192.png"
 ];
