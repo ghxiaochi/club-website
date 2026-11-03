@@ -47,7 +47,7 @@ window.HNYZ_MEMBERS = [
   {
     user: "Anuken",
     repo: "animdustry",
-    coverImg: "images/decor/animdustry.jpg",
+    coverImg: "images/decor/animdustry.webp",
     title: "Animdustry 音游",
     desc: "Anuken 的音游 × 弹幕 × gacha（Mindustry 愚人节企划），支持 Windows / Linux / Android，到 release 页直接下载。",
     language: "Nim",
