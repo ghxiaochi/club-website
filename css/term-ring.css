@@ -454,8 +454,9 @@ html[data-style="term"] .term-ring__corner--br { right: 14px; bottom: 14px; bord
    --------------------------------------------------------- */
 html[data-style="term"] .term-ring-back {
   position: fixed;
-  right: 20px;
-  bottom: 20px;
+  /* 右下角常驻一枚校徽，按钮跟它并排放，别叠在一起 */
+  right: 122px;
+  bottom: 24px;
   z-index: 152;
   display: inline-flex;
   align-items: center;
