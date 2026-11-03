@@ -48,13 +48,15 @@ club-website/
 ├── gallery.html            # 图集页（瀑布流 + 灯箱）
 ├── member.html             # 成员页
 ├── dino.html               # 天梯页：可玩的小恐龙 + 排行榜
+├── halo.html               # 「光场」皮肤本体：HALOFLUX 的移植版（整屏 canvas 光场）
 ├── 404.html                # 终端风 404（Pages 找不到路径时返回，站内任意深度都能用）
 ├── manifest.webmanifest    # PWA 清单（名称、图标、快捷方式）
 ├── sw.js                   # Service Worker：页面网络优先、资源缓存优先
 ├── css/
 │   ├── style.css           # 全站样式（蓝白科技风）
 │   ├── personal.css        # 深色主题、动效、彩蛋样式（在 style.css 之后加载）
-│   ├── skins.css           # 四套网页风格（默认 / 极简 / 黑客 / 棍木）的皮肤层
+│   ├── skins.css           # 五套网页风格（默认 / 极简 / 黑客 / 光场 / 棍木）的皮肤层
+│   ├── skin-halo.css       # 光场皮肤：全屏 iframe 挂载 halo.html，站点内容让位
 │   ├── dino.css            # 页脚小恐龙跑道、日间/夜间配色
 │   ├── type.css            # 三套风格的字体栈（标题衬线 / 等宽 / 几何无衬线；棍木只有一行灰字）
 │   ├── motion.css          # 弹性动效层（统一回弹曲线，最后加载）
@@ -78,7 +80,7 @@ club-website/
 │   ├── gallery-data.js     # 图集清单（加图改这里）
 │   ├── gallery.js          # 图集渲染与灯箱
 │   ├── theme.js            # 深浅色主题切换与记忆
-│   ├── skins.js            # 网页风格切换面板、竖向卡片、擦除转场、棍木的按钮搬运
+│   ├── skins.js            # 网页风格切换面板、竖向卡片、擦除转场、光场 iframe 的挂载/卸载、棍木的按钮搬运
 │   ├── dino.js             # 页脚像素小恐龙（金币 / 连击 / 星空，等级已移除）
 │   ├── matrix.js           # 黑客风的数字雨（只在 hacker 皮肤下启动）
 │   ├── copy.js             # 三套文案，按风格替换 data-copy 节点（棍木没有文案可换）
@@ -127,9 +129,7 @@ club-website/
 │   ├── personal/
 │   │   ├── sticker-2.webp   # ghxiaochi 主页贴纸（已去底）
 │   │   ├── sticker-3.webp
-│   │   ├── sticker-4.webp
-│   │   ├── chibi-1.jpg      # 早期贴纸（未再使用）
-│   │   └── chibi-2.jpg      # ghxiaochi 主页贴纸
+│   │   └── sticker-4.webp
 │   └── pet/
 │       ├── badge-school-hd.webp  # 高清校徽
 │       └── ghxiaochi-avatar.webp # 像素头像彩蛋
@@ -329,9 +329,9 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 
 > 所有动效都尊重 `prefers-reduced-motion`：系统开启「减少动态效果」时，渐显、打字机、倾斜、光晕全部停用，内容直接可见。
 
-### 网页风格（四套皮肤）
+### 网页风格（五套皮肤）
 
-页面右上角顶栏有一个四格小方块，点开是一块全屏面板：四张竖向卡片，上下滑动 / ↑↓ 切换，中间那张就是当前风格。
+页面右上角顶栏有一个四格小方块，点开是一块全屏面板：五张竖向卡片，上下滑动 / ↑↓ 切换，中间那张就是当前风格。
 
 切换是**两块幕布的接力**，不是「面板淡出、幕布再升起」两段各走各的：
 
@@ -349,9 +349,10 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 | `default` 蓝白科技 | 原来的样子，光斑、角色排、校徽、动效全保留 | 什么都不改 |
 | `minimal` 极简 | 纯黑白灰、直角、去阴影，隐藏光斑 / 装饰图标 / 贴纸 / 校徽 | `html[data-style="minimal"]` 变量 + 隐藏清单 |
 | `hacker` 黑客终端 | 纯黑底，背景只有一整屏代码雨和一层漂浮的气泡，等宽字 + 荧光绿；跑道里的天也永远是纯黑，太阳、月亮统一荧光绿（金币仍是琥珀色） | `html[data-style="hacker"]` 变量 + `js/matrix.js` 画布 + `.skin-bubbles` + `skyPal` |
+| `halo` 光场 | 整屏换成 HALOFLUX：节拍驱动的深色光场、中央数据环带、外侧光束、底部八块数据面板（文案已全部换成社团内容）；站点自己的内容全部让位，顶栏收缩成右上角一枚风格按钮，随时能切回来 | `css/skin-halo.css` + 全屏 iframe 挂载 `halo.html`，切走即移除 iframe（rAF 真正停掉） |
 | `bare` 棍木 | 全白空白页，没有内容、颜色和链接，中间一句灰字，右上角只剩风格按钮 | `html[data-style="bare"]` 隐藏 `body` 下所有节点 + 按钮搬到 `body` |
 
-- 选择存在 `localStorage`（key：`hnyz:style`），四个页面共用；`<head>` 里有内联脚本做首帧预置，刷新不会闪一下默认皮肤。
+- 选择存在 `localStorage`（key：`hnyz:style`），四个带风格切换的页面共用；`<head>` 里有内联脚本做首帧预置（含 `halo`），刷新不会闪一下默认皮肤。
 - 切到 `hacker` 时如果当前是浅色主题，会自动切到深色（否则只有半屏是黑的），并同步写 `hnyz:theme`。
 - 换肤会派发 `hnyz:stylechange` 事件，小恐龙、Canvas 相关组件收到后按新的 CSS 变量重画贴图。
 - 键盘 `Esc` 关闭面板；面板打开时背景滚动锁定。
@@ -593,7 +594,8 @@ Pages 会自动重新构建。如果页面还是旧版本，先强制刷新（`C
 - [ ] 像素头像可以拖动、刷新后停在原处；单击有星星和回弹，连点 12 次出彩蛋
 - [ ] 分享链接有 `og:image`（1200×630）和 `twitter:card`
 - [ ] 头部太阳/月亮按钮能切换深浅色，刷新后选择仍然保留
-- [ ] 顶栏四格方块能打开风格面板，四张竖卡上下滑动、点「切换」整屏擦除后换肤
+- [ ] 顶栏四格方块能打开风格面板，五张竖卡上下滑动、点「切换」整屏擦除后换肤；点卡片本体也会滚动居中并高亮
+- [ ] 切到「光场」后整屏是深色光场动画，右上角只剩一枚风格按钮，能随时切回来；切走后 iframe 被移除（DevTools 里搜不到 `.halo-frame`）
 - [ ] 切到「棍木」后整页只剩白底、一行灰字和右上角按钮，按钮仍能打开面板切回来
 - [ ] 切到极简风后没有光斑 / 贴纸 / 发光；切到黑客风整屏变深绿终端，刷新后保持
 - [ ] 页脚小恐龙会跑，能自己跳过仙人掌，点跑道 / 空格也能跳，撞到会重开
@@ -913,3 +915,42 @@ node scripts/compat-fallback.mjs         # 写入
 - **`aspect-ratio`**：旧内核下高度由内容决定，封面比例不精确，但不塌。
 
 这两项要真遇上再说，别为了假想的用户把代码写脏。
+
+---
+
+## 19. 光场皮肤（halo）
+
+第五套皮肤，把 [HALOFLUX](https://github.com/Ryder191/haloflux) 整个「抄」了进来。
+
+### 19.1 它是怎么进来的
+
+- `halo.html` 是 HALOFLUX 原版的完整拷贝（单文件，内嵌全部脚本），只做了四类改动：
+  1. **文案替换**：品牌、KPI、面板数据（动态 / 活动 / 代码 / 协作）全部换成社团内容——项目 5 个、成员 3 人、板块 8 个、每周活动 2 次；代码面板放的是 Arduino `digitalWrite` 示例
+  2. **删 BGM**：原版的背景音乐模块和音频标签整个移除，避免 autoplay 烦人
+  3. **修空引用**：原版给 `.console` 返回按钮绑事件，嵌入时按钮被移除会报错，改为判空
+  4. **手表断点**：≤340px 时 header 改两列、KPI 收缩、次要面板隐藏
+- `css/skin-halo.css` 负责挂载：`html[data-style="halo"]` 下站点内容全部 `display:none` 让位，`js/skins.js` 的 `syncHalo()` 创建一个 `position:fixed; inset:0` 的全屏 iframe 指向 `halo.html`；**切走即 `remove()`**——rAF 循环随文档销毁真正停掉，不留后台动画吃电。
+- 顶栏在 halo 下收缩成右上角一枚 32px 的风格按钮（半透明压在 iframe 上），面板打开时 iframe 压暗到 0.55 亮度。
+- 版本号走 `js/skins.js` 里的 `HALO_VERSION`，与页面引用、`sw.js` 预缓存三处同步 bump。
+
+### 19.2 为什么用 iframe 而不是直接并入页面
+
+HALOFLUX 是一个**自成一体的节拍引擎**：自己的 canvas、自己的滚动容器、自己的面板吸附逻辑。直接并入会和站点的小恐龙、数字雨、滚动进度条互相打架（滚动回调互推、rAF 抢帧）。iframe 隔离后两边互不可见，代价只是多一层文档，稳定性换得非常值。
+
+### 19.3 已修掉的两个坑
+
+- **右侧白边**：body 的 `scrollbar-gutter: stable` 会留 15px 槽，iframe 因此窄一截，右边露白。halo 下在 `html` 级把它关掉。
+- **首帧闪默认皮肤**：`<head>` 预置脚本原来只认 minimal/hacker，halo 下刷新会先画一遍默认页再换。已把 `halo` 加入预置。
+
+---
+
+## 20. 致谢
+
+本站站在这些作品肩膀上，感谢原作者们的慷慨：
+
+| 素材 / 代码 | 来源 | 授权与说明 |
+|---|---|---|
+| **HALOFLUX**（「光场」皮肤本体） | [Ryder191/haloflux](https://github.com/Ryder191/haloflux) · Copyright (c) 2026 Ryder191 (RYDER CODE / Ms MAIKEBAIs CAT) | [PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/)，**仅限非商业用途**。`halo.html` 保留原版权声明；本站为学校社团非营利站点，符合授权范围。转载或二创请保留声明并注明出处「HALOFLUX by Ryder191」 |
+| **Animdustry**（角色排、像素字体、音效） | [Anuken/animdustry](https://github.com/Anuken/animdustry) | 「全部项目」页的角色立绘（`images/characters/`）、原版像素字体（`fonts/anim-title.ttf` / `anim-pixel.ttf`）与音效（`audio/`）均取自该游戏素材，仅用于社团非营利展示 |
+
+除此之外的所有代码都是社团手写的。如果你也想给自己的学校/组织网站加点这样的东西，请先读一遍上面两个项目的授权条款。
