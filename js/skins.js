@@ -1,10 +1,11 @@
 /* =========================================================
    HNYZ · 风格系统
    ---------------------------------------------------------
-   五个皮肤：
+   六个皮肤：
      default  现在的蓝白科技风
      minimal  去装饰的极简风
      hacker   深色终端黑客风（代码雨 / 气泡 / 进度条）
+     term     琥珀终端：单色、方角、无阴影，把页面当成一份值班日志
      halo     光场：整屏嵌入 halo.html（HALOFLUX 移植版）
      bare     棍木：整页空白，只留右上角的风格按钮和一句灰字
    顶栏的方块打开一个竖向卡片面板，切换时用整屏向上擦除。
@@ -15,11 +16,12 @@
   "use strict";
 
   const KEY = "hnyz:style";
-  const STYLES = ["default", "minimal", "hacker", "halo", "bare"];
+  const STYLES = ["default", "minimal", "hacker", "term", "halo", "bare"];
   const LABELS = {
     default: "DEFAULT",
     minimal: "MINIMAL",
     hacker: "HACKER",
+    term: "TERM",
     halo: "HALO",
     bare: "BARE"
   };
@@ -27,6 +29,7 @@
     default: "蓝白科技",
     minimal: "极简",
     hacker: "黑客终端",
+    term: "终端",
     halo: "光场",
     bare: "棍木"
   };
@@ -165,6 +168,18 @@
           <button class="style-card__apply" type="button" data-style-pick="hacker">应用此风格</button>
         </article>
 
+        <article class="style-card" data-style-option="term">
+          <div class="style-card__top"><span>04 / TERM</span><span class="style-card__current">当前风格</span></div>
+          <div class="style-card__glyph style-card__glyph--term" aria-hidden="true"><span class="term-glyph">$_</span></div>
+          <p class="style-card__kicker">READ_ONLY_TTY</p>
+          <h3 class="style-card__title">终端</h3>
+          <p class="style-card__desc">琥珀单色、方角、没有阴影。卡片摊平成记录行，右下角一行会话提示跟着你走。</p>
+          <div class="style-card__swatches" aria-hidden="true">
+            <i style="--c:#0c0b08"></i><i style="--c:#ffb000"></i><i style="--c:#efe6d3"></i>
+          </div>
+          <button class="style-card__apply" type="button" data-style-pick="term">应用此风格</button>
+        </article>
+
         <article class="style-card" data-style-option="halo">
           <div class="style-card__top"><span>04 / HALO</span><span class="style-card__current">当前风格</span></div>
           <div class="style-card__glyph style-card__glyph--halo" aria-hidden="true"><span></span></div>
@@ -178,7 +193,7 @@
         </article>
 
         <article class="style-card" data-style-option="bare">
-          <div class="style-card__top"><span>05 / BARE</span><span class="style-card__current">当前风格</span></div>
+          <div class="style-card__top"><span>06 / BARE</span><span class="style-card__current">当前风格</span></div>
           <div class="style-card__glyph style-card__glyph--bare" aria-hidden="true"><span></span></div>
           <p class="style-card__kicker">NOTHING_HERE</p>
           <h3 class="style-card__title">棍木</h3>
@@ -193,8 +208,9 @@
         <button class="style-deck__dot" type="button" data-style-dot="0" aria-label="第 1 个：蓝白科技" aria-current="true"></button>
         <button class="style-deck__dot" type="button" data-style-dot="1" aria-label="第 2 个：极简"></button>
         <button class="style-deck__dot" type="button" data-style-dot="2" aria-label="第 3 个：黑客终端"></button>
-        <button class="style-deck__dot" type="button" data-style-dot="3" aria-label="第 4 个：光场"></button>
-        <button class="style-deck__dot" type="button" data-style-dot="4" aria-label="第 5 个：棍木"></button>
+        <button class="style-deck__dot" type="button" data-style-dot="3" aria-label="第 4 个：终端"></button>
+        <button class="style-deck__dot" type="button" data-style-dot="4" aria-label="第 5 个：光场"></button>
+        <button class="style-deck__dot" type="button" data-style-dot="5" aria-label="第 6 个：棍木"></button>
       </div>
 
       <p class="style-deck__hint">上下滑动 / ↑ ↓ 切换 · Esc 关闭</p>
@@ -441,7 +457,7 @@
      切走时直接 remove，里面的 rAF 才会真正停下；
      留在 DOM 里 hidden 只是不画，计时器还在跑。
      ------------------------------------------------------- */
-  const HALO_VERSION = "20261103c";
+  const HALO_VERSION = "20261103d";
   let haloFrame = null;
 
   function syncHalo(on) {
@@ -462,11 +478,78 @@
     }
   }
 
+  /* -------------------------------------------------------
+     终端风的会话状态栏
+     -------------------------------------------------------
+     右下角一行 `hnyz@club ~/ $ cat about.md`，跟着滚动换成
+     当前区块。它不参与布局（position:fixed，pointer-events:none），
+     也不开 rAF 循环：只有滚动时才读一次位置，算完就停。
+     切走时连监听一起拆掉，不留在后台。 */
+  let termBar = null;
+  let termCleanup = null;
+
+  function syncTerm(on) {
+    if (on) {
+      if (termBar) return;
+
+      termBar = document.createElement("div");
+      termBar.className = "term-bar";
+      termBar.setAttribute("aria-hidden", "true");
+      termBar.innerHTML = '<span class="term-bar__prompt">hnyz@club</span>' +
+        '<span class="term-bar__path">~/</span>' +
+        '<span class="term-bar__cmd">cd ~</span>' +
+        '<span class="term-bar__caret"></span>';
+      document.body.appendChild(termBar);
+
+      const cmd = termBar.querySelector(".term-bar__cmd");
+      const sections = Array.prototype.slice.call(document.querySelectorAll("section[id]"));
+      let queued = false;
+
+      const update = () => {
+        queued = false;
+        if (!sections.length) return;
+        /* 以视口上方三分之一处为准：正好在屏幕顶部换行，
+           而不是等整块滚完 */
+        const line = window.innerHeight * 0.32;
+        let active = sections[0];
+        for (let i = 0; i < sections.length; i += 1) {
+          if (sections[i].getBoundingClientRect().top <= line) active = sections[i];
+        }
+        const id = active.id;
+        cmd.textContent = id === "top" ? "cd ~" : "cat " + id + ".md";
+      };
+
+      const onScroll = () => {
+        if (queued) return;
+        queued = true;
+        window.requestAnimationFrame(update);
+      };
+
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll, { passive: true });
+      window.requestAnimationFrame(() => {
+        update();
+        if (termBar) termBar.classList.add("is-on");
+      });
+
+      termCleanup = () => {
+        window.removeEventListener("scroll", onScroll);
+        window.removeEventListener("resize", onScroll);
+      };
+    } else if (termBar) {
+      if (termCleanup) termCleanup();
+      termCleanup = null;
+      termBar.remove();
+      termBar = null;
+    }
+  }
+
   function commit(next) {
     current = next;
     root.dataset.style = next;
     setBareMode(next === "bare");
     syncHalo(next === "halo");
+    syncTerm(next === "term");
 
     /* 黑客风固定深夜：主题由 theme.js 监听 hnyz:stylechange 统一处理，
        这里不写 localStorage，用户原来选的深浅色在离开黑客风后还能回来 */
@@ -584,6 +667,7 @@
   /* 初始同步 */
   setBareMode(current === "bare");
   syncHalo(current === "halo");
+  syncTerm(current === "term");
   syncCurrentUi();
   flushProgress();
   if (trigger) {

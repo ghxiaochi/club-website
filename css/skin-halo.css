@@ -47,6 +47,10 @@ html[data-style="halo"] .skin-bubbles {
 /* 光场本体 */
 html[data-style="halo"] .halo-frame {
   position: fixed;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
   inset: 0;
   z-index: 1;
   display: block;

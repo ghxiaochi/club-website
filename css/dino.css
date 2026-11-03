@@ -226,7 +226,7 @@
 }
 
 /* 日间模式：跑道不再是一块黑，跟着页面一起亮起来 */
-html[data-theme="light"]:not([data-style="hacker"]):not([data-style="minimal"]) .dino-run:not(.dino-run--arena) {
+html[data-theme="light"]:not([data-style="hacker"]):not([data-style="minimal"]):not([data-style="term"]) .dino-run:not(.dino-run--arena) {
   --dino-ink: #10233c;
   --dino-accent: #0a84ff;
   --dino-dim: #6b86a6;
@@ -243,7 +243,7 @@ html[data-theme="light"]:not([data-style="hacker"]):not([data-style="minimal"]) 
   background-size: auto, 24px 24px, 24px 24px;
 }
 
-html[data-theme="light"]:not([data-style="hacker"]):not([data-style="minimal"]) .dino-run:not(.dino-run--arena) .dino-run__stage {
+html[data-theme="light"]:not([data-style="hacker"]):not([data-style="minimal"]):not([data-style="term"]) .dino-run:not(.dino-run--arena) .dino-run__stage {
   border-color: rgba(24, 82, 150, 0.16);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.75), transparent 46%),

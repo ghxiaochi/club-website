@@ -59,6 +59,8 @@
 
     /* 黑客风没有白天，直接用对比度最高的那套 */
     if (style === "hacker") return "dark_high_contrast";
+    /* 终端风是琥珀单色：用透明底的深色主题，让留言板和纸面同一块底 */
+    if (style === "term") return "transparent_dark";
     /* 蓝白科技风的深色模式偏藏蓝，dark_dimmed 最接近 */
     if (style === "default") return dark ? "dark_dimmed" : "light";
     /* 极简、棍木：只有黑白两档 */

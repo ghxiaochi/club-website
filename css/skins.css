@@ -1111,9 +1111,28 @@ body.is-dino-visible .hnyz-pet {
 
 .style-card__glyph--halo span {
   position: absolute;
+  top: 8px; /* fallback: 旧内核 */
+  right: 8px; /* fallback: 旧内核 */
+  bottom: 8px; /* fallback: 旧内核 */
+  left: 8px; /* fallback: 旧内核 */
   inset: 8px;
   border-radius: 50%;
   border: 1px solid rgba(240, 166, 198, 0.72);
+}
+
+/* 终端：方角、单色、一个字都不多 */
+.style-card__glyph--term {
+  border-radius: 4px;
+  border: 1px solid rgba(255, 176, 0, 0.5);
+  background: #0c0b08;
+  color: #ffb000;
+  font-size: 1.7rem;
+  letter-spacing: 0.02em;
+}
+
+.term-glyph {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-weight: 500;
 }
 
 .style-card__kicker {
