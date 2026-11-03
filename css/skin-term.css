@@ -20,30 +20,30 @@
    1. 色板与字体
    --------------------------------------------------------- */
 html[data-style="term"] {
-  --bg: #0c0b08;
-  --bg-deep: #070605;
-  --panel: #12100b;
-  --panel-2: #16130d;
-  --panel-3: #1a1710;
+  --bg: #0a101f;
+  --bg-deep: #060a14;
+  --panel: #0e1628;
+  --panel-2: #101b31;
+  --panel-3: #132038;
 
-  --border: rgba(255, 176, 0, 0.18);
-  --border-strong: rgba(255, 176, 0, 0.42);
+  --border: rgba(90, 160, 220, 0.18);
+  --border-strong: rgba(90, 160, 220, 0.42);
 
-  --text: #efe6d3;
-  --text-soft: #cfc2a8;
-  --muted: #a1957c;
-  --dim: #7f7563;
+  --text: #ccd8ea;
+  --text-soft: #a9bad1;
+  --muted: #7e90ab;
+  --dim: #5b6d87;
 
-  --blue: #ffb000;
-  --blue-bright: #ffc94d;
-  --green: #9fd3a8;
-  --green-bright: #b9e3c0;
-  --orange: #ffb000;
-  --red: #ff7a6b;
-  --purple: #d8b4fe;
+  --blue: #56d0e8;
+  --blue-bright: #8ce5f7;
+  --green: #7ce38b;
+  --green-bright: #9deba8;
+  --orange: #56d0e8;
+  --red: #ff6b7a;
+  --purple: #d78ff5;
 
-  --blue-soft: rgba(255, 176, 0, 0.1);
-  --green-soft: rgba(159, 211, 168, 0.1);
+  --blue-soft: rgba(90, 160, 220, 0.1);
+  --green-soft: rgba(124, 227, 139, 0.1);
 
   --radius-sm: 0;
   --radius: 0;
@@ -62,21 +62,21 @@ html[data-style="term"] {
 
 /* 终端风锁死深色：日间主题只留变量，不改变外观 */
 html[data-style="term"][data-theme="light"] {
-  --bg: #0c0b08;
-  --bg-deep: #070605;
-  --panel: #12100b;
-  --panel-2: #16130d;
-  --panel-3: #1a1710;
-  --border: rgba(255, 176, 0, 0.18);
-  --border-strong: rgba(255, 176, 0, 0.42);
-  --text: #efe6d3;
-  --text-soft: #cfc2a8;
-  --muted: #a1957c;
-  --dim: #7f7563;
-  --blue: #ffb000;
-  --blue-bright: #ffc94d;
-  --blue-soft: rgba(255, 176, 0, 0.1);
-  --green-soft: rgba(159, 211, 168, 0.1);
+  --bg: #0a101f;
+  --bg-deep: #060a14;
+  --panel: #0e1628;
+  --panel-2: #101b31;
+  --panel-3: #132038;
+  --border: rgba(90, 160, 220, 0.18);
+  --border-strong: rgba(90, 160, 220, 0.42);
+  --text: #ccd8ea;
+  --text-soft: #a9bad1;
+  --muted: #7e90ab;
+  --dim: #5b6d87;
+  --blue: #56d0e8;
+  --blue-bright: #8ce5f7;
+  --blue-soft: rgba(90, 160, 220, 0.1);
+  --green-soft: rgba(124, 227, 139, 0.1);
   --glow-blue: none;
   --glow-green: none;
   --shadow-card: none;
@@ -84,15 +84,15 @@ html[data-style="term"][data-theme="light"] {
 }
 
 html[data-style="term"] ::selection {
-  background: #ffb000;
-  color: #0c0b08;
+  background: #56d0e8;
+  color: #0a101f;
 }
 
 /* ---------------------------------------------------------
    2. 页面底：平涂，没有光斑
    --------------------------------------------------------- */
 html[data-style="term"] body {
-  background: #0c0b08;
+  background: #0a101f;
   background-image: none;
   font-family: var(--mono);
   letter-spacing: 0;
@@ -109,7 +109,7 @@ html[data-style="term"] .skin-progress {
 html[data-style="term"] .hnyz-pet__board {
   border-radius: 0;
   border: 1px solid var(--border);
-  background: #0a0906;
+  background: #070c17;
   box-shadow: none;
 }
 
@@ -122,14 +122,14 @@ html[data-style="term"] .hnyz-pet__speech,
 html[data-style="term"] .hnyz-avatar__speech {
   border-radius: 0;
   border: 1px solid var(--border);
-  background: #12100b;
+  background: #0e1628;
   box-shadow: none;
 }
 
 html[data-style="term"] .hnyz-avatar__name {
   border-radius: 0;
   border: 1px solid var(--border);
-  background: #12100b;
+  background: #0e1628;
 }
 
 /* ---------------------------------------------------------
@@ -137,7 +137,7 @@ html[data-style="term"] .hnyz-avatar__name {
    --------------------------------------------------------- */
 html[data-style="term"] .site-header,
 html[data-style="term"] .site-header.is-scrolled {
-  background: #0c0b08;
+  background: #0a101f;
   border-bottom: 1px solid var(--border);
   box-shadow: none;
   -webkit-backdrop-filter: none;
@@ -180,14 +180,14 @@ html[data-style="term"] .nav-list a::after {
 html[data-style="term"] .nav-cta {
   border-radius: 0;
   background: var(--blue);
-  color: #0c0b08;
+  color: #0a101f;
   border: 1px solid var(--blue);
   box-shadow: none;
   font-weight: 600;
 }
 
 html[data-style="term"] .nav-cta:hover {
-  background: #0c0b08;
+  background: #0a101f;
   color: var(--blue);
 }
 
@@ -319,14 +319,14 @@ html[data-style="term"] .mini-button {
 
 html[data-style="term"] .button--primary {
   background: var(--blue);
-  color: #0c0b08;
+  color: #0a101f;
   border: 1px solid var(--blue);
   box-shadow: none;
   font-weight: 600;
 }
 
 html[data-style="term"] .button--primary:hover {
-  background: #0c0b08;
+  background: #0a101f;
   color: var(--blue);
   transform: none;
 }
@@ -339,7 +339,7 @@ html[data-style="term"] .button--secondary {
 }
 
 html[data-style="term"] .button--secondary:hover {
-  background: rgba(255, 176, 0, 0.08);
+  background: rgba(90, 160, 220, 0.08);
   color: var(--blue);
   transform: none;
 }
@@ -392,7 +392,7 @@ html[data-style="term"] .quick-card {
 }
 
 html[data-style="term"] .quick-path {
-  background: #0a0906;
+  background: #070c17;
   border-bottom: 1px solid var(--border);
   color: var(--dim);
   border-radius: 0;
@@ -427,7 +427,7 @@ html[data-style="term"] .section {
 }
 
 html[data-style="term"] .section--soft {
-  background: #0a0906;
+  background: #070c17;
   background-image: none;
 }
 
@@ -475,7 +475,7 @@ html[data-style="term"] .schedule-item,
 html[data-style="term"] .join-step {
   border-radius: 0;
   border: 0;
-  border-bottom: 1px solid rgba(255, 176, 0, 0.12);
+  border-bottom: 1px solid rgba(90, 160, 220, 0.12);
   background: transparent;
   box-shadow: none;
   padding-inline: 0;
@@ -484,7 +484,7 @@ html[data-style="term"] .join-step {
 html[data-style="term"] .do-card:hover,
 html[data-style="term"] .wall-card:hover,
 html[data-style="term"] .member-summary:hover {
-  background: rgba(255, 176, 0, 0.04);
+  background: rgba(90, 160, 220, 0.04);
   translate: none;
   transform: none;
   box-shadow: none;
@@ -624,7 +624,7 @@ html[data-style="term"] .guestbook textarea,
 html[data-style="term"] .ladder-form input {
   border-radius: 0;
   border: 1px solid var(--border-strong);
-  background: #0a0906;
+  background: #070c17;
   color: var(--text);
   font-family: var(--mono);
   box-shadow: none;
@@ -654,7 +654,7 @@ html[data-style="term"] .guestbook__entry,
 html[data-style="term"] .guestbook__item {
   border-radius: 0;
   border: 0;
-  border-bottom: 1px solid rgba(255, 176, 0, 0.12);
+  border-bottom: 1px solid rgba(90, 160, 220, 0.12);
   background: transparent;
   box-shadow: none;
 }
@@ -691,7 +691,7 @@ html[data-style="term"] .gallery-filter:hover,
 html[data-style="term"] .gallery-filter[aria-pressed="true"] {
   border-color: var(--blue);
   color: var(--blue);
-  background: rgba(255, 176, 0, 0.06);
+  background: rgba(90, 160, 220, 0.06);
 }
 
 /* 成员页 */
@@ -712,7 +712,7 @@ html[data-style="term"] .member-secret:hover {
 
 /* 角色排：底面压暗，和车站台 */
 html[data-style="term"] .char-stage {
-  background: #090806;
+  background: #08101c;
 }
 
 html[data-style="term"] .char-slot {
@@ -728,7 +728,7 @@ html[data-style="term"] .char-note {
 html[data-style="term"] .dino-run {
   border-radius: 0;
   border: 1px solid var(--border);
-  background: #080706;
+  background: #080f1a;
   box-shadow: none;
 }
 
@@ -755,7 +755,7 @@ html[data-style="term"] .dino-run__ladder:hover {
 html[data-style="term"] .site-footer,
 html[data-style="term"] footer {
   border-top: 1px solid var(--border);
-  background: #0a0906;
+  background: #070c17;
   color: var(--dim);
   box-shadow: none;
 }
@@ -771,7 +771,7 @@ html[data-style="term"] .footer-nav a:hover {
 /* 跑马灯：压成一条状态栏 */
 html[data-style="term"] .hnyz-ticker {
   border-block: 1px solid var(--border);
-  background: #0a0906;
+  background: #070c17;
   -webkit-mask-image: none;
   mask-image: none;
 }
@@ -793,7 +793,7 @@ html[data-style="term"] .style-deck {
 html[data-style="term"] .style-card {
   border-radius: 0;
   border: 1px solid var(--border);
-  background: #12100b;
+  background: #0e1628;
   box-shadow: none;
 }
 
@@ -803,21 +803,21 @@ html[data-style="term"] .style-card.is-active {
 
 html[data-style="term"] .style-card__glyph {
   border-radius: 0;
-  background: #0a0906;
+  background: #070c17;
   border: 1px solid var(--border);
   color: var(--blue);
 }
 
 html[data-style="term"] .style-card__current {
   border-radius: 0;
-  background: rgba(255, 176, 0, 0.12);
+  background: rgba(90, 160, 220, 0.12);
   color: var(--blue);
 }
 
 html[data-style="term"] .style-card__apply {
   border-radius: 0;
   background: var(--blue);
-  color: #0c0b08;
+  color: #0a101f;
   box-shadow: none;
   font-family: var(--mono);
 }
@@ -840,7 +840,7 @@ html[data-style="term"] .style-card__apply {
   font-size: 11px;
   line-height: 1;
   color: var(--dim);
-  background: rgba(12, 11, 8, 0.86);
+  background: rgba(10, 16, 31, 0.86);
   border: 1px solid var(--border);
   pointer-events: none;
   opacity: 0;
@@ -973,22 +973,22 @@ html[data-style="term"] .member-hero {
 
 html[data-style="term"] .member-hero::before {
   background-image:
-    linear-gradient(rgba(255, 176, 0, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 176, 0, 0.07) 1px, transparent 1px);
+    linear-gradient(rgba(90, 160, 220, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(90, 160, 220, 0.07) 1px, transparent 1px);
 }
 
 /* 图集底板：原来是深蓝渐变，这里改成一块深色纸面 + 琥珀网格 */
 html[data-style="term"] .gallery-board {
   border-color: var(--border);
   border-radius: 0;
-  background: #0a0906;
+  background: #070c17;
   box-shadow: none;
 }
 
 html[data-style="term"] .gallery-board::before {
   background-image:
-    linear-gradient(rgba(255, 176, 0, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 176, 0, 0.06) 1px, transparent 1px);
+    linear-gradient(rgba(90, 160, 220, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(90, 160, 220, 0.06) 1px, transparent 1px);
 }
 
 html[data-style="term"] .gallery-item,
@@ -1015,20 +1015,20 @@ html[data-style="term"] .join-panel {
   border-color: var(--border);
   border-radius: 0;
   background:
-    radial-gradient(circle at 92% 8%, rgba(255, 176, 0, 0.07), transparent 40%),
-    #0a0906;
+    radial-gradient(circle at 92% 8%, rgba(90, 160, 220, 0.07), transparent 40%),
+    #070c17;
   box-shadow: none;
 }
 
 html[data-style="term"] .join-panel::before {
   background-image:
-    linear-gradient(rgba(255, 176, 0, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 176, 0, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(90, 160, 220, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(90, 160, 220, 0.05) 1px, transparent 1px);
 }
 
 html[data-style="term"] .join-contact {
   border-radius: 0;
-  background: #12100b;
+  background: #0e1628;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
@@ -1036,7 +1036,7 @@ html[data-style="term"] .join-contact {
 html[data-style="term"] .join-qr,
 html[data-style="term"] .join-qr img {
   border-radius: 0;
-  background: #efe6d3;
+  background: #ccd8ea;
 }
 
 /* 活动概览卡：同样是一块白底，改成比页面亮一档的纸面 */
@@ -1053,37 +1053,37 @@ html[data-style="term"] .agenda-list li + li {
 /* 留言板：giscus 是跨域 iframe，只能给它一块同色的底，
    真正的配色交给 js/guestbook.js 里的主题映射 */
 html[data-style="term"] .guestbook {
-  --giscus-canvas: #0f0e0a;
+  --giscus-canvas: #0b1220;
   border-radius: 0;
   box-shadow: none;
 }
 
 /* 页脚跑道：黑客风那样重设一套琥珀配色 */
 html[data-style="term"] .dino-run {
-  --dino-ink: #efe6d3;
-  --dino-accent: #ffb000;
-  --dino-dim: #7f7563;
-  --dino-ground: rgba(255, 176, 0, 0.4);
-  --dino-moon: #ffe2a8;
+  --dino-ink: #ccd8ea;
+  --dino-accent: #56d0e8;
+  --dino-dim: #5b6d87;
+  --dino-ground: rgba(90, 160, 220, 0.4);
+  --dino-moon: #b9ecf9;
   border-top-color: var(--border);
-  background-color: #080705;
+  background-color: #070d18;
   background-image:
-    radial-gradient(ellipse 70% 120% at 50% 110%, rgba(255, 176, 0, 0.09), transparent 70%),
-    linear-gradient(rgba(255, 176, 0, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 176, 0, 0.05) 1px, transparent 1px);
+    radial-gradient(ellipse 70% 120% at 50% 110%, rgba(90, 160, 220, 0.09), transparent 70%),
+    linear-gradient(rgba(90, 160, 220, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(90, 160, 220, 0.05) 1px, transparent 1px);
 }
 
 html[data-style="term"] .dino-run__stage {
   border-color: var(--border);
   background:
-    repeating-linear-gradient(180deg, rgba(255, 176, 0, 0.035) 0 1px, transparent 1px 3px),
-    rgba(10, 9, 6, 0.6);
+    repeating-linear-gradient(180deg, rgba(90, 160, 220, 0.035) 0 1px, transparent 1px 3px),
+    rgba(7, 12, 23, 0.6);
 }
 
 /* PWA 提示条是内联样式注入的，靠选择器优先级盖过去 */
 html[data-style="term"] .pwa-toast {
   border-radius: 0;
-  background: #0c0b08;
+  background: #0a101f;
   border-color: var(--border-strong);
   box-shadow: none;
   color: var(--text);

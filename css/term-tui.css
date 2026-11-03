@@ -2,9 +2,15 @@
    HNYZ · HNYZ TTY — 终端风的多窗口终端框架
    ---------------------------------------------------------
    配套 js/term-tui.js。整屏一台终端：顶栏、tmux 式窗口条、
-   八个窗口面板、命令行、按键图例栏。
+   八个窗口面板（带面板边框与标题条）、命令行、按键图例栏。
 
-   配色与 css/skin-term.css 同源但在这里自持一套字面色值，
+   配色：深空蓝底 + TUI 多色语义（btop / k9s / tokyo-night 一路）：
+     青   主色 · 链接 · 活动面板
+     绿   成功 · 计划 · 进度
+     黄   man page 标题 · 星标
+     品红 语言标签
+     红   报错
+   与 css/skin-term.css 同源但在这里自持一套字面色值，
    不依赖任何变量——框架拆走后不留半条全局规则。
 
    只在 html.tty-on 且 DOM 里存在 .tty 时生效。
@@ -19,8 +25,8 @@
   z-index: 500;
   display: flex;
   flex-direction: column;
-  background: #0c0b08;
-  color: #efe6d3;
+  background: #0a101f;
+  color: #ccd8ea;
   font-family: ui-monospace, "SF Mono", "Cascadia Mono", "JetBrains Mono", Consolas, "Courier New", monospace;
   font-size: 13.5px;
   line-height: 1.75;
@@ -57,19 +63,19 @@ html.tty-on .style-deck__shell {
   align-items: center;
   gap: 12px;
   padding: 10px 18px;
-  border-bottom: 1px solid rgba(255, 176, 0, 0.18);
-  background: #0a0906;
+  border-bottom: 1px solid rgba(90, 160, 220, 0.2);
+  background: #070c17;
   flex: none;
   min-height: 46px;
 }
 
 .tty__logo {
-  color: #ffb000;
+  color: #56d0e8;
   font-size: 15px;
 }
 
 .tty__brand {
-  color: #efe6d3;
+  color: #ccd8ea;
   font-weight: 700;
   letter-spacing: 0.04em;
   white-space: nowrap;
@@ -77,11 +83,11 @@ html.tty-on .style-deck__shell {
 
 .tty__brand i {
   font-style: normal;
-  color: #7f7563;
+  color: #5b6d87;
 }
 
 .tty__sess {
-  color: #7f7563;
+  color: #5b6d87;
   font-size: 11.5px;
   white-space: nowrap;
   overflow: hidden;
@@ -90,8 +96,13 @@ html.tty-on .style-deck__shell {
   min-width: 0;
 }
 
+.tty__sess b {
+  color: #7ce38b;
+  font-weight: 400;
+}
+
 .tty__clock {
-  color: #a1957c;
+  color: #7e90ab;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -106,15 +117,15 @@ html.tty-on .style-deck__shell {
 
 .tty .header-actions button {
   border-radius: 0 !important;
-  border: 1px solid rgba(255, 176, 0, 0.18);
+  border: 1px solid rgba(90, 160, 220, 0.2);
   background: transparent !important;
-  color: #a1957c !important;
+  color: #7e90ab !important;
   box-shadow: none !important;
 }
 
 .tty .header-actions button:hover {
-  border-color: rgba(255, 176, 0, 0.42);
-  color: #ffb000 !important;
+  border-color: rgba(86, 208, 232, 0.5);
+  color: #56d0e8 !important;
   transform: none !important;
 }
 
@@ -129,8 +140,8 @@ html.tty-on .style-deck__shell {
 .tty__tabs {
   display: flex;
   overflow-x: auto;
-  border-bottom: 1px solid rgba(255, 176, 0, 0.18);
-  background: #0a0906;
+  border-bottom: 1px solid rgba(90, 160, 220, 0.2);
+  background: #070c17;
   flex: none;
   scrollbar-width: none;
 }
@@ -142,9 +153,9 @@ html.tty-on .style-deck__shell {
 .tty__tabs [role="tab"] {
   appearance: none;
   border: 0;
-  border-right: 1px solid rgba(255, 176, 0, 0.12);
+  border-right: 1px solid rgba(90, 160, 220, 0.12);
   background: transparent;
-  color: #7f7563;
+  color: #5b6d87;
   font-family: inherit;
   font-size: 12px;
   line-height: 1;
@@ -155,18 +166,18 @@ html.tty-on .style-deck__shell {
 }
 
 .tty__tabs [role="tab"]:hover {
-  color: #ffb000;
-  background: rgba(255, 176, 0, 0.05);
+  color: #56d0e8;
+  background: rgba(86, 208, 232, 0.06);
 }
 
 .tty__tabs [role="tab"].is-active {
-  background: #ffb000;
-  color: #0c0b08;
+  background: #56d0e8;
+  color: #06111d;
   font-weight: 700;
 }
 
 .tty__tabs [role="tab"]:focus-visible {
-  outline: 1px solid #ffc94d;
+  outline: 1px solid #8ce5f7;
   outline-offset: -2px;
 }
 
@@ -176,27 +187,73 @@ html.tty-on .style-deck__shell {
 }
 
 /* ---------------------------------------------------------
-   4. 窗口面板
+   4. 窗口面板：tmux 式的框——每个窗口一块带边框的 pane，
+      活动窗口边框提亮（一眼看出焦点在哪块）
    --------------------------------------------------------- */
 .tty__body {
   flex: 1;
   min-height: 0;
   position: relative;
+  padding: 12px clamp(12px, 2.4vw, 22px) 8px;
+  background: #060a14;
 }
 
 .tty__pane {
   position: absolute;
-  inset: 0;
+  inset: 12px clamp(12px, 2.4vw, 22px) 8px;
   overflow-y: auto;
-  padding: 30px clamp(18px, 5vw, 56px) 44px;
   -webkit-overflow-scrolling: touch;
   outline: none;
   max-width: 100%;
+  border: 1px solid rgba(90, 160, 220, 0.24);
+  background: #0e1628;
+  transition: border-color 0.2s ease;
+}
+
+.tty__pane.is-active {
+  border-color: rgba(86, 208, 232, 0.55);
 }
 
 .tty__pane:focus-visible {
-  outline: 1px solid rgba(255, 176, 0, 0.42);
+  outline: 1px solid rgba(86, 208, 232, 0.55);
   outline-offset: -3px;
+}
+
+/* 面板标题条：粘在 pane 顶部，内容从它底下滚过 */
+.tty-panehdr {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 7px 16px 6px;
+  background: #0e1628;
+  border-bottom: 1px solid rgba(90, 160, 220, 0.22);
+  color: #5b6d87;
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  user-select: none;
+}
+
+.tty-panehdr::before {
+  content: "▌";
+  color: #56d0e8;
+}
+
+.tty-panehdr__no {
+  color: #56d0e8;
+}
+
+.tty-panehdr__ttl {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 面板正文 */
+.tty-pane__bd {
+  padding: 26px clamp(18px, 5vw, 56px) 44px;
 }
 
 /* ---------------------------------------------------------
@@ -218,6 +275,7 @@ html.tty-on .style-deck__shell {
 .tty.is-on .tty-wall,
 .tty.is-on .tty-timeline,
 .tty.is-on .tty-timeline__cap,
+.tty.is-on .tty-panehdr,
 .tty.is-on .tty-repos .tty-ln {
   animation: ttyPrint 0.16s steps(2, end) both;
   animation-delay: calc(min(var(--i, 0), 22) * 34ms);
@@ -228,11 +286,15 @@ html.tty-on .style-deck__shell {
   to { opacity: 1; }
 }
 
-/* 色阶：同一族琥珀，只靠明度分层 */
-.tty .t-dim { color: #7f7563; }
-.tty .t-mut { color: #a1957c; }
-.tty .t-amb { color: #ffb000; }
-.tty .t-brt { color: #ffc94d; }
+/* 语义色阶：TUI 的本分——颜色各司其职，不靠一个强调色走天下 */
+.tty .t-dim { color: #5b6d87; }   /* 注释 · 提示符 · 装饰 */
+.tty .t-mut { color: #7e90ab; }   /* 正文 · 次要说明 */
+.tty .t-cyn { color: #56d0e8; }   /* 主色 · 命令 · 链接 */
+.tty .t-brt { color: #8ce5f7; }   /* 亮青 · 强调值 */
+.tty .t-grn { color: #7ce38b; }   /* 计划 · 成功 · 进度 */
+.tty .t-yel { color: #f0d47a; }   /* man page 字段 · 星标 */
+.tty .t-mgt { color: #d78ff5; }   /* 语言标签 · 关键字 */
+.tty .t-red { color: #ff6b7a; }   /* 报错 */
 
 .tty-indent {
   padding-left: 1.8em;
@@ -263,15 +325,16 @@ html.tty-on .style-deck__shell {
 
 .tty-pixel i {
   display: block;
-  background: rgba(255, 176, 0, 0.09);
+  background: rgba(86, 208, 232, 0.09);
 }
 
 .tty-pixel i.on {
-  background: #ffb000;
+  background: #56d0e8;
+  box-shadow: 0 0 6px rgba(86, 208, 232, 0.45);
 }
 
 /* ---------------------------------------------------------
-   6. 仪表条（btop 味）
+   6. 仪表条（btop 味）：条一色一人，扫一眼能对上读数
    --------------------------------------------------------- */
 .tty-meters {
   margin: 4px 0 20px;
@@ -287,40 +350,43 @@ html.tty-on .style-deck__shell {
 }
 
 .tty-meter__label {
-  color: #a1957c;
+  color: #7e90ab;
   font-size: 12px;
 }
 
 .tty-bar {
   display: block;
   height: 9px;
-  border: 1px solid rgba(255, 176, 0, 0.24);
-  background: #0a0906;
+  border: 1px solid rgba(90, 160, 220, 0.26);
+  background: #070c17;
 }
 
 .tty-bar i {
   display: block;
   height: 100%;
-  background: #ffb000;
+  background: #56d0e8;
 }
 
+.tty-meter:nth-of-type(2) .tty-bar i { background: #7ce38b; }
+.tty-meter:nth-of-type(3) .tty-bar i { background: #f0d47a; }
+
 .tty-meter__val {
-  color: #efe6d3;
+  color: #ccd8ea;
   font-size: 12px;
   white-space: nowrap;
 }
 
 .tty-meter__val em {
   font-style: normal;
-  color: #7f7563;
+  color: #5b6d87;
 }
 
 /* ---------------------------------------------------------
    7. 联系卡 / 复制按钮 / 链接
    --------------------------------------------------------- */
 .tty-contact {
-  border: 1px solid rgba(255, 176, 0, 0.24);
-  background: #12100b;
+  border: 1px solid rgba(90, 160, 220, 0.26);
+  background: #0d1526;
   padding: 16px 18px;
   margin: 6px 0 20px;
   max-width: 460px;
@@ -331,7 +397,7 @@ html.tty-on .style-deck__shell {
   align-items: center;
   gap: 14px;
   padding: 7px 0;
-  border-bottom: 1px solid rgba(255, 176, 0, 0.1);
+  border-bottom: 1px solid rgba(90, 160, 220, 0.1);
 }
 
 .tty-contact__row:last-of-type {
@@ -345,7 +411,7 @@ html.tty-on .style-deck__shell {
 }
 
 .tty-contact__row b {
-  color: #efe6d3;
+  color: #ccd8ea;
   font-weight: 600;
   letter-spacing: 0.02em;
   overflow-wrap: anywhere;
@@ -359,9 +425,9 @@ html.tty-on .style-deck__shell {
 .tty-cp {
   appearance: none;
   margin-left: auto;
-  border: 1px solid rgba(255, 176, 0, 0.3);
+  border: 1px solid rgba(86, 208, 232, 0.35);
   background: transparent;
-  color: #ffb000;
+  color: #56d0e8;
   font-family: inherit;
   font-size: 11.5px;
   line-height: 1;
@@ -372,32 +438,32 @@ html.tty-on .style-deck__shell {
 }
 
 .tty-cp:hover {
-  background: #ffb000;
-  color: #0c0b08;
+  background: #56d0e8;
+  color: #06111d;
 }
 
 .tty-cp.is-done {
-  background: #ffb000;
-  color: #0c0b08;
-  border-color: #ffb000;
+  background: #7ce38b;
+  border-color: #7ce38b;
+  color: #06111d;
 }
 
 .tty-link {
-  color: #ffb000;
+  color: #56d0e8;
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 4px;
 }
 
 .tty-link:hover {
-  color: #ffc94d;
+  color: #8ce5f7;
 }
 
 .tty-btn {
   appearance: none;
-  border: 1px solid #ffb000;
-  background: #ffb000;
-  color: #0c0b08;
+  border: 1px solid #56d0e8;
+  background: #56d0e8;
+  color: #06111d;
   font-family: inherit;
   font-size: 12.5px;
   font-weight: 700;
@@ -409,7 +475,7 @@ html.tty-on .style-deck__shell {
 
 .tty-btn:hover {
   background: transparent;
-  color: #ffb000;
+  color: #56d0e8;
 }
 
 .tty-inline-note {
@@ -438,18 +504,18 @@ html.tty-on .style-deck__shell {
   gap: 12px;
   align-items: baseline;
   padding: 9px 0;
-  border-bottom: 1px solid rgba(255, 176, 0, 0.1);
-  color: #efe6d3;
+  border-bottom: 1px solid rgba(90, 160, 220, 0.1);
+  color: #ccd8ea;
   text-decoration: none;
   transition: background-color 0.15s ease;
 }
 
 .tty-wall__row:hover {
-  background: rgba(255, 176, 0, 0.05);
+  background: rgba(86, 208, 232, 0.06);
 }
 
 .tty-wall__row:hover b {
-  color: #ffc94d;
+  color: #8ce5f7;
 }
 
 .tty-wall__row span {
@@ -462,10 +528,11 @@ html.tty-on .style-deck__shell {
   font-size: 11.5px;
 }
 
+/* 时间轴：四段四色，与图例里的色点一一对应 */
 .tty-timeline {
   display: flex;
   height: 18px;
-  border: 1px solid rgba(255, 176, 0, 0.3);
+  border: 1px solid rgba(90, 160, 220, 0.3);
   max-width: 560px;
   margin: 4px 0 8px;
   overflow: hidden;
@@ -474,31 +541,35 @@ html.tty-on .style-deck__shell {
 .tty-timeline i {
   display: block;
   height: 100%;
-  background: rgba(255, 176, 0, 0.82);
-  border-right: 1px solid #0c0b08;
+  background: rgba(86, 208, 232, 0.85);
+  border-right: 1px solid #0a101f;
   position: relative;
 }
 
-.tty-timeline i:nth-child(2) { background: rgba(255, 176, 0, 0.5); }
-.tty-timeline i:nth-child(3) { background: rgba(255, 176, 0, 0.66); }
-.tty-timeline i:nth-child(4) { background: rgba(255, 176, 0, 0.34); }
+.tty-timeline i:nth-child(2) { background: rgba(124, 227, 139, 0.75); }
+.tty-timeline i:nth-child(3) { background: rgba(240, 212, 122, 0.7); }
+.tty-timeline i:nth-child(4) { background: rgba(215, 143, 245, 0.7); }
 
 .tty-timeline__cap {
   margin: 0 0 16px;
   font-size: 12px;
 }
 
+.tty-timeline__cap b {
+  font-weight: 400;
+}
+
 /* ---------------------------------------------------------
    9. FAQ 折叠
    --------------------------------------------------------- */
 .tty-faq {
-  border-bottom: 1px solid rgba(255, 176, 0, 0.12);
+  border-bottom: 1px solid rgba(90, 160, 220, 0.12);
   max-width: 680px;
 }
 
 .tty-faq summary {
   cursor: pointer;
-  color: #cfc2a8;
+  color: #a9bad1;
   padding: 9px 0;
   list-style: none;
   transition: color 0.15s ease;
@@ -509,17 +580,17 @@ html.tty-on .style-deck__shell {
 }
 
 .tty-faq summary:hover {
-  color: #ffb000;
+  color: #56d0e8;
 }
 
 .tty-faq[open] summary {
-  color: #ffb000;
+  color: #56d0e8;
 }
 
 .tty-faq p {
   margin: 0 0 12px;
   padding-left: 2.2em;
-  color: #a1957c;
+  color: #7e90ab;
 }
 
 /* ---------------------------------------------------------
@@ -530,8 +601,8 @@ html.tty-on .style-deck__shell {
   max-height: 168px;
   overflow-y: auto;
   padding: 10px 18px 0;
-  border-top: 1px solid rgba(255, 176, 0, 0.18);
-  background: #0a0906;
+  border-top: 1px solid rgba(90, 160, 220, 0.2);
+  background: #070c17;
   font-size: 12.5px;
   display: none;
 }
@@ -542,12 +613,12 @@ html.tty-on .style-deck__shell {
 
 .tty-echo__ln {
   margin: 0 0 3px;
-  color: #a1957c;
+  color: #7e90ab;
   overflow-wrap: anywhere;
 }
 
 .tty-echo__ln.is-err {
-  color: #ff7a6b;
+  color: #ff6b7a;
 }
 
 .tty__prompt {
@@ -555,13 +626,13 @@ html.tty-on .style-deck__shell {
   align-items: center;
   gap: 10px;
   padding: 9px 18px 11px;
-  border-top: 1px solid rgba(255, 176, 0, 0.18);
-  background: #0a0906;
+  border-top: 1px solid rgba(90, 160, 220, 0.2);
+  background: #070c17;
   flex: none;
 }
 
 .tty__prompt-label {
-  color: #ffb000;
+  color: #56d0e8;
   font-size: 12.5px;
   white-space: nowrap;
   flex: none;
@@ -572,16 +643,16 @@ html.tty-on .style-deck__shell {
   min-width: 0;
   border: 0;
   background: transparent;
-  color: #efe6d3;
+  color: #ccd8ea;
   font-family: inherit;
   font-size: 13.5px;
   line-height: 1.6;
-  caret-color: #ffb000;
+  caret-color: #56d0e8;
   outline: none;
 }
 
 .tty__prompt input::placeholder {
-  color: #55503f;
+  color: #45536b;
 }
 
 /* ---------------------------------------------------------
@@ -593,18 +664,18 @@ html.tty-on .style-deck__shell {
   justify-content: space-between;
   gap: 16px;
   padding: 7px 18px;
-  border-top: 1px solid rgba(255, 176, 0, 0.18);
-  background: #12100b;
-  color: #7f7563;
+  border-top: 1px solid rgba(90, 160, 220, 0.2);
+  background: #0d1526;
+  color: #5b6d87;
   font-size: 11px;
   flex: none;
 }
 
 .tty__legend kbd {
   font-family: inherit;
-  border: 1px solid rgba(255, 176, 0, 0.24);
+  border: 1px solid rgba(86, 208, 232, 0.3);
   padding: 1px 5px;
-  color: #a1957c;
+  color: #56d0e8;
 }
 
 .tty__up {
@@ -630,7 +701,7 @@ html.tty-on .style-deck__shell {
     gap: 10px;
   }
 
-  .tty__pane {
+  .tty-pane__bd {
     padding: 22px 18px 36px;
   }
 
@@ -657,6 +728,18 @@ html.tty-on .style-deck__shell {
 
   .tty__clock {
     display: none;
+  }
+
+  .tty__body {
+    padding: 8px 10px 6px;
+  }
+
+  .tty__pane {
+    inset: 8px 10px 6px;
+  }
+
+  .tty-panehdr {
+    padding: 6px 12px 5px;
   }
 
   .tty__legend span:first-child {
@@ -695,6 +778,10 @@ html.tty-on .style-deck__shell {
     transition: none;
   }
 
+  .tty__pane {
+    transition: none;
+  }
+
   .tty.is-on .tty-ln,
   .tty.is-on .tty-boot,
   .tty.is-on .tty-pixel,
@@ -704,6 +791,7 @@ html.tty-on .style-deck__shell {
   .tty.is-on .tty-wall,
   .tty.is-on .tty-timeline,
   .tty.is-on .tty-timeline__cap,
+  .tty.is-on .tty-panehdr,
   .tty.is-on .tty-repos .tty-ln {
     animation: none;
   }

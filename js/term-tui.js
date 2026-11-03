@@ -77,7 +77,7 @@
     var d = new Date();
     var h = [];
     h.push('<div class="tty-boot t-dim">');
-    h.push(L("HNYZ-TTY 6.2.0 (amber) — login: guest"));
+    h.push(L("HNYZ-TTY 6.3.0 (midnight) — login: guest"));
     h.push(L("last login: " + d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + " · from 教学楼机房"));
     h.push("</div>");
     /* 点阵 banner：17×5 的 LED 屏，一格一个 <i>，
@@ -105,7 +105,7 @@
     }).join("");
     h.push('<div class="tty-pixel" style="--i:' + (lineIdx++) + '" role="img" aria-label="HNYZ">' + px + "</div>");
     h.push(L('<span class="t-dim">$</span> whoami'));
-    h.push(L("衡南一中编程社 · 面向全校的极客技术社团", "t-brt"));
+    h.push(L("衡南一中编程社 · 面向全校的极客技术社团", "t-cyn"));
     h.push(L('<span class="t-dim">$</span> cat intro.txt'));
     h.push(L("教学内容以 Arduino 为主线：从点亮第一颗 LED 开始，组队做项目、一起学习，把脑子里的点子变成真正能跑的作品。", "t-mut"));
     h.push('<div class="tty-meters">');
@@ -129,16 +129,16 @@
     lineIdx = 0;
     var h = [];
     h.push(L('<span class="t-dim">$</span> man hnyz <span class="t-dim">(1)</span>'));
-    h.push(L('<b class="t-amb">NAME</b>　　hnyz — 衡南一中编程社 / HNYZ CS CLUB'));
-    h.push(L('<b class="t-amb">SYNOPSIS</b>　$ join --class 班级 --name 姓名'));
-    h.push(L('<b class="t-amb">DATE</b>　　每周两次 · 每次 60 分钟 · 时间地点见 QQ 群公告'));
-    h.push(L('<b class="t-amb">DESCRIPTION</b>'));
+    h.push(L('<b class="t-yel">NAME</b>　　hnyz — 衡南一中编程社 / HNYZ CS CLUB'));
+    h.push(L('<b class="t-yel">SYNOPSIS</b>　$ join --class 班级 --name 姓名'));
+    h.push(L('<b class="t-yel">DATE</b>　　每周两次 · 每次 60 分钟 · 时间地点见 QQ 群公告'));
+    h.push(L('<b class="t-yel">DESCRIPTION</b>'));
     h.push(L("一个把好奇心变成作品的地方。不用先学完什么才能来：从点亮第一颗 LED、读按钮和传感器开始，学数字/模拟输入输出、串口和简单的控制逻辑，再组队完成一个完整的硬件小项目。ESP32 会作为进阶平台接触。", "t-mut tty-indent"));
-    h.push(L('<b class="t-amb">CULTURE</b>'));
+    h.push(L('<b class="t-yel">CULTURE</b>'));
     h.push(L("1. 做完比完美更重要。", "tty-indent"));
     h.push(L("2. 提问不需要理由，卡住就喊。", "tty-indent"));
     h.push(L("3. 零基础和非技术方向都欢迎——项目还需要设计、文案、测试和组织。", "tty-indent"));
-    h.push(L('<b class="t-amb">SEE ALSO</b>　build(1) · sched(5) · join(1)'));
+    h.push(L('<b class="t-yel">SEE ALSO</b>　build(1) · sched(5) · join(1)'));
     return h.join("");
   }
 
@@ -165,8 +165,8 @@
         var desc = r.description ? esc(r.description) : '<span class="t-dim">（还没有描述）</span>';
         h.push(L(
           '<span class="t-dim">*</span> <a class="tty-link" href="' + esc(r.html_url || "#") + '" target="_blank" rel="noopener noreferrer">' + esc(r.name || "") + "</a> " +
-          '<span class="t-dim">[' + esc(r.language || "—") + "]</span> " +
-          '<span class="t-dim">★' + (r.stargazers_count || 0) + "</span><br>" +
+          '<span class="t-mgt">[' + esc(r.language || "—") + "]</span> " +
+          '<span class="t-yel">★' + (r.stargazers_count || 0) + "</span><br>" +
           '<span class="t-mut tty-desc">' + desc + "</span>"
         ));
       });
@@ -185,14 +185,15 @@
     var h = [];
     h.push(L('<span class="t-dim">$</span> crontab -l <span class="t-dim">| grep hnyz</span>'));
     h.push(L('<span class="t-dim"># 每周两次 · 每次 60 min · 时间地点以 QQ 群公告为准，考试周会减量</span>'));
-    h.push(L('<b class="t-brt">0 60min * * 2</b>　主题分享 + 结对开发　<span class="t-dim"># 从一个小主题讲起，讲完就动手</span>'));
-    h.push(L('<b class="t-brt">0 60min * * 5</b>　自由开发 + 问题排查　<span class="t-dim"># 带项目来，报错现场修</span>'));
-    h.push(L('<b class="t-brt">0 60min 1 * *</b>　demo-day --monthly　<span class="t-dim"># 展示这个月做的东西，接受不完美</span>'));
+    h.push(L('<b class="t-grn">0 60min * * 2</b>　主题分享 + 结对开发　<span class="t-dim"># 从一个小主题讲起，讲完就动手</span>'));
+    h.push(L('<b class="t-grn">0 60min * * 5</b>　自由开发 + 问题排查　<span class="t-dim"># 带项目来，报错现场修</span>'));
+    h.push(L('<b class="t-grn">0 60min 1 * *</b>　demo-day --monthly　<span class="t-dim"># 展示这个月做的东西，接受不完美</span>'));
     h.push(L('<span class="t-dim">$</span> breakdown --one-session'));
     h.push('<div class="tty-timeline" style="--i:' + (lineIdx++) + '" aria-label="一次活动 60 分钟的时间分配">' +
       '<i style="width:16.7%" data-k="分享 10’"></i><i style="width:41.6%" data-k="开发 25’"></i>' +
       '<i style="width:25%" data-k="同步 15’"></i><i style="width:16.7%" data-k="答疑 10’"></i></div>' +
-      '<p class="tty-timeline__cap t-dim" style="--i:' + (lineIdx++) + '">分享 10’ · 自由开发 25’ · 进度同步 15’ · 提问/结对 10’</p>');
+      '<p class="tty-timeline__cap t-dim" style="--i:' + (lineIdx++) + '">' +
+      '<span class="t-cyn">分享 10’</span> · <span class="t-grn">自由开发 25’</span> · <span class="t-yel">进度同步 15’</span> · <span class="t-mgt">提问/结对 10’</span></p>');
     return h.join("");
   }
 
@@ -202,9 +203,9 @@
     h.push(L('<span class="t-dim">$</span> ls -la <span class="t-dim">/srv/wall</span>'));
     h.push('<div class="tty-wall" style="--i:' + (lineIdx++) + '">');
     h.push('<a class="tty-wall__row" href="https://www.runoob.com/cplusplus/cpp-tutorial.html" target="_blank" rel="noopener noreferrer">' +
-      '<span class="t-dim">drwxr-xr-x</span><b class="t-amb">CPP/</b><span>C++ 菜鸟教程</span><span class="tty-wall__host t-dim">runoob.com ↗</span></a>');
+      '<span class="t-dim">drwxr-xr-x</span><b class="t-cyn">CPP/</b><span>C++ 菜鸟教程</span><span class="tty-wall__host t-dim">runoob.com ↗</span></a>');
     h.push('<a class="tty-wall__row" href="https://www.waveshare.net/wiki/ESP32-S3-DEV-KIT-N8R8" target="_blank" rel="noopener noreferrer">' +
-      '<span class="t-dim">drwxr-xr-x</span><b class="t-amb">ESP32/</b><span>微雪 ESP32-S3 Wiki</span><span class="tty-wall__host t-dim">waveshare.net ↗</span></a>');
+      '<span class="t-dim">drwxr-xr-x</span><b class="t-cyn">ESP32/</b><span>微雪 ESP32-S3 Wiki</span><span class="tty-wall__host t-dim">waveshare.net ↗</span></a>');
     h.push("</div>");
     h.push(L('<span class="t-dim"># C++ 基础配合 Arduino 项目一起看；ESP32 统一看微雪的 Wiki。</span>', "t-dim"));
     h.push(L('<span class="t-dim"># 有想推荐给社团的教程、工具或项目，丢进 QQ 群，这面墙会一直补。</span>', "t-dim"));
@@ -246,7 +247,7 @@
     h.push(L('<span class="t-dim">$</span> ssh newmember@hnyz.club'));
     h.push(L("▸ 第一次来不用准备任何东西，直接来坐坐。", "t-mut"));
     h.push('<div class="tty-contact" style="--i:' + (lineIdx++) + '">');
-    h.push('<div class="tty-contact__row"><span class="t-dim">QQ 群</span><b class="t-brt">' + QQ + "</b>" + copyBtn(QQ, "复制群号") + "</div>");
+    h.push('<div class="tty-contact__row"><span class="t-dim">QQ 群</span><b class="t-cyn">' + QQ + "</b>" + copyBtn(QQ, "复制群号") + "</div>");
     h.push('<div class="tty-contact__row"><span class="t-dim">邮箱</span><b>' + MAIL + "</b>" + copyBtn(MAIL, "复制邮箱") + "</div>");
     h.push('<div class="tty-contact__row"><span class="t-dim">备注</span><span>班级 + 姓名</span></div>');
     h.push('<p class="tty-contact__note t-dim">零基础 OK · 非技术方向 OK · 考试周活动会减量</p>');
@@ -303,6 +304,7 @@
     active = ((i % n) + n) % n;
     panes.forEach(function (p, j) {
       p.hidden = j !== active;
+      p.classList.toggle("is-active", j === active);
     });
     Array.prototype.forEach.call(tabsEl.children, function (t, j) {
       t.setAttribute("aria-selected", j === active ? "true" : "false");
@@ -340,16 +342,16 @@
       case "help":
       case "?":
         echo("可用命令：<br>" +
-          "　<span class='t-amb'>main about build sched wall faq msg join</span>　切到对应窗口<br>" +
-          "　<span class='t-amb'>0-7</span>　切窗口　<span class='t-amb'>ls</span>　列出窗口<br>" +
-          "　<span class='t-amb'>gallery member projects</span>　打开对应页面<br>" +
-          "　<span class='t-amb'>whoami clear</span>　我是谁 / 清屏");
+          "　<span class='t-cyn'>main about build sched wall faq msg join</span>　切到对应窗口<br>" +
+          "　<span class='t-cyn'>0-7</span>　切窗口　<span class='t-cyn'>ls</span>　列出窗口<br>" +
+          "　<span class='t-cyn'>gallery member projects</span>　打开对应页面<br>" +
+          "　<span class='t-cyn'>whoami clear</span>　我是谁 / 清屏");
         return;
       case "ls":
         echo(WINDOWS.map(function (w, j) { return "<span class='t-dim'>" + j + "</span>:" + w.cmd; }).join("　"));
         return;
       case "whoami":
-        echo("guest — 衡南一中编程社的访客。输入 <span class='t-amb'>join</span> 看怎么加入。");
+        echo("guest — 衡南一中编程社的访客。输入 <span class='t-cyn'>join</span> 看怎么加入。");
         return;
       case "clear":
         echoEl.innerHTML = "";
@@ -534,7 +536,10 @@
     }).join("");
 
     var panesHtml = WINDOWS.map(function (w, i) {
-      return '<div class="tty__pane" role="tabpanel" aria-label="' + esc(w.title) + '" tabindex="-1" hidden></div>';
+      return '<div class="tty__pane" role="tabpanel" aria-label="' + esc(w.title) + '" tabindex="-1" hidden>' +
+        '<div class="tty-panehdr" aria-hidden="true"><span class="tty-panehdr__no">' + i + ":" + esc(w.cmd) + "</span>" +
+        '<span class="tty-panehdr__ttl">' + esc(w.title) + "</span></div>" +
+        '<div class="tty-pane__bd"></div></div>';
     }).join("");
 
     root = document.createElement("div");
@@ -546,7 +551,7 @@
       '<header class="tty__top">' +
       '  <span class="tty__logo" aria-hidden="true">▚</span>' +
       '  <span class="tty__brand">HNYZ<i>//TTY</i></span>' +
-      '  <span class="tty__sess">hnyz@club · tty1 · amber</span>' +
+      '  <span class="tty__sess">hnyz@club · tty1 · <b>midnight</b></span>' +
       '  <span class="tty__clock" aria-hidden="true"></span>' +
       '  <span class="tty__actions"></span>' +
       "</header>" +
@@ -572,7 +577,9 @@
     upEl = root.querySelector(".tty__up");
 
     panes = Array.prototype.slice.call(bodyEl.querySelectorAll(".tty__pane"));
-    panes.forEach(function (p, i) { p.innerHTML = BUILDERS[WINDOWS[i].id](); });
+    panes.forEach(function (p, i) {
+      p.querySelector(".tty-pane__bd").innerHTML = BUILDERS[WINDOWS[i].id]();
+    });
 
     bindRoot();
     built = true;
@@ -580,7 +587,7 @@
     /* 仓库窗口：data/repos.json 是 Actions 每天抓好的快照，直接用 */
     var box = root.querySelector("[data-repos]");
     if (box && window.fetch) {
-      window.fetch("data/repos.json?v=20261103g")
+      window.fetch("data/repos.json?v=20261103h")
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (d) { renderRepos(box, d); })
         .catch(function () { renderRepos(box, null); });

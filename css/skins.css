@@ -1124,12 +1124,12 @@ body.is-dino-visible .hnyz-pet {
   border: 1px solid rgba(240, 166, 198, 0.72);
 }
 
-/* 终端：方角、单色、一个字都不多 */
+/* 终端：方角、深空蓝、多色语义 */
 .style-card__glyph--term {
   border-radius: 4px;
-  border: 1px solid rgba(255, 176, 0, 0.5);
-  background: #0c0b08;
-  color: #ffb000;
+  border: 1px solid rgba(86, 208, 232, 0.5);
+  background: #0a101f;
+  color: #56d0e8;
   font-size: 1.7rem;
   letter-spacing: 0.02em;
 }
