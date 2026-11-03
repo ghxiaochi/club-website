@@ -441,7 +441,7 @@
      切走时直接 remove，里面的 rAF 才会真正停下；
      留在 DOM 里 hidden 只是不画，计时器还在跑。
      ------------------------------------------------------- */
-  const HALO_VERSION = "20261205";
+  const HALO_VERSION = "20261103";
   let haloFrame = null;
 
   function syncHalo(on) {
