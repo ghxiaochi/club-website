@@ -10,7 +10,8 @@
 /* ---------------------------------------------------------
    1. 顶栏风格方块
    --------------------------------------------------------- */
-.style-toggle {
+.style-toggle,
+.fullscreen-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -27,7 +28,8 @@
     transform 0.25s ease;
   -webkit-tap-highlight-color: transparent;
 }
-.style-toggle[aria-expanded="true"] {
+.style-toggle[aria-expanded="true"],
+.fullscreen-toggle[aria-pressed="true"] {
   color: var(--blue);
   border-color: var(--blue);
   box-shadow: 0 0 0 4px var(--blue-soft);
@@ -35,7 +37,8 @@
 @media (hover: hover), (pointer: fine) {
 
 
-.style-toggle:hover{
+.style-toggle:hover,
+.fullscreen-toggle:hover {
   color: var(--blue);
   border-color: var(--blue);
   box-shadow: 0 0 0 4px var(--blue-soft);
@@ -43,7 +46,8 @@
 }
 
 
-.style-toggle:focus-visible {
+.style-toggle:focus-visible,
+.fullscreen-toggle:focus-visible {
   outline: 2px solid var(--blue);
   outline-offset: 3px;
 }
@@ -2365,4 +2369,32 @@ html[data-style="hacker"][data-theme="light"] .site-header .brand-copy strong {
   .style-deck__dots {
     right: 8px;
   }
+}
+
+
+/* ---------------------------------------------------------
+   全屏按钮（所有皮肤共用外观，跟着 .style-toggle 的变量走）
+   --------------------------------------------------------- */
+.fullscreen-toggle svg {
+  display: block;
+  width: 15px;
+  height: 15px;
+}
+
+.fullscreen-toggle .fs-ico--out {
+  display: none;
+}
+
+.fullscreen-toggle[aria-pressed="true"] .fs-ico--in {
+  display: none;
+}
+
+.fullscreen-toggle[aria-pressed="true"] .fs-ico--out {
+  display: block;
+}
+
+/* 全屏时顶栏会浮在画面上，给它一层实底，免得压着内容看不清 */
+:fullscreen .site-header,
+:-webkit-full-screen .site-header {
+  background: var(--bg);
 }

@@ -103,10 +103,11 @@ html[data-style="halo"] .site-header .theme-toggle {
 }
 
 html[data-style="halo"] .header-actions {
-  gap: 0;
+  gap: 4px;
 }
 
-html[data-style="halo"] .site-header .style-toggle {
+html[data-style="halo"] .site-header .style-toggle,
+html[data-style="halo"] .site-header .fullscreen-toggle {
   width: 32px;
   height: 32px;
   min-width: 32px;
@@ -116,7 +117,8 @@ html[data-style="halo"] .site-header .style-toggle {
   background: none;
 }
 
-html[data-style="halo"] .site-header .style-toggle:hover {
+html[data-style="halo"] .site-header .style-toggle:hover,
+html[data-style="halo"] .site-header .fullscreen-toggle:hover {
   border-color: #cfd2d8;
   color: #fff;
 }
@@ -133,7 +135,8 @@ html[data-style="halo"].is-style-deck-open .halo-frame {
     padding: 3px;
   }
 
-  html[data-style="halo"] .site-header .style-toggle {
+  html[data-style="halo"] .site-header .style-toggle,
+  html[data-style="halo"] .site-header .fullscreen-toggle {
     width: 28px;
     height: 28px;
     min-width: 28px;

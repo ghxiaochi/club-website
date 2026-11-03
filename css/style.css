@@ -2546,6 +2546,7 @@ code {
   .header-actions .sound-toggle,
   .header-actions .theme-toggle,
   .header-actions .style-toggle,
+  .header-actions .fullscreen-toggle,
   .header-actions .nav-toggle {
     width: 26px;
     height: 26px;

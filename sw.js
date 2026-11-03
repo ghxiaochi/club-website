@@ -25,7 +25,7 @@
    发版时改 VERSION，旧缓存在 activate 里被清掉。
    ========================================================= */
 
-const VERSION = "20261103d";
+const VERSION = "20261103e";
 const CACHE = `hnyz-v${VERSION}`;
 
 /* 站内根路径：用 "./" 就地解析，
@@ -56,6 +56,7 @@ const CORE = [
   `./css/skins.css${V}`,
   `./css/skin-halo.css${V}`,
   `./css/skin-term.css${V}`,
+  `./css/term-ring.css${V}`,
   `./css/personal.css${V}`,
   `./css/pet.css${V}`,
   `./css/avatar-pet.css${V}`,
@@ -69,7 +70,9 @@ const CORE = [
   `./js/copy.js${V}`,
   `./js/theme.js${V}`,
   `./js/theme-icon.js${V}`,
+  `./js/term-ring.js${V}`,
   `./js/skins.js${V}`,
+  `./js/fullscreen.js${V}`,
   `./js/pwa.js${V}`,
   `./js/sfx.js${V}`,
   `./js/matrix.js${V}`,

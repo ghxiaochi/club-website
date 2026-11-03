@@ -457,7 +457,7 @@
      切走时直接 remove，里面的 rAF 才会真正停下；
      留在 DOM 里 hidden 只是不画，计时器还在跑。
      ------------------------------------------------------- */
-  const HALO_VERSION = "20261103d";
+  const HALO_VERSION = "20261103e";
   let haloFrame = null;
 
   function syncHalo(on) {
@@ -489,6 +489,10 @@
   let termCleanup = null;
 
   function syncTerm(on) {
+    /* 终端风的正文换成了环形框架：这里只负责通知它进退场，
+       几何与交互全在 js/term-ring.js 里 */
+    if (window.HNYZRING) window.HNYZRING.sync(on);
+
     if (on) {
       if (termBar) return;
 
