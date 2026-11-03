@@ -489,9 +489,9 @@
   let termCleanup = null;
 
   function syncTerm(on) {
-    /* 终端风的正文换成了环形框架：这里只负责通知它进退场，
-       几何与交互全在 js/term-ring.js 里 */
-    if (window.HNYZRING) window.HNYZRING.sync(on);
+    /* 首页的正文换成了多窗口终端 HNYZ TTY：这里只负责通知它进退场，
+       窗口、命令行与全部交互都在 js/term-tui.js 里 */
+    if (window.HNYZTUI) window.HNYZTUI.sync(on);
 
     if (on) {
       if (termBar) return;
