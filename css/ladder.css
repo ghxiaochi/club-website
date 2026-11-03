@@ -34,12 +34,16 @@
   background: var(--panel);
   transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .ladder-head__back:hover {
   border-color: var(--blue);
   color: var(--blue);
   transform: translateX(-2px);
 }
+}
+
 
 .ladder-head__brand {
   margin: 0;
@@ -182,10 +186,14 @@ html[data-theme="dark"] .ladder-play__tips {
   cursor: pointer;
   transition: background 0.2s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .ladder-form__submit:hover {
   background: var(--blue-bright);
 }
+}
+
 
 .ladder-form__submit[disabled] {
   opacity: 0.6;
@@ -203,11 +211,15 @@ html[data-theme="dark"] .ladder-play__tips {
   font-size: 13px;
   cursor: pointer;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .ladder-form__again:hover {
   border-color: var(--blue);
   color: var(--blue);
 }
+}
+
 
 /* ---------- 右：榜单 ---------- */
 .ladder-board {

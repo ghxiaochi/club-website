@@ -102,10 +102,14 @@ a {
   text-decoration: none;
   transition: color 0.3s ease, opacity 0.3s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 a:hover {
   color: var(--blue-bright);
 }
+}
+
 
 button {
   font: inherit;
@@ -216,10 +220,14 @@ code {
   color: var(--text);
   flex-shrink: 0;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .brand:hover {
   color: var(--text);
 }
+}
+
 
 .brand-mark {
   display: grid;
@@ -276,10 +284,14 @@ code {
   letter-spacing: 0.04em;
   white-space: nowrap;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .nav-list a:hover {
   color: var(--blue);
 }
+}
+
 
 .nav-cta {
   display: inline-flex;
@@ -295,6 +307,8 @@ code {
   white-space: nowrap;
   transition: all 0.3s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .nav-cta:hover {
   border-color: var(--green);
@@ -302,6 +316,8 @@ code {
   color: var(--green-bright);
   box-shadow: var(--glow-green);
 }
+}
+
 
 .nav-toggle {
   display: none;
@@ -440,6 +456,8 @@ code {
   color: #ffffff;
   box-shadow: 0 8px 22px rgba(37, 99, 235, 0.2);
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .button--primary:hover {
   background: var(--blue-bright);
@@ -448,12 +466,16 @@ code {
   box-shadow: 0 10px 28px rgba(37, 99, 235, 0.32);
   transform: translateY(-2px);
 }
+}
+
 
 .button--secondary {
   border-color: var(--border-strong);
   background: rgba(255, 255, 255, 0.72);
   color: var(--text-soft);
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .button--secondary:hover {
   border-color: var(--blue);
@@ -461,6 +483,8 @@ code {
   box-shadow: var(--glow-blue);
   transform: translateY(-2px);
 }
+}
+
 
 .button--full {
   width: 100%;
@@ -618,10 +642,14 @@ code {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .quick-value--link:hover {
   color: var(--blue);
 }
+}
+
 
 .mini-button {
   padding: 5px 9px;
@@ -634,13 +662,21 @@ code {
   cursor: pointer;
   transition: all 0.3s ease;
 }
-
-.mini-button:hover,
 .mini-button.is-copied {
   border-color: var(--blue);
   background: var(--blue-soft);
   color: var(--blue);
 }
+@media (hover: hover), (pointer: fine) {
+
+
+.mini-button:hover{
+  border-color: var(--blue);
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+}
+
 
 .quick-note {
   margin-top: 18px;
@@ -770,12 +806,16 @@ code {
   background: linear-gradient(180deg, #ffffff 0%, #f4f9ff 100%);
   transition: all 0.3s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .do-card:hover {
   border-color: var(--blue);
   box-shadow: var(--glow-blue);
   transform: translateY(-3px);
 }
+}
+
 
 .do-num {
   display: block;
@@ -894,13 +934,21 @@ code {
   /* 统一过渡，hover 时边框、发光、位移一起变化 */
   transition: all 0.3s ease;
 }
-
-.project-card:hover,
 .project-card:focus-within {
   border-color: var(--blue);
   box-shadow: var(--glow-blue), 0 18px 40px rgba(30, 64, 175, 0.12);
   transform: translateY(-4px);
 }
+@media (hover: hover), (pointer: fine) {
+
+
+.project-card:hover{
+  border-color: var(--blue);
+  box-shadow: var(--glow-blue), 0 18px 40px rgba(30, 64, 175, 0.12);
+  transform: translateY(-4px);
+}
+}
+
 
 /* 16:9 封面区域 */
 .project-cover {
@@ -917,10 +965,14 @@ code {
   object-fit: cover;
   transition: transform 0.5s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .project-card:hover .project-cover img {
   transform: scale(1.035);
 }
+}
+
 
 /* 封面底部做一点暗角，让角标更清楚 */
 .project-cover::after {
@@ -1158,6 +1210,8 @@ code {
   letter-spacing: 0.02em;
   transition: all 0.3s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .project-source:hover {
   border-color: var(--blue);
@@ -1165,15 +1219,21 @@ code {
   color: var(--blue-bright);
   box-shadow: var(--glow-blue);
 }
+}
+
 
 .source-arrow {
   font-size: 0.8rem;
   transition: transform 0.3s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .project-source:hover .source-arrow {
   transform: translate(2px, -2px);
 }
+}
+
 
 .projects-foot {
   display: flex;
@@ -1219,12 +1279,16 @@ code {
   letter-spacing: 0.04em;
   transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .projects-more:hover {
   border-color: var(--blue);
   background: rgba(37, 99, 235, 0.08);
   transform: translateX(3px);
 }
+}
+
 
 /* ---------- 9.5 全部项目页 ---------- */
 .archive {
@@ -1284,10 +1348,14 @@ code {
 .member-summary::-webkit-details-marker {
   display: none;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .member-summary:hover {
   background: rgba(37, 99, 235, 0.05);
 }
+}
+
 
 .member-group[open] .member-summary {
   border-bottom: 1px solid var(--border);
@@ -1599,6 +1667,8 @@ code {
   opacity: 0;
   transition: opacity 0.3s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .wall-card:hover {
   border-color: var(--green);
@@ -1606,10 +1676,16 @@ code {
   color: var(--text);
   transform: translateY(-4px);
 }
+}
+
+@media (hover: hover), (pointer: fine) {
+
 
 .wall-card:hover::before {
   opacity: 1;
 }
+}
+
 
 .wall-index {
   padding-top: 2px;
@@ -1644,11 +1720,15 @@ code {
   font-size: 1.05rem;
   transition: color 0.3s ease, transform 0.3s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .wall-card:hover .wall-arrow {
   color: var(--green);
   transform: translate(2px, -2px);
 }
+}
+
 
 .wall-note {
   margin-top: 22px;
@@ -1684,10 +1764,14 @@ code {
 .faq-item summary::-webkit-details-marker {
   display: none;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .faq-item summary:hover {
   color: var(--blue);
 }
+}
+
 
 .faq-icon {
   position: relative;
@@ -1864,10 +1948,14 @@ code {
   font-size: 0.85rem;
   word-break: break-all;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .join-email:hover {
   color: var(--blue);
 }
+}
+
 
 .join-note {
   margin-top: 14px;
@@ -1950,10 +2038,14 @@ code {
   font-family: var(--mono);
   font-size: 0.72rem;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .footer-nav a:hover {
   color: var(--blue);
 }
+}
+
 
 .footer-meta {
   grid-column: 1 / -1;

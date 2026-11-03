@@ -69,10 +69,14 @@
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-soft);
 }
+@media (hover: hover), (pointer: fine) {
+
 
 [data-theme="dark"] .button--secondary:hover {
   background: var(--blue-soft);
 }
+}
+
 
 [data-theme="dark"] .quick-path {
   background: rgba(16, 33, 64, 0.72);
@@ -155,6 +159,8 @@
     box-shadow 0.2s ease;
   -webkit-tap-highlight-color: transparent;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .theme-toggle:hover {
   color: var(--blue);
@@ -162,6 +168,8 @@
   box-shadow: 0 0 0 4px var(--blue-soft);
   transform: rotate(18deg);
 }
+}
+
 
 .theme-toggle:focus-visible {
   outline: 2px solid var(--blue);
@@ -504,10 +512,14 @@ html[data-hacker="true"] {
   .hero-rotator__caret {
     animation: none;
   }
+@media (hover: hover), (pointer: fine) {
+
 
   .theme-toggle:hover {
     transform: none;
   }
+}
+
 
   .hnyz-toast {
     transition: none;
@@ -581,10 +593,14 @@ html[data-hacker="true"] {
   width: max-content;
   animation: hnyzTicker 34s linear infinite;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .hnyz-ticker:hover .hnyz-ticker__track {
   animation-play-state: paused;
 }
+}
+
 
 .hnyz-ticker__group {
   display: flex;
@@ -671,18 +687,26 @@ html[data-hacker="true"] {
   .do-card:nth-child(4n + 2) { transform: rotate(0.7deg); }
   .do-card:nth-child(4n + 3) { transform: rotate(0.5deg); }
   .do-card:nth-child(4n + 4) { transform: rotate(-0.6deg); }
+@media (hover: hover), (pointer: fine) {
+
 
   .do-card:hover {
     transform: rotate(0deg) translateY(-4px);
     box-shadow: var(--glow-blue);
   }
+}
+
 
   .wall-card:nth-child(odd) { transform: rotate(-0.6deg); }
   .wall-card:nth-child(even) { transform: rotate(0.5deg); }
+@media (hover: hover), (pointer: fine) {
+
 
   .wall-card:hover {
     transform: rotate(0deg) translateY(-3px);
   }
+}
+
 }
 
 /* 引言改成一张便签 */
@@ -699,11 +723,15 @@ html[data-hacker="true"] {
 .button--primary {
   box-shadow: 0 4px 0 rgba(29, 78, 216, 0.55);
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .button--primary:hover {
   box-shadow: 0 5px 0 rgba(29, 78, 216, 0.6);
   transform: translateY(-1px);
 }
+}
+
 
 .button--primary:active {
   box-shadow: 0 2px 0 rgba(29, 78, 216, 0.55);
@@ -1001,12 +1029,19 @@ main,
   transition: transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1),
     box-shadow 0.3s ease;
 }
-
-.gallery-item:hover,
 .gallery-item:focus-within {
   transform: rotate(0deg) translateY(-6px);
   box-shadow: 0 20px 38px rgba(3, 10, 22, 0.5);
 }
+@media (hover: hover), (pointer: fine) {
+
+
+.gallery-item:hover{
+  transform: rotate(0deg) translateY(-6px);
+  box-shadow: 0 20px 38px rgba(3, 10, 22, 0.5);
+}
+}
+
 
 .gallery-item__button {
   display: block;
@@ -1148,12 +1183,16 @@ main,
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .lightbox-close:hover,
 .lightbox-nav:hover {
   border-color: rgba(147, 197, 253, 0.75);
   background: rgba(37, 99, 235, 0.45);
 }
+}
+
 
 .lightbox-close:focus-visible,
 .lightbox-nav:focus-visible {
@@ -1186,10 +1225,14 @@ body.is-lightbox-open {
     transform: none;
     padding: 7px 7px 4px;
   }
+@media (hover: hover), (pointer: fine) {
+
 
   .gallery-item:hover {
     transform: translateY(-3px);
   }
+}
+
 
   .hnyz-lightbox {
     grid-template-columns: 1fr;
@@ -1234,11 +1277,15 @@ body.is-lightbox-open {
   cursor: pointer;
   transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .gallery-filter:hover {
   color: var(--blue);
   border-color: var(--blue);
 }
+}
+
 
 .gallery-filter.is-active {
   border-color: var(--blue);
@@ -1267,12 +1314,16 @@ body.is-lightbox-open {
   text-decoration: none;
   transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .gallery-entry:hover {
   border-color: var(--blue);
   box-shadow: var(--glow-blue);
   transform: translateY(-2px);
 }
+}
+
 
 .gallery-entry__index {
   color: var(--blue);
@@ -1475,12 +1526,16 @@ body.is-lightbox-open {
   transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   -webkit-tap-highlight-color: transparent;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .sound-toggle:hover {
   color: var(--blue);
   border-color: var(--blue);
   box-shadow: 0 0 0 4px var(--blue-soft);
 }
+}
+
 
 .sound-toggle:focus-visible {
   outline: 2px solid var(--blue);
@@ -1563,12 +1618,19 @@ body.is-lightbox-open {
   transition: transform 0.28s cubic-bezier(0.22, 0.61, 0.36, 1);
   pointer-events: none;
 }
-
-.nav-list a:hover::after,
 .nav-list a:focus-visible::after {
   transform: scaleX(1);
   transform-origin: left center;
 }
+@media (hover: hover), (pointer: fine) {
+
+
+.nav-list a:hover::after{
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+}
+
 
 @media (max-width: 900px) {
   .nav-list a::after {

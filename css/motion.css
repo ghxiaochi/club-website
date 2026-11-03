@@ -22,11 +22,15 @@
     border-color 0.28s ease,
     color 0.22s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .button:hover,
 .mini-button:hover {
   transform: translateY(-3px);
 }
+}
+
 
 .button:active,
 .mini-button:active {
@@ -45,10 +49,14 @@
     border-color 0.3s ease,
     background-color 0.3s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .do-card:hover {
   translate: 0 -6px;
 }
+}
+
 
 .wall-card {
   transition:
@@ -57,10 +65,14 @@
     border-color 0.3s ease,
     color 0.3s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .wall-card:hover {
   translate: 0 -6px;
 }
+}
+
 
 /* ---------- 3. 顶栏两颗按钮 ---------- */
 .theme-toggle {
@@ -70,10 +82,14 @@
     border-color 0.28s ease,
     color 0.24s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .theme-toggle:hover {
   transform: rotate(8deg) scale(1.04);
 }
+}
+
 
 .theme-toggle:active {
   transform: rotate(0deg) scale(0.95);
@@ -82,10 +98,14 @@
 .theme-toggle__flip {
   transition: transform 0.5s var(--ease-spring);
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .theme-toggle:hover .theme-toggle__flip {
   transform: scale(1.03);
 }
+}
+
 
 .style-toggle {
   transition:
@@ -94,10 +114,14 @@
     color 0.24s ease,
     background-color 0.28s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .style-toggle:hover {
   transform: translateY(-2px) rotate(6deg);
 }
+}
+
 
 .style-toggle:active {
   transform: scale(0.94);
@@ -127,10 +151,14 @@ html.reveal-ready .project-card[data-reveal] {
     opacity 0.4s ease,
     border-color 0.3s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .style-card:not(.is-active):hover {
   transform: scale(0.985);
 }
+}
+
 
 /* ---------- 6. 尊重「减少动效」 ---------- */
 @media (prefers-reduced-motion: reduce) {

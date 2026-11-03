@@ -112,18 +112,30 @@
   pointer-events: none;
   transition: transform 0.1s ease, filter 0.18s ease;
 }
-
-/* 悬停：游戏里是 fade 到白色 20%（跳动由 JS 逐个触发） */
-.char-slot:hover img,
 .char-slot:focus-visible img {
   filter: brightness(1.22) drop-shadow(0 2px 0 rgba(24, 32, 54, 0.35));
 }
+@media (hover: hover), (pointer: fine) {
 
-/* 悬停时整只人稍微长高一点（用独立的 scale，不和跳跃的 transform 抢） */
-.char-slot:hover,
+
+/* 悬停：游戏里是 fade 到白色 20%（跳动由 JS 逐个触发） */
+.char-slot:hover img{
+  filter: brightness(1.22) drop-shadow(0 2px 0 rgba(24, 32, 54, 0.35));
+}
+}
+
 .char-slot:focus-visible {
   scale: 1.06;
 }
+@media (hover: hover), (pointer: fine) {
+
+
+/* 悬停时整只人稍微长高一点（用独立的 scale，不和跳跃的 transform 抢） */
+.char-slot:hover{
+  scale: 1.06;
+}
+}
+
 
 .char-slot:focus-visible {
   outline: 2px solid #14141a;
@@ -146,11 +158,15 @@
 .char-slot.is-locked img {
   filter: brightness(0) opacity(0.72);
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .char-slot.is-locked:hover img {
   filter: brightness(0) opacity(0.86);
   animation: none;
 }
+}
+
 
 /* 点击挤压：游戏里 scl = (1 + 0.1, 1 - 0.1) */
 .char-slot.is-hit img {
@@ -198,12 +214,19 @@
   transition: opacity 0.18s ease, transform 0.18s ease;
   pointer-events: none;
 }
-
-.char-slot:hover .char-slot__name,
 .char-slot:focus-visible .char-slot__name {
   opacity: 1;
   transform: translate(-50%, 0);
 }
+@media (hover: hover), (pointer: fine) {
+
+
+.char-slot:hover .char-slot__name{
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+}
+
 
 /* 深色主题下稍微压一点亮度，别太刺眼 */
 [data-theme="dark"] .char-stage {
@@ -225,10 +248,14 @@
   text-decoration: none;
   border-bottom: 1px dashed currentColor;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .char-note a:hover {
   color: var(--text-soft);
 }
+}
+
 
 @media (max-width: 900px) {
   .char-note {
@@ -620,12 +647,16 @@
   transition: transform 0.12s ease, background 0.16s ease, box-shadow 0.12s ease;
   animation: splashBackIn 0.55s 0.15s ease both;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .char-splash__back:hover {
   background: #4b4b58;
   transform: translateY(-2px);
   box-shadow: 0 6px 0 rgba(12, 10, 18, 0.42);
 }
+}
+
 
 .char-splash__back:active {
   transform: translateY(2px);
@@ -656,11 +687,15 @@
   cursor: pointer;
   transition: background 0.16s ease, transform 0.12s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .char-splash__close:hover {
   background: #3b3b45;
   transform: rotate(90deg);
 }
+}
+
 
 /* 白闪 */
 .char-splash__flash {

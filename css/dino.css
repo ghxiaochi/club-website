@@ -374,11 +374,15 @@ body.is-dino-visible .pet-summon {
   transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   -webkit-tap-highlight-color: transparent;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .dino-run__time:hover {
   color: var(--dino-accent);
   border-color: var(--dino-accent);
 }
+}
+
 
 .dino-run__time.is-hot {
   color: var(--dino-accent);
@@ -517,14 +521,23 @@ body.is-dino-visible .pet-summon {
   /* 文字先落定，按钮再弹出来 */
   transition-delay: 0.32s, 0s, 0s, 0s;
 }
-
-.dino-run__rewind:hover,
 .dino-run__rewind:focus-visible {
   color: #fff0e2;
   border-color: #ff9a5c;
   box-shadow: 0 0 22px rgba(255, 110, 50, 0.45);
   outline: none;
 }
+@media (hover: hover), (pointer: fine) {
+
+
+.dino-run__rewind:hover{
+  color: #fff0e2;
+  border-color: #ff9a5c;
+  box-shadow: 0 0 22px rgba(255, 110, 50, 0.45);
+  outline: none;
+}
+}
+
 
 .dino-run__rewind:active {
   transform: translate(0, -50%) scale(0.96);
@@ -595,17 +608,29 @@ body.is-dino-visible .pet-summon {
   margin-left: 4px;
   transition: transform 0.2s ease;
 }
-
-.dino-run__ladder:hover,
 .dino-run__ladder:focus-visible {
   border-color: var(--dino-accent);
   background: rgba(125, 211, 252, 0.18);
   color: #ffffff;
 }
+@media (hover: hover), (pointer: fine) {
+
+
+.dino-run__ladder:hover{
+  border-color: var(--dino-accent);
+  background: rgba(125, 211, 252, 0.18);
+  color: #ffffff;
+}
+}
+
+@media (hover: hover), (pointer: fine) {
+
 
 .dino-run__ladder:hover span {
   transform: translateX(3px);
 }
+}
+
 
 .dino-run__ladder:focus-visible {
   outline: 2px solid var(--dino-accent);

@@ -115,11 +115,15 @@
   text-decoration: none;
   transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .member-home:hover {
   border-color: var(--blue);
   background: var(--blue-soft);
 }
+}
+
 
 /* ---------- 音游横幅 ---------- */
 .ad-banner {
@@ -241,11 +245,15 @@
   cursor: pointer;
   transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .member-secret:hover {
   border-color: var(--blue);
   color: var(--blue);
 }
+}
+
 
 .member-secret:focus-visible {
   outline: 2px solid var(--blue);

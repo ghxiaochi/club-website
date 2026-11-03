@@ -27,13 +27,21 @@
     transform 0.25s ease;
   -webkit-tap-highlight-color: transparent;
 }
-
-.style-toggle:hover,
 .style-toggle[aria-expanded="true"] {
   color: var(--blue);
   border-color: var(--blue);
   box-shadow: 0 0 0 4px var(--blue-soft);
 }
+@media (hover: hover), (pointer: fine) {
+
+
+.style-toggle:hover{
+  color: var(--blue);
+  border-color: var(--blue);
+  box-shadow: 0 0 0 4px var(--blue-soft);
+}
+}
+
 
 .style-toggle:focus-visible {
   outline: 2px solid var(--blue);
@@ -56,11 +64,17 @@
   opacity: 0.72;
   transition: background 0.25s ease, opacity 0.25s ease;
 }
-
-.style-toggle:hover .style-toggle__grid i,
 .style-toggle[aria-expanded="true"] .style-toggle__grid i {
   opacity: 1;
 }
+@media (hover: hover), (pointer: fine) {
+
+
+.style-toggle:hover .style-toggle__grid i{
+  opacity: 1;
+}
+}
+
 
 html[data-style="minimal"] .style-toggle {
   border-radius: 2px;
@@ -78,12 +92,19 @@ html[data-style="hacker"] .style-toggle {
   color: #39ff88;
   box-shadow: 0 0 0 1px rgba(57, 255, 136, 0.08), 0 0 18px rgba(57, 255, 136, 0.12);
 }
-
-html[data-style="hacker"] .style-toggle:hover,
 html[data-style="hacker"] .style-toggle[aria-expanded="true"] {
   border-color: #39ff88;
   box-shadow: 0 0 0 1px #39ff88, 0 0 26px rgba(57, 255, 136, 0.32);
 }
+@media (hover: hover), (pointer: fine) {
+
+
+html[data-style="hacker"] .style-toggle:hover{
+  border-color: #39ff88;
+  box-shadow: 0 0 0 1px #39ff88, 0 0 26px rgba(57, 255, 136, 0.32);
+}
+}
+
 
 html[data-style="hacker"] .style-toggle__grid i {
   border-radius: 0;
@@ -322,12 +343,16 @@ html[data-style="minimal"] .nav-cta {
   background: transparent;
   color: var(--text);
 }
+@media (hover: hover), (pointer: fine) {
+
 
 html[data-style="minimal"] .nav-cta:hover {
   background: var(--text);
   color: var(--bg);
   box-shadow: none;
 }
+}
+
 
 html[data-style="minimal"] .accent-text {
   color: var(--text);
@@ -358,6 +383,8 @@ html[data-style="minimal"] .project-group {
   border-color: var(--border);
   box-shadow: none;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 html[data-style="minimal"] .project-card:hover,
 html[data-style="minimal"] .quick-card:hover,
@@ -366,6 +393,8 @@ html[data-style="minimal"] .do-card:hover {
   border-color: var(--text);
   box-shadow: none;
 }
+}
+
 
 html[data-style="minimal"] .button--primary {
   background: var(--text);
@@ -373,6 +402,8 @@ html[data-style="minimal"] .button--primary {
   color: var(--bg);
   box-shadow: none;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 html[data-style="minimal"] .button--primary:hover {
   background: var(--text-soft);
@@ -380,12 +411,16 @@ html[data-style="minimal"] .button--primary:hover {
   transform: none;
   box-shadow: none;
 }
+}
+
 
 html[data-style="minimal"] .button--secondary {
   background: transparent;
   border-color: var(--border-strong);
   color: var(--text-soft);
 }
+@media (hover: hover), (pointer: fine) {
+
 
 html[data-style="minimal"] .button--secondary:hover {
   border-color: var(--text);
@@ -393,6 +428,8 @@ html[data-style="minimal"] .button--secondary:hover {
   box-shadow: none;
   transform: none;
 }
+}
+
 
 html[data-style="minimal"] .quick-path {
   background: var(--panel-2);
@@ -631,6 +668,8 @@ html[data-style="hacker"][data-theme="light"] .project-group {
   border-color: rgba(10, 143, 74, 0.18);
   box-shadow: 0 0 0 1px rgba(10, 143, 74, 0.03), 0 18px 40px rgba(10, 60, 30, 0.08);
 }
+@media (hover: hover), (pointer: fine) {
+
 
 html[data-style="hacker"] .project-card:hover,
 html[data-style="hacker"] .quick-card:hover,
@@ -639,6 +678,8 @@ html[data-style="hacker"] .do-card:hover {
   box-shadow: 0 0 0 1px rgba(57, 255, 136, 0.18), 0 0 34px rgba(57, 255, 136, 0.12),
     0 26px 56px rgba(0, 0, 0, 0.6);
 }
+}
+
 
 html[data-style="hacker"] .quick-path {
   background: rgba(57, 255, 136, 0.04);
@@ -664,6 +705,8 @@ html[data-style="hacker"] .button--primary {
   color: #02130a;
   box-shadow: 0 0 0 1px rgba(57, 255, 136, 0.4), 0 10px 26px rgba(57, 255, 136, 0.22);
 }
+@media (hover: hover), (pointer: fine) {
+
 
 html[data-style="hacker"] .button--primary:hover {
   background: #8bffb4;
@@ -671,30 +714,40 @@ html[data-style="hacker"] .button--primary:hover {
   color: #02130a;
   box-shadow: 0 0 0 1px rgba(57, 255, 136, 0.6), 0 12px 34px rgba(57, 255, 136, 0.32);
 }
+}
+
 
 html[data-style="hacker"] .button--secondary {
   border-color: rgba(57, 255, 136, 0.36);
   background: rgba(57, 255, 136, 0.04);
   color: #a9e9be;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 html[data-style="hacker"] .button--secondary:hover {
   border-color: #39ff88;
   color: #8bffb4;
   box-shadow: 0 0 24px rgba(57, 255, 136, 0.16);
 }
+}
+
 
 html[data-style="hacker"] .nav-cta {
   border-color: rgba(57, 255, 136, 0.4);
   background: rgba(57, 255, 136, 0.06);
   color: #8bffb4;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 html[data-style="hacker"] .nav-cta:hover {
   background: rgba(57, 255, 136, 0.12);
   border-color: #39ff88;
   color: #baffd0;
 }
+}
+
 
 html[data-style="hacker"] .theme-toggle,
 html[data-style="hacker"] .sound-toggle {
@@ -703,6 +756,8 @@ html[data-style="hacker"] .sound-toggle {
   background: #061009;
   color: #7dffab;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 html[data-style="hacker"] .theme-toggle:hover,
 html[data-style="hacker"] .sound-toggle:hover {
@@ -710,6 +765,8 @@ html[data-style="hacker"] .sound-toggle:hover {
   color: #d9ffe5;
   box-shadow: 0 0 0 4px rgba(57, 255, 136, 0.08);
 }
+}
+
 
 html[data-style="hacker"] .nav-toggle {
   border-radius: 2px;
@@ -872,12 +929,16 @@ body.is-dino-visible .hnyz-pet {
   cursor: pointer;
   transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .style-deck__close:hover {
   color: #fff;
   border-color: rgba(255, 255, 255, 0.4);
   background: rgba(255, 255, 255, 0.08);
 }
+}
+
 
 .style-deck__viewport {
   position: relative;
@@ -1076,6 +1137,7 @@ body.is-dino-visible .hnyz-pet {
   color: rgba(255, 255, 255, 0.56);
   font-size: 0.78rem;
   line-height: 1.75;
+  text-wrap: balance; /* 渐进增强：旧内核忽略，避免末行单字 */
 }
 
 .style-card__swatches {
@@ -1133,12 +1195,16 @@ body.is-dino-visible .hnyz-pet {
   color: #1a1a18;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.26);
 }
+@media (hover: hover), (pointer: fine) {
+
 
 .style-card__apply:hover {
   filter: brightness(1.08);
   transform: translateY(-1px);
   box-shadow: 0 16px 34px rgba(37, 99, 235, 0.34);
 }
+}
+
 
 .style-card__apply:focus-visible {
   outline: 2px solid #ffffff;
@@ -1609,13 +1675,21 @@ html[data-style="bare"] .style-toggle {
   box-shadow: none;
   transition: color 0.2s ease, border-color 0.2s ease;
 }
-
-html[data-style="bare"] .style-toggle:hover,
 html[data-style="bare"] .style-toggle[aria-expanded="true"] {
   color: #8f8f89;
   border-color: #d8d8d2;
   box-shadow: none;
 }
+@media (hover: hover), (pointer: fine) {
+
+
+html[data-style="bare"] .style-toggle:hover{
+  color: #8f8f89;
+  border-color: #d8d8d2;
+  box-shadow: none;
+}
+}
+
 
 html[data-style="bare"] .style-toggle:focus-visible {
   outline: 1px solid #cfcfc9;
@@ -1726,11 +1800,17 @@ html[data-style="hacker"] .nav-links a::after {
   transform-origin: 0 50%;
   transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
-html[data-style="hacker"] .nav-links a:hover::after,
 html[data-style="hacker"] .nav-links a[aria-current="page"]::after {
   transform: scaleX(1);
 }
+@media (hover: hover), (pointer: fine) {
+
+
+html[data-style="hacker"] .nav-links a:hover::after{
+  transform: scaleX(1);
+}
+}
+
 
 /* 卡片：一条 1px 的顶部高光，比加一圈发光更干净 */
 html[data-style="hacker"] .quick-card,
@@ -1750,6 +1830,8 @@ html[data-style="hacker"] .project-group {
     inset 0 1px 0 rgba(57, 255, 136, 0.07),
     0 18px 44px rgba(0, 0, 0, 0.5);
 }
+@media (hover: hover), (pointer: fine) {
+
 
 html[data-style="hacker"] .quick-card:hover,
 html[data-style="hacker"] .do-card:hover,
@@ -1760,6 +1842,8 @@ html[data-style="hacker"] .project-card:hover {
     0 0 0 1px rgba(57, 255, 136, 0.1),
     0 24px 54px rgba(0, 0, 0, 0.55);
 }
+}
+
 
 /* 小标签：`$ 名称` 的终端注释口吻，字距拉开。
    eyebrow 里可能是一条命令，所以不强制大写 */
@@ -1792,10 +1876,14 @@ html[data-style="hacker"] main a:not(.button):not(.nav-cta):not(.project-card):n
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 html[data-style="hacker"] main a:not(.button):not(.nav-cta):hover {
   text-decoration-color: #39ff88;
 }
+}
+
 
 /* 分隔线：短划线，不是整条实线 */
 html[data-style="hacker"] .quick-line,
@@ -1838,36 +1926,48 @@ html[data-style="hacker"][data-theme="light"] .button--primary {
   color: #f4fff8;
   box-shadow: 0 10px 24px rgba(10, 143, 74, 0.22);
 }
+@media (hover: hover), (pointer: fine) {
+
 
 html[data-style="hacker"][data-theme="light"] .button--primary:hover {
   border-color: #08753d;
   background: #08753d;
   color: #ffffff;
 }
+}
+
 
 html[data-style="hacker"][data-theme="light"] .button--secondary {
   border-color: rgba(10, 143, 74, 0.42);
   background: rgba(255, 255, 255, 0.72);
   color: #0a6b3a;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 html[data-style="hacker"][data-theme="light"] .button--secondary:hover {
   border-color: #0a8f4a;
   background: rgba(10, 143, 74, 0.08);
   color: #064f2b;
 }
+}
+
 
 html[data-style="hacker"][data-theme="light"] .nav-cta {
   border-color: rgba(10, 143, 74, 0.45);
   background: rgba(10, 143, 74, 0.08);
   color: #0a6b3a;
 }
+@media (hover: hover), (pointer: fine) {
+
 
 html[data-style="hacker"][data-theme="light"] .nav-cta:hover {
   border-color: #0a8f4a;
   background: rgba(10, 143, 74, 0.16);
   color: #054427;
 }
+}
+
 
 html[data-style="hacker"][data-theme="light"] .nav-toggle {
   border-color: rgba(10, 143, 74, 0.35);
@@ -1933,6 +2033,8 @@ html[data-style="hacker"][data-theme="light"] .project-group {
     inset 0 1px 0 rgba(255, 255, 255, 0.9),
     0 14px 34px rgba(10, 60, 30, 0.08);
 }
+@media (hover: hover), (pointer: fine) {
+
 
 html[data-style="hacker"][data-theme="light"] .quick-card:hover,
 html[data-style="hacker"][data-theme="light"] .do-card:hover,
@@ -1943,6 +2045,8 @@ html[data-style="hacker"][data-theme="light"] .project-card:hover {
     0 0 0 1px rgba(10, 143, 74, 0.1),
     0 20px 44px rgba(10, 60, 30, 0.12);
 }
+}
+
 
 /* 代码雨在白底上会抢正文，压一档，但仍然看得见 */
 html[data-style="hacker"][data-theme="light"] .matrix-rain.is-on {
@@ -2207,5 +2311,39 @@ html[data-style="hacker"][data-theme="light"] .site-header .brand-copy strong {
 
   .style-card__title {
     font-size: 0.95rem;
+  }
+}
+
+/* ---------------------------------------------------------
+   9. 横屏矮高度（手机横过来）：压一压面板卡片
+   高度不足时优先保住「当前卡能一眼看全」，图腾、
+   标题、按钮依次收缩，圆点指示器贴边。
+   --------------------------------------------------------- */
+@media (max-height: 500px) {
+  .style-card {
+    padding: 12px 20px 14px;
+  }
+
+  .style-card__glyph {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+  }
+
+  .style-card__title {
+    font-size: 1rem;
+  }
+
+  .style-card__desc {
+    font-size: 0.68rem;
+    line-height: 1.5;
+  }
+
+  .style-card__apply {
+    padding: 8px 26px;
+  }
+
+  .style-deck__dots {
+    right: 8px;
   }
 }
