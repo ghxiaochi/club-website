@@ -647,8 +647,10 @@
       closeDeck();
       commit(next);
       if (FIXED_STYLES[next] === undefined && scrollMemo > 0) {
-        const max = document.documentElement.scrollHeight - window.innerHeight;
-        window.scrollTo(0, Math.max(0, Math.min(scrollMemo, max)));
+        window.requestAnimationFrame(() => {
+          const max = document.documentElement.scrollHeight - window.innerHeight;
+          window.scrollTo(0, Math.max(0, Math.min(scrollMemo, max)));
+        });
       }
       return;
     }
@@ -690,17 +692,19 @@
          这块不透明底下，用户看不见，也就不会看到半张旧页面 */
       commit(next);
 
-      /* 从全屏皮肤回到可滚动页面：把刚才的位置放回去。
-         放在幕布还盖着的时候做，用户看不到跳动。 */
-      if (FIXED_STYLES[next] === undefined && scrollMemo > 0) {
-        const max = document.documentElement.scrollHeight - window.innerHeight;
-        window.scrollTo(0, Math.max(0, Math.min(scrollMemo, max)));
-      }
-
       /* 再等两帧把新皮肤的首次布局与绘制排空，然后才揭幕。
          少了这两帧，揭幕动画会和一次几十毫秒的长任务同时起步，
          表现就是「幕布卡一下才开始走」。 */
       await frames(2);
+
+      /* 从全屏皮肤回到可滚动页面：等布局落定再放回滚动位置。
+         提前读 scrollHeight 拿到的是终端工作台那一屏（约 899px），
+         会被 clamp 到页面顶部。 */
+      if (FIXED_STYLES[next] === undefined && scrollMemo > 0) {
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        window.scrollTo(0, Math.max(0, Math.min(scrollMemo, max)));
+        await frames(1);
+      }
 
       wipe.classList.remove("is-in");
       wipe.classList.add("is-out");
