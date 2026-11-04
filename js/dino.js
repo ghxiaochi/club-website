@@ -891,7 +891,7 @@
     });
 
     if (hintEl) {
-      hintEl.textContent = mode === "auto" ? "AUTO_PILOT // ON" : "SPACE / TAP → JUMP";
+      hintEl.textContent = mode === "auto" ? "自动躲避 · 开" : "空格 / 点击 → 起跳";
     }
 
     if (mode === "auto" && !activated) {

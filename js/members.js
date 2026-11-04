@@ -17,7 +17,7 @@ window.HNYZ_MEMBERS = [
     repo: "club-website",
     coverImg: "images/project-website.svg",
     title: "社团官网 HNYZ",
-    desc: "HNYZ 社团官网：纯手写 HTML / CSS / JavaScript，部署在 GitHub Pages，用 GitHub API 实时展示社团仓库。",
+    desc: "社团官网：手写 HTML / CSS / JavaScript，部署在 GitHub Pages，实时展示社团仓库。",
     language: "CSS"
   },
   {
@@ -67,9 +67,9 @@ window.HNYZ_MEMBERS = [
 
 window.HNYZ_PROFILES = {
   ghxiaochi: {
-    kicker: "MEMBER_PAGE // 2026–2027",
+    kicker: "成员主页 · 2026–2027",
     title: "ghxiaochi 的主页",
-    desc: "社团官网维护 · 把想法写成代码。下面的项目都是我的仓库。",
+    desc: "维护社团官网。下面的项目都是我的仓库。",
     intro: "写代码、焊板子、做网站。Arduino 是主线，最近在折腾网页和小装置。",
     /* 放在简介里的彩蛋，点一下才会显示 */
     secret: "我绝对不会偷偷告诉你，这是AI写的网页。",
@@ -82,7 +82,7 @@ window.HNYZ_PROFILES = {
     ]
   },
   vveyin: {
-    kicker: "MEMBER_PAGE // 2026–2027",
+    kicker: "成员主页 · 2026–2027",
     title: "vveyin 的主页",
     desc: "给手表写 App 的人。",
     intro: "喜欢把手机塞进手表里。f(x) 是我给 Android 11 手表写的函数绘图 App。",

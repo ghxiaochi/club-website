@@ -66,35 +66,35 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="stylesheet" href="css/style.css?v=20261104c">
-  <link rel="stylesheet" href="css/pet.css?v=20261104c">
-  <link rel="stylesheet" href="css/personal.css?v=20261104c">
-  <link rel="stylesheet" href="css/skins.css?v=20261104c">
-  <script src="js/skin-boot.js?v=20261104c"></script>
-  <link rel="stylesheet" href="css/type.css?v=20261104c">
-  <link rel="stylesheet" href="css/motion.css?v=20261104c">
-  <link rel="preload" href="css/dino.css?v=20261104c" as="style">
-  <link rel="stylesheet" href="css/dino.css?v=20261104c" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/dino.css?v=20261104c"></noscript>
+  <link rel="stylesheet" href="css/style.css?v=20261104d">
+  <link rel="stylesheet" href="css/pet.css?v=20261104d">
+  <link rel="stylesheet" href="css/personal.css?v=20261104d">
+  <link rel="stylesheet" href="css/skins.css?v=20261104d">
+  <script src="js/skin-boot.js?v=20261104d"></script>
+  <link rel="stylesheet" href="css/type.css?v=20261104d">
+  <link rel="stylesheet" href="css/motion.css?v=20261104d">
+  <link rel="preload" href="css/dino.css?v=20261104d" as="style">
+  <link rel="stylesheet" href="css/dino.css?v=20261104d" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/dino.css?v=20261104d"></noscript>
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
-  <script src="js/sfx.js?v=20261104c" defer></script>
-  <script src="js/theme.js?v=20261104c" defer></script>
-  <script src="js/theme-icon.js?v=20261104c" defer></script>
-  <script src="js/members.js?v=20261104c" defer></script>
-  <script src="js/main.js?v=20261104c" defer></script>
-  <script src="js/repo-sync.js?v=20261104c" defer></script>
-  <script src="js/pet.js?v=20261104c" defer></script>
-  <script src="js/gallery-data.js?v=20261104c" defer></script>
-  <script src="js/gallery.js?v=20261104c" defer></script>
-  <script src="js/personal.js?v=20261104c" defer></script>
-  <script src="js/click-fx.js?v=20261104c" defer></script>
-  <script src="js/term-tui.js?v=20261104c" defer></script>
-  <script src="js/skins.js?v=20261104c" defer></script>
-  <script src="js/fullscreen.js?v=20261104c" defer></script>
-  <script src="js/matrix.js?v=20261104c" defer></script>
-  <script src="js/copy.js?v=20261104c" defer></script>
-  <script src="js/pwa.js?v=20261104c" defer></script>
+  <script src="js/sfx.js?v=20261104d" defer></script>
+  <script src="js/theme.js?v=20261104d" defer></script>
+  <script src="js/theme-icon.js?v=20261104d" defer></script>
+  <script src="js/members.js?v=20261104d" defer></script>
+  <script src="js/main.js?v=20261104d" defer></script>
+  <script src="js/repo-sync.js?v=20261104d" defer></script>
+  <script src="js/pet.js?v=20261104d" defer></script>
+  <script src="js/gallery-data.js?v=20261104d" defer></script>
+  <script src="js/gallery.js?v=20261104d" defer></script>
+  <script src="js/personal.js?v=20261104d" defer></script>
+  <script src="js/click-fx.js?v=20261104d" defer></script>
+  <script src="js/term-tui.js?v=20261104d" defer></script>
+  <script src="js/skins.js?v=20261104d" defer></script>
+  <script src="js/fullscreen.js?v=20261104d" defer></script>
+  <script src="js/matrix.js?v=20261104d" defer></script>
+  <script src="js/copy.js?v=20261104d" defer></script>
+  <script src="js/pwa.js?v=20261104d" defer></script>
   <script>
     /* 页脚跑道不参与首屏：等 load 之后浏览器空闲了再拉脚本，
        用户提前往下滚也会立刻加载。少 80KB 的解析，首屏能早一点可交互。 */
@@ -104,7 +104,7 @@
         if (loaded) return;
         loaded = true;
         var script = document.createElement("script");
-        script.src = "js/dino.js?v=20261104c";
+        script.src = "js/dino.js?v=20261104d";
         script.async = true;
         document.body.appendChild(script);
       }
@@ -207,7 +207,7 @@
         <div class="archive-head">
           <p class="eyebrow">
             <span class="eyebrow-dot" aria-hidden="true"></span>
-            <span data-copy="gallery-eyebrow">GALLERY // MEMES &amp; WALLPAPERS</span>
+            <span data-copy="gallery-eyebrow">图集 · 梗图与日常</span>
           </p>
           <h1 id="archive-title" data-copy="gallery-title">存图的地方<br><span class="accent-text">梗图和日常</span></h1>
           <p class="section-intro" data-copy="gallery-intro">
@@ -227,7 +227,7 @@
 
         <div class="project-toolbar">
           <p class="code-line"><span class="prompt">$</span> ls ~/hnyz/gallery</p>
-          <p class="project-count" id="gallery-count" role="status" aria-live="polite">SYNCING…</p>
+          <p class="project-count" id="gallery-count" role="status" aria-live="polite">读取中…</p>
         </div>
 
         <div class="gallery-filters" data-gallery-filters role="group" aria-label="按分类筛选">
@@ -293,7 +293,7 @@
         <div class="dino-run__bar">
           <h2 class="dino-run__kicker" id="dino-run-title">
             <span class="dino-run__led" aria-hidden="true"></span>
-            DINO_RUN
+            小恐龙跑道
             <span class="dino-run__ver">// 08-BIT</span>
           </h2>
           <div class="dino-run__hud">
@@ -302,9 +302,9 @@
         </div>
         <div class="dino-run__stage" data-dino-stage tabindex="-1">
           <canvas class="dino-run__canvas" data-dino-canvas aria-hidden="true"></canvas>
-          <p class="dino-run__hint" data-dino-hint>AUTO_PILOT // ON</p>
+          <p class="dino-run__hint" data-dino-hint>自动躲避 · 开</p>
           <p class="dino-run__pop" data-dino-pop aria-live="polite"></p>
-          <p class="dino-run__toast" data-dino-toast hidden>SIGNAL LOST // REBOOT</p>
+          <p class="dino-run__toast" data-dino-toast hidden>信号中断 · 重新开始</p>
           <div class="dino-run__extinct" data-dino-extinct role="status" aria-live="polite" hidden>
             <p class="dino-run__extinct-text">这就是恐龙灭绝的真相</p>
             <button class="dino-run__rewind" type="button" data-dino-rewind>时间回溯</button>

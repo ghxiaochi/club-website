@@ -97,7 +97,7 @@
     gh.href = profile.link || `https://github.com/${user}`;
     gh.target = "_blank";
     gh.rel = "noopener noreferrer";
-    gh.textContent = "GitHub 主页 ↗";
+    gh.textContent = "查看 GitHub 主页 ↗";
     gh.dataset.copy = "member-github";
     actions.appendChild(gh);
 
@@ -148,7 +148,7 @@
 
     const tag = document.createElement("span");
     tag.className = "cover-tag";
-    tag.textContent = "NO_COVER // AUTO_GEN";
+    tag.textContent = "自动生成封面";
 
     const mark = document.createElement("strong");
     mark.className = "cover-mark";
@@ -222,7 +222,7 @@
     lang.className = "project-stat";
     const langLabel = document.createElement("span");
     langLabel.className = "stat-label";
-    langLabel.textContent = "LANG";
+    langLabel.textContent = "语言";
     const langValue = document.createElement("span");
     langValue.className = "stat-value";
     langValue.append(dot, document.createTextNode(data.language || "TEXT"));
@@ -310,7 +310,7 @@
 
     const hint = document.createElement("p");
     hint.className = "member-hint";
-    hint.textContent = "正在读取 GitHub…";
+    hint.textContent = "正在读取仓库…";
     grid.appendChild(hint);
 
     const data = await Promise.all(list.map((m) => fetchRepo(m)));

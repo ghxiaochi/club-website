@@ -100,7 +100,7 @@
   function updateCount() {
     if (!countEl) return;
     const label = currentTag === "all" ? `${items.length} 张` : `${visibleIndexes.length} 张`;
-    countEl.textContent = `${label} // GALLERY`;
+    countEl.textContent = label;
   }
 
   /* =======================================================

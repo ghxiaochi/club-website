@@ -170,7 +170,7 @@
   function loadDeepy() {
     if (deepyData || deepyLoading || !window.fetch) return;
     deepyLoading = true;
-    window.fetch("data/deepy.json?v=20261104c")
+    window.fetch("data/deepy.json?v=20261104d")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         deepyData = d;
@@ -285,18 +285,18 @@
       h.push('<div class="tty-hero" style="--i:' + (lineIdx++) + '">' +
         deepyBox(0, "Deepy 像素鲸鱼，点一下它会动", true) + wordmark() + "</div>");
       h.push('<div class="tty-meta" style="--i:' + (lineIdx++) + '">' +
-        "<span>hnyz-tty <b>6.4.0</b> · mist blue · login: guest</span>" +
-        "<span>~/hnyz · last login: " + date + " · 教学楼机房</span>" +
-        "<span>TIP: 输入 <b>help</b> 看命令，<b>0-3</b> 换板块，<b>[ ]</b> 前后翻</span>" +
+        "<span>hnyz-tty <b>6.4.0</b> · 雾蓝主题 · 访客登录</span>" +
+        "<span>~/hnyz · 上次登录 " + date + " · 教学楼机房</span>" +
+        "<span>提示：输入 <b>help</b> 看命令，<b>0-3</b> 换板块，<b>[ ]</b> 前后翻</span>" +
         "</div>");
-      h.push(L('<span class="t-dim">#</span> 入口都在 0.4，想直接跳就敲 <span class="t-cyn">projects</span> / <span class="t-cyn">gallery</span> / <span class="t-cyn">member</span>', "t-dim"));
+      h.push(L('<span class="t-dim">#</span> 各页入口在 0.4；也可以直接敲 <span class="t-cyn">projects</span> / <span class="t-cyn">gallery</span> / <span class="t-cyn">member</span>', "t-dim"));
       return h.join("");
     }) +
 
     tile("0.2", "一句话", 5, "intro", function () {
       return '<p class="tty-tag" style="--i:' + (lineIdx++) + '">把想法，<span>写成代码</span>。</p>' +
-        L("衡南一中编程社 · 面向全校的极客技术社团", "t-cyn") +
-        L("教学内容以 Arduino 为主线：从点亮第一颗 LED 开始，组队做项目、一起学习，把脑子里的点子变成真正能跑的作品。", "t-mut") +
+        L("衡南一中编程社 · 全校学生都能参加", "t-cyn") +
+        L("主线是 Arduino 硬件：从点亮第一颗 LED 开始，学接线、写程序、查问题，再组队做一个小装置。零基础也能来。", "t-mut") +
         '<ul class="tty-tags" style="--i:' + (lineIdx++) + '">' +
         "<li><span>01</span>零基础友好</li>" +
         "<li><span>02</span>Arduino 主线</li>" +
@@ -307,27 +307,27 @@
 
     tile("0.3", "节奏", 5, "meters", function () {
       return '<div class="tty-meters">' +
-        meter("常规活动", 2 / 7, "每周 2 次", "60 分钟") +
-        meter("基础门槛", 0, "0", "谁都能来") +
-        meter("动手占比", 6 / 10, "6 成", "讲完就动手") +
-        meter("项目周期", 5 / 10, "一学期", "从想法到 demo") +
+        meter("活动频率", 2 / 7, "每周 2 次") +
+        meter("单次时长", 60 / 60, "60 分钟") +
+        meter("入门要求", 0, "零基础") +
+        meter("项目周期", 5 / 10, "一学期") +
         "</div>";
     }) +
 
-    tile("0.4", "入口", 4, "4 links", function () {
+    tile("0.4", "入口", 4, "4 个入口", function () {
       return '<ul class="tty-entries">' +
         '<li><a href="projects.html"><b>projects</b><span>全部仓库与项目卡片</span><i>↗</i></a></li>' +
         '<li><a href="gallery.html"><b>gallery</b><span>活动的照片与作品图</span><i>↗</i></a></li>' +
         '<li><a href="member.html"><b>member</b><span>社团成员与各自的仓库</span><i>↗</i></a></li>' +
-        '<li><a href="https://github.com/ghxiaochi" target="_blank" rel="noopener noreferrer"><b>github</b><span>源码、issue 与提交记录</span><i>↗</i></a></li>' +
+        '<li><a href="https://github.com/ghxiaochi" target="_blank" rel="noopener noreferrer"><b>github</b><span>源码、问题讨论与提交记录</span><i>↗</i></a></li>' +
         "</ul>";
     }) +
 
     tile("0.5", "联系", 3, "contact", function () {
       return '<div class="tty-contact tty-contact--flat">' +
-        '<div class="tty-contact__row"><span class="t-dim">QQ_GROUP</span><b>' + QQ + "</b>" + copyBtn(QQ, "复制") + "</div>" +
-        '<div class="tty-contact__row"><span class="t-dim">EMAIL</span><b>' + MAIL + "</b>" + copyBtn(MAIL, "复制") + "</div>" +
-        '<div class="tty-contact__row"><span class="t-dim">FIND_US</span><span>教学楼机房</span></div>' +
+        '<div class="tty-contact__row"><span class="t-dim">QQ 群</span><b>' + QQ + "</b>" + copyBtn(QQ, "复制") + "</div>" +
+        '<div class="tty-contact__row"><span class="t-dim">邮箱</span><b>' + MAIL + "</b>" + copyBtn(MAIL, "复制") + "</div>" +
+        '<div class="tty-contact__row"><span class="t-dim">位置</span><span>教学楼机房</span></div>' +
         '<p class="tty-contact__note t-dim">加群请备注「班级 + 姓名」。</p>' +
         "</div>";
     });
@@ -342,16 +342,16 @@
     return tile("1.1", "man hnyz", 7, "man 1", function () {
       var h = [];
       h.push(L('<span class="t-dim">$</span> man hnyz <span class="t-dim">(1)</span>'));
-      h.push(L('<b class="t-yel">NAME</b>' + "　　" + "hnyz — 衡南一中编程社 / HNYZ CS CLUB"));
-      h.push(L('<b class="t-yel">SYNOPSIS</b>　$ join --class 班级 --name 姓名'));
-      h.push(L('<b class="t-yel">DATE</b>' + "　　" + "每周两次 · 每次 60 分钟 · 时间地点见 QQ 群公告"));
-      h.push(L('<b class="t-yel">DESCRIPTION</b>'));
+      h.push(L('<b class="t-yel">名称</b>　hnyz — 衡南一中编程社 / HNYZ CS CLUB'));
+      h.push(L('<b class="t-yel">加入</b>　加 QQ 群，备注「班级 + 姓名」'));
+      h.push(L('<b class="t-yel">时间</b>　每周两次，每次 60 分钟；具体见 QQ 群公告'));
+      h.push(L('<b class="t-yel">简介</b>'));
       h.push(L("一个把好奇心变成作品的地方。不用先学完什么才能来：从点亮第一颗 LED、读按钮和传感器开始，学数字/模拟输入输出、串口和简单的控制逻辑，再组队完成一个完整的硬件小项目。ESP32 会作为进阶平台接触。", "t-mut tty-indent"));
-      h.push(L('<b class="t-yel">SEE ALSO</b>　work(1) · join(1)'));
+      h.push(L('<b class="t-yel">另见</b>　右侧「作品」「加入」两栏'));
       return h.join("");
     }) +
 
-    tile("1.2", "文化", 5, "3 rules", function () {
+    tile("1.2", "文化", 5, "3 条", function () {
       return '<ol class="tty-rules">' +
         '<li><b>做完比完美更重要。</b><span>先跑起来，再改好。</span></li>' +
         '<li><b>提问不需要理由。</b><span>卡住就喊，没人会笑。</span></li>' +
@@ -362,10 +362,10 @@
     tile("1.3", "课表", 7, "crontab", function () {
       var h = [];
       h.push(L('<span class="t-dim">$</span> crontab -l <span class="t-dim">| grep hnyz</span>'));
-      h.push(L('<span class="t-dim"># 每周两次 · 每次 60 min · 时间地点以 QQ 群公告为准，考试周会减量</span>'));
-      h.push(L('<b class="t-grn">0 60min * * 2</b>　主题分享 + 结对开发　<span class="t-dim"># 从一个小主题讲起，讲完就动手</span>'));
-      h.push(L('<b class="t-grn">0 60min * * 5</b>　自由开发 + 问题排查　<span class="t-dim"># 带项目来，报错现场修</span>'));
-      h.push(L('<b class="t-grn">0 60min 1 * *</b>　demo-day --monthly　<span class="t-dim"># 展示这个月做的东西，接受不完美</span>'));
+      h.push(L('<span class="t-dim"># 每周两次 · 每次 60 分钟 · 时间地点以 QQ 群公告为准，考试周会减量</span>'));
+      h.push(L('<b class="t-grn">每周第一次</b>　主题分享 + 结对开发　<span class="t-dim"># 讲一个小主题，讲完就动手</span>'));
+      h.push(L('<b class="t-grn">每周第二次</b>　自由开发 + 问题排查　<span class="t-dim"># 带项目来，报错现场修</span>'));
+      h.push(L('<b class="t-grn">每月一次　</b>　Demo Day 展示　　　<span class="t-dim"># 展示这个月做的东西</span>'));
       h.push('<div class="tty-timeline" style="--i:' + (lineIdx++) + '" aria-label="一次活动 60 分钟的时间分配">' +
         '<i style="width:16.7%"></i><i style="width:41.6%"></i><i style="width:25%"></i><i style="width:16.7%"></i></div>' +
         '<p class="tty-timeline__cap t-dim" style="--i:' + (lineIdx++) + '">' +
@@ -397,22 +397,22 @@
   function gridWork() {
     tileSeq = 0;
 
-    return tile("2.1", "git log", 8, "all", function () {
+    return tile("2.1", "git log", 8, "全部", function () {
       return L('<span class="t-dim">$</span> git log --oneline <span class="t-dim">~/repos --all</span>') +
-        '<div class="tty-repos" data-repos><p class="t-dim" style="--i:' + (lineIdx++) + '">fetching origin/data/repos.json ...</p></div>';
+        '<div class="tty-repos" data-repos><p class="t-dim" style="--i:' + (lineIdx++) + '">正在读取仓库数据…</p></div>';
     }) +
 
     tile("2.2", "全部项目", 4, "→", function () {
-      return '<p class="tty-note">仓库卡片按成员分组，含 star、语言、最近推送时间。顶部那颗刷新按钮能跳过每日快照，直接问 GitHub。</p>' +
-        '<a class="tty-btn tty-btn--block" href="projects.html">$ cd ../projects</a>';
+      return '<p class="tty-note">卡片按成员分组，标了语言、star 和最近推送时间。点右上角的刷新按钮，可以跳过每日快照直接问 GitHub。</p>' +
+        '<a class="tty-btn tty-btn--block" href="projects.html">全部项目 →</a>';
     }, "tile--spread") +
 
     tile("2.3", "图集", 4, "→", function () {
-      return '<p class="tty-note">活动的照片、作品实物、社团的日常。图上都标了日期与场合。</p>' +
-        '<a class="tty-btn tty-btn--block" href="gallery.html">$ cd ../gallery</a>';
+      return '<p class="tty-note">活动的照片、作品实物，还有社团的日常。点开看大图，方向键翻页。</p>' +
+        '<a class="tty-btn tty-btn--block" href="gallery.html">图集 →</a>';
     }, "tile--spread") +
 
-    tile("2.4", "技术栈", 4, "stack", function () {
+    tile("2.4", "技术栈", 4, "4 项", function () {
       return '<ul class="tty-stack">' +
         '<li><b>Arduino</b><span>主线平台</span></li>' +
         '<li><b>C++</b><span>配合硬件</span></li>' +
@@ -421,10 +421,10 @@
         "</ul>";
     }) +
 
-    tile("2.5", "参与", 4, "howto", function () {
+    tile("2.5", "参与", 4, "3 步", function () {
       return '<ol class="tty-rules tty-rules--tight">' +
         '<li><b>先读代码</b><span>从最近一次提交看起。</span></li>' +
-        '<li><b>发现 bug 就开 issue</b><span>说清复现步骤就够。</span></li>' +
+        '<li><b>发现问题就提 issue</b><span>说清复现步骤就够。</span></li>' +
         '<li><b>想动手就来活动</b><span>现场结对，不用预约。</span></li>' +
         "</ol>";
     }, "tile--spread");
@@ -445,7 +445,7 @@
       h.push('<div class="tty-contact__row"><span class="t-dim">QQ 群</span><b class="t-cyn">' + QQ + "</b>" + copyBtn(QQ, "复制群号") + "</div>");
       h.push('<div class="tty-contact__row"><span class="t-dim">邮箱</span><b>' + MAIL + "</b>" + copyBtn(MAIL, "复制邮箱") + "</div>");
       h.push('<div class="tty-contact__row"><span class="t-dim">备注</span><span>班级 + 姓名</span></div>');
-      h.push('<p class="tty-contact__note t-dim">零基础 OK · 非技术方向 OK · 考试周活动会减量</p>');
+      h.push('<p class="tty-contact__note t-dim">零基础可以 · 非技术方向也可以 · 考试周活动会减量</p>');
       h.push("</div>");
       return h.join("");
     }) +
@@ -472,7 +472,7 @@
       var h = [];
       h.push(L('<span class="t-dim">$</span> tail -f <span class="t-dim">~/hnyz/guestbook.log</span>'));
       h.push(L("▌ 留言走 GitHub Discussions：公开、不设匿名、没有第三方服务器——删库才会消失。", "t-mut"));
-      h.push(L('▌ <span class="t-dim">listening for new messages…</span>'));
+      h.push(L('▌ <span class="t-dim">正在等待新留言…</span>'));
       h.push(L('<button type="button" class="tty-btn" data-open-guestbook>打开留言板 →</button>　<span class="t-dim tty-inline-note">需要 JavaScript 与 GitHub 账号</span>'));
       return h.join("");
     }, "tile--spread") +
@@ -499,13 +499,21 @@
     var h = [];
     var repos = data && data.repos ? Object.keys(data.repos).map(function (k) { return data.repos[k]; }) : [];
     if (!repos.length) {
-      h.push(L("origin: 没有取到仓库快照，去 projects.html 看实时版。", "t-dim"));
+      h.push(L("没取到仓库数据，去「全部项目」页看实时版。", "t-dim"));
     } else {
       repos.sort(function (a, b) { return String(b.pushed_at || "").localeCompare(String(a.pushed_at || "")); });
+      /* 仓库没写 About 时，用 members.js 里的本地简介兜底，别留一行空话 */
+      var localDesc = {};
+      (window.HNYZ_MEMBERS || []).forEach(function (m) {
+        if (m && m.repo && m.desc) localDesc[m.repo] = m.desc;
+      });
+
       repos.forEach(function (r) {
         var raw = String(r.description || "").trim();
         if (/^(没有简介|暂无简介|无|no description\.?|n\/a)$/i.test(raw)) raw = "";
-        var desc = raw ? esc(raw) : '<span class="t-dim">（还没有描述）</span>';
+        var desc = raw
+          ? esc(raw)
+          : (localDesc[r.name] ? esc(localDesc[r.name]) : '<span class="t-dim">（还没有描述）</span>');
         h.push(L(
           '<span class="t-dim">*</span> <a class="tty-link" href="' + esc(r.html_url || "#") + '" target="_blank" rel="noopener noreferrer">' + esc(r.name || "") + "</a> " +
           '<span class="t-mgt">[' + esc(r.language || "—") + "]</span> " +
@@ -543,7 +551,7 @@
     var cached = readCachedRepos();
     if (cached) renderRepos(box, { repos: cached.repos });
 
-    window.fetch("data/repos.json?v=20261104c")
+    window.fetch("data/repos.json?v=20261104d")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (store) {
         if (!store || !store.repos) {
@@ -614,11 +622,11 @@
       frag.push('<li><button type="button" data-goto-tile="' + i + '"' + (i === (index || 0) ? ' class="is-current"' : "") + ">" +
         '<span class="side-item__no">' + esc(el.getAttribute("data-tile")) + "</span>" +
         '<span class="side-item__name">' + esc(el.getAttribute("data-name")) + "</span>" +
-        '<span class="side-item__w">' + esc(el.style.getPropertyValue("--c")) + "c</span>" +
+        '<span class="side-item__w">' + esc(el.style.getPropertyValue("--c")) + " 栏</span>" +
         "</button></li>");
     });
     sideListEl.innerHTML = frag.join("");
-    if (stageStatEl) stageStatEl.textContent = items.length + " blocks · 12 cols";
+    if (stageStatEl) stageStatEl.textContent = items.length + " 块 · 12 栏";
   }
 
   function markSide(index) {
@@ -1008,7 +1016,7 @@
       '<header class="tty__top">' +
       '  <span class="tty__logo" aria-hidden="true"></span>' +
       '  <span class="tty__brand">HNYZ<i>//TTY</i></span>' +
-      '  <span class="tty__sess">hnyz@club · tty1 · <b>mist</b></span>' +
+      '  <span class="tty__sess">hnyz@club · tty1 · <b>雾蓝</b></span>' +
       '  <span class="tty__clock" aria-hidden="true"></span>' +
       '  <span class="tty__actions"></span>' +
       "</header>" +
@@ -1032,9 +1040,9 @@
       '      <button type="button" data-step="1" aria-label="下一个板块">→</button>' +
       "    </div>" +
       '    <div class="side__meta">' +
-      '      <div><span>theme</span><b>mist blue</b></div>' +
-      '      <div><span>layout</span><b>12 cols</b></div>' +
-      '      <div><span>board</span><b>4 blocks</b></div>' +
+      '      <div><span>主题</span><b>雾蓝</b></div>' +
+      '      <div><span>布局</span><b>12 栏</b></div>' +
+      '      <div><span>板块</span><b>4 个</b></div>' +
       "    </div>" +
       "  </aside>" +
       "</div>" +
@@ -1044,7 +1052,7 @@
       '  <input id="tty-cmd-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go" aria-label="输入命令，help 查看可用命令">' +
       "</form>" +
       '<footer class="tty__legend" aria-hidden="true">' +
-      '  <span class="tty-legend__path"><b>~/hnyz</b> · 4 blocks</span>' +
+      '  <span class="tty-legend__path"><b>~/hnyz</b> · 4 个板块</span>' +
       '  <span class="tty-legend__keys"><kbd>0-3</kbd> 换板块 · <kbd>[ ]</kbd> 前后 · <kbd>↑↓</kbd>/<kbd>j k</kbd> 滚动 · <kbd>:</kbd> 命令 · <kbd>?</kbd> 帮助</span>' +
       '  <span class="tty__up"></span>' +
       "</footer>";

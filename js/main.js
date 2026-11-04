@@ -74,10 +74,10 @@
   /* 记录这次加载中出现了哪些降级原因，最后合并成一条提示 */
   const notices = new Set();
 
-  /* 这次加载命中了几次 10 分钟缓存；用于把状态显示成 CACHE */
+  /* 这次加载命中了几次 10 分钟缓存；用于把状态显示成「本地缓存」 */
   let cacheHits = 0;
 
-  /* 刚点过顶部刷新按钮：角标改成 SYNCED，别再显示 STATIC 误导人 */
+  /* 刚点过顶部刷新按钮：角标改成「刚刚刷新」，别再说成每日快照 */
   let modeOverride = "";
 
   /* 命中静态快照的次数 / 真正打到 API 的次数 / 那份文件的 Promise */
@@ -247,7 +247,7 @@
 
     const tag = document.createElement("span");
     tag.className = "cover-tag";
-    tag.textContent = "NO_COVER // AUTO_GEN";
+    tag.textContent = "自动生成封面";
 
     const mark = document.createElement("strong");
     mark.className = "cover-mark";
@@ -294,10 +294,10 @@
     badge.dataset.state = project.status;
     badge.textContent =
       project.status === "ok"
-        ? "OPEN_SOURCE"
+        ? "开源项目"
         : project.status === "not-found"
-          ? "404_NOT_FOUND"
-          : "LOCAL_FALLBACK";
+          ? "仓库找不到"
+          : "本地缓存";
     wrap.appendChild(badge);
 
     return wrap;
@@ -369,7 +369,7 @@
     languageDot.setAttribute("aria-hidden", "true");
 
     stats.append(
-      createStat("LANG", project.language, languageDot, "语言"),
+      createStat("语言", project.language, languageDot, "语言"),
       createStat("🌟", formatStat(project.stars), null, "Stars"),
       createStat("🍴", formatStat(project.forks), null, "Forks")
     );
@@ -409,7 +409,7 @@
 
     if (notices.has("403")) {
       messages.push(
-        "GitHub API 返回 403：当前 IP 的未登录请求次数可能已用尽，已自动切换到本地缓存或降级卡片，稍后刷新即可恢复实时数据。"
+        "GitHub 暂时限制了未登录访问（每小时 60 次），已改用本地缓存显示。稍后点右上角刷新即可恢复。"
       );
     }
     if (notices.has("404")) {
@@ -419,10 +419,10 @@
       messages.push("部分数据来自本地缓存，10 分钟内不会重复请求 GitHub。");
     }
     if (notices.has("network")) {
-      messages.push("GitHub API 暂时无法连接，已显示本地缓存或降级卡片。");
+      messages.push("连不上 GitHub，先显示本地缓存或占位卡片。");
     }
     if (notices.has("error")) {
-      messages.push("部分仓库请求失败，已使用本地缓存或降级卡片。");
+      messages.push("部分仓库没取到，先用缓存或占位卡片顶上。");
     }
 
     if (!messages.length) {
@@ -444,7 +444,7 @@
     if (!projects.length) {
       const empty = document.createElement("p");
       empty.className = "project-empty";
-      empty.textContent = "项目清单还是空的，先在 js/members.js 里填入一个 GitHub 仓库吧。";
+      empty.textContent = "项目清单还是空的。等社团把仓库加进来，这里就会有卡片。";
       grid.appendChild(empty);
     } else {
       const fragment = document.createDocumentFragment();
@@ -456,7 +456,7 @@
       const scope = members.length > HOME_LIMIT
         ? `${projects.length} / ${members.length}`
         : `${projects.length}`;
-      count.textContent = `${scope} REPOS // ${currentMode()}`;
+      count.textContent = `${scope} 个项目 · ${currentMode()}`;
     }
 
     if (moreLabel) {
@@ -611,17 +611,17 @@
   function updateArchiveCount() {
     if (!count) return;
 
-    count.textContent = `${groupMembers().length} MEMBERS // ${members.length} REPOS // ${currentMode()}`;
+    count.textContent = `${groupMembers().length} 位成员 · ${members.length} 个项目 · ${currentMode()}`;
   }
 
   /* 状态角标文案：有降级 > 有缓存 > 实时 API，优先级从高到低 */
   function currentMode() {
     if (modeOverride) return modeOverride;
-    if (notices.size) return "DEGRADED";
-    /* 全部来自快照才算 STATIC；混着缓存或实时 API 的说法不诚实，往上报 */
-    if (staticHits && !apiHits && !cacheHits) return "STATIC";
-    if (cacheHits && !apiHits) return "CACHE";
-    return apiHits ? "GITHUB_API" : "CACHE";
+    if (notices.size) return "部分降级";
+    /* 全部来自快照才算「每日快照」；混着缓存或实时接口的说法不诚实，往上报 */
+    if (staticHits && !apiHits && !cacheHits) return "每日快照";
+    if (cacheHits && !apiHits) return "本地缓存";
+    return apiHits ? "实时接口" : "本地缓存";
   }
 
   /* 成员主页横幅：数据在 js/members.js 的 HNYZ_PROFILES 里，
@@ -725,7 +725,7 @@
 
     const hint = document.createElement("p");
     hint.className = "member-hint";
-    hint.textContent = "展开后加载这一组项目…";
+    hint.textContent = "点开加载这一组项目";
 
     body.append(hint, grid);
     const profile = createMemberProfile(user);
@@ -743,7 +743,7 @@
     if (details.dataset.loaded === "true" || details.dataset.loading === "true") return;
 
     details.dataset.loading = "true";
-    if (hint) hint.textContent = "正在连接 GitHub API…";
+    if (hint) hint.textContent = "正在读取项目数据…";
 
     try {
       const projects = await Promise.all(list.map((member) => fetchRepo(member)));
@@ -777,10 +777,10 @@
     if (!grouped.length) {
       const empty = document.createElement("p");
       empty.className = "project-empty";
-      empty.textContent = "项目清单还是空的，先在 js/members.js 里填入一个 GitHub 仓库吧。";
+      empty.textContent = "项目清单还是空的。等社团把仓库加进来，这里就会有卡片。";
       groupsRoot.appendChild(empty);
       groupsRoot.setAttribute("aria-busy", "false");
-      if (count) count.textContent = "0 MEMBERS // 0 REPOS";
+      if (count) count.textContent = "0 位成员 · 0 个项目";
       return;
     }
 
@@ -956,7 +956,7 @@
      数据落地后把当前页重新画一遍。
      ======================================================= */
   function refreshViews() {
-    modeOverride = "SYNCED";
+    modeOverride = "刚刚刷新";
 
     if (grid) loadProjects();
 
