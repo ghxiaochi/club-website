@@ -961,6 +961,16 @@ html[data-style="hacker"] .gallery-item img {
   background: #04100a;
 }
 
+html[data-style="hacker"] .gallery-item img[data-src] {
+  background-color: #04100a;
+  background-image: linear-gradient(
+    100deg,
+    transparent 18%,
+    rgba(57, 255, 136, 0.08) 46%,
+    transparent 74%
+  );
+}
+
 html[data-style="hacker"] .gallery-item__caption {
   color: var(--muted);
 }
