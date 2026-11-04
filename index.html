@@ -67,39 +67,40 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="stylesheet" href="css/style.css?v=20261104a">
-  <link rel="stylesheet" href="css/pet.css?v=20261104a">
-  <link rel="stylesheet" href="css/personal.css?v=20261104a">
-  <link rel="stylesheet" href="css/avatar-pet.css?v=20261104a">
-  <link rel="stylesheet" href="css/skins.css?v=20261104a">
-  <script src="js/skin-boot.js?v=20261104a"></script>
-  <link rel="stylesheet" href="css/type.css?v=20261104a">
-  <link rel="stylesheet" href="css/motion.css?v=20261104a">
-  <link rel="preload" href="css/dino.css?v=20261104a" as="style">
-  <link rel="stylesheet" href="css/dino.css?v=20261104a" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/dino.css?v=20261104a"></noscript>
-  <link rel="preload" href="css/guestbook.css?v=20261104a" as="style">
-  <link rel="stylesheet" href="css/guestbook.css?v=20261104a" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/guestbook.css?v=20261104a"></noscript>
+  <link rel="stylesheet" href="css/style.css?v=20261104b">
+  <link rel="stylesheet" href="css/pet.css?v=20261104b">
+  <link rel="stylesheet" href="css/personal.css?v=20261104b">
+  <link rel="stylesheet" href="css/avatar-pet.css?v=20261104b">
+  <link rel="stylesheet" href="css/skins.css?v=20261104b">
+  <script src="js/skin-boot.js?v=20261104b"></script>
+  <link rel="stylesheet" href="css/type.css?v=20261104b">
+  <link rel="stylesheet" href="css/motion.css?v=20261104b">
+  <link rel="preload" href="css/dino.css?v=20261104b" as="style">
+  <link rel="stylesheet" href="css/dino.css?v=20261104b" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/dino.css?v=20261104b"></noscript>
+  <link rel="preload" href="css/guestbook.css?v=20261104b" as="style">
+  <link rel="stylesheet" href="css/guestbook.css?v=20261104b" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/guestbook.css?v=20261104b"></noscript>
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <!-- 项目卡片、全部项目折叠页和复制按钮由 js/main.js 驱动 -->
-  <script src="js/sfx.js?v=20261104a" defer></script>
-  <script src="js/theme.js?v=20261104a" defer></script>
-  <script src="js/theme-icon.js?v=20261104a" defer></script>
-  <script src="js/members.js?v=20261104a" defer></script>
-  <script src="js/main.js?v=20261104a" defer></script>
-  <script src="js/pet.js?v=20261104a" defer></script>
-  <script src="js/avatar-pet.js?v=20261104a" defer></script>
-  <script src="js/personal.js?v=20261104a" defer></script>
-  <script src="js/click-fx.js?v=20261104a" defer></script>
-  <script src="js/term-tui.js?v=20261104a" defer></script>
-  <script src="js/skins.js?v=20261104a" defer></script>
-  <script src="js/fullscreen.js?v=20261104a" defer></script>
-  <script src="js/matrix.js?v=20261104a" defer></script>
-  <script src="js/copy.js?v=20261104a" defer></script>
-  <script src="js/pwa.js?v=20261104a" defer></script>
-  <script src="js/guestbook.js?v=20261104a" defer></script>
+  <script src="js/sfx.js?v=20261104b" defer></script>
+  <script src="js/theme.js?v=20261104b" defer></script>
+  <script src="js/theme-icon.js?v=20261104b" defer></script>
+  <script src="js/members.js?v=20261104b" defer></script>
+  <script src="js/main.js?v=20261104b" defer></script>
+  <script src="js/repo-sync.js?v=20261104b" defer></script>
+  <script src="js/pet.js?v=20261104b" defer></script>
+  <script src="js/avatar-pet.js?v=20261104b" defer></script>
+  <script src="js/personal.js?v=20261104b" defer></script>
+  <script src="js/click-fx.js?v=20261104b" defer></script>
+  <script src="js/term-tui.js?v=20261104b" defer></script>
+  <script src="js/skins.js?v=20261104b" defer></script>
+  <script src="js/fullscreen.js?v=20261104b" defer></script>
+  <script src="js/matrix.js?v=20261104b" defer></script>
+  <script src="js/copy.js?v=20261104b" defer></script>
+  <script src="js/pwa.js?v=20261104b" defer></script>
+  <script src="js/guestbook.js?v=20261104b" defer></script>
   <script>
     /* 页脚跑道不参与首屏：等 load 之后浏览器空闲了再拉脚本，
        用户提前往下滚也会立刻加载。少 80KB 的解析，首屏能早一点可交互。 */
@@ -109,7 +110,7 @@
         if (loaded) return;
         loaded = true;
         var script = document.createElement("script");
-        script.src = "js/dino.js?v=20261104a";
+        script.src = "js/dino.js?v=20261104b";
         script.async = true;
         document.body.appendChild(script);
       }
@@ -202,6 +203,12 @@
         </button>
         <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换到深色模式" aria-pressed="false" title="切换到深色模式">
           <span class="theme-toggle__flip" aria-hidden="true"></span>
+        </button>
+        <button class="sync-toggle" type="button" data-sync-toggle aria-label="从 GitHub 刷新全部项目数据" title="刷新项目数据">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path class="sync-ico" d="M20.4 11.6a8.4 8.4 0 1 1-2.35-5.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            <path class="sync-ico" d="M20.5 3.4v5.2h-5.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </button>
         <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="打开导航菜单" data-nav-toggle>
           <span></span>
@@ -419,7 +426,8 @@
           <h2 id="projects-title" data-copy="projects-title">从仓库里<br>长出来的作品</h2>
           <p class="section-intro" data-copy="projects-intro">
             卡片读的是 <code>data/repos.json</code>——每天凌晨由 GitHub Actions
-            抓一次的仓库快照，不消耗任何人的 API 额度。想换项目，只要修改
+            抓一次的仓库快照，不消耗任何人的 API 额度。仓库刚改了描述、涨了 star，
+            点右上角的刷新按钮就能立刻拉一次最新。想换项目，只要修改
             <code>js/members.js</code> 里的 <code>HNYZ_MEMBERS</code> 数组；
             想换封面，就填 <code>coverImg</code>，留空会自动生成科技网格占位图。
             首页展示前 6 个，更多项目在「全部项目」页按成员折叠展示。
@@ -617,6 +625,7 @@
             </summary>
             <div class="faq-answer">
               <p>由 <code>js/main.js</code> 读取 <code>data/repos.json</code>——一份每天凌晨由 GitHub Actions 抓好的仓库快照，<strong>不消耗你的 API 额度</strong>。快照里缺某个仓库、或者文件读不到时，才会回退到 GitHub API 实时请求；再不行还有本地缓存和降级卡片，页面不会空白。</p>
+              <p>想马上看到仓库的最新状态，点右上角的圆形箭头：它会跳过快照和十分钟本地缓存，直接问一次 GitHub，把描述、语言、star、推送时间全部换成最新的，顺手存进本地缓存，之后打开别的页面也是新值。一次刷新只花「仓库个数」次请求，撞上限流会提示你稍后再试，不会把已有数据清掉。</p>
             </div>
           </details>
         </div>

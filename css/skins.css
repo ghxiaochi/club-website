@@ -11,7 +11,8 @@
    1. 顶栏风格方块
    --------------------------------------------------------- */
 .style-toggle,
-.fullscreen-toggle {
+.fullscreen-toggle,
+.sync-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -38,7 +39,8 @@
 
 
 .style-toggle:hover,
-.fullscreen-toggle:hover {
+.fullscreen-toggle:hover,
+.sync-toggle:hover {
   color: var(--blue);
   border-color: var(--blue);
   box-shadow: 0 0 0 4px var(--blue-soft);
@@ -47,9 +49,48 @@
 
 
 .style-toggle:focus-visible,
-.fullscreen-toggle:focus-visible {
+.fullscreen-toggle:focus-visible,
+.sync-toggle:focus-visible {
   outline: 2px solid var(--blue);
   outline-offset: 3px;
+}
+
+/* ---------------------------------------------------------
+   刷新按钮：图标转起来表示在拉数据，完成/失败各给一档颜色
+   --------------------------------------------------------- */
+.sync-toggle svg {
+  width: 17px;
+  height: 17px;
+  transform-origin: 50% 50%;
+}
+
+.sync-toggle.is-syncing {
+  color: var(--blue);
+  border-color: var(--blue);
+}
+
+.sync-toggle.is-syncing svg {
+  animation: sync-turn 0.9s linear infinite;
+}
+
+.sync-toggle.is-done {
+  color: var(--blue);
+  border-color: var(--blue);
+}
+
+.sync-toggle.is-failed {
+  color: var(--red);
+  border-color: var(--red);
+}
+
+.sync-toggle[aria-busy="true"] {
+  cursor: progress;
+}
+
+@keyframes sync-turn {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .style-toggle__grid {

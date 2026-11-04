@@ -510,6 +510,7 @@ Pages 会自动重新构建。如果页面还是旧版本，先强制刷新（`C
 - [ ] 打开过一次之后断网刷新，首页 / 项目 / 图集 / 成员 / 天梯 / 404 六页都能正常显示，图集里的图也不缺（Service Worker 两批预缓存）
 - [ ] 断网时底部弹一次「已离线，正在用缓存打开页面」；发新版本后打开会弹「站点有新版本」
 - [ ] 首屏项目卡片角标显示 `STATIC`（说明读的是 `data/repos.json`，没打 GitHub API）
+- [ ] 点右上角刷新按钮，角标变 `SYNCED`、右下角弹出同步结果；断网时提示失败但卡片不清空
 - [ ] 留言板：滚到区块附近才加载；登录后能直接发评论；切皮肤时 iframe 跟着换主题
 - [ ] 留言板连不上时显示「群号 + Discussions 链接」，不是白色空框（`?debug=1` 看原始错误）
 - [ ] 页脚跑道右上角的「天梯 →」能进 `dino.html`
@@ -640,6 +641,28 @@ GITHUB_TOKEN=ghp_xxx node scripts/fetch-repos.mjs
 
 脚本有一条保护：**一个仓库都没抓到时不覆盖旧文件**，宁可数据旧一天，也不要线上突然全部降级。
 卡片的角标会显示 `STATIC`（全部来自快照）/ `CACHE`（本地缓存）/ `GITHUB_API`（实时）/ `DEGRADED`（有降级）。
+
+### 14.4 顶部的一键刷新
+
+快照一天只有一次。仓库刚换了描述、涨了几颗 star，等不及下一次 Actions，
+就点右上角那颗圆形箭头（`js/repo-sync.js`）：
+
+- **跳过两层缓存**：既不看 `data/repos.json`，也不看十分钟的 localStorage 缓存，
+  直接按 `HNYZ_MEMBERS` 里的清单问 GitHub；
+- **只花「仓库个数」次请求**：同一仓库在清单里出现多次会先去重，并发压到 3；
+  五个仓库就是五次，离 60 次/小时的额度还很远；
+- **写回同一份缓存**：拿到的数据落到 `hnyz:github-repo-cache:v1`，
+  当前页立刻重渲染 —— 首页卡片、全部项目页里已经展开的分组、终端风 `2:build`
+  的仓库窗口都会换成新值；之后从别的页面进来也命中这份新缓存；
+- **不会被旧快照盖回去**：`fetchRepo()` 会比对快照的 `generatedAt` 和缓存的
+  `savedAt`，缓存更新就以缓存为准，直到 Actions 产出下一份快照；
+- **失败不动数据**：撞上限流、404、断网都只在右下角提示一句，
+  已有卡片保持原样；角标从 `STATIC` 变成 `SYNCED`，见过就知道这次是真去问了。
+
+描述这块跟着改了一次：卡片简介以 **GitHub 的 About 为准**，本地 `desc`
+只在仓库没写简介（或只写了「没有简介」）时兜底。理由很直接 —— 既然按钮承诺
+「刷新成仓库最新版本」，简介就不能继续被本地文案挡住。想写更长的话，
+仍然可以写在 `js/members.js` 的 `desc` 里，但只对没填 About 的仓库生效。
 
 ---
 
@@ -900,7 +923,7 @@ node scripts/compat-fallback.mjs         # 写入
 - `0:main` — 启动页：像素鲸鱼 + 17×5 的 HNYZ 字标、版本 / 路径 / TIP、标语、
   `whoami`、仪表条、联系方式；
 - `1:about` — man page：NAME / SYNOPSIS / DESCRIPTION / SEE ALSO；
-- `2:build` — `git log --oneline ~/repos`：仓库列表直接读 `data/repos.json` 快照；
+- `2:build` — `git log --oneline ~/repos`：仓库列表先读本地缓存，没有才退到 `data/repos.json` 快照，点顶部刷新会当场重排；
 - `3:sched` — `crontab -l`：活动节奏写成三条 cron，配 60 分钟分段条；
 - `4:wall` — `ls -la /srv/wall`：资源墙的两个入口；
 - `5:faq` — 可折叠的问答；

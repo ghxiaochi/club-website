@@ -77,6 +77,9 @@
   /* 这次加载命中了几次 10 分钟缓存；用于把状态显示成 CACHE */
   let cacheHits = 0;
 
+  /* 刚点过顶部刷新按钮：角标改成 SYNCED，别再显示 STATIC 误导人 */
+  let modeOverride = "";
+
   /* 命中静态快照的次数 / 真正打到 API 的次数 / 那份文件的 Promise */
   let staticHits = 0;
   let apiHits = 0;
@@ -167,6 +170,15 @@
   }
 
   /* 用 GitHub API 返回的数据组装卡片需要的字段 */
+  /* 有些仓库把「没有简介」直接写进 About，那不是正文，当成空处理 */
+  function cleanDescription(value) {
+    if (typeof value !== "string") return "";
+    const text = value.trim();
+    if (!text) return "";
+    if (/^(没有简介|暂无简介|无|no description\.?|n\/a)$/i.test(text)) return "";
+    return text;
+  }
+
   function normalizeRepo(data, member) {
     return {
       key: `${member.user}/${member.repo}`,
@@ -177,9 +189,11 @@
         data.name ||
         member.repo,
       owner: (data.owner && data.owner.login) || member.user,
+      /* 描述以 GitHub 的 About 为准：仓库那边改了什么，刷新后立刻能看到。
+         本地 desc 只在仓库没写简介（或只写了「没有简介」）时兜底。 */
       description:
+        cleanDescription(data.description) ||
         (typeof member.desc === "string" && member.desc.trim()) ||
-        (typeof data.description === "string" && data.description.trim()) ||
         "这个仓库还没有填写简介，点开源码看看吧。",
       language: data.language || "TEXT",
       stars: Number(data.stargazers_count) || 0,
@@ -490,6 +504,13 @@
     const store = await loadStaticStore();
     const snapshot = store && store.repos ? store.repos[cacheKey] : null;
     if (snapshot) {
+      /* 手动刷新写入的缓存比这份快照新，就以缓存为准：
+         否则点完刷新过 10 分钟，旧快照又把它盖回去了 */
+      const generatedAt = store && store.generatedAt ? Date.parse(store.generatedAt) : 0;
+      if (cached && Number.isFinite(generatedAt) && cached.savedAt > generatedAt) {
+        cacheHits += 1;
+        return normalizeRepo(cached.data, member);
+      }
       staticHits += 1;
       /* 顺手落进本地缓存：哪一天快照文件缺了这个仓库，还有旧值兜底 */
       setCachedRepo(cacheKey, snapshot);
@@ -595,10 +616,12 @@
 
   /* 状态角标文案：有降级 > 有缓存 > 实时 API，优先级从高到低 */
   function currentMode() {
+    if (modeOverride) return modeOverride;
     if (notices.size) return "DEGRADED";
-    /* 全部来自快照才算 STATIC；混着实时 API 的说法不诚实，按 API 标 */
-    if (staticHits && !apiHits) return "STATIC";
-    return cacheHits ? "CACHE" : "GITHUB_API";
+    /* 全部来自快照才算 STATIC；混着缓存或实时 API 的说法不诚实，往上报 */
+    if (staticHits && !apiHits && !cacheHits) return "STATIC";
+    if (cacheHits && !apiHits) return "CACHE";
+    return apiHits ? "GITHUB_API" : "CACHE";
   }
 
   /* 成员主页横幅：数据在 js/members.js 的 HNYZ_PROFILES 里，
@@ -923,6 +946,36 @@
       element.textContent = String(new Date().getFullYear());
     });
   }
+
+  /* =======================================================
+     十一、顶部刷新按钮的回调口
+     -------------------------------------------------------
+     按钮逻辑在 js/repo-sync.js：它负责问 GitHub、写缓存。
+     这里提供两个口子 —— 一个让它写进 main.js 内存里那份
+     缓存引用（否则刚写进去的值会被旧引用盖住），一个在
+     数据落地后把当前页重新画一遍。
+     ======================================================= */
+  function refreshViews() {
+    modeOverride = "SYNCED";
+
+    if (grid) loadProjects();
+
+    /* 全部项目页：只重画已经展开过的分组；
+       没展开的等用户点开时，自然会读到刚写好的缓存 */
+    document.querySelectorAll(".member-group").forEach((details) => {
+      if (details.dataset.loaded !== "true" || !details.open) return;
+      details.dataset.loaded = "false";
+      details.dispatchEvent(new Event("toggle"));
+    });
+  }
+
+  window.HNYZ_REPO_VIEW = {
+    readCache: readRepoCache,
+    write: setCachedRepo,
+    refresh: refreshViews
+  };
+
+  window.addEventListener("hnyz:repos-synced", refreshViews);
 
   initNavigation();
   initCopyButtons();

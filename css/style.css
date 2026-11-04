@@ -2593,6 +2593,7 @@ code {
   .header-actions .theme-toggle,
   .header-actions .style-toggle,
   .header-actions .fullscreen-toggle,
+  .header-actions .sync-toggle,
   .header-actions .nav-toggle {
     width: 26px;
     height: 26px;
@@ -2748,5 +2749,75 @@ code {
 @media (prefers-reduced-motion: reduce) {
   .section {
     content-visibility: visible;
+  }
+}
+
+/* =========================================================
+   顶部刷新按钮的轻提示
+   ---------------------------------------------------------
+   右下角一颗胶囊，几秒后自己收走。底色和描边都走皮肤变量，
+   六套皮肤不用单独适配。z-index 低于风格面板（620），
+   免得盖住正在挑皮肤的弹窗。
+   ========================================================= */
+.sync-toast {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 610;
+  max-width: min(340px, calc(100vw - 32px));
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--blue);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: var(--fs-caption);
+  line-height: 1.6;
+  box-shadow: 0 10px 30px rgba(6, 13, 28, 0.16);
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.sync-toast.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.sync-toast b {
+  color: var(--blue);
+  font-weight: 600;
+}
+
+.sync-toast.is-error {
+  border-left-color: var(--red);
+}
+
+.sync-toast.is-error b {
+  color: var(--red);
+}
+
+/* 终端风开着的时候底部有一条状态栏，提示往上让一格，别压住它 */
+.tty ~ .sync-toast {
+  bottom: 46px;
+}
+
+@media (max-width: 560px) {
+  /* 小屏底部全是内容和社团徽标，提示挪到顶栏下面，别挡着 */
+  .sync-toast {
+    top: 68px;
+    right: 12px;
+    left: 12px;
+    bottom: auto;
+    max-width: none;
+    font-size: var(--fs-meta);
+  }
+
+  /* 终端风例外：顶栏在 TTY 里，底部只盖一条状态栏 */
+  .tty ~ .sync-toast {
+    top: auto;
+    left: auto;
+    bottom: 40px;
   }
 }

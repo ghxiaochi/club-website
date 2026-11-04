@@ -25,7 +25,7 @@
    发版时改 VERSION，旧缓存在 activate 里被清掉。
    ========================================================= */
 
-const VERSION = "20261104a";
+const VERSION = "20261104b";
 const CACHE = `hnyz-v${VERSION}`;
 
 /* 站内根路径：用 "./" 就地解析，
@@ -66,6 +66,7 @@ const CORE = [
   `./css/ladder.css${V}`,
   `./css/guestbook.css${V}`,
   `./js/main.js${V}`,
+  `./js/repo-sync.js${V}`,
   `./js/members.js${V}`,
   `./js/copy.js${V}`,
   `./js/theme.js${V}`,

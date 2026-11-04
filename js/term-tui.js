@@ -169,7 +169,7 @@
   function loadDeepy() {
     if (deepyData || deepyLoading || !window.fetch) return;
     deepyLoading = true;
-    window.fetch("data/deepy.json?v=20261104a")
+    window.fetch("data/deepy.json?v=20261104b")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         deepyData = d;
@@ -335,6 +335,58 @@
     }
     box.innerHTML = h.join("");
   }
+
+  /* 本地缓存（顶部刷新按钮写的那份）转成 repos.json 的形状。
+     有缓存就用缓存，它一定比每天生成一次的静态快照新。 */
+  function readCachedRepos() {
+    try {
+      var raw = window.localStorage.getItem("hnyz:github-repo-cache:v1");
+      var cache = raw ? JSON.parse(raw) : null;
+      if (!cache || typeof cache !== "object") return null;
+      var repos = {};
+      var newest = 0;
+      Object.keys(cache).forEach(function (k) {
+        var entry = cache[k];
+        if (!entry || !entry.data) return;
+        repos[k] = entry.data;
+        if (entry.savedAt > newest) newest = entry.savedAt;
+      });
+      return Object.keys(repos).length ? { repos: repos, newest: newest } : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /* 先把缓存画出来（有的话），再拿快照比一次时间：
+     快照更老就不动，免得把刚刷新过的数据盖回去 */
+  function paintRepos(box) {
+    if (!box) return;
+    var cached = readCachedRepos();
+    if (cached) renderRepos(box, { repos: cached.repos });
+
+    window.fetch("data/repos.json?v=20261104b")
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (store) {
+        if (!store || !store.repos) {
+          if (!cached) renderRepos(box, null);
+          return;
+        }
+        var generatedAt = Date.parse(store.generatedAt || "") || 0;
+        if (!cached || generatedAt > cached.newest) renderRepos(box, store);
+      })
+      .catch(function () {
+        if (!cached) renderRepos(box, null);
+      });
+  }
+
+  /* 顶部按钮同步完：终端窗口里那份也得换 */
+  window.addEventListener("hnyz:repos-synced", function () {
+    if (!built) return;
+    var box = root && root.querySelector("[data-repos]");
+    if (!box) return;
+    var cached = readCachedRepos();
+    if (cached) renderRepos(box, { repos: cached.repos });
+  });
 
   function pseudoHash(s) {
     var x = 0x1b873593;
@@ -754,13 +806,10 @@
     bindRoot();
     built = true;
 
-    /* 仓库窗口：data/repos.json 是 Actions 每天抓好的快照，直接用 */
+    /* 仓库窗口：本地缓存优先，静态快照兜底 */
     var box = root.querySelector("[data-repos]");
     if (box && window.fetch) {
-      window.fetch("data/repos.json?v=20261104a")
-        .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (d) { renderRepos(box, d); })
-        .catch(function () { renderRepos(box, null); });
+      paintRepos(box);
     } else if (box) {
       renderRepos(box, null);
     }
