@@ -15,7 +15,7 @@
 :root {
   --bg: #f5f9ff;
   --bg-deep: #eaf2ff;
-  --panel: #ffffff;
+  --panel: #fcfdff;
   --panel-2: #f2f7ff;
   --panel-3: #e8f1ff;
 
@@ -41,6 +41,36 @@
   --radius-sm: 4px;
   --radius: 6px;
   --radius-lg: 10px;
+
+  /* 字号阶梯：全站只用这七级，不再一处一个 rem
+     尺子来自归藏设计系统（网页排版 skill）：body 17px、meta 12px */
+  --fs-display: clamp(2.9rem, 5.2vw, 4.4rem);
+  --fs-heading: clamp(1.9rem, 3.4vw, 2.6rem);
+  --fs-subhead: 1.5rem;
+  --fs-lead: 1.125rem;
+  --fs-body: 1.0625rem;
+  --fs-small: 0.9375rem;
+  --fs-caption: 0.8125rem;
+  --fs-meta: 0.75rem;
+
+  /* 行高：中文按 1.75–1.85 给，标题收紧到 1.15–1.2 */
+  --lh-display: 1.15;
+  --lh-heading: 1.2;
+  --lh-body: 1.8;
+
+  /* 间距刻度，只在这八个值里挑 */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+
+  /* 正文行长：36 个汉字（约 612px），超过就换行 */
+  --measure: 36em;
 
   --mono: "SFMono-Regular", "Cascadia Code", "JetBrains Mono", Consolas,
     "Liberation Mono", Menlo, monospace;
@@ -79,10 +109,20 @@ body {
     linear-gradient(90deg, rgba(37, 99, 235, 0.035) 1px, transparent 1px);
   background-size: 56px 56px, 56px 56px;
   font-family: var(--sans);
-  font-size: 16px;
-  line-height: 1.7;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+/* 中文排版：避头尾、标点挤压、字距归零（汉字是方块，拉字距只会散）
+   只挂在中文页上，英文页不受影响 */
+html:lang(zh) body {
+  line-break: strict;
+  text-spacing-trim: normal;
+  hanging-punctuation: allow-end;
+  letter-spacing: 0;
+  overflow-wrap: break-word;
 }
 
 ::selection {
@@ -158,7 +198,7 @@ code {
   background: var(--panel);
   color: var(--text);
   font-family: var(--mono);
-  font-size: 0.8rem;
+  font-size: var(--fs-small);
   transform: translateY(-160%);
   transition: transform 0.2s ease;
 }
@@ -191,7 +231,7 @@ code {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(255, 255, 255, 0.78);
+  background: rgba(252, 253, 255, 0.8);
   border-bottom: 1px solid transparent;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -199,7 +239,7 @@ code {
 }
 
 .site-header.is-scrolled {
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(252, 253, 255, 0.94);
   border-bottom-color: var(--border);
 }
 
@@ -259,7 +299,7 @@ code {
 
 .brand-copy span {
   color: var(--muted);
-  font-size: 0.7rem;
+  font-size: var(--fs-meta);
   letter-spacing: 0.12em;
 }
 
@@ -278,7 +318,7 @@ code {
 .nav-list a {
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 0.78rem;
+  font-size: var(--fs-caption);
   letter-spacing: 0.04em;
   white-space: nowrap;
 }
@@ -301,7 +341,7 @@ code {
   background: rgba(14, 165, 233, 0.08);
   color: var(--green-bright);
   font-family: var(--mono);
-  font-size: 0.78rem;
+  font-size: var(--fs-caption);
   white-space: nowrap;
   transition: all 0.3s ease;
 }
@@ -382,7 +422,7 @@ code {
   margin-bottom: 24px;
   color: var(--green-bright);
   font-family: var(--mono);
-  font-size: 0.74rem;
+  font-size: var(--fs-caption);
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -407,10 +447,10 @@ code {
   margin-bottom: 26px;
   color: var(--text);
   font-size: 59.4px; /* fallback: 旧内核 */
-  font-size: clamp(3rem, 5.6vw, 4.9rem);
-  font-weight: 800;
-  line-height: 1.06;
-  letter-spacing: -0.02em;
+  font-size: var(--fs-display);
+  font-weight: 700;
+  line-height: var(--lh-display);
+  letter-spacing: 0;
 }
 
 .accent-text {
@@ -418,8 +458,8 @@ code {
 }
 
 .hero-lead {
-  max-width: 590px;
-  color: var(--muted);
+  max-width: 34em;
+  color: var(--text-soft);
   font-size: 1.04rem;
   line-height: 1.85;
 }
@@ -441,7 +481,7 @@ code {
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   font-family: var(--mono);
-  font-size: 0.82rem;
+  font-size: var(--fs-small);
   font-weight: 600;
   letter-spacing: 0.02em;
   cursor: pointer;
@@ -470,7 +510,7 @@ code {
 
 .button--secondary {
   border-color: var(--border-strong);
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(252, 253, 255, 0.74);
   color: var(--text-soft);
 }
 @media (hover: hover), (pointer: fine) {
@@ -518,7 +558,7 @@ code {
 .hero-stat dt small {
   margin-left: 3px;
   color: var(--muted);
-  font-size: 0.68rem;
+  font-size: var(--fs-meta);
   font-weight: 500;
 }
 
@@ -526,7 +566,7 @@ code {
   margin-top: 4px;
   color: var(--dim);
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: var(--fs-meta);
   letter-spacing: 0.08em;
 }
 
@@ -536,7 +576,7 @@ code {
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  background: #ffffff;
+  background: var(--panel);
   box-shadow: var(--shadow-card);
 }
 
@@ -562,7 +602,7 @@ code {
   background: rgba(234, 242, 255, 0.72);
   color: var(--dim);
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: var(--fs-meta);
   letter-spacing: 0.03em;
 }
 
@@ -598,7 +638,7 @@ code {
 .card-label {
   color: var(--blue);
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: var(--fs-meta);
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -607,9 +647,9 @@ code {
   margin: 10px 0 24px;
   color: var(--text);
   font-size: 25.6px; /* fallback: 旧内核 */
-  font-size: clamp(1.5rem, 2.5vw, 2rem);
-  line-height: 1.25;
-  letter-spacing: -0.02em;
+  font-size: var(--fs-subhead);
+  line-height: 1.35;
+  letter-spacing: 0;
 }
 
 .quick-lines {
@@ -628,7 +668,7 @@ code {
 .quick-label {
   color: var(--green);
   font-family: var(--mono);
-  font-size: 0.66rem;
+  font-size: var(--fs-meta);
   letter-spacing: 0.06em;
 }
 
@@ -637,7 +677,7 @@ code {
   overflow: hidden;
   color: var(--text);
   font-family: var(--mono);
-  font-size: 0.83rem;
+  font-size: var(--fs-small);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -657,7 +697,7 @@ code {
   background: transparent;
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 0.65rem;
+  font-size: var(--fs-meta);
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -682,27 +722,24 @@ code {
   padding-left: 11px;
   border-left: 2px solid var(--border-strong);
   color: var(--dim);
-  font-size: 0.78rem;
+  font-size: var(--fs-caption);
   line-height: 1.75;
 }
 
 /* ---------- 5. 通用区块 ---------- */
 .section {
   position: relative;
-  padding: 92px 0;
+  padding: var(--space-9) 0;
 }
 
+/* 区块之间不画线：靠一层更浅的纸色和 96px 的留白分开 */
 .section--soft {
   background: rgba(234, 242, 255, 0.58);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
 }
 
 .section-head {
   max-width: 760px;
-  margin-bottom: 40px;
-  padding-top: 18px;
-  border-top: 1px solid var(--border);
+  margin-bottom: var(--space-7);
 }
 
 .section-label {
@@ -711,7 +748,7 @@ code {
   gap: 10px;
   color: var(--blue);
   font-family: var(--mono);
-  font-size: 0.7rem;
+  font-size: var(--fs-meta);
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
@@ -728,15 +765,15 @@ code {
   margin: 14px 0 16px;
   color: var(--text);
   font-size: 38.9px; /* fallback: 旧内核 */
-  font-size: clamp(2rem, 3.8vw, 3.1rem);
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -0.035em;
+  font-size: var(--fs-heading);
+  font-weight: 700;
+  line-height: var(--lh-heading);
+  letter-spacing: 0;
 }
 
 .section-intro {
-  max-width: 680px;
-  color: var(--muted);
+  max-width: 38em;
+  color: var(--text-soft);
   font-size: 1rem;
   line-height: 1.85;
 }
@@ -750,10 +787,10 @@ code {
 }
 
 .about-text p {
-  margin-bottom: 18px;
+  margin-bottom: 1em;
   color: var(--text-soft);
-  font-size: 0.97rem;
-  line-height: 1.95;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
 }
 
 .about-quote {
@@ -762,7 +799,7 @@ code {
   border-left: 2px solid var(--blue);
   color: var(--text);
   font-family: var(--mono);
-  font-size: 0.92rem;
+  font-size: var(--fs-small);
   line-height: 1.8;
   background: linear-gradient(90deg, rgba(37, 99, 235, 0.08), transparent);
 }
@@ -782,13 +819,13 @@ code {
 .fact-list dt {
   color: var(--dim);
   font-family: var(--mono);
-  font-size: 0.7rem;
+  font-size: var(--fs-meta);
   letter-spacing: 0.05em;
 }
 
 .fact-list dd {
   color: var(--text-soft);
-  font-size: 0.86rem;
+  font-size: var(--fs-small);
 }
 
 /* ---------- 7. 我们做什么 ---------- */
@@ -804,7 +841,7 @@ code {
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: linear-gradient(180deg, #ffffff 0%, #f4f9ff 100%);
+  background: linear-gradient(180deg, #fcfdff 0%, #f4f9ff 100%);
   transition: all 0.3s ease;
 }
 @media (hover: hover), (pointer: fine) {
@@ -823,20 +860,20 @@ code {
   margin-bottom: 18px;
   color: var(--blue);
   font-family: var(--mono);
-  font-size: 0.72rem;
+  font-size: var(--fs-caption);
   letter-spacing: 0.1em;
 }
 
 .do-card h3 {
   margin-bottom: 10px;
   color: var(--text);
-  font-size: 1.12rem;
-  letter-spacing: -0.01em;
+  font-size: var(--fs-lead);
+  letter-spacing: 0;
 }
 
 .do-card p {
   color: var(--muted);
-  font-size: 0.88rem;
+  font-size: var(--fs-small);
   line-height: 1.85;
 }
 
@@ -855,7 +892,7 @@ code {
   overflow: hidden;
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 0.76rem;
+  font-size: var(--fs-caption);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -869,7 +906,7 @@ code {
   flex-shrink: 0;
   color: var(--dim);
   font-family: var(--mono);
-  font-size: 0.7rem;
+  font-size: var(--fs-meta);
   letter-spacing: 0.06em;
 }
 
@@ -881,7 +918,7 @@ code {
   border-radius: var(--radius-sm);
   background: rgba(210, 153, 34, 0.07);
   color: var(--orange);
-  font-size: 0.8rem;
+  font-size: var(--fs-small);
   line-height: 1.75;
 }
 
@@ -898,7 +935,7 @@ code {
   border-radius: var(--radius);
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 0.8rem;
+  font-size: var(--fs-small);
   text-align: center;
 }
 
@@ -920,7 +957,7 @@ code {
   border-radius: var(--radius);
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 0.82rem;
+  font-size: var(--fs-small);
   text-align: center;
 }
 
@@ -1059,9 +1096,9 @@ code {
   border-radius: 3px;
   color: var(--blue);
   font-family: var(--mono);
-  font-size: 0.58rem;
+  font-size: var(--fs-meta);
   letter-spacing: 0.09em;
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(252, 253, 255, 0.74);
 }
 
 .cover-mark {
@@ -1077,7 +1114,7 @@ code {
 .cover-repo {
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 0.64rem;
+  font-size: var(--fs-meta);
 }
 
 .cover-badge {
@@ -1088,10 +1125,10 @@ code {
   padding: 4px 7px;
   border: 1px solid rgba(14, 165, 233, 0.4);
   border-radius: 3px;
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(252, 253, 255, 0.84);
   color: var(--green);
   font-family: var(--mono);
-  font-size: 0.56rem;
+  font-size: var(--fs-meta);
   letter-spacing: 0.07em;
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
@@ -1123,9 +1160,9 @@ code {
 .project-title {
   overflow: hidden;
   color: var(--text);
-  font-size: 1.08rem;
+  font-size: var(--fs-lead);
   font-weight: 700;
-  letter-spacing: -0.015em;
+  letter-spacing: 0;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1134,7 +1171,7 @@ code {
   margin-top: 2px;
   color: var(--dim);
   font-family: var(--mono);
-  font-size: 0.7rem;
+  font-size: var(--fs-meta);
 }
 
 .project-desc {
@@ -1142,7 +1179,7 @@ code {
   min-height: 4.6em;
   overflow: hidden;
   color: var(--muted);
-  font-size: 0.86rem;
+  font-size: var(--fs-small);
   line-height: 1.7;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
@@ -1172,13 +1209,13 @@ code {
   gap: 4px;
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: var(--fs-meta);
   white-space: nowrap;
 }
 
 .stat-label {
   color: var(--dim);
-  font-size: 0.58rem;
+  font-size: var(--fs-meta);
   letter-spacing: 0.04em;
 }
 
@@ -1207,7 +1244,7 @@ code {
   background: transparent;
   color: var(--blue);
   font-family: var(--mono);
-  font-size: 0.66rem;
+  font-size: var(--fs-meta);
   letter-spacing: 0.02em;
   transition: all 0.3s ease;
 }
@@ -1224,7 +1261,7 @@ code {
 
 
 .source-arrow {
-  font-size: 0.8rem;
+  font-size: var(--fs-small);
   transition: transform 0.3s ease;
 }
 @media (hover: hover), (pointer: fine) {
@@ -1248,7 +1285,7 @@ code {
 
 .projects-foot p {
   color: var(--dim);
-  font-size: 0.82rem;
+  font-size: var(--fs-small);
 }
 
 .projects-foot a {
@@ -1257,7 +1294,7 @@ code {
   gap: 6px;
   color: var(--blue);
   font-family: var(--mono);
-  font-size: 0.74rem;
+  font-size: var(--fs-caption);
   white-space: nowrap;
 }
 
@@ -1276,7 +1313,7 @@ code {
   border-radius: var(--radius-sm);
   color: var(--blue);
   font-family: var(--mono);
-  font-size: 0.74rem;
+  font-size: var(--fs-caption);
   letter-spacing: 0.04em;
   transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
 }
@@ -1305,10 +1342,10 @@ code {
   margin: 18px 0 18px;
   color: var(--text);
   font-size: 55.3px; /* fallback: 旧内核 */
-  font-size: clamp(2.5rem, 5.4vw, 4.4rem);
-  font-weight: 800;
-  line-height: 1.08;
-  letter-spacing: -0.045em;
+  font-size: var(--fs-display);
+  font-weight: 700;
+  line-height: var(--lh-display);
+  letter-spacing: 0;
 }
 
 .archive-actions {
@@ -1373,14 +1410,14 @@ code {
 .member-prompt {
   color: var(--green);
   font-family: var(--mono);
-  font-size: 0.72rem;
+  font-size: var(--fs-caption);
 }
 
 .member-name {
   overflow: hidden;
   color: var(--text);
   font-family: var(--mono);
-  font-size: 0.95rem;
+  font-size: var(--fs-small);
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1393,7 +1430,7 @@ code {
   border-radius: 3px;
   color: var(--dim);
   font-family: var(--mono);
-  font-size: 0.63rem;
+  font-size: var(--fs-meta);
 }
 
 .member-toggle {
@@ -1427,7 +1464,7 @@ code {
   border-radius: var(--radius);
   background:
     radial-gradient(circle at 88% 12%, rgba(37, 99, 235, 0.15), transparent 34%),
-    linear-gradient(135deg, #ffffff 0%, #edf6ff 58%, #dceeff 100%);
+    linear-gradient(135deg, #fcfdff 0%, #edf6ff 58%, #dceeff 100%);
 }
 
 .member-profile::before {
@@ -1456,7 +1493,7 @@ code {
 .member-profile__kicker {
   color: var(--blue);
   font-family: var(--mono);
-  font-size: 0.6rem;
+  font-size: var(--fs-meta);
   letter-spacing: 0.13em;
   text-transform: uppercase;
 }
@@ -1464,14 +1501,14 @@ code {
 .member-profile__title {
   margin: 7px 0 5px;
   color: var(--text);
-  font-size: 1.15rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  letter-spacing: 0;
 }
 
 .member-profile__desc {
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: var(--fs-caption);
   line-height: 1.7;
 }
 
@@ -1488,7 +1525,7 @@ code {
   width: 92px;
   height: 92px;
   border-radius: 18px;
-  background: #ffffff;
+  background: var(--panel);
   object-fit: cover;
   box-shadow: 0 10px 24px rgba(30, 64, 175, 0.16);
   animation: chibi-bob-a 3.4s ease-in-out infinite;
@@ -1520,7 +1557,7 @@ code {
   border-radius: var(--radius-sm);
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 0.78rem;
+  font-size: var(--fs-caption);
   text-align: center;
 }
 
@@ -1536,14 +1573,14 @@ code {
 
 .archive-foot p {
   color: var(--dim);
-  font-size: 0.82rem;
+  font-size: var(--fs-small);
 }
 
 .archive-foot a {
   flex-shrink: 0;
   color: var(--blue);
   font-family: var(--mono);
-  font-size: 0.74rem;
+  font-size: var(--fs-caption);
 }
 
 .noscript-note {
@@ -1552,7 +1589,7 @@ code {
   border-radius: var(--radius-sm);
   background: rgba(210, 153, 34, 0.07);
   color: var(--orange);
-  font-size: 0.85rem;
+  font-size: var(--fs-small);
 }
 
 /* ---------- 10. 活动节奏 ---------- */
@@ -1578,7 +1615,7 @@ code {
 .schedule-when {
   color: var(--blue);
   font-family: var(--mono);
-  font-size: 0.7rem;
+  font-size: var(--fs-meta);
   letter-spacing: 0.04em;
 }
 
@@ -1590,7 +1627,7 @@ code {
 
 .schedule-item p {
   color: var(--muted);
-  font-size: 0.87rem;
+  font-size: var(--fs-small);
   line-height: 1.85;
 }
 
@@ -1598,7 +1635,7 @@ code {
   padding: 26px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: linear-gradient(180deg, #ffffff 0%, #f4f9ff 100%);
+  background: linear-gradient(180deg, #fcfdff 0%, #f4f9ff 100%);
 }
 
 .agenda-card h3 {
@@ -1616,20 +1653,20 @@ code {
   padding: 11px 0;
   border-bottom: 1px dashed var(--border);
   color: var(--text-soft);
-  font-size: 0.84rem;
+  font-size: var(--fs-small);
 }
 
 .agenda-time {
   color: var(--dim);
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: var(--fs-meta);
   white-space: nowrap;
 }
 
 .agenda-note {
   margin-top: 16px;
   color: var(--dim);
-  font-size: 0.76rem;
+  font-size: var(--fs-caption);
   line-height: 1.8;
 }
 
@@ -1650,7 +1687,7 @@ code {
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: linear-gradient(180deg, #ffffff 0%, #f4f9ff 100%);
+  background: linear-gradient(180deg, #fcfdff 0%, #f4f9ff 100%);
   color: var(--text);
   transition: all 0.3s ease;
 }
@@ -1692,14 +1729,14 @@ code {
   padding-top: 2px;
   color: var(--blue);
   font-family: var(--mono);
-  font-size: 0.7rem;
+  font-size: var(--fs-meta);
 }
 
 .wall-kicker {
   margin-bottom: 8px;
   color: var(--green);
   font-family: var(--mono);
-  font-size: 0.62rem;
+  font-size: var(--fs-meta);
   letter-spacing: 0.1em;
 }
 
@@ -1711,7 +1748,7 @@ code {
 
 .wall-body p {
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: var(--fs-small);
   line-height: 1.8;
 }
 
@@ -1735,7 +1772,7 @@ code {
   margin-top: 22px;
   color: var(--dim);
   font-family: var(--mono);
-  font-size: 0.72rem;
+  font-size: var(--fs-caption);
   line-height: 1.8;
 }
 
@@ -1756,7 +1793,7 @@ code {
   gap: 20px;
   padding: 20px 0;
   color: var(--text-soft);
-  font-size: 0.98rem;
+  font-size: var(--fs-small);
   cursor: pointer;
   list-style: none;
   transition: color 0.3s ease;
@@ -1803,11 +1840,11 @@ code {
 }
 
 .faq-answer {
-  max-width: 780px;
+  max-width: 44em;
   padding: 0 0 22px;
   color: var(--muted);
-  font-size: 0.88rem;
-  line-height: 1.9;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
 }
 
 /* ---------- 13. 加入我们 ---------- */
@@ -1829,7 +1866,7 @@ code {
   border-radius: var(--radius-lg);
   background:
     radial-gradient(circle at 92% 8%, rgba(37, 99, 235, 0.12), transparent 38%),
-    linear-gradient(135deg, #ffffff 0%, #eef6ff 52%, #e0efff 100%);
+    linear-gradient(135deg, #fcfdff 0%, #eef6ff 52%, #e0efff 100%);
   box-shadow: 0 28px 70px rgba(30, 64, 175, 0.14);
 }
 
@@ -1864,16 +1901,16 @@ code {
   margin: 14px 0 16px;
   color: var(--text);
   font-size: 38.9px; /* fallback: 旧内核 */
-  font-size: clamp(2rem, 3.8vw, 3rem);
-  line-height: 1.1;
-  letter-spacing: -0.035em;
+  font-size: var(--fs-heading);
+  line-height: var(--lh-heading);
+  letter-spacing: 0;
 }
 
 .join-lead {
-  max-width: 520px;
+  max-width: 32em;
   color: var(--muted);
-  font-size: 0.94rem;
-  line-height: 1.9;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
 }
 
 .join-steps {
@@ -1891,7 +1928,7 @@ code {
 .join-step-num {
   color: var(--green);
   font-family: var(--mono);
-  font-size: 0.72rem;
+  font-size: var(--fs-caption);
   line-height: 1.8;
 }
 
@@ -1899,12 +1936,12 @@ code {
   display: block;
   margin-bottom: 3px;
   color: var(--text-soft);
-  font-size: 0.9rem;
+  font-size: var(--fs-small);
 }
 
 .join-steps p {
   color: var(--dim);
-  font-size: 0.8rem;
+  font-size: var(--fs-small);
   line-height: 1.7;
 }
 
@@ -1913,7 +1950,7 @@ code {
   padding: 24px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.66);
+  background: rgba(252, 253, 255, 0.7);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
@@ -1921,7 +1958,7 @@ code {
 .join-contact-label {
   color: var(--dim);
   font-family: var(--mono);
-  font-size: 0.64rem;
+  font-size: var(--fs-meta);
   letter-spacing: 0.08em;
 }
 
@@ -1946,7 +1983,7 @@ code {
   margin: 6px 0 12px;
   color: var(--text);
   font-family: var(--mono);
-  font-size: 0.85rem;
+  font-size: var(--fs-small);
   word-break: break-all;
 }
 @media (hover: hover), (pointer: fine) {
@@ -1961,7 +1998,7 @@ code {
 .join-note {
   margin-top: 14px;
   color: var(--dim);
-  font-size: 0.74rem;
+  font-size: var(--fs-caption);
   line-height: 1.75;
 }
 
@@ -1973,7 +2010,7 @@ code {
   padding: 10px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  background: #ffffff;
+  background: var(--panel);
 }
 
 .join-qr__img {
@@ -1982,7 +2019,7 @@ code {
   height: 140px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--panel);
 }
 
 .join-qr__copy {
@@ -1992,14 +2029,14 @@ code {
 .join-qr__copy strong {
   display: block;
   color: var(--text);
-  font-size: 0.84rem;
+  font-size: var(--fs-small);
 }
 
 .join-qr__copy span {
   display: block;
   margin-top: 4px;
   color: var(--dim);
-  font-size: 0.7rem;
+  font-size: var(--fs-meta);
   line-height: 1.65;
 }
 
@@ -2024,7 +2061,7 @@ code {
 .footer-brand > p {
   color: var(--dim);
   font-family: var(--mono);
-  font-size: 0.74rem;
+  font-size: var(--fs-caption);
 }
 
 .footer-nav {
@@ -2037,7 +2074,7 @@ code {
 .footer-nav a {
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 0.72rem;
+  font-size: var(--fs-caption);
 }
 @media (hover: hover), (pointer: fine) {
 
@@ -2054,7 +2091,7 @@ code {
   border-top: 1px solid var(--border);
   color: var(--dim);
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: var(--fs-meta);
   line-height: 1.9;
 }
 
@@ -2079,6 +2116,14 @@ code {
   .join-panel {
     gap: 36px;
   }
+}
+
+/* 901–1120：导航还在横排，字号抬到 13px 后顶栏会挤，
+   把导航与按钮区的间距收紧一档，别把主题开关挤出屏幕 */
+@media (min-width: 901px) and (max-width: 1120px) {
+  .header-inner { gap: 14px; }
+  .nav-list { gap: 15px; }
+  .nav-cta { padding: 8px 12px; }
 }
 
 @media (max-width: 900px) {
@@ -2112,7 +2157,7 @@ code {
     padding: 20px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    background: #ffffff;
+    background: var(--panel);
     box-shadow: 0 24px 48px rgba(30, 64, 175, 0.16);
     -webkit-backdrop-filter: blur(18px);
     backdrop-filter: blur(18px);
@@ -2132,7 +2177,7 @@ code {
     display: block;
     padding: 10px 0;
     border-bottom: 1px solid var(--border);
-    font-size: 0.84rem;
+    font-size: var(--fs-small);
   }
 
   .nav-cta {
@@ -2238,7 +2283,7 @@ code {
   }
 
   .faq-item summary {
-    font-size: 0.92rem;
+    font-size: var(--fs-small);
   }
 
   .archive {
@@ -2269,7 +2314,7 @@ code {
   }
 
   .hero-lead {
-    font-size: 0.94rem;
+    font-size: var(--fs-small);
   }
 
   .button {
@@ -2285,7 +2330,7 @@ code {
   }
 
   .quick-value {
-    font-size: 0.76rem;
+    font-size: var(--fs-caption);
   }
 
   .section {
@@ -2405,11 +2450,11 @@ code {
   }
 
   .member-profile__desc {
-    font-size: 0.72rem;
+    font-size: var(--fs-caption);
   }
 
   .member-profile__kicker {
-    font-size: 0.52rem;
+    font-size: var(--fs-meta);
     letter-spacing: 0.06em;
     white-space: nowrap;
   }
@@ -2528,7 +2573,7 @@ code {
   }
 
   .brand-copy strong {
-    font-size: 0.76rem;
+    font-size: var(--fs-caption);
     letter-spacing: 0.02em;
   }
 
@@ -2575,12 +2620,12 @@ code {
   .do-card p,
   .quick-desc,
   .faq-a {
-    font-size: 0.74rem;
+    font-size: var(--fs-caption);
     line-height: 1.7;
   }
 
   .eyebrow {
-    font-size: 0.54rem;
+    font-size: var(--fs-meta);
     letter-spacing: 0.1em;
   }
 
@@ -2592,7 +2637,7 @@ code {
   .button {
     min-height: 38px;
     padding: 0 12px;
-    font-size: 0.74rem;
+    font-size: var(--fs-caption);
   }
 
   .quick-card,
@@ -2653,12 +2698,12 @@ code {
   .dino-run__hud {
     flex-wrap: wrap;
     gap: 4px 8px;
-    font-size: 0.5rem;
+    font-size: var(--fs-meta);
   }
 
   .dino-run__kicker,
   .dino-run__hint {
-    font-size: 0.5rem;
+    font-size: var(--fs-meta);
   }
 }
 

@@ -248,7 +248,7 @@ const projects = await Promise.all(list.map((member) => fetchRepo(member)));
 | `default` 蓝白科技 | 原来的样子，光斑、角色排、校徽、动效全保留 | 什么都不改 |
 | `minimal` 极简 | 纯黑白灰、直角、去阴影，隐藏光斑 / 装饰图标 / 贴纸 / 校徽 | `html[data-style="minimal"]` 变量 + 隐藏清单 |
 | `hacker` 黑客终端 | 纯黑底，背景只有一整屏代码雨和一层漂浮的气泡，等宽字 + 荧光绿；跑道里的天也永远是纯黑，太阳、月亮统一荧光绿（金币仍是琥珀色） | `html[data-style="hacker"]` 变量 + `js/matrix.js` 画布 + `.skin-bubbles` + `skyPal` |
-| `term` 终端 | 首页是一整台「多窗口终端」HNYZ TTY：tmux 式窗口条挂着 0:main～7:join 八个窗口，底部一条真能敲命令的 shell，按键图例常驻；雾蓝双版（浅色白面板 #F6F3ED / 深色 #242B3A，主蓝 #3F6CC4 / #7DA1DE），像素鲸鱼 + 像素字标；窗口文案是终端味重写的，不与其它皮肤共用；内页退回同色纸带，方块摊平成记录行 | `css/skin-term.css` + `css/term-tui.css` + `js/term-tui.js`，由 `js/skins.js` 的 `syncTerm()` 通知进退场；五套老皮肤一条规则都没动 |
+| `term` 终端 | 首页是一整台「多窗口终端」HNYZ TTY：tmux 式窗口条挂着 0:main～7:join 八个窗口，底部一条真能敲命令的 shell，按键图例常驻；雾蓝双版（浅色白面板 #F6F3ED / 深色 #242B3A，主蓝 #3F6CC4 / #7DA1DE），Deepy 像素鲸鱼 + 像素字标；窗口文案是终端味重写的，不与其它皮肤共用；内页退回同色纸带，方块摊平成记录行 | `css/skin-term.css` + `css/term-tui.css` + `js/term-tui.js`，由 `js/skins.js` 的 `syncTerm()` 通知进退场；五套老皮肤一条规则都没动 |
 | `halo` 光场 | 整屏换成 HALOFLUX：节拍驱动的深色光场、中央数据环带、外侧光束、底部八块数据面板（文案已全部换成社团内容）；站点自己的内容全部让位，顶栏收缩成右上角一枚风格按钮，随时能切回来 | `css/skin-halo.css` + 全屏 iframe 挂载 `halo.html`，切走即移除 iframe（rAF 真正停掉） |
 | `bare` 棍木 | 全白空白页，没有内容、颜色和链接，中间一句灰字，右上角只剩风格按钮 | `html[data-style="bare"]` 隐藏 `body` 下所有节点 + 按钮搬到 `body` |
 
@@ -496,7 +496,7 @@ Pages 会自动重新构建。如果页面还是旧版本，先强制刷新（`C
 - [ ] 头部太阳/月亮按钮能切换深浅色，刷新后选择仍然保留
 - [ ] 顶栏四格方块能打开风格面板，六张竖卡上下滑动、点「切换」整屏擦除后换肤；点卡片本体也会滚动居中并高亮
 - [ ] 切到「光场」后整屏是深色光场动画，右上角只剩一枚风格按钮，能随时切回来；切走后 iframe 被移除（DevTools 里搜不到 `.halo-frame`）
-- [ ] 切到「终端」：首页变成一台多窗口终端，启动页有像素鲸鱼与 HNYZ 字标；`0-7` 或点窗口条能切窗口、每个窗口滚动位置各自保留，活动窗口边框转主蓝；底部命令行敲 `help` 有命令列表、敲 `gallery` 能跳图集页、敲错的命令会报 `command not found`；复制按钮点了闪「已复制 ✓」；内页仍是同色系纸带；切走后 TTY 从 DOM 里拆干净、顶栏按钮搬回原位
+- [ ] 切到「终端」：首页变成一台多窗口终端，启动页有 Deepy 鲸鱼与 HNYZ 字标，停一会儿它会喷水或游一下，点一下会换表情；`0-7` 或点窗口条能切窗口、每个窗口滚动位置各自保留，活动窗口边框转主蓝；底部命令行敲 `help` 有命令列表、敲 `gallery` 能跳图集页、敲错的命令会报 `command not found`；复制按钮点了闪「已复制 ✓」；内页仍是同色系纸带；切走后 TTY 从 DOM 里拆干净、顶栏按钮搬回原位
 - [ ] 终端风明暗两版都过一遍：白面板 / 深面板、主蓝 `#3F6CC4` / `#7DA1DE`，鲸鱼和字标在两种底色上都清晰，状态条不换行
 - [ ] 性能：默认风首屏不请求 `skin-term.css` / `term-tui.css` / `skin-halo.css`；鼠标移到「风格」按钮前后再切终端风不闪白；滚动到页面中段，区块正常显示（`content-visibility` 生效）；图集图片是懒加载
 - [ ] 顶栏的全屏按钮能进能出，图标在「四角向外 / 向内」之间切换，Esc 退出后按钮状态跟着回来
@@ -874,6 +874,8 @@ node scripts/compat-fallback.mjs         # 写入
 第六套皮肤，和黑客风是两种东西：黑客风在「攻击」你（荧光绿、代码雨、发光边框），
 终端风是一台值班的机器——视觉照着 [dsh-TUI](https://github.com/ccch1mneyyy/dsh-TUI)
 的 Gentle Mist Blue（雾蓝）：白面板、暖白纸底、墨色字、雾蓝主色、像素鲸鱼。
+鲸鱼用的是 dsh-TUI 仓库里那只 **Deepy**（`assets/deepy/frames.json`）：42×30 的像素画，
+七组动画按下表的时机播放，不再自己拿 CSS 拼一只。
 
 ### 19.1 首页不是网页，是一台多窗口终端
 
@@ -905,9 +907,22 @@ node scripts/compat-fallback.mjs         # 写入
 - `6:msg` — `tail -f guestbook.log`：留言说明 + 跳到真留言板（giscus 需要真页面）；
 - `7:join` — `ssh newmember@hnyz`：群号、邮箱、备注，复制按钮齐全。
 
-鲸鱼与字标都是 CSS Grid 逐格画的点阵，一格一个 `<i>`：不用字符画，
-块字符（█）在不同字体里宽度不稳定，点阵永远清晰，还各自带 `aria-label`。
-顶栏那只小鲸鱼复用的是同一份点阵，格子压到 2px。
+字标还是 CSS Grid 逐格画的点阵，一格一个 `<i>`：不用字符画，
+块字符（█）在不同字体里宽度不稳定，点阵永远清晰，带 `aria-label`。
+
+鲸鱼换成 Deepy 之后是另一套做法（`js/term-tui.js` 的 `deepyBox()` / `stepDeepy()`）：
+
+- **数据**：`data/deepy.json` 存 `idle / idle-spout / swim / happy / notification /
+  poke-left / poke-right` 七组帧，每帧一行 1260 字符的调色板索引；gzip 后 2KB；
+- **静态先行**：首帧另存成 `images/deepy/idle.webp`（1.2KB），`<img>` 先站着，
+  脚本把帧数据取回来、把每一帧预渲染到离屏 canvas 之后，才叠上 `<canvas>` 播放，
+  中途失败也只是「鲸鱼不动」，不会留一块空白；
+- **待机**：`idle` 循环；每 9–16 秒随机插入一段 `idle-spout` 或 `swim` 再回待机，
+  所以它不会像一张贴图；
+- **互动**：点一下（或聚焦后按 Enter / 空格）随机播 `happy / poke-left / poke-right /
+  idle-spout`，播完回 `idle`；
+- **降级**：`prefers-reduced-motion: reduce` 时只留静态首帧，不取动画数据；
+  顶栏那只小鲸鱼就是同一张首帧压到 1px 一格（42×30）。
 
 ### 19.3 命令行是真的
 
@@ -973,7 +988,61 @@ TTY 打开时把原顶栏的 `.header-actions`（音效 / 全屏 / 风格 / 主�
 
 ---
 
-## 21. 性能与加载
+## 21. 设计系统与中文排版
+
+排版这块借了 [歸藏设计](https://github.com/op7418/dsh-guizang-design)（`op7418/dsh-guizang-design`）
+的网页排版 skill：那套东西的价值不在某张页面长什么样，而在它把「字号、间距、行长、
+中文规则」收成了一套可复用的 token，PPT、卡片、网页三个出口共用一把尺子。
+本站只搬能迁移的部分，版式还是自己的。
+
+### 21.1 字号阶梯
+
+以前全站散着 `0.58rem` 到 `1.04rem` 十几种字号，同一个层级的标签在不同组件里能差 2px。
+现在只留七级（`css/style.css` 的 `:root`）：
+
+| Token | 值 | 像素 | 用在哪 |
+|---|---|---|---|
+| `--fs-display` | `clamp(2.9rem, 5.2vw, 4.4rem)` | 46–70 | 页面大标题（h1） |
+| `--fs-heading` | `clamp(1.9rem, 3.4vw, 2.6rem)` | 30–42 | 章节标题（h2） |
+| `--fs-subhead` | `1.5rem` | 24 | 卡片标题 |
+| `--fs-lead` | `1.125rem` | 18 | 项目名、条目标题 |
+| `--fs-body` | `1.0625rem` | 17 | 正文 |
+| `--fs-small` | `0.9375rem` | 15 | 卡片简介、次要信息 |
+| `--fs-caption` | `0.8125rem` | 13 | 标签、图注 |
+| `--fs-meta` | `0.75rem` | 12 | 等宽小字、角标、数据栏 |
+
+12px 是下限：原来 9px 的封面角标、10px 的复制按钮、10.9px 的统计说明都抬到了 12px，
+先保证看得清，再谈密度。
+
+### 21.2 间距只走八个刻度
+
+`--space-1` 到 `--space-9`：4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 / 96。
+区块上下留白统一到 96px，章节标题与正文之间 48px，卡片内部 24px。
+以前 92px、40px、18px 混着用，滚动时节奏是碎的。
+
+### 21.3 中文按中文的规矩排
+
+- 正文 17px / 行高 1.8；行长上限 `36em`（约 612px，36 个汉字），超过就换行；
+- `line-break: strict` 避头尾，`text-spacing-trim: normal` 挤掉标点多余的全角空白，
+  `hanging-punctuation: allow-end`（Safari）让句号挂在栏外；
+- 中文字距归零。之前标题写 `letter-spacing: -0.02em` 到 `-0.045em`，
+  汉字是方块，负字距只会让笔画粘在一起；
+- 标题字重从 800 降到 700。系统黑体 800 在中文大字号下发死，700 已经够重；
+- 中文不用伪斜体（强调靠颜色和字重，不靠斜体），这条和归藏的设计规则一致。
+
+### 21.4 少画线，多留白
+
+- 区块之间不再画上下边框，靠 96px 留白和一层更浅的纸色（`--section--soft`）分开；
+- 章节标题原来同时有「标签前短横线」和「标题上边框」两条线挨着，现在只留短横线；
+- 大面积纯白换成冷白 `#FCFDFF`（面板）与 `rgba(252, 253, 255, 0.8)`（顶栏），
+  纯白在浅蓝底上会发青、发刺眼；
+- 全站仍然只有一个强调蓝（`--blue`），绿和橙只做语义色（成功、Arduino），
+  不参与装饰。
+
+这些规则全在基础层，六套皮肤的身份色、字体、版式一条没动；
+极简黑白、黑客荧光绿、终端雾蓝、光场、空白各自还是原来的样子。
+
+## 22. 性能与加载
 
 这一轮做的是「少下载、少阻塞、少重排」，不靠压缩工具改构建流程：
 
@@ -988,6 +1057,10 @@ TTY 打开时把原顶栏的 `.header-actions`（音效 / 全屏 / 风格 / 主�
   首帧只排版第一屏；`prefers-reduced-motion` 时关闭。
 - **背景不再 `fixed`**：滚动时省掉一次大面积重绘，移动端尤其明显。
 - 代码雨本就只在黑客风启动、页面不可见就停；光场 iframe 只在切到光场时创建。
+- **Deepy 不挡首屏**：静态首帧 1.2KB 跟图片一起预缓存；动画数据
+  `data/deepy.json`（83KB，gzip 后 2KB）要等 `requestIdleCallback` 才 fetch，
+  并且只取一次、逐帧预渲染到离屏 canvas，播放时每帧只做一次 `drawImage`。
+  `prefers-reduced-motion` 下连这次请求都不发。
 
 实测（本地静态服务、禁用缓存、1440×900）：
 
@@ -1001,12 +1074,21 @@ TTY 打开时把原顶栏的 `.header-actions`（音效 / 全屏 / 风格 / 主�
 
 ---
 
-## 22. 致谢
+## 23. 致谢
 
 有两样东西不是我们写的，都在这里说清楚：
 
 **[HALOFLUX](https://github.com/Ryder191/haloflux) by Ryder191**（RYDER CODE / Ms MAIKEBAIs CAT），「光场」皮肤的本体，Copyright (c) 2026。按 [PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/) 授权，**只能非商业使用**。`halo.html` 文件头保留了原始声明；本站是学校社团的非营利站点，在授权范围内。转载或二创请保留声明，注明「HALOFLUX by Ryder191」。
 
 **[Animdustry](https://github.com/Anuken/animdustry) by Anuken**。「全部项目」页那排角色、原版像素字体（`fonts/anim-title.ttf` / `anim-pixel.ttf`）和音效（`audio/`）都取自这个游戏，仅用于社团非营利展示。
+
+**[dsh-TUI](https://github.com/ccch1mneyyy/dsh-TUI) by ccch1mneyyy**（MIT）。终端风的 Deepy 小鲸鱼
+（`assets/deepy/frames.json` 的 42×30 帧数据）来自这个仓库，本站只截了七个动画，
+转成 `data/deepy.json` 用 canvas 播放；原仓库说明这是一份非官方粉丝作品。
+顶栏布局、窗口条、状态条的交互骨架也参照了它的落地页，代码是自己写的。
+
+**[歸藏设计](https://github.com/op7418/dsh-guizang-design) by op7418**（AGPL-3.0）。
+第 21 节的字号阶梯、间距刻度与中文排版规则参考了它的网页排版 skill；只借鉴规则和取值，
+没有引入它的任何代码、样式文件或字体，站点仍是纯手写 CSS。
 
 其余的代码都是社团手写的。想给自己的网站也加点这样的东西，先去读一遍上面两个项目的授权条款。

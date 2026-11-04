@@ -70,36 +70,161 @@
   }
 
   /* ---------------------------------------------------------
-     点阵素材：鲸鱼与字标都逐格画，不依赖字体度量
+     形象：dsh-TUI 的 Deepy（42×30 像素鲸鱼，20 组动画）
+     原素材是 frames.json 里按调色板索引的帧，这里换成 canvas 播放，
+     静态首帧仍走 <img>，脚本没跑到也不会留一块空白。
      --------------------------------------------------------- */
-  var WHALE = [
-    "0000000000000000011000",
-    "0000000000000000111100",
-    "0000000000000001111000",
-    "0000011110000011110000",
-    "0000111111000111100000",
-    "0001111111111111100000",
-    "0011111111111111110000",
-    "0111131111111111111000",
-    "0111111111111111111100",
-    "0011222222222222111100",
-    "0001122222222221110000",
-    "0000111111111111100000"
-  ];
+  var DEEPY_W = 42;
+  var DEEPY_H = 30;
+  var DEEPY_SRC = "images/deepy/idle.webp";
+  var DEEPY_IDLE = "idle";
+  var deepyData = null;
+  var deepyLoading = false;
+  var deepyWaiters = [];
+  var deepyCtx = null;
+  var deepyAnim = DEEPY_IDLE;
+  var deepyStart = 0;
+  var deepyFrame = 0;
+  var deepyTimer = 0;
+  var deepyNext = 0;
+  var deepyCache = {};
 
-  /* cell 传数字时固定像素，不传就用 CSS 的 clamp（跟着视口走） */
-  function whale(cell) {
-    var cols = 0;
-    WHALE.forEach(function (r) { cols = Math.max(cols, r.length); });
-    var out = "";
-    WHALE.forEach(function (row) {
-      for (var c = 0; c < cols; c += 1) {
-        var ch = row[c] || "0";
-        out += ch === "1" ? '<i class="on"></i>' : ch === "2" ? '<i class="belly"></i>' : ch === "3" ? '<i class="eye"></i>' : "<i></i>";
+  function deepyBox(cell, label, interactive) {
+    return '<span class="tty-deepy"' + (cell ? ' style="--cell:' + cell + 'px"' : "") +
+      (label ? ' role="img"' + (interactive ? ' tabindex="0"' : "") + ' aria-label="' + esc(label) + '"' : ' aria-hidden="true"') + ">" +
+      '<img class="tty-deepy__img" src="' + DEEPY_SRC + '" width="' + DEEPY_W * 4 + '" height="' + DEEPY_H * 4 +
+      '" alt="" decoding="async"' + (interactive ? "" : ' loading="lazy"') + ">" +
+      (interactive ? '<canvas class="tty-deepy__cv" width="' + DEEPY_W + '" height="' + DEEPY_H + '"></canvas>' : "") +
+      "</span>";
+  }
+
+  function deepyFrames(anim) {
+    if (deepyCache[anim]) return deepyCache[anim];
+    if (!deepyData || !deepyData.animations[anim]) return null;
+    var pal = deepyData.palette;
+    var list = deepyData.animations[anim].map(function (f) {
+      var c = document.createElement("canvas");
+      c.width = DEEPY_W;
+      c.height = DEEPY_H;
+      var g = c.getContext("2d");
+      for (var y = 0; y < DEEPY_H; y += 1) {
+        for (var x = 0; x < DEEPY_W; x += 1) {
+          var ch = f.p.charAt(y * DEEPY_W + x);
+          if (!ch || ch === ".") continue;
+          var hex = pal[ch];
+          if (!hex) continue;
+          g.fillStyle = hex;
+          g.fillRect(x, y, 1, 1);
+        }
       }
+      return { d: f.d, c: c };
     });
-    return '<span class="tty-whale" role="img" aria-label="像素鲸鱼" style="--cols:' + cols +
-      (cell ? ";--cell:" + cell + "px" : "") + '">' + out + "</span>";
+    deepyCache[anim] = list;
+    return list;
+  }
+
+  function paintDeepy(anim, index) {
+    if (!deepyCtx) return;
+    var frames = deepyFrames(anim);
+    if (!frames || !frames[index]) return;
+    deepyCtx.clearRect(0, 0, DEEPY_W, DEEPY_H);
+    deepyCtx.drawImage(frames[index].c, 0, 0);
+  }
+
+  /* 一帧一帧按原素材的 dur 走；idle 循环，互动动画播完自动回 idle */
+  function stepDeepy(now) {
+    if (!deepyCtx) return;
+    var frames = deepyFrames(deepyAnim) || deepyFrames(DEEPY_IDLE);
+    if (!frames) return;
+    if (!deepyStart) deepyStart = now;
+    var wait = frames[deepyFrame] ? frames[deepyFrame].d : 400;
+    if (now - deepyStart >= wait) {
+      deepyStart = now;
+      deepyFrame += 1;
+      if (deepyFrame >= frames.length) {
+        deepyFrame = 0;
+        if (deepyAnim !== DEEPY_IDLE) {
+          deepyAnim = DEEPY_IDLE;
+          frames = deepyFrames(DEEPY_IDLE);
+        }
+      }
+      paintDeepy(deepyAnim, deepyFrame);
+    }
+    /* 待机不能真的一动不动：每 9–16 秒插一段喷水或游动，再回待机 */
+    if (deepyAnim === DEEPY_IDLE && now > deepyNext) {
+      deepyNext = now + 9000 + Math.random() * 7000;
+      playDeepy(Math.random() < 0.55 ? "idle-spout" : "swim");
+    }
+    deepyTimer = window.requestAnimationFrame(stepDeepy);
+  }
+
+  function playDeepy(anim) {
+    if (!deepyCtx || !deepyData || !deepyData.animations[anim] || deepyAnim === anim) return;
+    deepyAnim = anim;
+    deepyFrame = 0;
+    deepyStart = 0;
+    paintDeepy(anim, 0);
+  }
+
+  function loadDeepy() {
+    if (deepyData || deepyLoading || !window.fetch) return;
+    deepyLoading = true;
+    window.fetch("data/deepy.json?v=20261104a")
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        deepyData = d;
+        deepyWaiters.forEach(function (fn) { fn(d); });
+        deepyWaiters = [];
+      })
+      .catch(function () { deepyWaiters = []; })
+      .then(function () { deepyLoading = false; });
+  }
+
+  /* 启动页那只：静态图先站着，数据到了再换成会动的 canvas */
+  function mountDeepy(el) {
+    if (!el) return;
+    var cv = el.querySelector(".tty-deepy__cv");
+    if (!cv || !cv.getContext) return;
+    deepyCtx = cv.getContext("2d");
+    paintDeepy(DEEPY_IDLE, 0);
+    el.classList.add("is-live");
+
+    var start = function () {
+      if (!deepyData) {
+        deepyWaiters.push(start);
+        loadDeepy();
+        return;
+      }
+      if (deepyTimer) return;
+      deepyNext = (window.performance ? performance.now() : Date.now()) + 8000;
+      deepyTimer = window.requestAnimationFrame(stepDeepy);
+    };
+
+    if (motionOK()) {
+      /* 首屏先让位给文字，鲸鱼等浏览器闲下来再动 */
+      if (window.requestIdleCallback) window.requestIdleCallback(start, { timeout: 1600 });
+      else window.setTimeout(start, 900);
+    }
+
+    el.addEventListener("click", function () {
+      if (!deepyData) return;
+      var pool = ["happy", "poke-left", "poke-right", "idle-spout"];
+      playDeepy(pool[Math.floor(Math.random() * pool.length)]);
+    });
+    el.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      e.preventDefault();
+      el.click();
+    });
+  }
+
+  function stopDeepy() {
+    if (deepyTimer) { window.cancelAnimationFrame(deepyTimer); deepyTimer = 0; }
+    deepyCtx = null;
+    deepyNext = 0;
+    deepyAnim = DEEPY_IDLE;
+    deepyFrame = 0;
+    deepyStart = 0;
   }
 
   var GLYPH = {
@@ -135,11 +260,11 @@
     var d = new Date();
     var h = [];
     /* 启动页：鲸鱼 + 字标 + 三行元信息 + 一条细线，dsh 的落地页骨架 */
-    h.push('<div class="tty-hero" style="--i:' + (lineIdx++) + '">' + whale() + wordmark() + "</div>");
+    h.push('<div class="tty-hero" style="--i:' + (lineIdx++) + '">' + deepyBox(0, "Deepy 像素鲸鱼，点一下它会动", true) + wordmark() + "</div>");
     h.push('<div class="tty-meta" style="--i:' + (lineIdx++) + '">' +
       "<span>hnyz-tty <b>6.4.0</b> · mist blue · login: guest</span>" +
       "<span>~/hnyz · last login: " + d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + " · 教学楼机房</span>" +
-      "<span>TIP: 输入 <b>help</b> 看命令，<b>0-7</b> 切窗口</span>" +
+      "<span>TIP: 输入 <b>help</b> 看命令，<b>0-7</b> 切窗口，点一下鲸鱼</span>" +
       "</div>");
     h.push('<hr class="tty-rule" style="--i:' + (lineIdx++) + '">');
     h.push('<p class="tty-tag" style="--i:' + (lineIdx++) + '">把想法，<span>写成代码</span>。</p>');
@@ -619,9 +744,12 @@
       p.querySelector(".tty-pane__bd").innerHTML = BUILDERS[WINDOWS[i].id]();
     });
 
-    /* 顶栏的小鲸鱼：同一份点阵，格子压到 2px */
+    /* 顶栏的小鲸鱼：Deepy 的首帧，1px 一格刚好压在 46px 的顶栏里 */
     var logoEl = root.querySelector(".tty__logo");
-    if (logoEl) logoEl.innerHTML = whale(2);
+    if (logoEl) logoEl.innerHTML = deepyBox(1, "", false);
+
+    /* 启动页那只：等 pane 内容都插好再挂 canvas */
+    mountDeepy(root.querySelector(".tty__pane .tty-deepy"));
 
     bindRoot();
     built = true;
@@ -629,7 +757,7 @@
     /* 仓库窗口：data/repos.json 是 Actions 每天抓好的快照，直接用 */
     var box = root.querySelector("[data-repos]");
     if (box && window.fetch) {
-      window.fetch("data/repos.json?v=20261103i")
+      window.fetch("data/repos.json?v=20261104a")
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (d) { renderRepos(box, d); })
         .catch(function () { renderRepos(box, null); });
@@ -640,6 +768,7 @@
 
   function teardown() {
     close();
+    stopDeepy();
     if (root && root.parentNode) root.parentNode.removeChild(root);
     root = null; tabsEl = null; bodyEl = null; echoEl = null; inputEl = null;
     clockEl = null; upEl = null; panes = [];
