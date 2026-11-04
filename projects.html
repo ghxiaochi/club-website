@@ -68,63 +68,73 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="stylesheet" href="css/style.css?v=20261104d">
-  <link rel="stylesheet" href="css/pet.css?v=20261104d">
-  <link rel="stylesheet" href="css/avatar-pet.css?v=20261104d">
-  <link rel="stylesheet" href="css/skins.css?v=20261104d">
-  <script src="js/skin-boot.js?v=20261104d"></script>
-  <link rel="stylesheet" href="css/type.css?v=20261104d">
-  <link rel="stylesheet" href="css/motion.css?v=20261104d">
-  <link rel="preload" href="css/dino.css?v=20261104d" as="style">
-  <link rel="stylesheet" href="css/dino.css?v=20261104d" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/dino.css?v=20261104d"></noscript>
-  <link rel="stylesheet" href="css/personal.css?v=20261104d">
-  <link rel="stylesheet" href="css/member.css?v=20261104d">
-  <link rel="stylesheet" href="css/characters.css?v=20261104d">
+  <link rel="stylesheet" href="css/style.css?v=20261104e">
+  <link rel="stylesheet" href="css/pet.css?v=20261104e">
+  <link rel="stylesheet" href="css/avatar-pet.css?v=20261104e">
+  <link rel="stylesheet" href="css/skins.css?v=20261104e">
+  <script src="js/skin-boot.js?v=20261104e"></script>
+  <link rel="stylesheet" href="css/type.css?v=20261104e">
+  <link rel="stylesheet" href="css/motion.css?v=20261104e">
+  <link rel="preload" href="css/dino.css?v=20261104e" as="style">
+  <link rel="stylesheet" href="css/dino.css?v=20261104e" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/dino.css?v=20261104e"></noscript>
+  <link rel="stylesheet" href="css/personal.css?v=20261104e">
+  <link rel="stylesheet" href="css/characters.css?v=20261104e">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
-  <script src="js/sfx.js?v=20261104d" defer></script>
-  <script src="js/theme.js?v=20261104d" defer></script>
-  <script src="js/theme-icon.js?v=20261104d" defer></script>
-  <script src="js/members.js?v=20261104d" defer></script>
-  <script src="js/main.js?v=20261104d" defer></script>
-  <script src="js/repo-sync.js?v=20261104d" defer></script>
-  <script src="js/pet.js?v=20261104d" defer></script>
-  <script src="js/avatar-pet.js?v=20261104d" defer></script>
-  <script src="js/splash-scene.js?v=20261104d" defer></script>
-  <script src="js/characters.js?v=20261104d" defer></script>
-  <script src="js/personal.js?v=20261104d" defer></script>
-  <script src="js/click-fx.js?v=20261104d" defer></script>
-  <script src="js/term-tui.js?v=20261104d" defer></script>
-  <script src="js/skins.js?v=20261104d" defer></script>
-  <script src="js/fullscreen.js?v=20261104d" defer></script>
-  <script src="js/matrix.js?v=20261104d" defer></script>
-  <script src="js/copy.js?v=20261104d" defer></script>
-  <script src="js/pwa.js?v=20261104d" defer></script>
+  <script src="js/sfx.js?v=20261104e" defer></script>
+  <script src="js/theme.js?v=20261104e" defer></script>
+  <script src="js/theme-icon.js?v=20261104e" defer></script>
+  <script src="js/members.js?v=20261104e" defer></script>
+  <script src="js/main.js?v=20261104e" defer></script>
+  <script src="js/repo-sync.js?v=20261104e" defer></script>
+  <script src="js/pet.js?v=20261104e" defer></script>
+  <script src="js/avatar-pet.js?v=20261104e" defer></script>
+  <script src="js/splash-scene.js?v=20261104e" defer></script>
+  <script src="js/characters.js?v=20261104e" defer></script>
+  <script src="js/personal.js?v=20261104e" defer></script>
+  <script src="js/click-fx.js?v=20261104e" defer></script>
+  <script src="js/skins.js?v=20261104e" defer></script>
+  <script src="js/fullscreen.js?v=20261104e" defer></script>
+  <script src="js/copy.js?v=20261104e" defer></script>
+  <script src="js/pwa.js?v=20261104e" defer></script>
   <script>
-    /* 页脚跑道不参与首屏：等 load 之后浏览器空闲了再拉脚本，
-       用户提前往下滚也会立刻加载。少 80KB 的解析，首屏能早一点可交互。 */
+    /* 页脚跑道不参与首屏，也不该为「只看了首屏的人」付钱：
+       等它进入视口前 600px 再拉脚本。以前 load 完就 idle 注入，
+       等于每个页面都白下 88KB、多一次 40ms 的解析。 */
     (function () {
       var loaded = false;
       function loadDino() {
         if (loaded) return;
         loaded = true;
         var script = document.createElement("script");
-        script.src = "js/dino.js?v=20261104d";
+        script.src = "js/dino.js?v=20261104e";
         script.async = true;
         document.body.appendChild(script);
       }
-      /* 等浏览器真空闲再注入：固定 1.5 秒的定时器很可能正好撞上首屏滚动或点击，
-         解析这 80KB 就变成一次能感觉到的卡顿。idle 回调只在主线程闲下来时才跑。 */
-      function whenIdle() {
-        if ("requestIdleCallback" in window) {
-          window.requestIdleCallback(loadDino, { timeout: 3000 });
+      function arm() {
+        var run = document.querySelector("[data-dino-run]");
+        if (!run) return;
+        if ("IntersectionObserver" in window) {
+          var io = new IntersectionObserver(function (entries) {
+            for (var i = 0; i < entries.length; i += 1) {
+              if (entries[i].isIntersecting) {
+                io.disconnect();
+                loadDino();
+                return;
+              }
+            }
+          }, { rootMargin: "600px 0px" });
+          io.observe(run);
         } else {
-          window.setTimeout(loadDino, 1200);
+          window.addEventListener("scroll", loadDino, { once: true, passive: true });
         }
       }
-      window.addEventListener("load", whenIdle, { once: true });
-      window.addEventListener("scroll", loadDino, { once: true, passive: true });
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", arm, { once: true });
+      } else {
+        arm();
+      }
     })();
   </script>
 </head>

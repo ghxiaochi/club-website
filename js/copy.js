@@ -63,7 +63,7 @@
     "about-intro": {
       default:
         "我们做真东西：一个校园小工具、一段硬件程序，或者纯粹好玩的装置。做完比完美重要。",
-      minimal: "仅此。",
+      minimal: "做真东西。",
       hacker: "// 只做能跑的东西：校园小工具、硬件程序，或者纯粹好玩。"
     },
     "about-p1": {
@@ -145,7 +145,7 @@
       hacker: "// 用 GitHub 账号发表，存在仓库的 Discussions 里。没有匿名，也没有第三方服务器。"
     },
     "join-title": {
-      minimal: "来",
+      minimal: "加入",
       hacker: "下一次活动<br>来坐坐"
     },
     "join-lead": {
@@ -166,7 +166,7 @@
       hacker: "~/repos 目录"
     },
     "archive-title": {
-      minimal: "项目区",
+      minimal: "全部项目<br>按成员分组",
       hacker: "全部项目<br>按人分组"
     },
     "archive-intro": {
@@ -200,7 +200,7 @@
       hacker: "~/hnyz/gallery"
     },
     "gallery-title": {
-      minimal: "图",
+      minimal: "图集",
       hacker: "梗图和<br>社团日常"
     },
     "gallery-intro": {

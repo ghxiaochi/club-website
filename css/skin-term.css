@@ -701,12 +701,31 @@ html[data-style="term"] .guestbook__dot {
 }
 
 /* 图集：方角图，不加阴影 */
+html[data-style="term"] .gallery-board {
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: var(--panel-2);
+  box-shadow: none;
+}
+
 html[data-style="term"] .gallery-item,
 html[data-style="term"] .gallery-entry {
   border-radius: 0;
   border: 1px solid var(--border);
   background: var(--panel);
   box-shadow: none;
+}
+
+html[data-style="term"] .gallery-item img {
+  background: var(--panel-2);
+}
+
+html[data-style="term"] .gallery-item__caption {
+  color: var(--muted);
+}
+
+html[data-style="term"] .gallery-item__tag {
+  color: var(--blue);
 }
 
 html[data-style="term"] .gallery-item:hover,
@@ -1010,6 +1029,11 @@ html[data-style="term"] .hnyz-avatar__img {
 html[data-style="term"] .hnyz-avatar__speech::after,
 html[data-style="term"] .hnyz-avatar__name {
   border-radius: 0;
+}
+
+/* 桌面右下角的校徽在小屏/终端风里都缩小一档，别压住卡片右下角 */
+html[data-style="term"] .hnyz-pet {
+  width: 68px;
 }
 
 html[data-style="term"] .hnyz-pet__badge,

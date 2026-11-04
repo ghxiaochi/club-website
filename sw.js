@@ -25,7 +25,7 @@
    发版时改 VERSION，旧缓存在 activate 里被清掉。
    ========================================================= */
 
-const VERSION = "20261104d";
+const VERSION = "20261104e";
 const CACHE = `hnyz-v${VERSION}`;
 
 /* 站内根路径：用 "./" 就地解析，
@@ -54,9 +54,6 @@ const CORE = [
   `./css/type.css${V}`,
   `./css/motion.css${V}`,
   `./css/skins.css${V}`,
-  `./css/skin-halo.css${V}`,
-  `./css/skin-term.css${V}`,
-  `./css/term-tui.css${V}`,
   `./css/personal.css${V}`,
   `./css/pet.css${V}`,
   `./css/avatar-pet.css${V}`,
@@ -71,13 +68,11 @@ const CORE = [
   `./js/copy.js${V}`,
   `./js/theme.js${V}`,
   `./js/theme-icon.js${V}`,
-  `./js/term-tui.js${V}`,
   `./js/skins.js${V}`,
   `./js/fullscreen.js${V}`,
   `./js/skin-boot.js${V}`,
   `./js/pwa.js${V}`,
   `./js/sfx.js${V}`,
-  `./js/matrix.js${V}`,
   `./js/click-fx.js${V}`,
   `./js/pet.js${V}`,
   `./js/avatar-pet.js${V}`,
@@ -103,6 +98,13 @@ const CORE = [
 /* 第二批：装完再补，失败无所谓。离线看图集/角色排/听音效时才用到。
    逐个串行 fetch，不一次并发几十个请求，免得装完 SW 就把带宽占满 */
 const EXTRA = [
+  /* 皮肤与按需脚本：不切这套皮肤就不下载 */
+  `./css/skin-halo.css${V}`,
+  `./css/skin-term.css${V}`,
+  `./css/term-tui.css${V}`,
+  `./js/term-tui.js${V}`,
+  `./js/matrix.js${V}`,
+  `./js/dino.js${V}`,
   "./images/characters/art-alpha.webp",
   "./images/characters/art-crawler.webp",
   "./images/characters/art-mono.webp",

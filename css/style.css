@@ -2803,6 +2803,39 @@ code {
   bottom: 46px;
 }
 
+/* 小屏顶栏：品牌 + 六个圆形按钮在 390px 上挤成一条，
+   音效和全屏让位给风格、主题、刷新和菜单，点起来才不误触 */
+@media (max-width: 420px) {
+  .header-actions {
+    gap: 2px;
+  }
+
+  .header-actions .sound-toggle,
+  .header-actions .fullscreen-toggle {
+    display: none;
+  }
+
+  .header-actions .theme-toggle,
+  .header-actions .style-toggle,
+  .header-actions .sync-toggle,
+  .header-actions .nav-toggle {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+  }
+
+  .brand-copy span {
+    display: none;
+  }
+}
+
+/* 手机屏幕右下角本来就是内容，84px 的桌宠只会挡字 */
+@media (max-width: 560px) {
+  .hnyz-pet {
+    display: none !important;
+  }
+}
+
 @media (max-width: 560px) {
   /* 小屏底部全是内容和社团徽标，提示挪到顶栏下面，别挡着 */
   .sync-toast {

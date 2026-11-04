@@ -42,6 +42,10 @@
 
   let current = "default";
   let busy = false;
+  /* 切到全屏皮肤（终端/光场/棍木）前记下滚动位置，
+     切回普通页面时放回去。以前从页面中段切一次风格就被送回顶部。 */
+  let scrollMemo = 0;
+  const FIXED_STYLES = { term: true, halo: true, bare: true };
 
   function readStored() {
     try {
@@ -181,7 +185,7 @@
         </article>
 
         <article class="style-card" data-style-option="halo">
-          <div class="style-card__top"><span>04 / HALO</span><span class="style-card__current">当前风格</span></div>
+          <div class="style-card__top"><span>05 / HALO</span><span class="style-card__current">当前风格</span></div>
           <div class="style-card__glyph style-card__glyph--halo" aria-hidden="true"><span></span></div>
           <p class="style-card__kicker">BEAT_DRIVEN</p>
           <h3 class="style-card__title">光场</h3>
@@ -479,6 +483,26 @@
   }
 
   /* -------------------------------------------------------
+     黑客风的代码雨：用到才加载
+     -------------------------------------------------------
+     以前 matrix.js 每页都挂在 <head> 里，哪怕当前是蓝白风，
+     也要先建一张全屏 canvas 再判断要不要跑。现在只有切到
+     黑客风时才注入，平时连这 5KB 都不用下。
+     ------------------------------------------------------- */
+  let matrixLoaded = false;
+
+  function syncMatrix(on) {
+    if (!on || matrixLoaded) return;
+    matrixLoaded = true;
+    const own = document.querySelector('script[src*="skins.js"]');
+    const query = own && own.src.indexOf("?") > -1 ? own.src.slice(own.src.indexOf("?")) : "";
+    const script = document.createElement("script");
+    script.src = "js/matrix.js" + query;
+    script.defer = true;
+    document.body.appendChild(script);
+  }
+
+  /* -------------------------------------------------------
      终端风的会话状态栏
      -------------------------------------------------------
      右下角一行 `hnyz@club ~/ $ cat about.md`，跟着滚动换成
@@ -558,6 +582,7 @@
     setBareMode(next === "bare");
     syncHalo(next === "halo");
     syncTerm(next === "term");
+    syncMatrix(next === "hacker");
 
     /* 黑客风固定深夜：主题由 theme.js 监听 hnyz:stylechange 统一处理，
        这里不写 localStorage，用户原来选的深浅色在离开黑客风后还能回来 */
@@ -612,9 +637,19 @@
       return;
     }
 
+    /* 只在「可滚动页面 → 全屏皮肤」时记一次；
+       反方向（全屏 → 页面）用记下的值恢复，别把它覆盖成 0 */
+    if (!FIXED_STYLES[current] && FIXED_STYLES[next]) {
+      scrollMemo = window.scrollY || window.pageYOffset || 0;
+    }
+
     if (reduce.matches) {
       closeDeck();
       commit(next);
+      if (FIXED_STYLES[next] === undefined && scrollMemo > 0) {
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        window.scrollTo(0, Math.max(0, Math.min(scrollMemo, max)));
+      }
       return;
     }
 
@@ -655,6 +690,13 @@
          这块不透明底下，用户看不见，也就不会看到半张旧页面 */
       commit(next);
 
+      /* 从全屏皮肤回到可滚动页面：把刚才的位置放回去。
+         放在幕布还盖着的时候做，用户看不到跳动。 */
+      if (FIXED_STYLES[next] === undefined && scrollMemo > 0) {
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        window.scrollTo(0, Math.max(0, Math.min(scrollMemo, max)));
+      }
+
       /* 再等两帧把新皮肤的首次布局与绘制排空，然后才揭幕。
          少了这两帧，揭幕动画会和一次几十毫秒的长任务同时起步，
          表现就是「幕布卡一下才开始走」。 */
@@ -676,6 +718,7 @@
   setBareMode(current === "bare");
   syncHalo(current === "halo");
   syncTerm(current === "term");
+  syncMatrix(current === "hacker");
   syncCurrentUi();
   flushProgress();
   if (trigger) {

@@ -23,6 +23,44 @@
 
   const figures = [];
 
+  /* 一张 1×1 的透明占位：真实地址放 data-src，
+     进到视口前 800px 再换上去，布局由 width/height 撑住，不抖 */
+  const PLACEHOLDER =
+    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/%3E";
+  let lazyObserver = null;
+
+  function flushLazy(images) {
+    images.forEach((img) => {
+      const src = img.dataset.src;
+      if (!src) return;
+      img.src = src;
+      delete img.dataset.src;
+      if (lazyObserver) lazyObserver.unobserve(img);
+    });
+  }
+
+  function observeLazyImages() {
+    const pending = Array.prototype.slice.call(grid.querySelectorAll("img[data-src]"));
+    if (!pending.length) return;
+
+    if (!("IntersectionObserver" in window)) {
+      flushLazy(pending);
+      return;
+    }
+
+    if (!lazyObserver) {
+      lazyObserver = new IntersectionObserver((entries) => {
+        const hits = [];
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) hits.push(entry.target);
+        });
+        if (hits.length) flushLazy(hits);
+      }, { rootMargin: "300px 0px" });
+    }
+
+    pending.forEach((img) => lazyObserver.observe(img));
+  }
+
   /* =======================================================
      一、渲染
      ======================================================= */
@@ -43,9 +81,14 @@
     button.setAttribute("aria-label", `查看大图：${item.title || "图集图片"}`);
 
     const image = document.createElement("img");
-    image.src = item.src;
+    /* 首屏两行先加载，其余等滚到附近再给 src。
+       图集一共六百多 KB，以前 loading="lazy" 在 Chrome 上仍会把
+       3 屏内的图全拉下来，等于首屏替整个页面付流量。 */
+    const eager = index < 4;
+    image.src = eager ? item.src : PLACEHOLDER;
+    if (!eager) image.dataset.src = item.src;
     image.alt = item.title || "HNYZ 图集图片";
-    image.loading = "lazy";
+    image.loading = eager ? "eager" : "lazy";
     image.decoding = "async";
     image.width = item.w || 800;
     image.height = item.h || 1000;
@@ -93,6 +136,7 @@
       fragment.appendChild(figure);
     });
     grid.appendChild(fragment);
+    observeLazyImages();
 
     updateCount();
   }
@@ -218,6 +262,12 @@
 
     lightboxImage.src = item.src;
     lightboxImage.alt = item.title || "图集图片";
+
+    /* 翻到一张还没懒加载的图：顺手把它在网格里的缩略图也补上，
+       关掉灯箱时不会看到一块占位 */
+    const figure = figures[index];
+    const thumb = figure && figure.querySelector("img[data-src]");
+    if (thumb) flushLazy([thumb]);
     lightboxCaption.textContent = item.tag
       ? `${item.title || "未命名"} · #${item.tag}`
       : item.title || "未命名";

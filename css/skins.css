@@ -492,6 +492,64 @@ html[data-style="minimal"] .site-footer {
   padding-bottom: 24px;
 }
 
+/* 图集页：深蓝底板和白卡在极简风里都不成立，
+   换成一张纸、一条细线，图片只留自己的颜色 */
+html[data-style="minimal"] .gallery-board {
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: var(--panel);
+  box-shadow: none;
+}
+
+html[data-style="minimal"] .gallery-board::before {
+  opacity: 1;
+  background-image:
+    linear-gradient(rgba(22, 22, 20, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(22, 22, 20, 0.05) 1px, transparent 1px);
+}
+
+html[data-style="minimal"] .gallery-item {
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: var(--panel);
+  box-shadow: none;
+}
+
+@media (hover: hover), (pointer: fine) {
+  html[data-style="minimal"] .gallery-item:hover,
+  html[data-style="minimal"] .gallery-item:focus-within {
+    border-color: var(--text);
+    box-shadow: none;
+    transform: none;
+  }
+}
+
+html[data-style="minimal"] .gallery-item img {
+  background: var(--panel-2);
+}
+
+html[data-style="minimal"] .gallery-item__caption {
+  color: var(--muted);
+}
+
+html[data-style="minimal"] .gallery-item__tag {
+  color: var(--text);
+}
+
+html[data-style="minimal"] .gallery-filter {
+  border-color: var(--border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+}
+
+html[data-style="minimal"] .gallery-filter:hover,
+html[data-style="minimal"] .gallery-filter[aria-pressed="true"] {
+  border-color: var(--text);
+  background: transparent;
+  color: var(--text);
+}
+
 /* 极简风：小恐龙也走黑白 */
 html[data-style="minimal"] .dino-run {
   --dino-ink: #171715;
@@ -597,6 +655,12 @@ html[data-style="hacker"] .bg-icons {
 }
 
 /* 右下角校徽的浅蓝底板在黑客风里改成暗绿终端 */
+html[data-style="hacker"] .hnyz-pet {
+  width: 72px;
+  /* 校徽本身是白底圆，暗色里太跳；压暗一档，保留但退到背景 */
+  filter: grayscale(0.5) brightness(0.82);
+}
+
 html[data-style="hacker"] .hnyz-pet__board {
   border-color: rgba(57, 255, 136, 0.45);
   background: radial-gradient(circle at 50% 38%, #07160e 0%, #04100a 58%, #020a06 100%);
@@ -860,6 +924,76 @@ html[data-style="hacker"][data-theme="light"] .dino-run {
     linear-gradient(90deg, rgba(10, 143, 74, 0.06) 1px, transparent 1px);
   background-size: auto, 28px 28px, 28px 28px;
   border-top-color: rgba(10, 143, 74, 0.2);
+}
+
+/* 图集页：默认的深蓝展板在黑客风里是一块亮斑，
+   改成终端里的文件列表底板，图片自己发光 */
+html[data-style="hacker"] .gallery-board {
+  border-color: rgba(57, 255, 136, 0.2);
+  border-radius: 2px;
+  background:
+    radial-gradient(circle at 86% 4%, rgba(57, 255, 136, 0.08), transparent 46%),
+    linear-gradient(180deg, rgba(7, 16, 10, 0.96), rgba(3, 8, 5, 0.98));
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+
+html[data-style="hacker"] .gallery-board::before {
+  opacity: 1;
+  background-image:
+    linear-gradient(rgba(57, 255, 136, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57, 255, 136, 0.06) 1px, transparent 1px);
+}
+
+html[data-style="hacker"] .gallery-item {
+  border: 1px solid rgba(57, 255, 136, 0.18);
+  border-radius: 2px;
+  background: rgba(7, 16, 10, 0.9);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.55);
+}
+
+html[data-style="hacker"] .gallery-item:hover,
+html[data-style="hacker"] .gallery-item:focus-within {
+  border-color: rgba(57, 255, 136, 0.5);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.7);
+}
+
+html[data-style="hacker"] .gallery-item img {
+  background: #04100a;
+}
+
+html[data-style="hacker"] .gallery-item__caption {
+  color: var(--muted);
+}
+
+html[data-style="hacker"] .gallery-item__tag {
+  color: var(--blue);
+}
+
+html[data-style="hacker"] .gallery-filter {
+  border-color: rgba(57, 255, 136, 0.24);
+  background: transparent;
+  color: var(--muted);
+}
+
+html[data-style="hacker"] .gallery-filter:hover,
+html[data-style="hacker"] .gallery-filter[aria-pressed="true"] {
+  border-color: var(--blue);
+  background: rgba(57, 255, 136, 0.1);
+  color: var(--blue);
+}
+
+html[data-style="hacker"][data-theme="light"] .gallery-board {
+  background: rgba(249, 255, 251, 0.9);
+  border-color: rgba(10, 143, 74, 0.2);
+}
+
+html[data-style="hacker"][data-theme="light"] .gallery-item {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(10, 143, 74, 0.2);
+}
+
+html[data-style="hacker"][data-theme="light"] .gallery-item img {
+  background: #f2fbf4;
 }
 
 /* ---------------------------------------------------------
