@@ -70,27 +70,48 @@
   }
 
   /* ---------------------------------------------------------
-     八个窗口的内容。文案是终端风专属的，不与其它皮肤共用。
+     点阵素材：鲸鱼与字标都逐格画，不依赖字体度量
      --------------------------------------------------------- */
-  function paneMain() {
-    lineIdx = 0;
-    var d = new Date();
-    var h = [];
-    h.push('<div class="tty-boot t-dim">');
-    h.push(L("HNYZ-TTY 6.3.0 (midnight) — login: guest"));
-    h.push(L("last login: " + d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + " · from 教学楼机房"));
-    h.push("</div>");
-    /* 点阵 banner：17×5 的 LED 屏，一格一个 <i>，
-       不用字符画——块字符在不同字体里宽度不稳，点阵永远清晰 */
-    var GLYPH = {
-      H: ["101", "101", "111", "101", "101"],
-      N: ["1001", "1101", "1011", "1001", "1001"],
-      Y: ["101", "101", "010", "010", "010"],
-      Z: ["1111", "0001", "0010", "1000", "1111"]
-    };
-    var WORD = ["H", "N", "Y", "Z"];
+  var WHALE = [
+    "0000000000000000011000",
+    "0000000000000000111100",
+    "0000000000000001111000",
+    "0000011110000011110000",
+    "0000111111000111100000",
+    "0001111111111111100000",
+    "0011111111111111110000",
+    "0111131111111111111000",
+    "0111111111111111111100",
+    "0011222222222222111100",
+    "0001122222222221110000",
+    "0000111111111111100000"
+  ];
+
+  /* cell 传数字时固定像素，不传就用 CSS 的 clamp（跟着视口走） */
+  function whale(cell) {
+    var cols = 0;
+    WHALE.forEach(function (r) { cols = Math.max(cols, r.length); });
+    var out = "";
+    WHALE.forEach(function (row) {
+      for (var c = 0; c < cols; c += 1) {
+        var ch = row[c] || "0";
+        out += ch === "1" ? '<i class="on"></i>' : ch === "2" ? '<i class="belly"></i>' : ch === "3" ? '<i class="eye"></i>' : "<i></i>";
+      }
+    });
+    return '<span class="tty-whale" role="img" aria-label="像素鲸鱼" style="--cols:' + cols +
+      (cell ? ";--cell:" + cell + "px" : "") + '">' + out + "</span>";
+  }
+
+  var GLYPH = {
+    H: ["101", "101", "111", "101", "101"],
+    N: ["1001", "1101", "1011", "1001", "1001"],
+    Y: ["101", "101", "010", "010", "010"],
+    Z: ["1111", "0001", "0010", "1000", "1111"]
+  };
+
+  function wordmark() {
     var rows = ["", "", "", "", ""];
-    WORD.forEach(function (ch, wi) {
+    ["H", "N", "Y", "Z"].forEach(function (ch, wi) {
       var g = GLYPH[ch];
       for (var r = 0; r < 5; r += 1) {
         rows[r] += (wi ? "0" : "") + g[r];
@@ -103,10 +124,26 @@
       }
       return out;
     }).join("");
-    h.push('<div class="tty-pixel" style="--i:' + (lineIdx++) + '" role="img" aria-label="HNYZ">' + px + "</div>");
-    h.push(L('<span class="t-dim">$</span> whoami'));
+    return '<span class="tty-pixel" role="img" aria-label="HNYZ">' + px + "</span>";
+  }
+
+  /* ---------------------------------------------------------
+     八个窗口的内容。文案是终端风专属的，不与其它皮肤共用。
+     --------------------------------------------------------- */
+  function paneMain() {
+    lineIdx = 0;
+    var d = new Date();
+    var h = [];
+    /* 启动页：鲸鱼 + 字标 + 三行元信息 + 一条细线，dsh 的落地页骨架 */
+    h.push('<div class="tty-hero" style="--i:' + (lineIdx++) + '">' + whale() + wordmark() + "</div>");
+    h.push('<div class="tty-meta" style="--i:' + (lineIdx++) + '">' +
+      "<span>hnyz-tty <b>6.4.0</b> · mist blue · login: guest</span>" +
+      "<span>~/hnyz · last login: " + d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + " · 教学楼机房</span>" +
+      "<span>TIP: 输入 <b>help</b> 看命令，<b>0-7</b> 切窗口</span>" +
+      "</div>");
+    h.push('<hr class="tty-rule" style="--i:' + (lineIdx++) + '">');
+    h.push('<p class="tty-tag" style="--i:' + (lineIdx++) + '">把想法，<span>写成代码</span>。</p>');
     h.push(L("衡南一中编程社 · 面向全校的极客技术社团", "t-cyn"));
-    h.push(L('<span class="t-dim">$</span> cat intro.txt'));
     h.push(L("教学内容以 Arduino 为主线：从点亮第一颗 LED 开始，组队做项目、一起学习，把脑子里的点子变成真正能跑的作品。", "t-mut"));
     h.push('<div class="tty-meters">');
     h.push(meter("常规活动", 2 / 7, "2 次 / 周", "每次 60 分钟"));
@@ -292,7 +329,7 @@
     if (!isOpen) return;
     var d = new Date();
     if (clockEl) clockEl.textContent = pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
-    if (upEl) upEl.textContent = "UP " + fmtUptime(Date.now() - openedAt);
+    if (upEl) upEl.textContent = "v6.4.0 · UP " + fmtUptime(Date.now() - openedAt);
   }
 
   /* ---------------------------------------------------------
@@ -549,9 +586,9 @@
     root.setAttribute("aria-hidden", "true");
     root.innerHTML =
       '<header class="tty__top">' +
-      '  <span class="tty__logo" aria-hidden="true">▚</span>' +
+      '  <span class="tty__logo" aria-hidden="true"></span>' +
       '  <span class="tty__brand">HNYZ<i>//TTY</i></span>' +
-      '  <span class="tty__sess">hnyz@club · tty1 · <b>midnight</b></span>' +
+      '  <span class="tty__sess">hnyz@club · tty1 · <b>mist</b></span>' +
       '  <span class="tty__clock" aria-hidden="true"></span>' +
       '  <span class="tty__actions"></span>' +
       "</header>" +
@@ -563,7 +600,8 @@
       '  <input id="tty-cmd-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go" aria-label="输入命令，help 查看可用命令">' +
       "</form>" +
       '<footer class="tty__legend" aria-hidden="true">' +
-      '  <span><kbd>0-7</kbd> 切窗口 · <kbd>↑↓</kbd>/<kbd>j k</kbd> 滚动 · <kbd>:</kbd> 命令 · <kbd>?</kbd> 帮助</span>' +
+      '  <span class="tty-legend__path"><b>~/hnyz</b> · 8 windows</span>' +
+      '  <span class="tty-legend__keys"><kbd>0-7</kbd> 切窗口 · <kbd>↑↓</kbd>/<kbd>j k</kbd> 滚动 · <kbd>:</kbd> 命令 · <kbd>?</kbd> 帮助</span>' +
       '  <span class="tty__up"></span>' +
       "</footer>";
 
@@ -581,13 +619,17 @@
       p.querySelector(".tty-pane__bd").innerHTML = BUILDERS[WINDOWS[i].id]();
     });
 
+    /* 顶栏的小鲸鱼：同一份点阵，格子压到 2px */
+    var logoEl = root.querySelector(".tty__logo");
+    if (logoEl) logoEl.innerHTML = whale(2);
+
     bindRoot();
     built = true;
 
     /* 仓库窗口：data/repos.json 是 Actions 每天抓好的快照，直接用 */
     var box = root.querySelector("[data-repos]");
     if (box && window.fetch) {
-      window.fetch("data/repos.json?v=20261103h")
+      window.fetch("data/repos.json?v=20261103i")
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (d) { renderRepos(box, d); })
         .catch(function () { renderRepos(box, null); });

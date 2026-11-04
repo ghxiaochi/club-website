@@ -1004,6 +1004,7 @@ body.is-dino-visible .hnyz-pet {
 .style-card[data-style-option="default"] { --card-accent: rgba(96, 165, 250, 0.55); }
 .style-card[data-style-option="minimal"] { --card-accent: rgba(255, 255, 255, 0.4); }
 .style-card[data-style-option="hacker"] { --card-accent: rgba(57, 255, 136, 0.55); }
+.style-card[data-style-option="term"] { --card-accent: rgba(63, 108, 196, 0.55); }
 
 .style-card::after {
   content: "";
@@ -1124,12 +1125,12 @@ body.is-dino-visible .hnyz-pet {
   border: 1px solid rgba(240, 166, 198, 0.72);
 }
 
-/* 终端：方角、深空蓝、多色语义 */
+/* 终端：方角、雾蓝、像素鲸鱼那一路 */
 .style-card__glyph--term {
   border-radius: 4px;
-  border: 1px solid rgba(86, 208, 232, 0.5);
-  background: #0a101f;
-  color: #56d0e8;
+  border: 1px solid rgba(63, 108, 196, 0.5);
+  background: #f6f3ed;
+  color: #3f6cc4;
   font-size: 1.7rem;
   letter-spacing: 0.02em;
 }

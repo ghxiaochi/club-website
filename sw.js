@@ -25,7 +25,7 @@
    发版时改 VERSION，旧缓存在 activate 里被清掉。
    ========================================================= */
 
-const VERSION = "20261103h";
+const VERSION = "20261103i";
 const CACHE = `hnyz-v${VERSION}`;
 
 /* 站内根路径：用 "./" 就地解析，
@@ -73,6 +73,7 @@ const CORE = [
   `./js/term-tui.js${V}`,
   `./js/skins.js${V}`,
   `./js/fullscreen.js${V}`,
+  `./js/skin-boot.js${V}`,
   `./js/pwa.js${V}`,
   `./js/sfx.js${V}`,
   `./js/matrix.js${V}`,

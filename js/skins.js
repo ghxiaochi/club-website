@@ -171,11 +171,11 @@
         <article class="style-card" data-style-option="term">
           <div class="style-card__top"><span>04 / TERM</span><span class="style-card__current">当前风格</span></div>
           <div class="style-card__glyph style-card__glyph--term" aria-hidden="true"><span class="term-glyph">$_</span></div>
-          <p class="style-card__kicker">READ_ONLY_TTY</p>
+          <p class="style-card__kicker">MIST_BLUE_TTY</p>
           <h3 class="style-card__title">终端</h3>
-          <p class="style-card__desc">琥珀单色、方角、没有阴影。卡片摊平成记录行，右下角一行会话提示跟着你走。</p>
+          <p class="style-card__desc">雾蓝白面板、方角、细线分隔。像素鲸鱼与 HNYZ 字标开屏，窗口条、命令行与状态条各就各位。</p>
           <div class="style-card__swatches" aria-hidden="true">
-            <i style="--c:#0c0b08"></i><i style="--c:#ffb000"></i><i style="--c:#efe6d3"></i>
+            <i style="--c:#f6f3ed"></i><i style="--c:#3f6cc4"></i><i style="--c:#242b3a"></i>
           </div>
           <button class="style-card__apply" type="button" data-style-pick="term">应用此风格</button>
         </article>
@@ -549,6 +549,10 @@
   }
 
   function commit(next) {
+    /* 皮肤 CSS 是按需加载的：先确保样式就位，再挂 data-style。
+       样式表通常已由 skin-boot.js 在空闲时预取，这里只是兜底 */
+    if (window.HNYZCSS) window.HNYZCSS.ensure(next);
+
     current = next;
     root.dataset.style = next;
     setBareMode(next === "bare");
