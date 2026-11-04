@@ -170,7 +170,7 @@
   function loadDeepy() {
     if (deepyData || deepyLoading || !window.fetch) return;
     deepyLoading = true;
-    window.fetch("data/deepy.json?v=20261104i")
+    window.fetch("data/deepy.json?v=20261105a")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         deepyData = d;
@@ -473,7 +473,7 @@
       h.push(L('<span class="t-dim">$</span> tail -f <span class="t-dim">~/hnyz/guestbook.log</span>'));
       h.push(L("▌ 留言走 GitHub Discussions：公开、不设匿名、没有第三方服务器——删库才会消失。", "t-mut"));
       h.push(L('▌ <span class="t-dim">正在等待新留言…</span>'));
-      h.push(L('<button type="button" class="tty-btn" data-open-guestbook>打开留言板 →</button>　<span class="t-dim tty-inline-note">需要 JavaScript 与 GitHub 账号</span>'));
+      h.push(L('<button type="button" class="tty-btn" data-open-guestbook>打开留言板 →</button>　<span class="t-dim tty-inline-note">需要 GitHub 账号；没有就进群说一声</span>'));
       return h.join("");
     }, "tile--spread") +
 
@@ -551,7 +551,7 @@
     var cached = readCachedRepos();
     if (cached) renderRepos(box, { repos: cached.repos });
 
-    window.fetch("data/repos.json?v=20261104i")
+    window.fetch("data/repos.json?v=20261105a")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (store) {
         if (!store || !store.repos) {

@@ -1160,3 +1160,11 @@ body.is-pet-boom .hnyz-avatar {
     display: none;
   }
 }
+
+/* 手机上屏幕本来就是内容：左下角头像会压住页脚的「加入我们」。
+   桌面留着当彩蛋，小屏收起来。 */
+@media (max-width: 560px) {
+  .hnyz-avatar {
+    display: none !important;
+  }
+}

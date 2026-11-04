@@ -566,7 +566,7 @@ html[data-style="minimal"] .gallery-filter[aria-pressed="true"] {
 html[data-style="minimal"] .dino-run {
   --dino-ink: #171715;
   --dino-accent: #6f6f66;
-  --dino-dim: #b9b9b0;
+  --dino-dim: #6a6a61;
   --dino-ground: rgba(23, 23, 21, 0.28);
   background: #f7f7f3;
   background-image: none;
@@ -576,7 +576,7 @@ html[data-style="minimal"] .dino-run {
 html[data-style="minimal"][data-theme="dark"] .dino-run {
   --dino-ink: #f0f0e9;
   --dino-accent: #b9b9b0;
-  --dino-dim: #4c4c46;
+  --dino-dim: #96968c;
   --dino-ground: rgba(240, 240, 233, 0.24);
   background: #10100f;
   border-top-color: #2b2b28;
@@ -913,7 +913,7 @@ html[data-style="hacker"][data-theme="light"] .join-qr {
 html[data-style="hacker"] .dino-run {
   --dino-ink: #baffd0;
   --dino-accent: #39ff88;
-  --dino-dim: #2f6b46;
+  --dino-dim: #4d9c6b;
   --dino-ground: rgba(57, 255, 136, 0.35);
   background-color: #020604;
   background-image:
@@ -927,7 +927,7 @@ html[data-style="hacker"] .dino-run {
 html[data-style="hacker"][data-theme="light"] .dino-run {
   --dino-ink: #0a3a1d;
   --dino-accent: #0a8f4a;
-  --dino-dim: #79a98b;
+  --dino-dim: #4f8563;
   --dino-ground: rgba(10, 143, 74, 0.28);
   background-color: #f2fbf4;
   background-image:
@@ -2595,4 +2595,31 @@ html[data-style="hacker"][data-theme="light"] .site-header .brand-copy strong {
 :fullscreen .site-header,
 :-webkit-full-screen .site-header {
   background: var(--bg);
+}
+
+/* ---------------------------------------------------------
+   首页项目区的「全部项目」入口卡
+   ---------------------------------------------------------
+   虚线在极简的白底上几乎看不见，黑客风的深绿边也糊。
+   按皮肤各给一档能看见的描边与底色。
+   --------------------------------------------------------- */
+html[data-style="minimal"] .project-grid > .project-card--more {
+  border: 1px solid var(--border-strong);
+  background: var(--panel-2);
+}
+
+html[data-style="minimal"] .project-grid > .project-card--more:hover {
+  border-color: var(--text);
+  background: var(--panel-3);
+}
+
+html[data-style="hacker"] .project-grid > .project-card--more {
+  border-color: rgba(57, 255, 136, 0.34);
+  background: rgba(57, 255, 136, 0.035);
+}
+
+html[data-style="hacker"] .project-grid > .project-card--more:hover {
+  border-color: #39ff88;
+  background: rgba(57, 255, 136, 0.08);
+  box-shadow: 0 0 0 1px rgba(57, 255, 136, 0.35), 0 0 26px rgba(57, 255, 136, 0.12);
 }

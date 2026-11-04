@@ -8,7 +8,7 @@
 .dino-run {
   --dino-ink: #e8f1ff;
   --dino-accent: #7dd3fc;
-  --dino-dim: #3a5a80;
+  --dino-dim: #8098b8;
   --dino-ground: rgba(125, 211, 252, 0.42);
   --dino-gold: #fbbf24;
   --dino-gold-lit: #ffe9a8;
@@ -130,7 +130,7 @@
   margin: 0;
   color: var(--dino-dim);
   font-family: var(--mono);
-  font-size: 0.52rem;
+  font-size: 0.62rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   pointer-events: none;
@@ -138,7 +138,7 @@
 }
 
 .dino-run[data-mode="auto"] .dino-run__hint {
-  opacity: 0.48;
+  opacity: 0.8;
 }
 
 /* 吃到金币 / 升档时从右上角飘起来的一行字 */

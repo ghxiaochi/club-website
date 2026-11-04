@@ -94,8 +94,8 @@ html[data-style="term"][data-theme="dark"] {
 
   --t-text: #e8e6e0;
   --t-soft: #c9c6bf;
-  --t-mut: #8d95a6;
-  --t-dim: #78828f;
+  --t-mut: #9ba4b6;
+  --t-dim: #8c96a6;
 
   --t-accent: #7da1de;
   --t-accent-2: #abc2ec;
@@ -592,7 +592,6 @@ html[data-style="term"] .project-card:hover .project-title {
   color: var(--blue);
 }
 
-html[data-style="term"] .projects-more,
 html[data-style="term"] .project-source {
   border-radius: 0;
   border: 1px solid var(--border);
@@ -600,7 +599,6 @@ html[data-style="term"] .project-source {
   color: var(--muted);
 }
 
-html[data-style="term"] .projects-more:hover,
 html[data-style="term"] .project-source:hover {
   border-color: var(--border-strong);
   color: var(--blue);
@@ -1212,4 +1210,15 @@ html[data-style="term"] .pwa-toast__action {
   .term-bar {
     transition: none;
   }
+}
+
+/* 收尾卡：终端风用面板底 + 主题色虚线，和白纸卡片区分 */
+html[data-style="term"] .project-grid > .project-card--more {
+  border-color: var(--border-strong);
+  background: var(--panel-2);
+}
+
+html[data-style="term"] .project-grid > .project-card--more:hover {
+  border-color: var(--t-accent);
+  background: var(--panel-3);
 }

@@ -367,9 +367,9 @@ html.reveal-ready .project-card[data-reveal] {
   letter-spacing: 0.01em;
 }
 
+/* 提示符别用半透明压暗：深色底上它是最先糊掉的一笔 */
 .hero-rotator__prompt {
-  color: var(--muted);
-  opacity: 0.8;
+  color: var(--text-soft);
 }
 
 .hero-rotator__caret {
@@ -495,10 +495,9 @@ html[data-hacker="true"] {
 .footer-visits {
   display: block;
   margin-top: 6px;
-  color: var(--dim);
+  color: var(--muted);
   font-family: var(--mono);
   font-size: 0.66rem;
-  opacity: 0.85;
 }
 
 /* ---------- 10. 减弱动效 ---------- */
@@ -827,22 +826,24 @@ html[data-hacker="true"] {
 }
 
 @media (max-width: 720px) {
-  /* 横幅改成竖排：文字在上，贴纸一行四张在下 */
+  /* 横幅改成竖排：文字在上，贴纸一行四张在下。
+     手机上整张卡压到 150px 左右，首屏能看见第一张项目卡。 */
   .member-profile {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: 8px;
+    padding: 12px 14px;
   }
 
   .member-profile__sprites {
-    grid-template-columns: repeat(3, 72px);
+    grid-template-columns: repeat(4, 44px);
     gap: 0;
-    margin: 2px 0 0;
+    margin: 0;
   }
 
   .member-chibi {
-    width: 72px;
-    height: 66px;
+    width: 44px;
+    height: 42px;
   }
 }
 

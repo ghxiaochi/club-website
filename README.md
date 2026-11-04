@@ -144,6 +144,7 @@
 - 滚动到留言区附近才插入 giscus 的 `<script>`，首屏不加载第三方 iframe。
 - 把当前皮肤 / 主题映射成 giscus 主题，切一次跟一次。
 - 监听 `postMessage` 拿高度与错误；没有 Discussion 时提示「发第一条」。
+- giscus 只认 GitHub 登录，所以留言框下面固定一条替代路径：复制群号或发邮件，由社团代贴。不为了留言逼人注册账号。
 
 换仓库或分类：去 [giscus.app](https://giscus.app/zh-CN) 重新生成，替换 `guestbook.js` 顶部的 `data-repo` / `data-category-id`。
 
@@ -171,7 +172,7 @@
 | 点击特效 | `js/click-fx.js`，换肤期间关闭 |
 | 404 | 自包含页面，按 `data-style` 适配蓝白 / 黑客 / 极简 / 终端 |
 | 一键复制 | `js/main.js` 的 `[data-copy]` 按钮，QQ 群与邮箱 |
-| 导航与滚动 | 移动端抽屉、顶栏滚动态、页脚年份 |
+| 导航与滚动 | 移动端抽屉（遮罩 + 锁 body 滚动 + 点遮罩关闭）、顶栏滚动态、页脚年份 |
 
 ---
 

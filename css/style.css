@@ -309,6 +309,13 @@ code {
   gap: 30px;
 }
 
+/* 抽屉打开时锁住页面：不然手指一滑，底下的 hero 和表格跟着跑，
+   菜单像是贴在滚动的纸片上 */
+body.nav-locked {
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
 .nav-list {
   display: flex;
   align-items: center;
@@ -494,6 +501,14 @@ code {
   background: var(--blue);
   color: #ffffff;
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.16);
+}
+
+/* 深色下 --blue 是亮蓝（#5b93ff），白字只有 2.97:1。
+   反过来用深色字，对比度 8:1 以上。
+   皮肤各自的主按钮选择器更具体，不会被这条波及。 */
+[data-theme="dark"] .button--primary,
+[data-theme="dark"] .button--primary:hover {
+  color: #061424;
 }
 @media (hover: hover), (pointer: fine) {
 
@@ -928,6 +943,63 @@ code {
   gap: 20px;
 }
 
+/* 首页项目区的收尾卡：点进「全部项目」。
+   它按余数占 1 / 2 / 3 格，把最后一行的空位正好填掉：
+   5 张卡 → 入口占 1 格，两行排满；4 张 → 占 2 格；3 的倍数 → 单独一条横卡。
+   占几格由 js 写进 --more-span。 */
+.project-grid > .project-card--more {
+  grid-column: span var(--more-span, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  padding: 28px 22px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--muted);
+  text-align: center;
+  transition: border-color 0.24s ease, background 0.24s ease, color 0.24s ease;
+}
+
+.project-grid > .project-card--more:hover {
+  border-color: var(--blue);
+  background: rgba(37, 99, 235, 0.06);
+  color: var(--text);
+}
+
+.project-more__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.project-more__count {
+  color: var(--blue);
+  font-family: var(--mono);
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.project-more__label {
+  color: var(--text);
+  font-size: var(--fs-body);
+  font-weight: 600;
+}
+
+.project-more__hint {
+  color: var(--muted);
+  font-size: var(--fs-meta);
+  line-height: 1.7;
+}
+
+.project-more__arrow {
+  color: var(--blue);
+  font-size: 1.1rem;
+}
+
 .loading-state {
   grid-column: 1 / -1;
   padding: 40px 20px;
@@ -1298,48 +1370,18 @@ code {
   white-space: nowrap;
 }
 
-.projects-archive-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 24px;
-}
-
-.projects-more {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 16px;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  color: var(--blue);
-  font-family: var(--mono);
-  font-size: var(--fs-caption);
-  letter-spacing: 0.04em;
-  transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
-}
-@media (hover: hover), (pointer: fine) {
-
-
-.projects-more:hover {
-  border-color: var(--blue);
-  background: rgba(37, 99, 235, 0.08);
-  transform: translateX(3px);
-}
-}
-
-
 /* ---------- 9.5 全部项目页 ---------- */
 .archive {
-  padding-top: 144px;
+  padding-top: 112px;
 }
 
 .archive-head {
   max-width: 840px;
-  margin-bottom: 44px;
+  margin-bottom: 30px;
 }
 
 .archive-head h1 {
-  margin: 18px 0 18px;
+  margin: 12px 0 14px;
   color: var(--text);
   font-size: 55.3px; /* fallback: 旧内核 */
   font-size: var(--fs-display);
@@ -1352,7 +1394,12 @@ code {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 26px;
+  margin-top: 20px;
+}
+
+/* 角色舞台排在项目列表之后，跟上面的说明拉开距离 */
+.archive-foot + .char-stage {
+  margin-top: 56px;
 }
 
 .project-groups {
@@ -2111,6 +2158,12 @@ code {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  /* 两列时不再按三列的余数补位，收尾卡固定占一格 */
+  .project-grid > .project-card--more {
+    --more-span: 1 !important;
+    min-height: 150px;
+  }
+
   .about-layout,
   .schedule-layout,
   .join-panel {
@@ -2143,6 +2196,33 @@ code {
 
   .nav-toggle {
     display: inline-flex;
+  }
+
+  /* 抽屉打开时，从顶栏下沿盖一层遮罩。
+     放在 header 的伪元素上：header 本身 z-index:50 且是层叠上下文，
+     伪元素用 z-index:-1 就正好压在页面内容之上、顶栏之下，
+     不用再给抽屉和页面内容各排一次层级。
+     height 用 100vh 兜底，100dvh 让手机地址栏收起时也铺满。 */
+  .site-header::before {
+    content: "";
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: 0;
+    height: 100vh;
+    height: 100dvh;
+    background: rgba(6, 13, 28, 0.55);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.22s ease, visibility 0.22s ease;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .site-header.is-nav-open::before {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
   }
 
   .site-nav {
@@ -2267,6 +2347,12 @@ code {
     flex-direction: column;
   }
 
+  .project-toolbar {
+    gap: 6px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+  }
+
   .project-footer {
     align-items: flex-start;
     flex-direction: column;
@@ -2287,7 +2373,11 @@ code {
   }
 
   .archive {
-    padding-top: 112px;
+    padding-top: 78px;
+  }
+
+  .archive-head {
+    margin-bottom: 22px;
   }
 
   .member-summary {
@@ -2364,12 +2454,18 @@ code {
   }
 
   .archive-head h1 {
-    font-size: 48px; /* fallback: 旧内核 */
-    font-size: clamp(2.2rem, 11vw, 3rem);
+    font-size: 35px; /* fallback: 旧内核 */
+    font-size: clamp(1.8rem, 8.8vw, 2.3rem);
   }
 
+  /* 两个按钮并排，别在首屏堆成两行大色块 */
   .archive-actions .button {
-    width: 100%;
+    width: auto;
+    flex: 1 1 0;
+    min-width: 0;
+    padding-right: 12px;
+    padding-left: 12px;
+    font-size: var(--fs-caption);
   }
 
   .member-identity {
@@ -2392,15 +2488,13 @@ code {
 
 /* ---------- 16. 可访问性：减少动画 ---------- */
 @media (max-width: 720px) {
-  .member-profile {
-    gap: 12px;
-    padding: 18px;
-  }
-
-  .member-chibi {
-    width: 66px;
-    height: 66px;
-    border-radius: 14px;
+  /* 手机上简介只留一行：首屏先让项目卡露出来，
+     完整的话在成员主页里 */
+  .member-profile__desc {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
   }
 }
 
@@ -2720,8 +2814,38 @@ code {
 @media (pointer: coarse) {
   .nav-list a,
   .footer-nav a,
-  .site-nav a {
+  .site-nav a,
+  .quick-value--link,
+  .join-email,
+  .projects-foot a,
+  .archive-foot a,
+  a[href^="mailto:"],
+  .brand {
+    display: inline-flex;
+    align-items: center;
     min-height: 44px;
+  }
+
+  /* 负 margin 抵消左右 padding：热区变大，看起来没变 */
+  .footer-nav a {
+    padding-right: 10px;
+    padding-left: 10px;
+    margin-right: -10px;
+    margin-left: -10px;
+  }
+
+  /* 图标按钮和跑道上的小按钮：横竖都给够，手指不用瞄 */
+  .header-actions > button,
+  .mini-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .dino-run .dino-run__time,
+  .dino-run .dino-run__ladder {
+    min-height: 40px;
+    padding-top: 6px;
+    padding-bottom: 6px;
   }
 }
 
@@ -2819,9 +2943,9 @@ code {
   .header-actions .style-toggle,
   .header-actions .sync-toggle,
   .header-actions .nav-toggle {
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
   }
 
   .brand-copy span {
@@ -2853,4 +2977,24 @@ code {
     left: auto;
     bottom: 40px;
   }
+}
+
+/* 成员横幅现在排在项目之后：它是这组的结尾注，不是开头 */
+.member-body > .member-profile {
+  margin: 18px 0 4px;
+}
+
+/* 展开一组后的第一行：个人主页入口（从 summary 里搬出来的） */
+.member-body__head {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 10px;
+}
+
+.member-body__head .member-home {
+  padding: 4px 0;
+  color: var(--blue);
+  font-family: var(--mono);
+  font-size: var(--fs-meta);
+  letter-spacing: 0.04em;
 }

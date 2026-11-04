@@ -105,10 +105,10 @@
     },
     "projects-intro": {
       default:
-        "这里是我们开源的仓库，描述、语言和 star 都直接读 GitHub。想立刻看到最新状态，点右上角的刷新按钮。首页放 6 个，更多在「全部项目」里按成员分组。",
+        "这里是我们开源的仓库，描述、语言和 star 都直接读 GitHub。想立刻看到最新状态，点右上角的刷新按钮；完整列表按成员分组，最后一张卡就是入口。",
       minimal: "在 GitHub 上。",
       hacker:
-        "// 仓库描述、语言、star 都从 GitHub 读。要最新数据，点右上角刷新；首页 6 个，其余按成员归档。"
+        "// 仓库描述、语言、star 都从 GitHub 读。要最新数据，点右上角刷新；全部仓库按成员归档。"
     },
     "schedule-title": {
       minimal: "每周两次",
@@ -140,9 +140,9 @@
       hacker: "留一句话<br>给下一个人"
     },
     "guestbook-note": {
-      default: "留言用 GitHub 账号发表，存在仓库的 Discussions 里。不设匿名，也没有第三方服务器。",
-      minimal: "GitHub 账号发表，存进 Discussions。",
-      hacker: "// 用 GitHub 账号发表，存在仓库的 Discussions 里。没有匿名，也没有第三方服务器。"
+      default: "留言用 GitHub 账号发表，存在仓库的 Discussions 里。不设匿名，也没有第三方服务器。没有账号也能留，下面写了办法。",
+      minimal: "GitHub 账号发表；没有也能进群说。",
+      hacker: "// 用 GitHub 账号发表，存在仓库的 Discussions 里。没有匿名，也没有第三方服务器。没账号就进群说一声。"
     },
     "join-title": {
       minimal: "加入",
@@ -170,9 +170,9 @@
       hacker: "全部项目<br>按人分组"
     },
     "archive-intro": {
-      default: "按成员分组，点开谁就加载谁的项目。人再多，页面也不会一次铺满。",
+      default: "按成员分组，点开谁就加载谁的项目。",
       minimal: "一人一组。点开再看。",
-      hacker: "// 一个成员一组，展开才加载。人再多也不会一次铺满。"
+      hacker: "// 一个成员一组，展开才加载。"
     },
     "archive-back": {
       minimal: '<span aria-hidden="true">←</span> 回去',

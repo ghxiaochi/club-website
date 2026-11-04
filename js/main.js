@@ -69,7 +69,6 @@
   const groupsRoot = document.querySelector("#project-groups");
   const count = document.querySelector("#project-count");
   const renderNote = document.querySelector("#render-note");
-  const moreLabel = document.querySelector("[data-more-label]");
 
   /* 记录这次加载中出现了哪些降级原因，最后合并成一条提示 */
   const notices = new Set();
@@ -288,17 +287,16 @@
       wrap.appendChild(image);
     }
 
-    /* 右上角状态角标：正常数据 / 本地快照 / 404 */
-    const badge = document.createElement("span");
-    badge.className = "cover-badge";
-    badge.dataset.state = project.status;
-    badge.textContent =
-      project.status === "ok"
-        ? "开源项目"
-        : project.status === "not-found"
-          ? "仓库找不到"
-          : "本地缓存";
-    wrap.appendChild(badge);
+    /* 右上角状态角标：只在数据异常时出现。
+       正常仓库一律不挂「开源项目」——每张卡都挂一遍，
+       等于五个角标说同一句话，还把封面右上角挡掉。 */
+    if (project.status !== "ok") {
+      const badge = document.createElement("span");
+      badge.className = "cover-badge";
+      badge.dataset.state = project.status;
+      badge.textContent = project.status === "not-found" ? "仓库找不到" : "本地缓存";
+      wrap.appendChild(badge);
+    }
 
     return wrap;
   }
@@ -321,9 +319,16 @@
     val.append(document.createTextNode(value));
 
     if (accessibleLabel) {
-      stat.setAttribute("aria-label", `${accessibleLabel}：${value}`);
+      /* 不用 aria-label：它挂在没有 role 的 span 上，axe 会报
+         「aria-label 不被支持」。改成一段只给读屏看的文本，
+         读起来和原来一样（「语言：JavaScript」），DOM 也合法。 */
       key.setAttribute("aria-hidden", "true");
       val.setAttribute("aria-hidden", "true");
+
+      const spoken = document.createElement("span");
+      spoken.className = "sr-only";
+      spoken.textContent = `${accessibleLabel}：${value}`;
+      stat.appendChild(spoken);
     }
 
     stat.append(key, val);
@@ -435,7 +440,45 @@
     renderNote.hidden = false;
   }
 
+  /* 首页项目区的收尾卡：5 张卡 + 它正好两行，不再空一整列。
+     total 是全部项目数，所以点进去之前就知道里面有多少。 */
+  function createMoreCard(total) {
+    const card = document.createElement("a");
+    card.className = "project-card project-card--more";
+    card.href = "projects.html";
+
+    /* 3 列网格里按余数补位：余 0 单独一条横卡，余 1 占两格，余 2 占一格 */
+    const rest = total % 3;
+    card.style.setProperty("--more-span", String(rest === 0 ? 3 : rest === 1 ? 2 : 1));
+
+    const inner = document.createElement("span");
+    inner.className = "project-more__inner";
+
+    const num = document.createElement("span");
+    num.className = "project-more__count";
+    num.textContent = String(total);
+
+    const label = document.createElement("span");
+    label.className = "project-more__label";
+    label.textContent = "全部项目";
+
+    const hint = document.createElement("span");
+    hint.className = "project-more__hint";
+    hint.textContent = "按成员分组 · 点开才加载";
+
+    const arrow = document.createElement("span");
+    arrow.className = "project-more__arrow";
+    arrow.setAttribute("aria-hidden", "true");
+    arrow.textContent = "→";
+
+    inner.append(num, label, hint, arrow);
+    card.append(inner);
+    return card;
+  }
+
   function renderProjects(projects) {
+    const isHome = grid && grid.id === "project-grid";
+
     if (!grid) return;
 
     grid.replaceChildren();
@@ -450,6 +493,8 @@
       const fragment = document.createDocumentFragment();
       projects.forEach((project) => fragment.appendChild(createProjectCard(project)));
       grid.appendChild(fragment);
+
+      if (isHome) grid.appendChild(createMoreCard(members.length));
     }
 
     if (count) {
@@ -457,10 +502,6 @@
         ? `${projects.length} / ${members.length}`
         : `${projects.length}`;
       count.textContent = `${scope} 个项目 · ${currentMode()}`;
-    }
-
-    if (moreLabel) {
-      moreLabel.textContent = `查看全部 ${members.length} 个项目`;
     }
 
     updateNotice();
@@ -714,10 +755,20 @@
     marker.setAttribute("aria-hidden", "true");
     marker.textContent = "+";
 
-    summary.append(identity, home, marker);
+    /* 链接不放进 summary：summary 里嵌套可交互元素，读屏和键盘都会打架。
+       「个人主页」挪到展开后的第一行，折叠时点标题只管展开。 */
+    summary.append(identity, marker);
 
     const body = document.createElement("div");
     body.className = "member-body";
+
+    const groupTitle = document.createElement("h2");
+    groupTitle.className = "sr-only";
+    groupTitle.textContent = `@${user} 的项目`;
+
+    const head = document.createElement("p");
+    head.className = "member-body__head";
+    head.append(home);
 
     const grid = document.createElement("div");
     grid.className = "project-grid member-projects";
@@ -727,9 +778,11 @@
     hint.className = "member-hint";
     hint.textContent = "点开加载这一组项目";
 
-    body.append(hint, grid);
+    body.append(groupTitle, head, hint, grid);
+    /* 成员横幅放在项目之后：展开一组，先看到仓库，
+       再看到「这个人是谁」。首屏也就不会被一张身份卡挡死。 */
     const profile = createMemberProfile(user);
-    if (profile) body.prepend(profile);
+    if (profile) body.append(profile);
     details.append(summary, body);
 
     details.addEventListener("toggle", () => {
@@ -871,18 +924,24 @@
   function initNavigation() {
     const toggle = document.querySelector("[data-nav-toggle]");
     const nav = document.querySelector("[data-nav]");
+    const header = document.querySelector("[data-header]");
     if (!toggle || !nav) return;
 
     const closeMenu = () => {
       nav.classList.remove("is-open");
       toggle.setAttribute("aria-expanded", "false");
       toggle.setAttribute("aria-label", "打开导航菜单");
+      document.body.classList.remove("nav-locked");
+      if (header) header.classList.remove("is-nav-open");
     };
 
     toggle.addEventListener("click", () => {
       const open = nav.classList.toggle("is-open");
       toggle.setAttribute("aria-expanded", String(open));
       toggle.setAttribute("aria-label", open ? "关闭导航菜单" : "打开导航菜单");
+      /* 锁 body：抽屉开着时底下的页面不能跟着滚 */
+      document.body.classList.toggle("nav-locked", open);
+      if (header) header.classList.toggle("is-nav-open", open);
     });
 
     nav.querySelectorAll("a").forEach((link) => {
