@@ -361,7 +361,7 @@ html[data-theme="dark"] .tty-deepy {
   display: grid;
   grid-template-columns: repeat(17, var(--px));
   grid-auto-rows: var(--px);
-  gap: 3px;
+  gap: 2px;
   width: max-content;
   margin: 0;
 }
