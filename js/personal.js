@@ -140,14 +140,15 @@
         if (charIndex <= 0) {
           deleting = false;
           phraseIndex = (phraseIndex + 1) % phrases.length;
-          timer = window.setTimeout(tick, 380);
+          /* 别在空行上停太久：停 380ms 时，正好切过来的人只看到一个 $ */
+          timer = window.setTimeout(tick, 140);
           return;
         }
         timer = window.setTimeout(tick, 26);
       }
 
       target.textContent = "";
-      timer = window.setTimeout(tick, 420);
+      timer = window.setTimeout(tick, 200);
     }
 
     start();

@@ -2211,7 +2211,7 @@ body.nav-locked {
     left: 0;
     height: 100vh;
     height: 100dvh;
-    background: rgba(6, 13, 28, 0.55);
+    background: rgba(6, 13, 28, 0.6);
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.22s ease, visibility 0.22s ease;
