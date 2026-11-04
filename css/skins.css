@@ -509,10 +509,12 @@ html[data-style="minimal"] .gallery-board::before {
 }
 
 html[data-style="minimal"] .gallery-item {
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
   border-radius: 0;
   background: var(--panel);
   box-shadow: none;
+  /* 白卡在白纸上只靠一条线分界，倾斜会把这层关系弄乱 */
+  transform: none;
 }
 
 @media (hover: hover), (pointer: fine) {
