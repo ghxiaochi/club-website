@@ -735,6 +735,16 @@ html[data-style="term"] .gallery-entry:hover {
   box-shadow: none;
 }
 
+html[data-style="term"] .gallery-item img[data-src] {
+  background-color: var(--panel-2);
+  background-image: linear-gradient(
+    100deg,
+    transparent 18%,
+    rgba(var(--t-rgb), 0.08) 46%,
+    transparent 74%
+  );
+}
+
 html[data-style="term"] .gallery-filter {
   border-radius: 0;
   border: 1px solid var(--border);
