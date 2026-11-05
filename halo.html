@@ -1282,6 +1282,7 @@ let chkMobile = false;
    引线把框钉上去；每换一条文案就重新掷一次，镜头推拉时框也跟着弧走。
    竖屏手机另走左下角角标（场景旋转绘制，弧点算出来在屏幕外）。 */
 let chkA = null, chkW = 180, chkH = 41, chkTX = -1e9, chkTY = -1e9, chkPickAt = 0;
+let chkSafeH = 560;   // 舞台里真正露在面板上方的部分，浮窗不许压到面板
 
 function chkAnchor(a) {
   return toScreen(cx + Math.cos(a) * (RO + 7), cy + Math.sin(a) * (RO + 7));
@@ -1294,7 +1295,7 @@ function chkPick(prev) {
     const p = chkAnchor(a);
     /* 锚点必须真的落在屏幕里的这段弧上，右边还得留得下框 */
     if (p.x < W * 0.30 || p.x > W - chkW - 116) continue;
-    if (p.y < 64 || p.y > H - 28) continue;
+    if (p.y < 64 || p.y > chkSafeH - 24) continue;
     ok.push(a);
   }
   return ok.length ? pick(ok) : -thS * 0.32;
@@ -1324,13 +1325,13 @@ function drawCallout() {
   if (chkA == null) { chkA = chkPick(null); chkMeasure(); }
   let p = chkAnchor(chkA);
   /* 镜头把锚点推出画面就再掷一次（限流，免得每次运镜都跳） */
-  if ((p.x < 6 || p.x > W - 6 || p.y < 56 || p.y > H - 24) && performance.now() - chkPickAt > 1600) {
+  if ((p.x < 6 || p.x > W - 6 || p.y < 56 || p.y > chkSafeH - 20) && performance.now() - chkPickAt > 1600) {
     chkA = chkPick(chkA); chkPickAt = performance.now(); p = chkAnchor(chkA);
   }
   /* 框挂在锚点的外法线方向（远离圆心的那一侧），始终浮在弧外，不压圆内网线 */
   const nx = Math.cos(chkA), ny = Math.sin(chkA);
   const bx = Math.min(W - chkW - 18, Math.max(18, p.x + nx * 96));
-  const by = Math.min(H - chkH - 16, Math.max(76, p.y + ny * 86 - chkH * 0.5 - 12));
+  const by = Math.min(chkSafeH - chkH - 14, Math.max(76, p.y + ny * 86 - chkH * 0.5 - 12));
   /* 框直接钉在锚点的外法线上：不做缓动，引线才不会在换点时被拉成一条长斜线 */
   if (Math.abs(bx - chkTX) > 0.4 || Math.abs(by - chkTY) > 0.4) {
     chkTX = bx; chkTY = by;
@@ -1580,7 +1581,10 @@ function resizeAll() {
   const r = stage.getBoundingClientRect();
   if (r.width < 20 || r.height < 20) { ready = false; return; }
   DPR = Math.min(window.devicePixelRatio || 1, 1.75); resizeStage(); resizePanels(); ready = true;
-  /* 尺寸变了，弧的投影也变了：浮窗重新掷点、重新量宽 */
+  /* 尺寸变了，弧的投影也变了：浮窗重新掷点、重新量宽。
+     H 是画布高度，面板会盖住舞台下沿，所以浮窗的可活动范围要按面板顶算 */
+  const pn = document.querySelector('.panels');
+  chkSafeH = pn ? Math.max(240, pn.getBoundingClientRect().top - r.top) : r.height;
   chkA = null; chkTX = chkTY = -1e9; chkMeasure();
   if (!started) { started = true; last = performance.now(); requestAnimationFrame(frame); }
 }
