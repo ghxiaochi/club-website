@@ -23,11 +23,12 @@
 <style>
 :root{
   --bg:#08090b; --panel:#0e0f12; --line:#25282e; --line2:#3a3e46;
-  --text:#cfd2d8; --dim:#6b6f78; --faint:#3f434a; --white:#f4f5f7;
+  --text:#cfd2d8; --dim:#8a8e98; --faint:#3f434a; --white:#f4f5f7;
   --pink:#f0a6c6; --teal:#98e0cf;
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:"JetBrains Mono",Consolas,monospace;overflow:hidden}
+.app:focus-visible,header:focus-visible,.panels:focus-visible{outline:1px solid var(--dim);outline-offset:-1px}
 .app{display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100vh}
 
 /* ---------- header ---------- */
@@ -48,7 +49,7 @@ header{display:grid;grid-template-columns:minmax(240px,1.7fr) repeat(5,minmax(0,
   background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px),
              radial-gradient(ellipse at 40% 50%,transparent 55%,rgba(0,0,0,.55) 100%)}
 .ov{position:absolute;font-size:9px;letter-spacing:1px;color:var(--text);pointer-events:none;z-index:2}
-.chk{left:0;top:0;will-change:transform;background:rgba(8,9,11,.85);border:1px solid var(--line2);padding:5px 8px;transition:opacity .4s}
+.chk{left:0;top:0;will-change:transform;background:rgba(8,9,11,.88);border:1px solid var(--line2);padding:5px 8px;transition:opacity .4s}
 .chk b{display:block;font-size:8px;color:var(--dim);font-weight:600;margin-bottom:3px}
 .chk span{font-size:12px;color:var(--white);font-weight:600;white-space:nowrap}
 /* 竖屏手机：场景整体旋转 -90° 绘制，圆环的几何锚点会跑到屏幕外，
@@ -87,7 +88,7 @@ header{display:grid;grid-template-columns:minmax(240px,1.7fr) repeat(5,minmax(0,
 .feed{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-end;font-size:9px;line-height:1.4;overflow:hidden}
 .feed div{white-space:nowrap;color:var(--dim)}
 .feed div:last-child{color:var(--white);font-weight:600}
-.n{color:var(--faint);margin-right:8px}
+.n{color:#7d818b;margin-right:8px}
 .vb{display:inline-block;width:42px;font-weight:800}
 .vb.build{color:var(--pink)} .vb.check{color:var(--text)} .vb.read{color:var(--teal)} .vb.qa{color:var(--white)}
 
@@ -97,7 +98,7 @@ header{display:grid;grid-template-columns:minmax(240px,1.7fr) repeat(5,minmax(0,
 
 .code{flex:1;min-height:0;font-size:9px;line-height:1.45;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
 .code div{white-space:nowrap}
-.code .ln{color:var(--faint);margin-right:10px}
+.code .ln{color:#7d818b;margin-right:10px}
 .code .fn{color:var(--white);font-weight:800}
 .code .op{color:var(--dim)}
 .caret{display:inline-block;width:6px;height:10px;background:var(--white);vertical-align:-1px;animation:bl 1s steps(1) infinite}
@@ -201,7 +202,7 @@ header::-webkit-scrollbar{display:none}
 </head>
 <body>
 <div class="app">
-  <header>
+  <header tabindex="0">
     <div class="brand"><h1>HNYZ · 光场</h1><p>衡南一中编程社 / ARDUINO · HARDWARE · OPEN SOURCE</p></div>
     <div class="kpi"><div class="k">项目</div><div class="v" id="k0">5</div><div class="seg"><i></i></div></div>
     <div class="kpi"><div class="k">成员</div><div class="v pink" id="k1">3</div><div class="seg"><i></i></div></div>
@@ -217,7 +218,7 @@ header::-webkit-scrollbar{display:none}
     <div class="ov status"><div class="big" id="stBig">8 SECTIONS · 5 PAGES</div><div class="sm">arduino · hardware · open source</div></div>
   </div>
 
-  <section class="panels">
+  <section class="panels" tabindex="0">
     <div class="p"><h3>CLUB / 社团动态</h3><div class="feed" id="feed"></div></div>
     <div class="p"><h3>ACTIVITY / 活动节奏</h3><canvas id="cAdv"></canvas>
       <div class="btns" id="advBtns"><span class="on">ADVECT</span><span>PROJECT</span><span>RENDER</span></div></div>
@@ -1277,6 +1278,32 @@ const CHECKS = [['CLUB / QUICK INFO', 'QQ 1098931492'], ['MEETING', '每周两�
 let chkI = 0;
 const chkEl = document.getElementById('chk');
 let chkMobile = false;
+/* 桌面端：浮窗不是钉死在某个坐标，而是从圆环上“随便点”一个可见的弧点，
+   引线把框钉上去；每换一条文案就重新掷一次，镜头推拉时框也跟着弧走。
+   竖屏手机另走左下角角标（场景旋转绘制，弧点算出来在屏幕外）。 */
+let chkA = null, chkW = 180, chkH = 41, chkTX = -1e9, chkTY = -1e9, chkPickAt = 0;
+
+function chkAnchor(a) {
+  return toScreen(cx + Math.cos(a) * (RO + 7), cy + Math.sin(a) * (RO + 7));
+}
+function chkPick(prev) {
+  const lim = thS * 0.82, ok = [];
+  for (let i = 0; i < 56; i++) {
+    const a = rr(-lim, lim);
+    if (prev != null && Math.abs(a - prev) < 0.16) continue;   // 别在原地打转
+    const p = chkAnchor(a);
+    /* 锚点必须真的落在屏幕里的这段弧上，右边还得留得下框 */
+    if (p.x < W * 0.30 || p.x > W - chkW - 116) continue;
+    if (p.y < 64 || p.y > H * 0.84) continue;
+    ok.push(a);
+  }
+  return ok.length ? pick(ok) : -thS * 0.32;
+}
+function chkMeasure() {
+  const w = chkEl.offsetWidth, h = chkEl.offsetHeight;
+  if (w > 40) chkW = w;
+  if (h > 20) chkH = h;
+}
 function drawCallout() {
   /* 竖屏手机不跟圆环走：那一套锚点算出来在屏幕外（场景是转着画的），
      改成固定在舞台左下角的角标，字还是那几个字，几秒换一条 */
@@ -1294,14 +1321,42 @@ function drawCallout() {
     chkEl.classList.remove('chk--m');
   }
   chkEl.style.display = '';
-  const a = -thS * 0.32;
-  const anchor = toScreen(cx + Math.cos(a) * (RO + 30), cy + Math.sin(a) * (RO + 30));
-  const box = toScreen(cx + Math.cos(a) * (RO + 30) + 120, cy + Math.sin(a) * (RO + 30) - 40);
-  const bx = Math.min(W - 190, Math.max(8, box.x)), by = Math.min(H - 60, Math.max(40, box.y));
-  chkEl.style.transform = `translate(${bx}px,${by}px)`;
-  S.strokeStyle = 'rgba(230,233,238,.55)'; S.lineWidth = 0.8;
-  S.beginPath(); S.moveTo(anchor.x, anchor.y); S.lineTo(bx, by + 12); S.stroke();
-  S.fillStyle = '#fff'; S.fillRect(anchor.x - 1.5, anchor.y - 1.5, 3, 3);
+  if (chkA == null) { chkA = chkPick(null); chkMeasure(); }
+  let p = chkAnchor(chkA);
+  /* 镜头把锚点推出画面就再掷一次（限流，免得每次运镜都跳） */
+  if ((p.x < 6 || p.x > W - 6 || p.y < 56 || p.y > H * 0.70) && performance.now() - chkPickAt > 1600) {
+    chkA = chkPick(chkA); chkPickAt = performance.now(); p = chkAnchor(chkA);
+  }
+  /* 框挂在锚点的外法线方向（远离圆心的那一侧），始终浮在弧外，不压圆内网线 */
+  const nx = Math.cos(chkA), ny = Math.sin(chkA);
+  const bx = Math.min(W - chkW - 18, Math.max(18, p.x + nx * 96));
+  const by = Math.min(H * 0.58 - chkH, Math.max(76, p.y + ny * 86 - chkH * 0.5 - 12));
+  /* 缓动跟随：运镜时框别像贴纸一样硬跟着抖，换点时也顺手滑过去 */
+  const first = chkTX < -1e8;
+  if (first) { chkTX = bx; chkTY = by; }
+  else { chkTX += (bx - chkTX) * 0.18; chkTY += (by - chkTY) * 0.18; }
+  if (first || Math.abs(chkTX - bx) > 0.3 || Math.abs(chkTY - by) > 0.3) {
+    chkEl.style.transform = `translate(${chkTX.toFixed(1)}px,${chkTY.toFixed(1)}px)`;
+  }
+  /* 引线：从弧上的点连到框最近的边；框本体是 DOM，会盖住线头。
+     先铺一道深色衬边，白线经过弧外的强光带时才不会消失 */
+  const tx = Math.min(chkTX + chkW, Math.max(chkTX, p.x));
+  const ty = Math.min(chkTY + chkH, Math.max(chkTY, p.y));
+  S.beginPath(); S.moveTo(p.x, p.y); S.lineTo(tx, ty);
+  S.strokeStyle = 'rgba(0,0,0,.62)'; S.lineWidth = 3.2; S.stroke();
+  S.strokeStyle = 'rgba(240,243,249,.82)'; S.lineWidth = 1; S.stroke();
+  /* 锚点：黑白双色的十字准星，钉在弧的外缘上，亮带里也看得见 */
+  S.strokeStyle = 'rgba(0,0,0,.65)'; S.lineWidth = 3.4;
+  S.beginPath(); S.moveTo(p.x - 7, p.y); S.lineTo(p.x + 7, p.y);
+  S.moveTo(p.x, p.y - 7); S.lineTo(p.x, p.y + 7); S.stroke();
+  S.strokeStyle = 'rgba(255,255,255,.9)'; S.lineWidth = 1;
+  S.beginPath(); S.moveTo(p.x - 7, p.y); S.lineTo(p.x + 7, p.y);
+  S.moveTo(p.x, p.y - 7); S.lineTo(p.x, p.y + 7); S.stroke();
+  S.fillStyle = '#fff'; S.fillRect(p.x - 1.4, p.y - 1.4, 2.8, 2.8);
+  /* 沿半径的一小段刻度，和圆环的走向咬合 */
+  S.beginPath(); S.moveTo(p.x - nx * 13, p.y - ny * 13); S.lineTo(p.x - nx * 7.5, p.y - ny * 7.5);
+  S.strokeStyle = 'rgba(0,0,0,.6)'; S.lineWidth = 3; S.stroke();
+  S.strokeStyle = 'rgba(255,255,255,.7)'; S.lineWidth = 1; S.stroke();
 }
 setInterval(() => {
   chkEl.style.opacity = 0;
@@ -1309,8 +1364,9 @@ setInterval(() => {
     chkI = (chkI + 1) % CHECKS.length;
     document.getElementById('chkK').textContent = CHECKS[chkI][0];
     document.getElementById('chkV').textContent = CHECKS[chkI][1];
+    if (!ROT) { chkA = chkPick(chkA); chkPickAt = performance.now(); chkMeasure(); chkTX = chkTY = -1e9; }
     chkEl.style.opacity = 1;
-  }, 400);
+  }, 420);
 }, 3600);
 
 /* =========================================================
@@ -1529,6 +1585,8 @@ function resizeAll() {
   const r = stage.getBoundingClientRect();
   if (r.width < 20 || r.height < 20) { ready = false; return; }
   DPR = Math.min(window.devicePixelRatio || 1, 1.75); resizeStage(); resizePanels(); ready = true;
+  /* 尺寸变了，弧的投影也变了：浮窗重新掷点、重新量宽 */
+  chkA = null; chkTX = chkTY = -1e9; chkMeasure();
   if (!started) { started = true; last = performance.now(); requestAnimationFrame(frame); }
 }
 const origFrame = frame;
