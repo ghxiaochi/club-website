@@ -1169,6 +1169,8 @@ main,
 }
 
 .lightbox-image {
+  /* 横向拖拽由灯箱自己处理，别让浏览器翻成「后退」 */
+  touch-action: pan-y;
   max-width: 100%;
   max-height: 74vh;
   border-radius: 6px;
@@ -1662,4 +1664,13 @@ body.is-lightbox-open {
   .nav-list a::after {
     bottom: 6px;
   }
+}
+
+/* 灯箱底部的「3 / 14」：手机上尤其需要，知道还有多少张 */
+.lightbox-count {
+  margin-left: 10px;
+  padding-left: 10px;
+  border-left: 1px solid rgba(147, 197, 253, 0.28);
+  color: rgba(219, 234, 254, 0.62);
+  font-variant-numeric: tabular-nums;
 }

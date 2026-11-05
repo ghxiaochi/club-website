@@ -14,6 +14,7 @@
 window.HNYZ_GALLERY = [
   {
     src: "images/gallery/meme-01.webp",
+    thumb: "images/gallery/thumb/meme-01.webp",
     title: "这支笔",
     tag: "梗图",
     w: 1080,
@@ -21,6 +22,7 @@ window.HNYZ_GALLERY = [
   },
   {
     src: "images/gallery/meme-02.webp",
+    thumb: "images/gallery/thumb/meme-02.webp",
     title: "三件套",
     tag: "梗图",
     w: 1080,
@@ -28,6 +30,7 @@ window.HNYZ_GALLERY = [
   },
   {
     src: "images/gallery/meme-03.webp",
+    thumb: "images/gallery/thumb/meme-03.webp",
     title: "油画里的下午",
     tag: "梗图",
     w: 900,
@@ -35,6 +38,7 @@ window.HNYZ_GALLERY = [
   },
   {
     src: "images/gallery/meme-04.webp",
+    thumb: "images/gallery/thumb/meme-04.webp",
     title: "100 个游戏",
     tag: "梗图",
     w: 1280,
@@ -42,6 +46,7 @@ window.HNYZ_GALLERY = [
   },
   {
     src: "images/gallery/meme-05.webp",
+    thumb: "images/gallery/thumb/meme-05.webp",
     title: "悲伤是水做的",
     tag: "梗图",
     w: 1280,
@@ -49,6 +54,7 @@ window.HNYZ_GALLERY = [
   },
   {
     src: "images/gallery/meme-06.webp",
+    thumb: "images/gallery/thumb/meme-06.webp",
     title: "完整的一生",
     tag: "梗图",
     w: 1206,
@@ -56,6 +62,7 @@ window.HNYZ_GALLERY = [
   },
   {
     src: "images/gallery/meme-07.webp",
+    thumb: "images/gallery/thumb/meme-07.webp",
     title: "外行",
     tag: "梗图",
     w: 1280,
@@ -63,6 +70,7 @@ window.HNYZ_GALLERY = [
   },
   {
     src: "images/gallery/meme-08.webp",
+    thumb: "images/gallery/thumb/meme-08.webp",
     title: "回归基本功",
     tag: "梗图",
     w: 506,
@@ -70,6 +78,7 @@ window.HNYZ_GALLERY = [
   },
   {
     src: "images/gallery/meme-09.webp",
+    thumb: "images/gallery/thumb/meme-09.webp",
     title: "社团日常",
     tag: "社团",
     w: 1280,
@@ -77,6 +86,7 @@ window.HNYZ_GALLERY = [
   },
   {
     src: "images/gallery/meme-10.webp",
+    thumb: "images/gallery/thumb/meme-10.webp",
     title: "离谱但合理",
     tag: "梗图",
     w: 595,
@@ -84,6 +94,7 @@ window.HNYZ_GALLERY = [
   },
   {
     src: "images/gallery/meme-11.webp",
+    thumb: "images/gallery/thumb/meme-11.webp",
     title: "不读了",
     tag: "梗图",
     w: 1080,
@@ -91,6 +102,7 @@ window.HNYZ_GALLERY = [
   },
   {
     src: "images/gallery/meme-12.webp",
+    thumb: "images/gallery/thumb/meme-12.webp",
     title: "克服不了？",
     tag: "梗图",
     w: 1090,
@@ -98,6 +110,7 @@ window.HNYZ_GALLERY = [
   },
   {
     src: "images/gallery/meme-13.webp",
+    thumb: "images/gallery/thumb/meme-13.webp",
     title: "凌晨的屏幕",
     tag: "社团",
     w: 1280,
@@ -105,6 +118,7 @@ window.HNYZ_GALLERY = [
   },
   {
     src: "images/gallery/meme-14.webp",
+    thumb: "images/gallery/thumb/meme-14.webp",
     title: "大肥鱼的生活",
     tag: "梗图",
     w: 548,

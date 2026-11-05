@@ -25,7 +25,7 @@
    发版时改 VERSION，旧缓存在 activate 里被清掉。
    ========================================================= */
 
-const VERSION = "20261105b";
+const VERSION = "20261105c";
 const CACHE = `hnyz-v${VERSION}`;
 
 /* 站内根路径：用 "./" 就地解析，
@@ -86,17 +86,20 @@ const CORE = [
   `./js/ladder.js${V}`,
   /* 光场是整页 iframe，地址里带同一个版本号；预缓存要连 ?v= 一起写 */
   `./halo.html${V}`,
-  "./fonts/anim-title.ttf",
-  "./fonts/anim-pixel.ttf",
+  "./fonts/anim-title.woff2",
+  "./fonts/anim-pixel.woff2",
   "./images/favicon.svg",
   "./images/icon-192.png",
   "./images/icon-512.png",
   "./images/icon-maskable-512.png"
 ];
 
-/* 第二批：装完再补，失败无所谓。离线打开项目页/图集时才会用到 */
 /* 第二批：装完再补，失败无所谓。离线看图集/角色排/听音效时才用到。
-   逐个串行 fetch，不一次并发几十个请求，免得装完 SW 就把带宽占满 */
+   逐个串行 fetch，不一次并发几十个请求，免得装完 SW 就把带宽占满。
+
+   立绘（art-*）和图集原图（gallery/*）不在这里：它们加起来八百多 KB，
+   而且只在点开角色卡/灯箱时才用。装完 SW 就把这些拉一遍，等于替每个
+   访客预付了流量。现在交给 fetch 里的运行时缓存，看过哪张留哪张。 */
 const EXTRA = [
   /* 皮肤与按需脚本：不切这套皮肤就不下载 */
   `./css/skin-halo.css${V}`,
@@ -105,16 +108,6 @@ const EXTRA = [
   `./js/term-tui.js${V}`,
   `./js/matrix.js${V}`,
   `./js/dino.js${V}`,
-  "./images/characters/art-alpha.webp",
-  "./images/characters/art-crawler.webp",
-  "./images/characters/art-mono.webp",
-  "./images/characters/art-oct.webp",
-  "./images/characters/art-oxynoe.webp",
-  "./images/characters/art-quad.webp",
-  "./images/characters/art-sei.webp",
-  "./images/characters/art-zenith.webp",
-  "./images/characters/decor-zenith-chips.webp",
-  "./images/characters/decor-zenith-controller.webp",
   "./images/characters/unit-alpha-hit.webp",
   "./images/characters/unit-alpha.webp",
   "./images/characters/unit-crawler-hit.webp",
@@ -131,20 +124,6 @@ const EXTRA = [
   "./images/characters/unit-sei.webp",
   "./images/characters/unit-zenith-hit.webp",
   "./images/characters/unit-zenith.webp",
-  "./images/gallery/meme-01.webp",
-  "./images/gallery/meme-02.webp",
-  "./images/gallery/meme-03.webp",
-  "./images/gallery/meme-04.webp",
-  "./images/gallery/meme-05.webp",
-  "./images/gallery/meme-06.webp",
-  "./images/gallery/meme-07.webp",
-  "./images/gallery/meme-08.webp",
-  "./images/gallery/meme-09.webp",
-  "./images/gallery/meme-10.webp",
-  "./images/gallery/meme-11.webp",
-  "./images/gallery/meme-12.webp",
-  "./images/gallery/meme-13.webp",
-  "./images/gallery/meme-14.webp",
   "./images/personal/sticker-2.webp",
   "./images/personal/sticker-3.webp",
   "./images/personal/sticker-4.webp",

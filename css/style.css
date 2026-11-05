@@ -2998,3 +2998,29 @@ body.nav-locked {
   font-size: var(--fs-meta);
   letter-spacing: 0.04em;
 }
+
+/* ---------------------------------------------------------
+   成员页：主内容由 JS 注入，先占住高度
+   ---------------------------------------------------------
+   #member-hero 和 #member-projects 初始是空 div，脚本填完之后
+   整块往下长，页脚和跑道跟着跳（桌面 CLS 0.54，属于「差」）。
+   这里按实际渲染高度预留，注入时高度已经在了，不再推挤。
+   --------------------------------------------------------- */
+#member-hero {
+  min-height: 298px;
+}
+
+#member-projects {
+  min-height: 446px;
+}
+
+@media (max-width: 900px) {
+  #member-hero {
+    min-height: 456px;
+  }
+
+  /* 手机上单列堆叠，卡数不定，交给 main 兜底 */
+  #member-projects {
+    min-height: 0;
+  }
+}

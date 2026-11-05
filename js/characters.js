@@ -299,14 +299,38 @@
   }
 
   function preloadArt() {
-    /* 8 张立绘一共两百多 KB，刚进页面就全拉会和首屏图片抢带宽；
-       等空闲下来再补，hover 到谁就先拉谁 */
+    /* 8 张立绘一共两百多 KB。以前是「空闲就全拉」，但角色舞台排在
+       项目列表后面，不进那个区域的人等于白付这笔流量。
+
+       用 IntersectionObserver 也不可靠：列表是异步填的，观察那一刻
+       舞台还在首屏附近，一观察就触发。改成「滚动过首屏才开始」——
+       真正往下看的人才会预载，hover 到谁仍然优先拉谁。 */
     const run = () => characters.forEach(warm);
-    if ("requestIdleCallback" in window) {
-      window.requestIdleCallback(run, { timeout: 3000 });
-    } else {
-      window.setTimeout(run, 1800);
+    const schedule = () => {
+      if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(run, { timeout: 2000 });
+      } else {
+        window.setTimeout(run, 300);
+      }
+    };
+
+    if (window.scrollY > 400) {
+      schedule();
+      return;
     }
+
+    let queued = false;
+    const onScroll = () => {
+      if (queued) return;
+      queued = true;
+      window.requestAnimationFrame(() => {
+        queued = false;
+        if (window.scrollY <= 400) return;
+        window.removeEventListener("scroll", onScroll);
+        schedule();
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
   }
 
   preloadArt();

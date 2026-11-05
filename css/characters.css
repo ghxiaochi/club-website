@@ -1,12 +1,15 @@
 @font-face {
   font-family: "AnimTitle";
-  src: url("../fonts/anim-title.ttf") format("truetype");
+  /* woff2 只有原来的 1/8；ttf 留给不认识 woff2 的旧内核 */
+  src: url("../fonts/anim-title.woff2") format("woff2"),
+    url("../fonts/anim-title.ttf") format("truetype");
   font-display: swap;
 }
 
 @font-face {
   font-family: "AnimPixel";
-  src: url("../fonts/anim-pixel.ttf") format("truetype");
+  src: url("../fonts/anim-pixel.woff2") format("woff2"),
+    url("../fonts/anim-pixel.ttf") format("truetype");
   font-display: swap;
 }
 

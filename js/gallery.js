@@ -83,10 +83,14 @@
     const image = document.createElement("img");
     /* 首屏两行先加载，其余等滚到附近再给 src。
        图集一共六百多 KB，以前 loading="lazy" 在 Chrome 上仍会把
-       3 屏内的图全拉下来，等于首屏替整个页面付流量。 */
+       3 屏内的图全拉下来，等于首屏替整个页面付流量。
+
+       网格里用 560px 宽的 thumb（约原图 43%），点开灯箱才换原图。
+       桌面一列约 290px、手机约 350px，两倍屏也够。 */
+    const gridSrc = item.thumb || item.src;
     const eager = index < 4;
-    image.src = eager ? item.src : PLACEHOLDER;
-    if (!eager) image.dataset.src = item.src;
+    image.src = eager ? gridSrc : PLACEHOLDER;
+    if (!eager) image.dataset.src = gridSrc;
     image.alt = item.title || "HNYZ 图集图片";
     image.loading = eager ? "eager" : "lazy";
     image.decoding = "async";
@@ -193,8 +197,11 @@
   let lightbox = null;
   let lightboxImage = null;
   let lightboxCaption = null;
+  let lightboxCount = null;
   let lightboxPos = 0;
   let lastFocused = null;
+  /* 每次换图 +1：原图异步回来时对一下，翻走了就不再覆盖 */
+  let paintToken = 0;
 
   function buildLightbox() {
     lightbox = document.createElement("div");
@@ -232,6 +239,12 @@
     lightboxCaption = document.createElement("figcaption");
     lightboxCaption.className = "lightbox-caption";
 
+    lightboxCount = document.createElement("span");
+    lightboxCount.className = "lightbox-count";
+    lightboxCount.setAttribute("aria-hidden", "true");
+
+    lightboxCaption.append(lightboxCount);
+
     figure.append(lightboxImage, lightboxCaption);
     lightbox.append(close, prev, figure, next);
     document.body.appendChild(lightbox);
@@ -243,6 +256,24 @@
     lightbox.addEventListener("click", (event) => {
       if (event.target === lightbox) closeLightbox();
     });
+
+    /* 手机上用手指翻：横向拖 45px 以上才认，竖向划动留给关闭/滚动，
+       免得看长图时轻轻一斜就跳到下一张。 */
+    let dragFrom = null;
+    lightbox.addEventListener("pointerdown", (event) => {
+      if (event.target.closest(".lightbox-nav, .lightbox-close")) return;
+      dragFrom = { x: event.clientX, y: event.clientY };
+    });
+    lightbox.addEventListener("pointerup", (event) => {
+      if (!dragFrom) return;
+      const dx = event.clientX - dragFrom.x;
+      const dy = event.clientY - dragFrom.y;
+      dragFrom = null;
+      if (Math.abs(dx) < 45) return;
+      if (Math.abs(dx) < Math.abs(dy) * 1.4) return;
+      step(dx < 0 ? 1 : -1);
+    });
+    lightbox.addEventListener("pointercancel", () => { dragFrom = null; });
 
     document.addEventListener("keydown", (event) => {
       if (lightbox.hidden) return;
@@ -260,8 +291,30 @@
     const item = items[index];
     if (!item) return;
 
-    lightboxImage.src = item.src;
+    const token = ++paintToken;
+    const quick = item.thumb || item.src;
+
+    /* 先上网格那张 thumb：它已经在缓存里，点开就是图，不用等原图。
+       原图加载完再换上去，换图时不留白屏。 */
+    lightboxImage.onerror = () => {
+      if (item.thumb && lightboxImage.getAttribute("src") !== item.thumb) {
+        lightboxImage.src = item.thumb;
+      }
+    };
+    if (lightboxImage.getAttribute("src") !== quick) lightboxImage.src = quick;
     lightboxImage.alt = item.title || "图集图片";
+
+    if (item.src !== quick) {
+      const full = new Image();
+      full.decoding = "async";
+      full.onload = () => {
+        /* 期间用户可能已经翻到别的图，token 对不上就不换 */
+        if (token !== paintToken) return;
+        lightboxImage.src = item.src;
+      };
+      full.onerror = () => { /* 原图拿不到就留在 thumb 上 */ };
+      full.src = item.src;
+    }
 
     /* 翻到一张还没懒加载的图：顺手把它在网格里的缩略图也补上，
        关掉灯箱时不会看到一块占位 */
@@ -271,6 +324,11 @@
     lightboxCaption.textContent = item.tag
       ? `${item.title || "未命名"} · #${item.tag}`
       : item.title || "未命名";
+    if (lightboxCount) {
+      /* textContent 会把子节点一起清掉，所以每次设完文字再挂回去 */
+      lightboxCount.textContent = `${lightboxPos + 1} / ${visibleIndexes.length}`;
+      lightboxCaption.append(lightboxCount);
+    }
     lightbox.setAttribute("aria-label", `图集预览：${item.title || "未命名"}`);
   }
 

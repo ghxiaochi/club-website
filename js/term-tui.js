@@ -170,7 +170,7 @@
   function loadDeepy() {
     if (deepyData || deepyLoading || !window.fetch) return;
     deepyLoading = true;
-    window.fetch("data/deepy.json?v=20261105b")
+    window.fetch("data/deepy.json?v=20261105c")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         deepyData = d;
@@ -551,7 +551,7 @@
     var cached = readCachedRepos();
     if (cached) renderRepos(box, { repos: cached.repos });
 
-    window.fetch("data/repos.json?v=20261105b")
+    window.fetch("data/repos.json?v=20261105c")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (store) {
         if (!store || !store.repos) {
@@ -1013,16 +1013,16 @@
     root.setAttribute("aria-label", "HNYZ 终端");
     root.setAttribute("aria-hidden", "true");
     root.innerHTML =
-      '<header class="tty__top">' +
+      '<div class="tty__top">' +
       '  <span class="tty__logo" aria-hidden="true"></span>' +
       '  <span class="tty__brand">HNYZ<i>//TTY</i></span>' +
       '  <span class="tty__sess">hnyz@club · tty1 · <b>雾蓝</b></span>' +
       '  <span class="tty__clock" aria-hidden="true"></span>' +
       '  <span class="tty__actions"></span>' +
-      "</header>" +
+      "</div>" +
       '<div class="tty__shell">' +
       '  <nav class="tty__rail" role="tablist" aria-label="板块" aria-orientation="vertical">' + rail + "</nav>" +
-      '  <main class="tty__stage">' +
+      '  <div class="tty__stage">' +
       '    <div class="tty-stage__hdr">' +
       '      <span class="tty-stage__no">0:overview</span>' +
       '      <b class="tty-stage__ttl">launchpad</b>' +
@@ -1030,8 +1030,8 @@
       '      <span class="tty-stage__stat"></span>' +
       "    </div>" +
       '    <div class="tty-stage__bd">' + gridHtml + "</div>" +
-      "  </main>" +
-      '  <aside class="tty__side" aria-label="板块索引">' +
+      "  </div>" +
+      '  <div class="tty__side" role="group" aria-label="板块索引">' +
       '    <div class="side__hdr"><span>BLOCKS</span><i class="side__hint">点一行滚过去</i></div>' +
       '    <ol class="side__list"></ol>' +
       '    <div class="side__nav">' +
@@ -1044,7 +1044,7 @@
       '      <div><span>布局</span><b>12 栏</b></div>' +
       '      <div><span>板块</span><b>4 个</b></div>' +
       "    </div>" +
-      "  </aside>" +
+      "  </div>" +
       "</div>" +
       '<div class="tty__echo" aria-live="polite"></div>' +
       '<form class="tty__prompt">' +

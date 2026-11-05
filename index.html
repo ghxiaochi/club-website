@@ -67,39 +67,39 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="stylesheet" href="css/style.css?v=20261105b">
-  <link rel="stylesheet" href="css/pet.css?v=20261105b">
-  <link rel="stylesheet" href="css/personal.css?v=20261105b">
-  <link rel="stylesheet" href="css/avatar-pet.css?v=20261105b">
-  <link rel="stylesheet" href="css/skins.css?v=20261105b">
-  <script src="js/skin-boot.js?v=20261105b"></script>
-  <link rel="stylesheet" href="css/type.css?v=20261105b">
-  <link rel="stylesheet" href="css/motion.css?v=20261105b">
-  <link rel="preload" href="css/dino.css?v=20261105b" as="style">
-  <link rel="stylesheet" href="css/dino.css?v=20261105b" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/dino.css?v=20261105b"></noscript>
-  <link rel="preload" href="css/guestbook.css?v=20261105b" as="style">
-  <link rel="stylesheet" href="css/guestbook.css?v=20261105b" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/guestbook.css?v=20261105b"></noscript>
+  <link rel="stylesheet" href="css/style.css?v=20261105c">
+  <link rel="stylesheet" href="css/pet.css?v=20261105c">
+  <link rel="stylesheet" href="css/personal.css?v=20261105c">
+  <link rel="stylesheet" href="css/avatar-pet.css?v=20261105c">
+  <link rel="stylesheet" href="css/skins.css?v=20261105c">
+  <script src="js/skin-boot.js?v=20261105c"></script>
+  <link rel="stylesheet" href="css/type.css?v=20261105c">
+  <link rel="stylesheet" href="css/motion.css?v=20261105c">
+  <link rel="preload" href="css/dino.css?v=20261105c" as="style">
+  <link rel="stylesheet" href="css/dino.css?v=20261105c" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/dino.css?v=20261105c"></noscript>
+  <link rel="preload" href="css/guestbook.css?v=20261105c" as="style">
+  <link rel="stylesheet" href="css/guestbook.css?v=20261105c" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/guestbook.css?v=20261105c"></noscript>
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <!-- 项目卡片、全部项目折叠页和复制按钮由 js/main.js 驱动 -->
-  <script src="js/sfx.js?v=20261105b" defer></script>
-  <script src="js/theme.js?v=20261105b" defer></script>
-  <script src="js/theme-icon.js?v=20261105b" defer></script>
-  <script src="js/members.js?v=20261105b" defer></script>
-  <script src="js/main.js?v=20261105b" defer></script>
-  <script src="js/repo-sync.js?v=20261105b" defer></script>
-  <script src="js/pet.js?v=20261105b" defer></script>
-  <script src="js/avatar-pet.js?v=20261105b" defer></script>
-  <script src="js/personal.js?v=20261105b" defer></script>
-  <script src="js/click-fx.js?v=20261105b" defer></script>
-  <script src="js/term-tui.js?v=20261105b" defer></script>
-  <script src="js/skins.js?v=20261105b" defer></script>
-  <script src="js/fullscreen.js?v=20261105b" defer></script>
-  <script src="js/copy.js?v=20261105b" defer></script>
-  <script src="js/pwa.js?v=20261105b" defer></script>
-  <script src="js/guestbook.js?v=20261105b" defer></script>
+  <script src="js/sfx.js?v=20261105c" defer></script>
+  <script src="js/theme.js?v=20261105c" defer></script>
+  <script src="js/theme-icon.js?v=20261105c" defer></script>
+  <script src="js/members.js?v=20261105c" defer></script>
+  <script src="js/main.js?v=20261105c" defer></script>
+  <script src="js/repo-sync.js?v=20261105c" defer></script>
+  <script src="js/pet.js?v=20261105c" defer></script>
+  <script src="js/avatar-pet.js?v=20261105c" defer></script>
+  <script src="js/personal.js?v=20261105c" defer></script>
+  <script src="js/click-fx.js?v=20261105c" defer></script>
+  <script src="js/term-tui.js?v=20261105c" defer></script>
+  <script src="js/skins.js?v=20261105c" defer></script>
+  <script src="js/fullscreen.js?v=20261105c" defer></script>
+  <script src="js/copy.js?v=20261105c" defer></script>
+  <script src="js/pwa.js?v=20261105c" defer></script>
+  <script src="js/guestbook.js?v=20261105c" defer></script>
   <script>
     /* 页脚跑道不参与首屏，也不该为「只看了首屏的人」付钱：
        等它进入视口前 600px 再拉脚本。以前 load 完就 idle 注入，
@@ -110,7 +110,7 @@
         if (loaded) return;
         loaded = true;
         var script = document.createElement("script");
-        script.src = "js/dino.js?v=20261105b";
+        script.src = "js/dino.js?v=20261105c";
         script.async = true;
         document.body.appendChild(script);
       }
@@ -286,7 +286,7 @@
           </div>
         </div>
 
-        <aside class="quick-card" aria-labelledby="quick-title">
+        <div class="quick-card" role="group" aria-labelledby="quick-title">
           <p class="quick-path"><span class="quick-dots" aria-hidden="true"><i></i><i></i><i></i></span> ~/hnyz/contact.sh</p>
           <div class="quick-body">
             <p class="card-label">// 联系方式</p>
@@ -312,7 +312,7 @@
 
             <p class="quick-note" data-copy="quick-note">加群请备注「班级 + 姓名」。零基础、非技术方向的同学都欢迎。</p>
           </div>
-        </aside>
+        </div>
       </div>
     </section>
 
@@ -501,7 +501,7 @@
             </article>
           </div>
 
-          <aside class="agenda-card" aria-labelledby="agenda-title">
+          <div class="agenda-card" role="group" aria-labelledby="agenda-title">
             <p class="card-label">// 一次活动</p>
             <h3 id="agenda-title">一次活动，通常这样过</h3>
             <ol class="agenda-list">
@@ -511,7 +511,7 @@
               <li><span>提问 / 结对</span><span class="agenda-time">10 min</span></li>
             </ol>
             <p class="agenda-note">每次活动固定 60 分钟；每周两次，具体时间、地点以 QQ 群通知为准，考试周会适当减少。</p>
-          </aside>
+          </div>
         </div>
       </div>
     </section>

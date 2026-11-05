@@ -108,11 +108,16 @@
 `js/gallery-data.js` 是清单：
 
 ```js
-{ src: "images/gallery/meme-01.webp", title: "这支笔", tag: "梗图", w: 1080, h: 1172 }
+{
+  src: "images/gallery/meme-01.webp",          // 原图，灯箱用
+  thumb: "images/gallery/thumb/meme-01.webp",  // 560px，网格用
+  title: "这支笔", tag: "梗图", w: 1080, h: 1172
+}
 ```
 
+- 网格加载 `thumb`（长边 560px，约为原图 43%），点开灯箱才要 `src`。新图记得跑一遍 `python3 scripts/make-thumbs.py`。
 - 首屏只加载前 4 张，其余用 `IntersectionObserver` 在进入视口前 300px 时再给 `src`；占位靠 `w` / `h` 撑住，不抖。
-- 灯箱复用同一份数据，方向键翻页，`Esc` 关闭；翻到未加载的图时顺手补上网格缩略图。
+- 灯箱先显示已经缓存好的 `thumb`，原图到了再换上，中间不白屏；方向键 / 左右滑动翻页，`Esc` 关闭，底部显示「3 / 14」。
 - 筛选按钮只切换 `hidden`，不重建 DOM。
 
 ---
