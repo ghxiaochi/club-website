@@ -1343,16 +1343,13 @@ function drawCallout() {
   const tx = Math.min(chkTX + chkW, Math.max(chkTX, p.x));
   const ty = Math.min(chkTY + chkH, Math.max(chkTY, p.y));
   S.beginPath(); S.moveTo(p.x, p.y); S.lineTo(tx, ty);
-  S.strokeStyle = 'rgba(0,0,0,.62)'; S.lineWidth = 3.2; S.stroke();
-  S.strokeStyle = 'rgba(240,243,249,.82)'; S.lineWidth = 1; S.stroke();
-  /* 锚点：黑白双色的十字准星，钉在弧的外缘上，亮带里也看得见 */
-  S.strokeStyle = 'rgba(0,0,0,.65)'; S.lineWidth = 3.4;
-  S.beginPath(); S.moveTo(p.x - 7, p.y); S.lineTo(p.x + 7, p.y);
-  S.moveTo(p.x, p.y - 7); S.lineTo(p.x, p.y + 7); S.stroke();
-  S.strokeStyle = 'rgba(255,255,255,.9)'; S.lineWidth = 1;
-  S.beginPath(); S.moveTo(p.x - 7, p.y); S.lineTo(p.x + 7, p.y);
-  S.moveTo(p.x, p.y - 7); S.lineTo(p.x, p.y + 7); S.stroke();
-  S.fillStyle = '#fff'; S.fillRect(p.x - 1.4, p.y - 1.4, 2.8, 2.8);
+  S.strokeStyle = 'rgba(0,0,0,.72)'; S.lineWidth = 3.4; S.stroke();
+  S.strokeStyle = 'rgba(244,246,251,.9)'; S.lineWidth = 1; S.stroke();
+  /* 锚点：黑底白十字的准星，钉在弧的外缘上，亮带里也看得见 */
+  S.fillStyle = 'rgba(0,0,0,.82)'; S.beginPath(); S.arc(p.x, p.y, 6, 0, TAU); S.fill();
+  S.strokeStyle = 'rgba(255,255,255,.92)'; S.lineWidth = 1.2;
+  S.beginPath(); S.moveTo(p.x - 6, p.y); S.lineTo(p.x + 6, p.y);
+  S.moveTo(p.x, p.y - 6); S.lineTo(p.x, p.y + 6); S.stroke();
   /* 沿半径的一小段刻度，和圆环的走向咬合 */
   S.beginPath(); S.moveTo(p.x - nx * 13, p.y - ny * 13); S.lineTo(p.x - nx * 7.5, p.y - ny * 7.5);
   S.strokeStyle = 'rgba(0,0,0,.6)'; S.lineWidth = 3; S.stroke();
