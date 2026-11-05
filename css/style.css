@@ -33,7 +33,19 @@
   --green-bright: #075985;
   --orange: #b45309;
   --red: #dc2626;
-  --purple: #7c3aed;
+  --purple: #6d28d9;
+
+  /* 蓝白不再只有「蓝」：青 / 靛 / 紫三种近邻色，只用在
+     小面积（数字、圆点、标签、描边），大块底色仍是白和浅蓝。
+     都是深一档的值，压在浅底上过 4.5:1。 */
+  --cyan: #0e7490;
+  --cyan-bright: #0891b2;
+  --indigo: #4338ca;
+  --violet: #6d28d9;
+  --mint: #0f766e;
+
+  /* 背景：一层纯色 + 一张气泡图案（内联 SVG，无需额外请求） */
+  --bg-pattern: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22280%22%20height=%22280%22%20viewBox=%220%200%20280%20280%22%3E%3Cg%20fill=%22none%22%20stroke-width=%221.1%22%3E%3Ccircle%20cx=%2242%22%20cy=%2238%22%20r=%2219%22%20stroke=%22%232563eb%22%20stroke-opacity=%22.09%22/%3E%3Ccircle%20cx=%22214%22%20cy=%2274%22%20r=%228%22%20stroke=%22%230891b2%22%20stroke-opacity=%22.12%22/%3E%3Ccircle%20cx=%22132%22%20cy=%22150%22%20r=%2227%22%20stroke=%22%234338ca%22%20stroke-opacity=%22.07%22/%3E%3Ccircle%20cx=%22248%22%20cy=%22196%22%20r=%2211%22%20stroke=%22%232563eb%22%20stroke-opacity=%22.09%22/%3E%3Ccircle%20cx=%2276%22%20cy=%22238%22%20r=%226%22%20stroke=%22%230891b2%22%20stroke-opacity=%22.13%22/%3E%3C/g%3E%3C/svg%3E");
 
   --blue-soft: rgba(37, 99, 235, 0.08);
   --green-soft: rgba(3, 105, 161, 0.1);
@@ -103,11 +115,11 @@ body {
   overflow-x: hidden;
   color: var(--text);
   background-color: var(--bg);
-  /* 只留一层极淡的工程网格：简单的图形，不铺光晕 */
-  background-image:
-    linear-gradient(rgba(37, 99, 235, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(37, 99, 235, 0.035) 1px, transparent 1px);
-  background-size: 56px 56px, 56px 56px;
+  /* 纯色底 + 一层气泡图案。底色是平的，图案只做很浅的圆圈，
+     滚动时跟着内容走，不再铺会糊成一片的柔光渐变。 */
+  background-image: var(--bg-pattern);
+  background-repeat: repeat;
+  background-size: 280px 280px;
   font-family: var(--sans);
   font-size: var(--fs-body);
   line-height: var(--lh-body);
@@ -401,7 +413,8 @@ body.nav-locked {
   overflow: hidden;
 }
 
-/* 首屏右侧：一个细圆环。只用一条线，不加光 */
+/* 首屏右上：一条细圆环，旁边再套一条小的冷紫环。
+   两条都只用 1px 线，不加光晕，纯装饰。 */
 .hero::before {
   content: "";
   position: absolute;
@@ -2617,6 +2630,16 @@ body.nav-locked {
   --glow-green: 0 10px 26px rgba(56, 189, 248, 0.18);
   --shadow-card: 0 18px 48px rgba(0, 0, 0, 0.46);
 
+  /* 深色下同一张气泡图案，换成亮蓝描边、更低的透明度 */
+  --bg-pattern-dark: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22280%22%20height=%22280%22%20viewBox=%220%200%20280%20280%22%3E%3Cg%20fill=%22none%22%20stroke-width=%221.1%22%3E%3Ccircle%20cx=%2242%22%20cy=%2238%22%20r=%2219%22%20stroke=%22%235b93ff%22%20stroke-opacity=%22.13%22/%3E%3Ccircle%20cx=%22214%22%20cy=%2274%22%20r=%228%22%20stroke=%22%2338bdf8%22%20stroke-opacity=%22.15%22/%3E%3Ccircle%20cx=%22132%22%20cy=%22150%22%20r=%2227%22%20stroke=%22%23a5b4fc%22%20stroke-opacity=%22.10%22/%3E%3Ccircle%20cx=%22248%22%20cy=%22196%22%20r=%2211%22%20stroke=%22%235b93ff%22%20stroke-opacity=%22.12%22/%3E%3Ccircle%20cx=%2276%22%20cy=%22238%22%20r=%226%22%20stroke=%22%2338bdf8%22%20stroke-opacity=%22.16%22/%3E%3C/g%3E%3C/svg%3E");
+
+  /* 深色下的辅助色：同一批色相，提亮到深底上可读 */
+  --cyan: #67e8f9;
+  --cyan-bright: #22d3ee;
+  --indigo: #a5b4fc;
+  --violet: #c4b5fd;
+  --mint: #5eead4;
+
   color-scheme: dark;
 }
 
@@ -3022,5 +3045,244 @@ body.nav-locked {
   /* 手机上单列堆叠，卡数不定，交给 main 兜底 */
   #member-projects {
     min-height: 0;
+  }
+}
+
+
+/* =========================================================
+   蓝白配色扩展（只作用于默认皮肤）
+   ---------------------------------------------------------
+   主色仍是蓝，青 / 靛 / 紫只铺在小面积上：标题后半句、主按钮、
+   四个数字、四张贴纸、小节编号、封面角标。底色和卡片保持白，
+   大块面一花就变成「彩页」，不是这个站要的东西。
+   ========================================================= */
+html[data-style="default"] .accent-text {
+  color: var(--blue);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  html[data-style="default"] .accent-text {
+    background-image: linear-gradient(96deg, #2563eb 0%, #4f46e5 52%, #0e7490 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  html[data-style="default"][data-theme="dark"] .accent-text {
+    background-image: linear-gradient(96deg, #8ab4ff 0%, #c4b5fd 52%, #67e8f9 100%);
+  }
+}
+
+/* 主按钮：蓝到靛的一条斜向渐变，hover 再压深一档 */
+html[data-style="default"] .button--secondary {
+  border-color: rgba(37, 99, 235, 0.28);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--text-soft);
+}
+
+html[data-style="default"][data-theme="dark"] .button--secondary {
+  border-color: rgba(91, 147, 255, 0.36);
+  background: rgba(13, 27, 51, 0.9);
+  color: var(--text-soft);
+}
+
+html[data-style="default"] .button--primary {
+  border-color: transparent;
+  background-color: #2563eb;
+  background-image: linear-gradient(135deg, #2563eb 0%, #4f46e5 58%, #4338ca 100%);
+}
+
+@media (hover: hover), (pointer: fine) {
+  html[data-style="default"] .button--primary:hover {
+    border-color: transparent;
+    background-color: #1d4ed8;
+    background-image: linear-gradient(135deg, #1d4ed8 0%, #4338ca 58%, #3730a3 100%);
+  }
+}
+
+/* 极简和黑客风不需要这条装饰弧线：一个要留白，一个要纯终端 */
+html[data-style="minimal"] .hero::before,
+html[data-style="hacker"] .hero::before {
+  display: none;
+}
+
+/* 四个数字各一色，下面的说明字跟着压深一档 */
+html[data-style="default"] .hero-stat:nth-child(1) { --stat-ink: var(--blue); }
+html[data-style="default"] .hero-stat:nth-child(2) { --stat-ink: var(--cyan); }
+html[data-style="default"] .hero-stat:nth-child(3) { --stat-ink: var(--indigo); }
+html[data-style="default"] .hero-stat:nth-child(4) { --stat-ink: var(--violet); }
+
+html[data-style="default"] .hero-stat dt {
+  color: var(--stat-ink, var(--text));
+}
+
+html[data-style="default"] .hero-stat dd {
+  color: var(--dim);
+}
+
+/* 四张关键词贴纸：虚线边和底色跟着字色走 */
+html[data-style="default"] .hero-tag:nth-child(1) {
+  border-color: rgba(37, 99, 235, 0.34);
+  background: rgba(37, 99, 235, 0.06);
+  color: #1d4ed8;
+}
+
+html[data-style="default"] .hero-tag:nth-child(2) {
+  border-color: rgba(8, 145, 178, 0.34);
+  background: rgba(8, 145, 178, 0.07);
+  color: var(--cyan);
+}
+
+html[data-style="default"] .hero-tag:nth-child(3) {
+  border-color: rgba(67, 56, 202, 0.32);
+  background: rgba(67, 56, 202, 0.06);
+  color: var(--indigo);
+}
+
+html[data-style="default"] .hero-tag:nth-child(4) {
+  border-color: rgba(109, 40, 217, 0.3);
+  background: rgba(109, 40, 217, 0.06);
+  color: var(--violet);
+}
+
+html[data-style="default"][data-theme="dark"] .hero-tag:nth-child(1) {
+  color: #8ab4ff;
+}
+
+html[data-style="default"][data-theme="dark"] .hero-tag:nth-child(2) {
+  color: var(--cyan);
+}
+
+/* 小节编号按顺序换色，长页面滚下来不会一路都是同一条蓝线 */
+html[data-style="default"] main > section:nth-of-type(3n + 2) .section-label {
+  color: var(--cyan);
+}
+
+html[data-style="default"] main > section:nth-of-type(3n) .section-label {
+  color: var(--indigo);
+}
+
+/* 项目封面角标：五张卡轮着用三种辅色，面积只有一个角 */
+html[data-style="default"] .project-card:nth-child(3n + 2) .cover-tag {
+  border-color: rgba(8, 145, 178, 0.32);
+  color: var(--cyan);
+}
+
+html[data-style="default"] .project-card:nth-child(3n) .cover-tag {
+  border-color: rgba(67, 56, 202, 0.28);
+  color: var(--indigo);
+}
+
+html[data-style="default"][data-theme="dark"] .cover-tag {
+  background: rgba(10, 22, 42, 0.78);
+}
+
+
+/* =========================================================
+   手机端：首屏与背景的收尾
+   ---------------------------------------------------------
+   1. 圆环从「横穿标题」挪到右上角外沿，只露一段弧
+   2. 玻璃泡整体缩小、外移，避免在窄屏上变成大片色块
+   3. 首屏上下留白各收 38px，四张统计卡能进第一屏
+   ========================================================= */
+@media (max-width: 900px) {
+  .hero::before {
+    width: 260px;
+    height: 260px;
+    top: -130px;
+    right: -130px;
+    border-color: rgba(37, 99, 235, 0.2);
+  }
+
+  .bg-orbs__orb--a {
+    top: -105px;
+    right: -105px;
+    width: 210px;
+    height: 210px;
+  }
+
+  .bg-orbs__orb--b {
+    bottom: -120px;
+    left: -120px;
+    width: 240px;
+    height: 240px;
+  }
+
+  .bg-orbs__orb--c {
+    top: 78%;
+    right: -44px;
+    width: 88px;
+    height: 88px;
+  }
+
+  .bg-orbs__dots::before {
+    top: 72%;
+    left: 2%;
+    width: 62px;
+    height: 62px;
+  }
+
+  .bg-orbs__dots::after {
+    top: 82%;
+    left: 10%;
+    width: 28px;
+    height: 28px;
+  }
+
+  /* 手机屏窄，同样的格子会更密；放大一档，气泡才不会糊成一片 */
+  body {
+    background-size: 300px 300px;
+  }
+}
+
+@media (max-width: 720px) {
+  .hero {
+    padding: 52px 0 54px;
+  }
+
+  /* 两个按钮横排：手机上竖排要多吃 60px，第一屏就放不下统计卡了。
+     用 max-content 两列，宽度不够时自然换行。 */
+  .hero-actions {
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  .hero-actions .button {
+    padding: 11px 16px;
+    font-size: var(--fs-caption);
+  }
+
+  .hero-lead {
+    font-size: 0.98rem;
+    line-height: 1.72;
+  }
+
+  .hero-stats {
+    margin-top: 26px;
+  }
+
+  .hero-stat {
+    padding-top: 14px;
+  }
+
+  .hero-stat:nth-child(n + 3) {
+    margin-top: 10px;
+  }
+
+  .hero-tags {
+    margin-top: 16px;
+    gap: 7px;
+  }
+
+  .hero-tag {
+    padding: 4px 10px;
+  }
+}
+
+@media (max-width: 520px) {
+  .hero h1 {
+    font-size: 2.62rem;
   }
 }
