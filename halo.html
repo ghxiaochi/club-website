@@ -1294,7 +1294,7 @@ function chkPick(prev) {
     const p = chkAnchor(a);
     /* 锚点必须真的落在屏幕里的这段弧上，右边还得留得下框 */
     if (p.x < W * 0.30 || p.x > W - chkW - 116) continue;
-    if (p.y < 64 || p.y > H * 0.84) continue;
+    if (p.y < 64 || p.y > H - 28) continue;
     ok.push(a);
   }
   return ok.length ? pick(ok) : -thS * 0.32;
@@ -1324,19 +1324,17 @@ function drawCallout() {
   if (chkA == null) { chkA = chkPick(null); chkMeasure(); }
   let p = chkAnchor(chkA);
   /* 镜头把锚点推出画面就再掷一次（限流，免得每次运镜都跳） */
-  if ((p.x < 6 || p.x > W - 6 || p.y < 56 || p.y > H * 0.70) && performance.now() - chkPickAt > 1600) {
+  if ((p.x < 6 || p.x > W - 6 || p.y < 56 || p.y > H - 24) && performance.now() - chkPickAt > 1600) {
     chkA = chkPick(chkA); chkPickAt = performance.now(); p = chkAnchor(chkA);
   }
   /* 框挂在锚点的外法线方向（远离圆心的那一侧），始终浮在弧外，不压圆内网线 */
   const nx = Math.cos(chkA), ny = Math.sin(chkA);
   const bx = Math.min(W - chkW - 18, Math.max(18, p.x + nx * 96));
-  const by = Math.min(H * 0.58 - chkH, Math.max(76, p.y + ny * 86 - chkH * 0.5 - 12));
-  /* 缓动跟随：运镜时框别像贴纸一样硬跟着抖，换点时也顺手滑过去 */
-  const first = chkTX < -1e8;
-  if (first) { chkTX = bx; chkTY = by; }
-  else { chkTX += (bx - chkTX) * 0.18; chkTY += (by - chkTY) * 0.18; }
-  if (first || Math.abs(chkTX - bx) > 0.3 || Math.abs(chkTY - by) > 0.3) {
-    chkEl.style.transform = `translate(${chkTX.toFixed(1)}px,${chkTY.toFixed(1)}px)`;
+  const by = Math.min(H - chkH - 16, Math.max(76, p.y + ny * 86 - chkH * 0.5 - 12));
+  /* 框直接钉在锚点的外法线上：不做缓动，引线才不会在换点时被拉成一条长斜线 */
+  if (Math.abs(bx - chkTX) > 0.4 || Math.abs(by - chkTY) > 0.4) {
+    chkTX = bx; chkTY = by;
+    chkEl.style.transform = `translate(${bx.toFixed(1)}px,${by.toFixed(1)}px)`;
   }
   /* 引线：从弧上的点连到框最近的边；框本体是 DOM，会盖住线头。
      先铺一道深色衬边，白线经过弧外的强光带时才不会消失 */

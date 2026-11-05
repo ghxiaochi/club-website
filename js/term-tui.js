@@ -170,7 +170,7 @@
   function loadDeepy() {
     if (deepyData || deepyLoading || !window.fetch) return;
     deepyLoading = true;
-    window.fetch("data/deepy.json?v=20261105g")
+    window.fetch("data/deepy.json?v=20261105h")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         deepyData = d;
@@ -551,7 +551,7 @@
     var cached = readCachedRepos();
     if (cached) renderRepos(box, { repos: cached.repos });
 
-    window.fetch("data/repos.json?v=20261105g")
+    window.fetch("data/repos.json?v=20261105h")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (store) {
         if (!store || !store.repos) {
