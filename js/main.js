@@ -338,6 +338,9 @@
   function createProjectCard(project) {
     const card = document.createElement("article");
     card.className = "project-card";
+    /* 记住这张卡对应哪个仓库：刷新时按 key 找到它，
+       只改文字，不整块重画（重画会让封面闪一下） */
+    card.dataset.key = project.key;
 
     const body = document.createElement("div");
     body.className = "project-body";
@@ -505,6 +508,44 @@
     }
 
     updateNotice();
+  }
+
+  /* -------------------------------------------------------
+     单张卡就地更新
+     -------------------------------------------------------
+     刷新时每回来一个仓库就调一次：只改文字和链接，不重建
+      DOM，封面图不会重新解码，所以不会闪。
+     ------------------------------------------------------- */
+  function patchCard(project) {
+    if (!grid) return;
+
+    const card = grid.querySelector(`.project-card[data-key="${project.key}"]`);
+    if (!card) return;
+
+    const title = card.querySelector(".project-title");
+    if (title) title.textContent = project.name;
+
+    const owner = card.querySelector(".project-owner");
+    if (owner) owner.textContent = `@${project.owner}`;
+
+    const desc = card.querySelector(".project-desc");
+    if (desc) desc.textContent = project.description;
+
+    const values = card.querySelectorAll(".project-stats .stat-value");
+    if (values.length === 3) {
+      values[0].textContent = project.language;
+      values[1].textContent = formatStat(project.stars);
+      values[2].textContent = formatStat(project.forks);
+
+      const dot = values[0].querySelector(".lang-dot");
+      if (dot) dot.style.backgroundColor = LANGUAGE_COLORS[project.language] || "#8b949e";
+    }
+
+    const source = card.querySelector(".project-source");
+    if (source) {
+      source.href = project.url;
+      source.setAttribute("aria-label", `查看 ${project.name} 的源码`);
+    }
   }
 
   /* =======================================================
@@ -1014,10 +1055,46 @@
      缓存引用（否则刚写进去的值会被旧引用盖住），一个在
      数据落地后把当前页重新画一遍。
      ======================================================= */
+  /* 仓库 key -> 成员配置：刷新回来的裸数据要靠它补齐标题、封面这些本地字段 */
+  const memberByKey = new Map();
+  members.forEach((member) => {
+    if (!member || !member.user || !member.repo) return;
+    memberByKey.set(`${member.user}/${member.repo}`, member);
+  });
+
+  /* 刷新过程中每回来一个仓库就调一次：只改那几张卡的文字 */
+  function onRepoUpdated(event) {
+    const detail = event.detail || {};
+    const member = memberByKey.get(detail.key);
+    if (!member || !detail.data) return;
+
+    modeOverride = "刚刚刷新";
+    patchCard(normalizeRepo(detail.data, member));
+
+    if (count) {
+      const total = grid ? grid.querySelectorAll(".project-card:not(.project-card--more)").length : 0;
+      if (total) count.textContent = `${total} 个项目 · ${currentMode()}`;
+    }
+  }
+
+  /* 全部回来之后：卡片在进度里已经逐张改过了，这里只补状态角标，
+     不再整块重画——重画会让六张封面同时重新解码，白闪一下。 */
   function refreshViews() {
     modeOverride = "刚刚刷新";
 
-    if (grid) loadProjects();
+    const cache = readRepoCache();
+    members.forEach((member) => {
+      if (!member || !member.user || !member.repo) return;
+      const entry = cache[`${member.user}/${member.repo}`];
+      if (entry && entry.data) patchCard(normalizeRepo(entry.data, member));
+    });
+
+    if (count) {
+      const total = grid ? grid.querySelectorAll(".project-card:not(.project-card--more)").length : 0;
+      if (total) count.textContent = `${total} 个项目 · ${currentMode()}`;
+    }
+
+    updateNotice();
 
     /* 全部项目页：只重画已经展开过的分组；
        没展开的等用户点开时，自然会读到刚写好的缓存 */
@@ -1034,6 +1111,7 @@
     refresh: refreshViews
   };
 
+  window.addEventListener("hnyz:repo-updated", onRepoUpdated);
   window.addEventListener("hnyz:repos-synced", refreshViews);
 
   initNavigation();

@@ -45,7 +45,6 @@
   --mint: #0f766e;
 
   /* 背景：一层纯色 + 一张气泡图案（内联 SVG，无需额外请求） */
-  --bg-pattern: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22280%22%20height=%22280%22%20viewBox=%220%200%20280%20280%22%3E%3Cg%20fill=%22none%22%20stroke-width=%221.1%22%3E%3Ccircle%20cx=%2242%22%20cy=%2238%22%20r=%2219%22%20stroke=%22%232563eb%22%20stroke-opacity=%22.09%22/%3E%3Ccircle%20cx=%22214%22%20cy=%2274%22%20r=%228%22%20stroke=%22%230891b2%22%20stroke-opacity=%22.12%22/%3E%3Ccircle%20cx=%22132%22%20cy=%22150%22%20r=%2227%22%20stroke=%22%234338ca%22%20stroke-opacity=%22.07%22/%3E%3Ccircle%20cx=%22248%22%20cy=%22196%22%20r=%2211%22%20stroke=%22%232563eb%22%20stroke-opacity=%22.09%22/%3E%3Ccircle%20cx=%2276%22%20cy=%22238%22%20r=%226%22%20stroke=%22%230891b2%22%20stroke-opacity=%22.13%22/%3E%3C/g%3E%3C/svg%3E");
 
   --blue-soft: rgba(37, 99, 235, 0.08);
   --green-soft: rgba(3, 105, 161, 0.1);
@@ -115,11 +114,8 @@ body {
   overflow-x: hidden;
   color: var(--text);
   background-color: var(--bg);
-  /* 纯色底 + 一层气泡图案。底色是平的，图案只做很浅的圆圈，
-     滚动时跟着内容走，不再铺会糊成一片的柔光渐变。 */
-  background-image: var(--bg-pattern);
-  background-repeat: repeat;
-  background-size: 280px 280px;
+  /* 底色就是一条纯色。装饰交给 .bg-orbs 里那三张气泡图，
+     body 上不再平铺任何图案——平铺在长页面上会变成一层灰噪点。 */
   font-family: var(--sans);
   font-size: var(--fs-body);
   line-height: var(--lh-body);
@@ -2631,7 +2627,6 @@ body.nav-locked {
   --shadow-card: 0 18px 48px rgba(0, 0, 0, 0.46);
 
   /* 深色下同一张气泡图案，换成亮蓝描边、更低的透明度 */
-  --bg-pattern-dark: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22280%22%20height=%22280%22%20viewBox=%220%200%20280%20280%22%3E%3Cg%20fill=%22none%22%20stroke-width=%221.1%22%3E%3Ccircle%20cx=%2242%22%20cy=%2238%22%20r=%2219%22%20stroke=%22%235b93ff%22%20stroke-opacity=%22.13%22/%3E%3Ccircle%20cx=%22214%22%20cy=%2274%22%20r=%228%22%20stroke=%22%2338bdf8%22%20stroke-opacity=%22.15%22/%3E%3Ccircle%20cx=%22132%22%20cy=%22150%22%20r=%2227%22%20stroke=%22%23a5b4fc%22%20stroke-opacity=%22.10%22/%3E%3Ccircle%20cx=%22248%22%20cy=%22196%22%20r=%2211%22%20stroke=%22%235b93ff%22%20stroke-opacity=%22.12%22/%3E%3Ccircle%20cx=%2276%22%20cy=%22238%22%20r=%226%22%20stroke=%22%2338bdf8%22%20stroke-opacity=%22.16%22/%3E%3C/g%3E%3C/svg%3E");
 
   /* 深色下的辅助色：同一批色相，提亮到深底上可读 */
   --cyan: #67e8f9;
@@ -2909,7 +2904,9 @@ body.nav-locked {
 .sync-toast {
   position: fixed;
   right: 20px;
-  bottom: 20px;
+  /* 右下角是校徽（84–112px + 20px 边距），提示条放低会压在它上面，
+     所以抬到 132px，正好落在徽标上方 */
+  bottom: 132px;
   z-index: 610;
   max-width: min(340px, calc(100vw - 32px));
   padding: 12px 16px;
@@ -2943,6 +2940,27 @@ body.nav-locked {
 
 .sync-toast.is-error b {
   color: var(--red);
+}
+
+/* 刷新进行中：左边一颗转圈的小环。
+   点下去就出现，不等网络——「有没有反应」比「多快刷完」更要紧。 */
+.sync-toast.is-busy::before {
+  content: "";
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  margin-right: 8px;
+  vertical-align: -1px;
+  border: 2px solid var(--blue-soft);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: sync-turn 0.8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sync-toast.is-busy::before {
+    animation-duration: 2.4s;
+  }
 }
 
 /* 终端风开着的时候底部有一条状态栏，提示往上让一格，别压住它 */
@@ -3194,44 +3212,26 @@ html[data-style="default"][data-theme="dark"] .cover-tag {
     border-color: rgba(37, 99, 235, 0.2);
   }
 
+  /* 手机上三颗泡缩小、更靠边：窄屏里同样的大小会显得糊成一块 */
   .bg-orbs__orb--a {
-    top: -105px;
-    right: -105px;
-    width: 210px;
-    height: 210px;
+    top: -130px;
+    right: -120px;
+    width: 300px;
+    height: 300px;
   }
 
   .bg-orbs__orb--b {
-    bottom: -120px;
-    left: -120px;
-    width: 240px;
-    height: 240px;
+    bottom: -150px;
+    left: -140px;
+    width: 340px;
+    height: 340px;
   }
 
   .bg-orbs__orb--c {
-    top: 78%;
-    right: -44px;
-    width: 88px;
-    height: 88px;
-  }
-
-  .bg-orbs__dots::before {
-    top: 72%;
-    left: 2%;
-    width: 62px;
-    height: 62px;
-  }
-
-  .bg-orbs__dots::after {
-    top: 82%;
-    left: 10%;
-    width: 28px;
-    height: 28px;
-  }
-
-  /* 手机屏窄，同样的格子会更密；放大一档，气泡才不会糊成一片 */
-  body {
-    background-size: 300px 300px;
+    top: 64%;
+    right: -110px;
+    width: 220px;
+    height: 220px;
   }
 }
 

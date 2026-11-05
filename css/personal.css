@@ -874,17 +874,14 @@ html[data-hacker="true"] {
 }
 
 /* =========================================================
-   17. 更丰富的背景层
+   17. 背景层：三颗气泡
    ---------------------------------------------------------
-   - 底色是一条纯色，图案是 style.css 里那张气泡 SVG，平铺
-   - .bg-orbs 从「三团模糊光斑」改成「几颗贴边的玻璃泡」，
-     只在页面左右边缘露一部分，不再横穿正文
+   - 底色是一条纯色，body 上不铺任何图案
+   - .bg-orbs 里放三张气泡图（images/decor/bubble-a/b/c.webp），
+     深色另有一套 -dark，浅色那套在白底上会发灰
+   - 圆心都压到视口外，只露一部分，正文区域永远是空的
    - main / footer 抬到 z-index 1，保证内容在气泡之上
    ========================================================= */
-[data-theme="dark"] body {
-  background-image: var(--bg-pattern-dark);
-}
-
 .bg-orbs {
   position: fixed;
   top: 0; /* fallback: 旧内核 */
@@ -897,107 +894,51 @@ html[data-hacker="true"] {
   pointer-events: none;
 }
 
-/* 玻璃泡：外圈一条细线，左上一点高光。
-   填充几乎透明——它只是背景里的一颗泡，不是一块色板。
-   不做 blur，大尺寸模糊层在部分 GPU 上会出棋盘格。 */
+/* 三颗泡共用一套盒子：图是 640px 的方图，缩放时按盒子铺满 */
 .bg-orbs__orb {
   position: absolute;
-  border-radius: 50%;
-  border: 1px solid rgba(37, 99, 235, 0.15);
-  background: radial-gradient(
-    circle at 30% 24%,
-    rgba(255, 255, 255, 0.9) 0 7%,
-    rgba(255, 255, 255, 0) 38%
-  );
-  box-shadow: inset 0 0 40px rgba(37, 99, 235, 0.04);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
 }
 
-/* 圆心压在视口角上，只露四分之一条弧；正文区域始终是空的 */
+/* 右上：蓝，露右下四分之一 */
 .bg-orbs__orb--a {
-  top: -190px;
-  right: -190px;
-  width: 380px;
-  height: 380px;
-  border-color: rgba(37, 99, 235, 0.16);
+  top: -230px;
+  right: -210px;
+  width: 560px;
+  height: 560px;
+  background-image: url("../images/decor/bubble-a.svg");
 }
 
+/* 左下：青，露右上四分之一 */
 .bg-orbs__orb--b {
-  bottom: -210px;
-  left: -210px;
+  bottom: -270px;
+  left: -250px;
+  width: 640px;
+  height: 640px;
+  background-image: url("../images/decor/bubble-b.svg");
+}
+
+/* 右侧偏下：紫，压在加入区旁边，只露左半边 */
+.bg-orbs__orb--c {
+  top: 58%;
+  right: -190px;
   width: 420px;
   height: 420px;
-  border-color: rgba(8, 145, 178, 0.18);
+  background-image: url("../images/decor/bubble-c.svg");
 }
 
-.bg-orbs__orb--c {
-  top: 74%;
-  right: -60px;
-  width: 120px;
-  height: 120px;
-  border-color: rgba(109, 40, 217, 0.18);
-}
-
-/* 原来这一层是点阵，现在放两颗小泡，补一点疏密 */
-.bg-orbs__dots {
-  position: absolute;
-  top: 0; /* fallback: 旧内核 */
-  right: 0; /* fallback: 旧内核 */
-  bottom: 0; /* fallback: 旧内核 */
-  left: 0; /* fallback: 旧内核 */
-  inset: 0;
-}
-
-.bg-orbs__dots::before,
-.bg-orbs__dots::after {
-  content: "";
-  position: absolute;
-  border-radius: 50%;
-  border: 1px solid rgba(14, 116, 144, 0.22);
-  background: radial-gradient(circle at 30% 26%, rgba(255, 255, 255, 0.85), transparent 64%);
-}
-
-.bg-orbs__dots::before {
-  top: 66%;
-  left: 3%;
-  width: 92px;
-  height: 92px;
-}
-
-.bg-orbs__dots::after {
-  top: 78%;
-  left: 12%;
-  width: 42px;
-  height: 42px;
-  border-color: rgba(37, 99, 235, 0.2);
-}
-
-/* 深色下白色高光会变成一颗白球，压到几乎看不见，只留线 */
-[data-theme="dark"] .bg-orbs__orb {
-  border-color: rgba(91, 147, 255, 0.22);
-  background: radial-gradient(
-    circle at 30% 24%,
-    rgba(160, 196, 255, 0.08) 0 6%,
-    rgba(160, 196, 255, 0) 32%
-  );
-  box-shadow: none;
+[data-theme="dark"] .bg-orbs__orb--a {
+  background-image: url("../images/decor/bubble-a-dark.svg");
 }
 
 [data-theme="dark"] .bg-orbs__orb--b {
-  border-color: rgba(56, 189, 248, 0.24);
+  background-image: url("../images/decor/bubble-b-dark.svg");
 }
 
 [data-theme="dark"] .bg-orbs__orb--c {
-  border-color: rgba(196, 181, 253, 0.2);
-}
-
-[data-theme="dark"] .bg-orbs__dots::before,
-[data-theme="dark"] .bg-orbs__dots::after {
-  border-color: rgba(103, 232, 249, 0.24);
-  background: radial-gradient(
-    circle at 30% 26%,
-    rgba(160, 196, 255, 0.12),
-    rgba(160, 196, 255, 0) 62%
-  );
+  background-image: url("../images/decor/bubble-c-dark.svg");
 }
 
 main,
@@ -1344,6 +1285,14 @@ body.is-lightbox-open {
 .gallery-filter.is-active {
   border-color: var(--blue);
   background: var(--blue-soft);
+  /* 10px 的字压在 #e4edfd 上，#2563eb 只有 4.38:1，差一点点；
+     压深一档到 #1d4ed8 是 6.0:1，看起来还是同一支蓝 */
+  color: var(--blue-bright);
+}
+
+/* 深色主题反过来：底是深蓝，得用亮一档的蓝，
+   --blue-bright 在那里是 #1d4ed8，压上去反而看不见 */
+[data-theme="dark"] .gallery-filter.is-active {
   color: var(--blue);
 }
 

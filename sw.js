@@ -25,7 +25,7 @@
    发版时改 VERSION，旧缓存在 activate 里被清掉。
    ========================================================= */
 
-const VERSION = "20261105d";
+const VERSION = "20261105e";
 const CACHE = `hnyz-v${VERSION}`;
 
 /* 站内根路径：用 "./" 就地解析，
@@ -128,6 +128,13 @@ const EXTRA = [
   "./images/personal/sticker-3.webp",
   "./images/personal/sticker-4.webp",
   "./images/decor/animdustry.webp",
+  /* 首页背景那三颗气泡（深色另有三张）：一张不到 1KB，顺手收进来 */
+  "./images/decor/bubble-a.svg",
+  "./images/decor/bubble-b.svg",
+  "./images/decor/bubble-c.svg",
+  "./images/decor/bubble-a-dark.svg",
+  "./images/decor/bubble-b-dark.svg",
+  "./images/decor/bubble-c-dark.svg",
   "./images/decor/icon-arduino.webp",
   "./images/decor/icon-badge.webp",
   "./images/decor/icon-token.webp",

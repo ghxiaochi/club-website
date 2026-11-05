@@ -715,6 +715,10 @@
   const STAY_MS = 26000;
   let stayTimer = 0;
   let idleTimer = 0;
+  /* 离开是 600ms 的过渡，过渡期间再点一次召唤，
+     旧的 setTimeout 会把刚加上的 is-visible 又抹掉——
+     人还在，动作没了。这里留个句柄，召唤时先取消。 */
+  let leaveTimer = 0;
   let summoned = false;
 
   function scheduleIdle() {
@@ -744,6 +748,8 @@
     }
 
     summoned = true;
+    document.body.classList.add("is-pet-summoned");
+    window.clearTimeout(leaveTimer);
     pet.classList.remove("is-leaving");
     pet.classList.add("is-visible", "is-waving");
     if (summonBtn) {
@@ -770,7 +776,8 @@
     showLine("我先回项目区了。", 1400);
     pet.classList.add("is-leaving");
 
-    window.setTimeout(() => {
+    leaveTimer = window.setTimeout(() => {
+      document.body.classList.remove("is-pet-summoned");
       pet.classList.remove("is-visible", "is-leaving", "is-speaking", "is-poked", "is-secret");
       if (summonBtn) {
         summonBtn.classList.remove("is-active");

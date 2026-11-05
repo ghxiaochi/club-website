@@ -11,6 +11,17 @@
    拉回来的数据写进 localStorage（和 main.js 同一个键），
    当前页立刻重渲染，其它页面之后打开也命中新值。
 
+   —— 为什么改成「两个源一起问」——
+   api.github.com 在国内经常要 4–9 秒才回，甚至直接超时。
+   以前是等全部仓库都回来才提示，用户点完按钮盯着看七八秒，
+   以为按钮坏了。现在：
+     1. 点下去立刻弹一条「正在刷新」，进度跟着走；
+     2. 每个仓库同时问 api.github.com 和 ungh.cc 镜像，
+        谁先回先用谁——镜像 300ms 左右，先把卡片刷新掉；
+     3. api 的数据后到就再补一次（镜像没有 language 等字段，
+        这些以 api 为准，缺的字段沿用缓存里的旧值）；
+     4. 单个仓库回来就单独重画那张卡，不等其它仓库。
+
    未登录 API 每小时 60 次 / IP。一次全量同步只花
    「不同仓库数」次 —— 五个仓库就是五次，够用；
    真撞上限流也不会删旧数据，只是提示稍后再试。
@@ -20,10 +31,15 @@
   "use strict";
 
   const API_BASE = "https://api.github.com/repos";
+  const MIRROR_BASE = "https://ungh.cc/repos";
   const CACHE_KEY = "hnyz:github-repo-cache:v1";
   const LAST_SYNC_KEY = "hnyz:repo-sync-at";
-  const CONCURRENCY = 3;
-  const TIMEOUT = 9000;
+
+  /* 5 个仓库就 5 个并发，不分批。
+     以前并发 3，五个仓库要排两轮，白等一个 RTT。 */
+  const MAX_PARALLEL = 10;
+  const API_TIMEOUT = 5000;
+  const MIRROR_TIMEOUT = 6000;
   const LIMIT_KEEP = 40;
 
   /* 判断「有没有变化」时只看这些字段：
@@ -98,9 +114,11 @@
   }
 
   /* ---------------------------------------------------------
-     轻提示：右下角一颗胶囊，几秒后自己收走
+     轻提示：右下角一颗胶囊。
+     sticky=true 时不自动收（刷新过程中一直显示进度），
+     由调用方最后再调一次 toast 收尾。
      --------------------------------------------------------- */
-  function toast(html, kind) {
+  function toast(html, kind, sticky) {
     if (!toastEl) {
       toastEl = document.createElement("div");
       toastEl.className = "sync-toast";
@@ -109,16 +127,29 @@
       document.body.appendChild(toastEl);
     }
 
-    toastEl.className = kind === "error" ? "sync-toast is-error" : "sync-toast";
+    toastEl.className = "sync-toast";
+    if (kind === "error") toastEl.classList.add("is-error");
+    if (kind === "busy") toastEl.classList.add("is-busy");
     toastEl.innerHTML = html;
+
     /* 重新触发过渡：同一个元素连续两次提示时也能淡入 */
     void toastEl.offsetWidth;
     toastEl.classList.add("is-visible");
 
     window.clearTimeout(toastTimer);
-    toastTimer = window.setTimeout(() => {
-      toastEl.classList.remove("is-visible");
-    }, 3800);
+    if (!sticky) {
+      toastTimer = window.setTimeout(() => {
+        toastEl.classList.remove("is-visible");
+      }, kind === "error" ? 5200 : 3800);
+    }
+    return toastEl;
+  }
+
+  /* 只改文字，不重放淡入动画：进度每回来一个仓库就刷一次，
+     每次都重新淡入会闪。 */
+  function toastText(html) {
+    if (!toastEl) return;
+    toastEl.innerHTML = html;
   }
 
   function clockText(date) {
@@ -130,14 +161,13 @@
   }
 
   /* ---------------------------------------------------------
-     拉单个仓库
+     两个数据源
      --------------------------------------------------------- */
-  async function fetchOne(member, cache) {
-    const key = `${member.user}/${member.repo}`;
-    const before = cache[key] && cache[key].data ? cache[key].data : null;
 
+  /* 正式接口：字段全，但慢，偶尔超时 */
+  async function fetchApi(member) {
     const controller = new AbortController();
-    const timer = window.setTimeout(() => controller.abort(), TIMEOUT);
+    const timer = window.setTimeout(() => controller.abort(), API_TIMEOUT);
 
     try {
       const response = await fetch(
@@ -151,26 +181,18 @@
 
       /* 403 / 429：未登录额度用尽，或同一个 IP 上人太多 */
       if (response.status === 403 || response.status === 429) {
-        return { key, status: "fail", reason: "rate-limit" };
+        return { status: "fail", reason: "rate-limit" };
       }
       if (response.status === 404) {
-        return { key, status: "fail", reason: "not-found" };
+        return { status: "fail", reason: "not-found" };
       }
       if (!response.ok) {
-        return { key, status: "fail", reason: "error" };
+        return { status: "fail", reason: "error" };
       }
 
-      const data = await response.json();
-      writeCache(key, data);
-
-      const changed = !before || WATCH_FIELDS.some(
-        (field) => JSON.stringify(before[field] ?? null) !== JSON.stringify(data[field] ?? null)
-      );
-
-      return { key, status: "ok", changed };
+      return { status: "ok", data: await response.json() };
     } catch (error) {
       return {
-        key,
         status: "fail",
         reason: controller.signal.aborted ? "timeout" : "network"
       };
@@ -179,7 +201,177 @@
     }
   }
 
-  /* 固定并发，别一次把浏览器连接池占满 */
+  /* 镜像：ungh.cc，Cloudflare 上的一份 GitHub 只读副本。
+     没有 language / homepage / issues，只当「先看一眼」用。
+     失败一律返回 null，不参与错误统计——它只是加速手段。 */
+  async function fetchMirror(member) {
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), MIRROR_TIMEOUT);
+
+    try {
+      const response = await fetch(
+        `${MIRROR_BASE}/${encodeURIComponent(member.user)}/${encodeURIComponent(member.repo)}`,
+        { headers: { Accept: "application/json" }, cache: "no-store", signal: controller.signal }
+      );
+      if (!response.ok) return null;
+
+      const payload = await response.json();
+      const repo = payload && payload.repo;
+      if (!repo) return null;
+
+      /* 翻译成 GitHub API 的字段名，后面 merge 的时候不用分源 */
+      return {
+        status: "ok",
+        mirror: true,
+        data: {
+          name: repo.name || member.repo,
+          description: repo.description || "",
+          stargazers_count: typeof repo.stars === "number" ? repo.stars : null,
+          forks_count: typeof repo.forks === "number" ? repo.forks : null,
+          pushed_at: repo.pushedAt || null,
+          updated_at: repo.updatedAt || null,
+          html_url: `https://github.com/${member.user}/${member.repo}`,
+          /* 镜像没有的字段留 null，merge 时不会覆盖缓存里的旧值 */
+          language: null,
+          homepage: null,
+          open_issues_count: null,
+          archived: null
+        }
+      };
+    } catch (error) {
+      return null;
+    } finally {
+      window.clearTimeout(timer);
+    }
+  }
+
+  /* 两个请求同时发出，谁先带着数据回来就 resolve 谁。
+     都没成功则 resolve null。 */
+  function raceFirst(promises) {
+    return new Promise((resolve) => {
+      let left = promises.length;
+      let settled = false;
+
+      const done = (value) => {
+        if (settled) return;
+        settled = true;
+        resolve(value);
+      };
+
+      promises.forEach((promise) => {
+        promise
+          .then((value) => {
+            if (value && value.status === "ok" && value.data) done(value);
+          })
+          .catch(() => {})
+          .then(() => {
+            left -= 1;
+            if (left === 0) done(null);
+          });
+      });
+    });
+  }
+
+  /* 合并：新值里是 null / undefined 的字段保留旧值。
+     镜像没有 language，不能让卡片从 JavaScript 变回 TEXT。 */
+  function mergeData(before, patch) {
+    const merged = Object.assign({}, before || {});
+    Object.keys(patch || {}).forEach((field) => {
+      const value = patch[field];
+      if (value !== null && value !== undefined) merged[field] = value;
+    });
+    return merged;
+  }
+
+  /* 只比对新数据里真的有值的字段，避免「镜像缺字段」被当成有改动 */
+  function hasChanged(before, after) {
+    if (!before) return true;
+    return WATCH_FIELDS.some((field) => {
+      if (after[field] === null || after[field] === undefined) return false;
+      if (field === "pushed_at" && before[field] && after[field]) {
+        return Date.parse(before[field]) !== Date.parse(after[field]);
+      }
+      return String(before[field] ?? "") !== String(after[field] ?? "");
+    });
+  }
+
+  /* ---------------------------------------------------------
+     单个仓库：先到先画，后到的补
+     --------------------------------------------------------- */
+  async function syncOne(member) {
+    const key = `${member.user}/${member.repo}`;
+    const before = (readCache()[key] || {}).data || null;
+
+    const apiPromise = fetchApi(member);
+    const mirrorPromise = fetchMirror(member);
+
+    let last = before;
+    let firstChanged = false;
+    let applied = false;
+
+    const apply = (payload) => {
+      const merged = mergeData(last, payload);
+      last = merged;
+      writeCache(key, merged);
+      window.dispatchEvent(
+        new CustomEvent("hnyz:repo-updated", { detail: { key, data: merged } })
+      );
+      applied = true;
+    };
+
+    /* 第一轮：谁快用谁 */
+    const first = await raceFirst([apiPromise, mirrorPromise]);
+    if (first) {
+      firstChanged = hasChanged(before, mergeData(before, first.data));
+      apply(first.data);
+    }
+
+    /* 第二轮：正式的 api 数据通常晚 2–5 秒。
+       不能在这里 await——那样进度和总结都要跟着它一起等，
+       用户看到的还是「点了没反应」。改成后台补：
+       数据到了再单独刷一次那张卡，赶不上就算了。 */
+    const mergeApi = (apiResult) => {
+      if (!apiResult || apiResult.status !== "ok" || !apiResult.data) return;
+      const mergedAgain = mergeData(last, apiResult.data);
+      if (applied && !hasChanged(last, mergedAgain)) return;
+
+      last = mergedAgain;
+      writeCache(key, mergedAgain);
+      window.dispatchEvent(
+        new CustomEvent("hnyz:repo-updated", { detail: { key, data: mergedAgain } })
+      );
+      applied = true;
+    };
+
+    if (first) {
+      apiPromise.then(mergeApi).catch(() => {});
+      return { key, status: "ok", changed: firstChanged, mirror: !!first.mirror };
+    }
+
+    /* 两个源都没给数据：这时候 api 一定已经结束，直接拿它的原因 */
+    let apiResult = null;
+    try {
+      apiResult = await apiPromise;
+    } catch (error) {
+      apiResult = null;
+    }
+    mergeApi(apiResult);
+
+    if (applied) {
+      return { key, status: "ok", changed: firstChanged, mirror: false };
+    }
+
+    return {
+      key,
+      status: "fail",
+      reason: (apiResult && apiResult.reason) || "network",
+      changed: false
+    };
+  }
+
+  /* ---------------------------------------------------------
+     固定并发：上限 10，实际就是「有几个仓库发几个」
+     --------------------------------------------------------- */
   async function pool(items, limit, worker) {
     const output = new Array(items.length);
     let cursor = 0;
@@ -243,8 +435,27 @@
     });
     const list = Array.from(unique.values());
 
-    const cache = readCache();
-    const results = await pool(list, CONCURRENCY, (member) => fetchOne(member, cache));
+    /* 点下去立刻有反馈：不等网络，先说自己开始干了 */
+    const total = list.length;
+    let done = 0;
+    toast(`<b>0</b> / ${total} · 正在刷新，最快的仓库先上屏`, "busy", true);
+
+    /* 3 秒还没结果：多半是 GitHub 那边卡住了。
+       与其让圈一直转，不如说出来——用户知道在等，就不会以为坏了。 */
+    const slowHint = window.setTimeout(() => {
+      if (running) toastText(`<b>0</b> / ${total} · 网络有点慢，还在等 GitHub 回话`);
+    }, 3000);
+
+    const results = await pool(list, MAX_PARALLEL, async (member) => {
+      const result = await syncOne(member);
+      done += 1;
+      if (done < total) {
+        toastText(`<b>${done}</b> / ${total} · 正在刷新，最快的仓库先上屏`);
+      }
+      return result;
+    });
+
+    window.clearTimeout(slowHint);
 
     const ok = results.filter((item) => item.status === "ok");
     const failed = results.filter((item) => item.status !== "ok");
@@ -266,7 +477,7 @@
       button.setAttribute("title", `刷新项目数据 · 上次 ${time}`);
     }
 
-    /* 只要有仓库更新成功，就让页面把新数据画出来 */
+    /* 通知页面：所有卡片按最终数据再对一遍（进度里已经逐张刷过了） */
     if (ok.length) {
       window.dispatchEvent(
         new CustomEvent("hnyz:repos-synced", {

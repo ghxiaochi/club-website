@@ -461,7 +461,14 @@
      切走时直接 remove，里面的 rAF 才会真正停下；
      留在 DOM 里 hidden 只是不画，计时器还在跑。
      ------------------------------------------------------- */
-  const HALO_VERSION = "20261103f";
+  /* 版本号跟着页面上的 skins.js 一起走。
+     以前这里写死 20261103f：站点改版、halo.html 换了，iframe 还在
+     请求旧地址，浏览器一直喂缓存里那份旧的。 */
+  const HALO_VERSION = (() => {
+    const own = document.querySelector('script[src*="skins.js"]');
+    const match = own && own.src.match(/[?&]v=([^&]+)/);
+    return match ? decodeURIComponent(match[1]) : "20261105e";
+  })();
   let haloFrame = null;
 
   function syncHalo(on) {

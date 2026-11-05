@@ -63,41 +63,44 @@
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
+  <!-- 刷新按钮要连 GitHub；先把域名解析好，点下去省一次 DNS 往返 -->
+  <link rel="dns-prefetch" href="https://api.github.com">
+  <link rel="dns-prefetch" href="https://ungh.cc">
   <meta name="application-name" content="HNYZ">
   <meta name="apple-mobile-web-app-title" content="HNYZ">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="stylesheet" href="css/style.css?v=20261105d">
-  <link rel="stylesheet" href="css/pet.css?v=20261105d">
-  <link rel="stylesheet" href="css/avatar-pet.css?v=20261105d">
-  <link rel="stylesheet" href="css/skins.css?v=20261105d">
-  <script src="js/skin-boot.js?v=20261105d"></script>
-  <link rel="stylesheet" href="css/type.css?v=20261105d">
-  <link rel="stylesheet" href="css/motion.css?v=20261105d">
-  <link rel="preload" href="css/dino.css?v=20261105d" as="style">
-  <link rel="stylesheet" href="css/dino.css?v=20261105d" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/dino.css?v=20261105d"></noscript>
-  <link rel="stylesheet" href="css/personal.css?v=20261105d">
-  <link rel="stylesheet" href="css/characters.css?v=20261105d">
+  <link rel="stylesheet" href="css/style.css?v=20261105e">
+  <link rel="stylesheet" href="css/pet.css?v=20261105e">
+  <link rel="stylesheet" href="css/avatar-pet.css?v=20261105e">
+  <link rel="stylesheet" href="css/skins.css?v=20261105e">
+  <script src="js/skin-boot.js?v=20261105e"></script>
+  <link rel="stylesheet" href="css/type.css?v=20261105e">
+  <link rel="stylesheet" href="css/motion.css?v=20261105e">
+  <link rel="preload" href="css/dino.css?v=20261105e" as="style">
+  <link rel="stylesheet" href="css/dino.css?v=20261105e" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/dino.css?v=20261105e"></noscript>
+  <link rel="stylesheet" href="css/personal.css?v=20261105e">
+  <link rel="stylesheet" href="css/characters.css?v=20261105e">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
-  <script src="js/sfx.js?v=20261105d" defer></script>
-  <script src="js/theme.js?v=20261105d" defer></script>
-  <script src="js/theme-icon.js?v=20261105d" defer></script>
-  <script src="js/members.js?v=20261105d" defer></script>
-  <script src="js/main.js?v=20261105d" defer></script>
-  <script src="js/repo-sync.js?v=20261105d" defer></script>
-  <script src="js/pet.js?v=20261105d" defer></script>
-  <script src="js/avatar-pet.js?v=20261105d" defer></script>
-  <script src="js/splash-scene.js?v=20261105d" defer></script>
-  <script src="js/characters.js?v=20261105d" defer></script>
-  <script src="js/personal.js?v=20261105d" defer></script>
-  <script src="js/click-fx.js?v=20261105d" defer></script>
-  <script src="js/skins.js?v=20261105d" defer></script>
-  <script src="js/fullscreen.js?v=20261105d" defer></script>
-  <script src="js/copy.js?v=20261105d" defer></script>
-  <script src="js/pwa.js?v=20261105d" defer></script>
+  <script src="js/sfx.js?v=20261105e" defer></script>
+  <script src="js/theme.js?v=20261105e" defer></script>
+  <script src="js/theme-icon.js?v=20261105e" defer></script>
+  <script src="js/members.js?v=20261105e" defer></script>
+  <script src="js/main.js?v=20261105e" defer></script>
+  <script src="js/repo-sync.js?v=20261105e" defer></script>
+  <script src="js/pet.js?v=20261105e" defer></script>
+  <script src="js/avatar-pet.js?v=20261105e" defer></script>
+  <script src="js/splash-scene.js?v=20261105e" defer></script>
+  <script src="js/characters.js?v=20261105e" defer></script>
+  <script src="js/personal.js?v=20261105e" defer></script>
+  <script src="js/click-fx.js?v=20261105e" defer></script>
+  <script src="js/skins.js?v=20261105e" defer></script>
+  <script src="js/fullscreen.js?v=20261105e" defer></script>
+  <script src="js/copy.js?v=20261105e" defer></script>
+  <script src="js/pwa.js?v=20261105e" defer></script>
   <script>
     /* 页脚跑道不参与首屏，也不该为「只看了首屏的人」付钱：
        等它进入视口前 600px 再拉脚本。以前 load 完就 idle 注入，
@@ -108,7 +111,7 @@
         if (loaded) return;
         loaded = true;
         var script = document.createElement("script");
-        script.src = "js/dino.js?v=20261105d";
+        script.src = "js/dino.js?v=20261105e";
         script.async = true;
         document.body.appendChild(script);
       }
@@ -143,7 +146,6 @@
     <span class="bg-orbs__orb bg-orbs__orb--a"></span>
     <span class="bg-orbs__orb bg-orbs__orb--b"></span>
     <span class="bg-orbs__orb bg-orbs__orb--c"></span>
-    <span class="bg-orbs__dots"></span>
   </div>
 
   <a class="skip-link" href="#main">跳到主要内容</a>
@@ -372,10 +374,12 @@
         <p class="char-splash__sub" data-splash-sub></p>
       </div>
       <div class="char-splash__bob">
-        <img class="char-splash__decor char-splash__decor--a" data-splash-decor="a" src="" alt="" aria-hidden="true" hidden>
-        <img class="char-splash__decor char-splash__decor--b" data-splash-decor="b" src="" alt="" aria-hidden="true" hidden>
-        <img class="char-splash__pixel" data-splash-pixel src="" alt="" width="24" height="36">
-        <img class="char-splash__unit" data-splash-img src="" alt="">
+        <!-- 这四个 img 的 src 由 js/characters.js 在打开角色卡时填。
+             留空的 src="" 会让浏览器把当前页面再请求一遍，还会先画一个破图。 -->
+        <img class="char-splash__decor char-splash__decor--a" data-splash-decor="a" alt="" aria-hidden="true" hidden>
+        <img class="char-splash__decor char-splash__decor--b" data-splash-decor="b" alt="" aria-hidden="true" hidden>
+        <img class="char-splash__pixel" data-splash-pixel alt="" width="24" height="36">
+        <img class="char-splash__unit" data-splash-img alt="">
       </div>
     </div>
     <p class="char-splash__ability" data-splash-ability></p>

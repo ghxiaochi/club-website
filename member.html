@@ -61,38 +61,41 @@
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
+  <!-- 刷新按钮要连 GitHub；先把域名解析好，点下去省一次 DNS 往返 -->
+  <link rel="dns-prefetch" href="https://api.github.com">
+  <link rel="dns-prefetch" href="https://ungh.cc">
   <meta name="application-name" content="HNYZ">
   <meta name="apple-mobile-web-app-title" content="HNYZ">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="stylesheet" href="css/style.css?v=20261105d">
-  <link rel="stylesheet" href="css/pet.css?v=20261105d">
-  <link rel="stylesheet" href="css/personal.css?v=20261105d">
-  <link rel="stylesheet" href="css/member.css?v=20261105d">
-  <link rel="stylesheet" href="css/avatar-pet.css?v=20261105d">
-  <link rel="stylesheet" href="css/skins.css?v=20261105d">
-  <script src="js/skin-boot.js?v=20261105d"></script>
-  <link rel="stylesheet" href="css/type.css?v=20261105d">
-  <link rel="stylesheet" href="css/motion.css?v=20261105d">
-  <link rel="stylesheet" href="css/dino.css?v=20261105d">
+  <link rel="stylesheet" href="css/style.css?v=20261105e">
+  <link rel="stylesheet" href="css/pet.css?v=20261105e">
+  <link rel="stylesheet" href="css/personal.css?v=20261105e">
+  <link rel="stylesheet" href="css/member.css?v=20261105e">
+  <link rel="stylesheet" href="css/avatar-pet.css?v=20261105e">
+  <link rel="stylesheet" href="css/skins.css?v=20261105e">
+  <script src="js/skin-boot.js?v=20261105e"></script>
+  <link rel="stylesheet" href="css/type.css?v=20261105e">
+  <link rel="stylesheet" href="css/motion.css?v=20261105e">
+  <link rel="stylesheet" href="css/dino.css?v=20261105e">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
-  <script src="js/sfx.js?v=20261105d" defer></script>
-  <script src="js/theme.js?v=20261105d" defer></script>
-  <script src="js/theme-icon.js?v=20261105d" defer></script>
-  <script src="js/members.js?v=20261105d" defer></script>
-  <script src="js/main.js?v=20261105d" defer></script>
-  <script src="js/repo-sync.js?v=20261105d" defer></script>
-  <script src="js/pet.js?v=20261105d" defer></script>
-  <script src="js/member.js?v=20261105d" defer></script>
-  <script src="js/avatar-pet.js?v=20261105d" defer></script>
-  <script src="js/personal.js?v=20261105d" defer></script>
-  <script src="js/click-fx.js?v=20261105d" defer></script>
-  <script src="js/skins.js?v=20261105d" defer></script>
-  <script src="js/fullscreen.js?v=20261105d" defer></script>
-  <script src="js/copy.js?v=20261105d" defer></script>
-  <script src="js/pwa.js?v=20261105d" defer></script>
+  <script src="js/sfx.js?v=20261105e" defer></script>
+  <script src="js/theme.js?v=20261105e" defer></script>
+  <script src="js/theme-icon.js?v=20261105e" defer></script>
+  <script src="js/members.js?v=20261105e" defer></script>
+  <script src="js/main.js?v=20261105e" defer></script>
+  <script src="js/repo-sync.js?v=20261105e" defer></script>
+  <script src="js/pet.js?v=20261105e" defer></script>
+  <script src="js/member.js?v=20261105e" defer></script>
+  <script src="js/avatar-pet.js?v=20261105e" defer></script>
+  <script src="js/personal.js?v=20261105e" defer></script>
+  <script src="js/click-fx.js?v=20261105e" defer></script>
+  <script src="js/skins.js?v=20261105e" defer></script>
+  <script src="js/fullscreen.js?v=20261105e" defer></script>
+  <script src="js/copy.js?v=20261105e" defer></script>
+  <script src="js/pwa.js?v=20261105e" defer></script>
   <script>
     /* 页脚跑道不参与首屏，也不该为「只看了首屏的人」付钱：
        等它进入视口前 600px 再拉脚本。以前 load 完就 idle 注入，
@@ -103,7 +106,7 @@
         if (loaded) return;
         loaded = true;
         var script = document.createElement("script");
-        script.src = "js/dino.js?v=20261105d";
+        script.src = "js/dino.js?v=20261105e";
         script.async = true;
         document.body.appendChild(script);
       }
@@ -138,7 +141,6 @@
     <span class="bg-orbs__orb bg-orbs__orb--a"></span>
     <span class="bg-orbs__orb bg-orbs__orb--b"></span>
     <span class="bg-orbs__orb bg-orbs__orb--c"></span>
-    <span class="bg-orbs__dots"></span>
   </div>
 
   <a class="skip-link" href="#main">跳到主要内容</a>

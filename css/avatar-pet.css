@@ -272,10 +272,12 @@
    ========================================================= */
 .hnyz-avatar--summon {
   left: auto;
-  right: 26.6px; /* fallback: 旧内核 */
-  right: clamp(18px, 2.6vw, 40px);
-  bottom: 153.6px; /* fallback: 旧内核 */
-  bottom: clamp(150px, 20vh, 210px);
+  /* 桌面：直接站到右下角——那是校徽的位置，召唤期间校徽让位（见下）。
+     以前浮在 20vh 高的地方，1280 宽的屏上会正好压住联系卡的复制按钮。 */
+  right: 12px; /* fallback: 旧内核 */
+  right: clamp(8px, 1.6vw, 20px);
+  bottom: 12px; /* fallback: 旧内核 */
+  bottom: clamp(10px, 2.2vh, 22px);
   animation: none;
   opacity: 0;
   transform: translate(26px, 18px) scale(0.9);
@@ -429,7 +431,10 @@
   .pet-summon {
     top: auto;
     bottom: 104px;
-    padding: 8px 9px 8px 7px;
+    /* 收起文字后只剩一圈图标，触控热区要补到 44px 以上 */
+    min-width: 46px;
+    padding: 10px 10px 10px 9px;
+    justify-content: center;
   }
 
   /* 手机上桌宠缩一号，放在按钮上方，别压住主要按钮 */
@@ -453,6 +458,22 @@
     width: 24px;
     height: 35px;
   }
+}
+
+/* 手机：桌面那颗校徽在 560 以下已经收掉了，按钮直接贴到底边，
+   不然它会悬在正文中间，滚动时一直压着一行字 */
+@media (max-width: 560px) {
+  .pet-summon {
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* 召唤期间校徽先让位：右下角只有一块地方，两个装饰叠在一起只会互相咬边。
+   用 !important 压过 hnyz-pet-in 那条 forwards 的关键帧。 */
+body.is-pet-summoned .hnyz-pet {
+  opacity: 0 !important;
+  transform: scale(0.92) translateY(8px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1161,10 +1182,11 @@ body.is-pet-boom .hnyz-avatar {
   }
 }
 
-/* 手机上屏幕本来就是内容：左下角头像会压住页脚的「加入我们」。
-   桌面留着当彩蛋，小屏收起来。 */
+/* 手机上屏幕本来就是内容：左下角那只会压住页脚的「加入我们」。
+   但召唤出来的是用户自己叫的，而且只待 26 秒，不能一起收掉——
+   之前这里一刀切 display:none，手机上点召唤按钮等于没反应。 */
 @media (max-width: 560px) {
-  .hnyz-avatar {
+  .hnyz-avatar:not(.hnyz-avatar--summon) {
     display: none !important;
   }
 }

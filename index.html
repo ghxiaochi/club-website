@@ -62,44 +62,47 @@
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
+  <!-- 刷新按钮要连 GitHub；先把域名解析好，点下去省一次 DNS 往返 -->
+  <link rel="dns-prefetch" href="https://api.github.com">
+  <link rel="dns-prefetch" href="https://ungh.cc">
   <meta name="application-name" content="HNYZ">
   <meta name="apple-mobile-web-app-title" content="HNYZ">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="stylesheet" href="css/style.css?v=20261105d">
-  <link rel="stylesheet" href="css/pet.css?v=20261105d">
-  <link rel="stylesheet" href="css/personal.css?v=20261105d">
-  <link rel="stylesheet" href="css/avatar-pet.css?v=20261105d">
-  <link rel="stylesheet" href="css/skins.css?v=20261105d">
-  <script src="js/skin-boot.js?v=20261105d"></script>
-  <link rel="stylesheet" href="css/type.css?v=20261105d">
-  <link rel="stylesheet" href="css/motion.css?v=20261105d">
-  <link rel="preload" href="css/dino.css?v=20261105d" as="style">
-  <link rel="stylesheet" href="css/dino.css?v=20261105d" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/dino.css?v=20261105d"></noscript>
-  <link rel="preload" href="css/guestbook.css?v=20261105d" as="style">
-  <link rel="stylesheet" href="css/guestbook.css?v=20261105d" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/guestbook.css?v=20261105d"></noscript>
+  <link rel="stylesheet" href="css/style.css?v=20261105e">
+  <link rel="stylesheet" href="css/pet.css?v=20261105e">
+  <link rel="stylesheet" href="css/personal.css?v=20261105e">
+  <link rel="stylesheet" href="css/avatar-pet.css?v=20261105e">
+  <link rel="stylesheet" href="css/skins.css?v=20261105e">
+  <script src="js/skin-boot.js?v=20261105e"></script>
+  <link rel="stylesheet" href="css/type.css?v=20261105e">
+  <link rel="stylesheet" href="css/motion.css?v=20261105e">
+  <link rel="preload" href="css/dino.css?v=20261105e" as="style">
+  <link rel="stylesheet" href="css/dino.css?v=20261105e" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/dino.css?v=20261105e"></noscript>
+  <link rel="preload" href="css/guestbook.css?v=20261105e" as="style">
+  <link rel="stylesheet" href="css/guestbook.css?v=20261105e" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/guestbook.css?v=20261105e"></noscript>
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <!-- 项目卡片、全部项目折叠页和复制按钮由 js/main.js 驱动 -->
-  <script src="js/sfx.js?v=20261105d" defer></script>
-  <script src="js/theme.js?v=20261105d" defer></script>
-  <script src="js/theme-icon.js?v=20261105d" defer></script>
-  <script src="js/members.js?v=20261105d" defer></script>
-  <script src="js/main.js?v=20261105d" defer></script>
-  <script src="js/repo-sync.js?v=20261105d" defer></script>
-  <script src="js/pet.js?v=20261105d" defer></script>
-  <script src="js/avatar-pet.js?v=20261105d" defer></script>
-  <script src="js/personal.js?v=20261105d" defer></script>
-  <script src="js/click-fx.js?v=20261105d" defer></script>
-  <script src="js/term-tui.js?v=20261105d" defer></script>
-  <script src="js/skins.js?v=20261105d" defer></script>
-  <script src="js/fullscreen.js?v=20261105d" defer></script>
-  <script src="js/copy.js?v=20261105d" defer></script>
-  <script src="js/pwa.js?v=20261105d" defer></script>
-  <script src="js/guestbook.js?v=20261105d" defer></script>
+  <script src="js/sfx.js?v=20261105e" defer></script>
+  <script src="js/theme.js?v=20261105e" defer></script>
+  <script src="js/theme-icon.js?v=20261105e" defer></script>
+  <script src="js/members.js?v=20261105e" defer></script>
+  <script src="js/main.js?v=20261105e" defer></script>
+  <script src="js/repo-sync.js?v=20261105e" defer></script>
+  <script src="js/pet.js?v=20261105e" defer></script>
+  <script src="js/avatar-pet.js?v=20261105e" defer></script>
+  <script src="js/personal.js?v=20261105e" defer></script>
+  <script src="js/click-fx.js?v=20261105e" defer></script>
+  <script src="js/term-tui.js?v=20261105e" defer></script>
+  <script src="js/skins.js?v=20261105e" defer></script>
+  <script src="js/fullscreen.js?v=20261105e" defer></script>
+  <script src="js/copy.js?v=20261105e" defer></script>
+  <script src="js/pwa.js?v=20261105e" defer></script>
+  <script src="js/guestbook.js?v=20261105e" defer></script>
   <script>
     /* 页脚跑道不参与首屏，也不该为「只看了首屏的人」付钱：
        等它进入视口前 600px 再拉脚本。以前 load 完就 idle 注入，
@@ -110,7 +113,7 @@
         if (loaded) return;
         loaded = true;
         var script = document.createElement("script");
-        script.src = "js/dino.js?v=20261105d";
+        script.src = "js/dino.js?v=20261105e";
         script.async = true;
         document.body.appendChild(script);
       }
@@ -156,7 +159,6 @@
     <span class="bg-orbs__orb bg-orbs__orb--a"></span>
     <span class="bg-orbs__orb bg-orbs__orb--b"></span>
     <span class="bg-orbs__orb bg-orbs__orb--c"></span>
-    <span class="bg-orbs__dots"></span>
   </div>
 
   <a class="skip-link" href="#main">跳到主要内容</a>
@@ -736,23 +738,6 @@
           </div>
         </div>
 
-        <!-- 右侧召唤按钮：点一下把桌宠叫到首页来 -->
-  <button class="pet-summon" type="button" data-pet-summon aria-pressed="false" aria-label="召唤东方马也">
-    <span class="pet-summon__icon" aria-hidden="true">
-      <img src="images/pet/ghxiaochi-avatar.webp" alt="" width="40" height="59" loading="lazy">
-    </span>
-    <span class="pet-summon__label">召唤<br>东方马也</span>
-  </button>
-
-  <!-- 桌宠：召唤后出现在首页，过一会儿自己回「全部项目」页 -->
-  <div class="hnyz-avatar hnyz-avatar--summon" data-hnyz-avatar data-avatar-mode="summon">
-    <p class="hnyz-avatar__speech" data-hnyz-avatar-speech role="status" aria-live="polite"></p>
-    <button class="hnyz-avatar__button" type="button" data-hnyz-avatar-trigger aria-label="和东方马也互动">
-      <img class="hnyz-avatar__img" src="images/pet/ghxiaochi-avatar.webp" alt="东方马也的像素头像" width="648" height="954">
-      <span class="hnyz-avatar__name" aria-hidden="true">东方马也</span>
-    </button>
-  </div>
-
   <script>
     /* 开屏：固定停在首屏（顶部），不走平滑滚动，也不恢复到上次的位置。
        带 #锚点 的链接仍然按锚点落位。 */
@@ -781,7 +766,6 @@
     })();
   </script>
 
-  <p class="sr-only" id="copy-status" role="status" aria-live="polite"></p>
       </div>
     </section>
     <!-- 页面最下方：图集入口 -->
@@ -876,5 +860,26 @@
     </button>
     <p class="hnyz-pet__speech" data-hnyz-pet-speech role="status" aria-live="polite"></p>
   </div>
+  <!-- 召唤按钮与桌宠必须挂在 body 下：.section 上有 content-visibility:auto，
+       position:fixed 的后代会被那个 section 当成包含块，按钮会跟着滚走并被裁掉 -->
+  <!-- 右侧召唤按钮：点一下把桌宠叫到首页来 -->
+  <button class="pet-summon" type="button" data-pet-summon aria-pressed="false" aria-label="召唤东方马也">
+    <span class="pet-summon__icon" aria-hidden="true">
+      <img src="images/pet/ghxiaochi-avatar.webp" alt="" width="40" height="59" loading="lazy">
+    </span>
+    <span class="pet-summon__label">召唤<br>东方马也</span>
+  </button>
+
+  <!-- 桌宠：召唤后出现在首页，过一会儿自己回「全部项目」页 -->
+  <div class="hnyz-avatar hnyz-avatar--summon" data-hnyz-avatar data-avatar-mode="summon">
+    <p class="hnyz-avatar__speech" data-hnyz-avatar-speech role="status" aria-live="polite"></p>
+    <button class="hnyz-avatar__button" type="button" data-hnyz-avatar-trigger aria-label="和东方马也互动">
+      <img class="hnyz-avatar__img" src="images/pet/ghxiaochi-avatar.webp" alt="东方马也的像素头像" width="648" height="954">
+      <span class="hnyz-avatar__name" aria-hidden="true">东方马也</span>
+    </button>
+  </div>
+
+  <p class="sr-only" id="copy-status" role="status" aria-live="polite"></p>
+
 </body>
 </html>
