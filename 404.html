@@ -83,18 +83,7 @@
       --ink-soft: #6fae82;
     }
 
-    /* 极简与终端也各有一套纸面，别让 404 成为唯一的蓝白页 */
-    html[data-style="minimal"] {
-      --bg: #fbfbf8;
-      --panel: #ffffff;
-      --line: #e3e3dd;
-      --ink: #161614;
-      --ink-soft: #67675f;
-      --accent: #161614;
-      --ok: #4d4d47;
-      --shadow: 0 24px 60px rgba(0, 0, 0, 0.08);
-    }
-
+    /* 终端也有一套纸面，别让 404 成为唯一的蓝白页 */
     html[data-style="term"] {
       --bg: #f6f3ed;
       --panel: #ffffff;
@@ -106,26 +95,20 @@
       --shadow: none;
     }
 
-    /* 黑白与雾蓝的主按钮得反过来：底色一深，默认的深色字就看不见了 */
-    html[data-style="minimal"] .cmd,
+    /* 雾蓝的主按钮得反过来：底色一浅，默认的深色字反而合适，
+       这里只把方角补上 */
     html[data-style="term"] .cmd {
       border-radius: 0;
-    }
-
-    html[data-style="minimal"] .cmd--primary {
-      color: #fbfbf8;
     }
 
     html[data-style="term"] .cmd--primary {
       color: #f6f3ed;
     }
 
-    html[data-style="minimal"] .cmd--primary .sigil,
     html[data-style="term"] .cmd--primary .sigil {
       color: inherit;
     }
 
-    html[data-style="minimal"] body,
     html[data-style="term"] body {
       background: var(--bg);
     }

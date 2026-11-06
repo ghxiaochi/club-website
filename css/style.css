@@ -2593,7 +2593,7 @@ body.nav-locked {
    这一层必须在 style.css 里：它是所有页面的基础样式表。
    原来放在 personal.css（个性化层），结果 dino.html 这种
    只引基础层的页面拿不到深色变量，切到夜间还是一整片白。
-   皮肤（极简/黑客）在 skins.css 里再覆盖 --bg 等，加载顺序在
+   皮肤（黑客等）在 skins.css 里再覆盖 --bg 等，加载顺序在
    这之后，优先级不受影响。
    ========================================================= */
 [data-theme="dark"] {
@@ -3118,8 +3118,7 @@ html[data-style="default"] .button--primary {
   }
 }
 
-/* 极简和黑客风不需要这条装饰弧线：一个要留白，一个要纯终端 */
-html[data-style="minimal"] .hero::before,
+/* 黑客风不需要这条装饰弧线：它要的是纯终端 */
 html[data-style="hacker"] .hero::before {
   display: none;
 }

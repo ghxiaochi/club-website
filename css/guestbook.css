@@ -198,7 +198,6 @@ html[data-style="hacker"] .guestbook__setup code {
 }
 
 html[data-theme="dark"] .guestbook { --giscus-canvas: #22272e; }              /* dark_dimmed */
-html[data-style="minimal"][data-theme="dark"] .guestbook { --giscus-canvas: #0d1117; } /* dark */
 html[data-style="hacker"] .guestbook { --giscus-canvas: #0a0c10; }            /* dark_high_contrast */
 
 .guestbook__body[data-connected="1"] {

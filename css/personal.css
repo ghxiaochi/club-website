@@ -187,10 +187,6 @@
   pointer-events: none;
 }
 
-html[data-style="minimal"] .theme-toggle__flip {
-  filter: grayscale(1) contrast(1.1);
-}
-
 html[data-style="hacker"] .theme-toggle__flip {
   /* 蓝色 210° 转到荧光绿 120°，顺时针退回 90° */
   filter: hue-rotate(-90deg) saturate(1.45) brightness(1.06);

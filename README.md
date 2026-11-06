@@ -29,7 +29,6 @@
 | 值 | 名称 | 实现 |
 | --- | --- | --- |
 | `default` | 蓝白科技 | `style.css` + `skins.css` |
-| `minimal` | 极简 | `skins.css` 的 `html[data-style="minimal"]` |
 | `hacker` | 黑客终端 | `skins.css` + `js/matrix.js`（代码雨） |
 | `term` | 终端 | `css/skin-term.css` + `css/term-tui.css` |
 | `halo` | 光场 | `css/skin-halo.css` + `halo.html` iframe |
@@ -190,7 +189,7 @@
 | 全屏 | `js/fullscreen.js`，`requestFullscreen` |
 | 桌宠与校徽 | `js/pet.js`、`js/avatar-pet.js`；常驻的左下角头像在 ≤560px 收起，但首页那颗「召唤」出来的照常显示 |
 | 点击特效 | `js/click-fx.js`，换肤期间关闭 |
-| 404 | 自包含页面，按 `data-style` 适配蓝白 / 黑客 / 极简 / 终端 |
+| 404 | 自包含页面，按 `data-style` 适配蓝白 / 黑客 / 终端 |
 | 一键复制 | `js/main.js` 的 `[data-copy]` 按钮，QQ 群与邮箱 |
 | 导航与滚动 | 移动端抽屉（遮罩 + 锁 body 滚动 + 点遮罩关闭）、顶栏滚动态、页脚年份 |
 

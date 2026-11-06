@@ -3,7 +3,7 @@
    ---------------------------------------------------------
    1. 顶栏「风格方块」与风格面板（竖向卡片轮播）
    2. 黑客风的涂鸦背景、扫描线、滚动进度
-   3. 极简风 / 黑客风两套皮肤变量
+   黑客风等皮肤变量
    这个文件最后加载，用来覆盖前面三套样式。
    ========================================================= */
 
@@ -120,15 +120,6 @@
 }
 }
 
-
-html[data-style="minimal"] .style-toggle {
-  border-radius: 2px;
-}
-
-html[data-style="minimal"] .style-toggle__grid i {
-  border-radius: 0;
-  background: var(--text);
-}
 
 html[data-style="hacker"] .style-toggle {
   border-radius: 2px;
@@ -271,315 +262,6 @@ html[data-style="hacker"][data-theme="light"] .skin-bubbles i::after {
 
 html[data-style="hacker"] .skin-progress {
   opacity: 0.9;
-}
-
-/* ---------------------------------------------------------
-   3. 极简风
-   --------------------------------------------------------- */
-html[data-style="minimal"] {
-  --bg: #fbfbf8;
-  --bg-deep: #f3f3ef;
-  --panel: #ffffff;
-  --panel-2: #f7f7f3;
-  --panel-3: #f0f0eb;
-  --border: #e3e3dd;
-  --border-strong: #c8c8bf;
-  --text: #161614;
-  --text-soft: #3c3c38;
-  --muted: #67675f;
-  /* 原来是 #7d7d74，对 #fbfbf8 只有 4.01:1 —— 只够大字号。
-     这个变量全站 20 处用在 12~14px 的标签、面包屑、元信息上，
-     小字必须过 4.5。提到 #72726a（4.68 / 对白卡 4.85），
-     仍然比 --muted 淡一档，层级没丢。 */
-  --dim: #72726a;
-  --blue: #111110;
-  --blue-bright: #000000;
-  --green: #4d4d47;
-  --green-bright: #2c2c28;
-  --orange: #6d5a3e;
-  --red: #a33a30;
-  --purple: #5b5b55;
-  --blue-soft: rgba(17, 17, 16, 0.05);
-  --green-soft: rgba(17, 17, 16, 0.05);
-  --radius-sm: 2px;
-  --radius: 2px;
-  --radius-lg: 3px;
-  --glow-blue: none;
-  --glow-green: none;
-  --shadow-card: none;
-  color-scheme: light;
-}
-
-html[data-style="minimal"][data-theme="dark"] {
-  --bg: #0d0d0c;
-  --bg-deep: #080807;
-  --panel: #141413;
-  --panel-2: #191918;
-  --panel-3: #1e1e1c;
-  --border: #2b2b28;
-  --border-strong: #44443f;
-  --text: #f3f3ee;
-  --text-soft: #d4d4cd;
-  --muted: #a3a39a;
-  --dim: #85857c;
-  --blue: #f3f3ee;
-  --blue-bright: #ffffff;
-  --green: #c9c9c1;
-  --green-bright: #e8e8e1;
-  --orange: #d8c7a6;
-  --red: #ff8f82;
-  --purple: #c9c9c1;
-  --blue-soft: rgba(255, 255, 255, 0.06);
-  --green-soft: rgba(255, 255, 255, 0.06);
-  color-scheme: dark;
-}
-
-html[data-style="minimal"] body {
-  background: var(--bg);
-  background-image: none;
-}
-
-html[data-style="minimal"] .bg-orbs,
-html[data-style="minimal"] .bg-orbs__dots,
-html[data-style="minimal"] .bg-icons,
-html[data-style="minimal"] .hnyz-glow,
-html[data-style="minimal"] .hnyz-pet,
-html[data-style="minimal"] .hnyz-avatar,
-html[data-style="minimal"] .pet-summon,
-html[data-style="minimal"] .pet-tomb-veil,
-html[data-style="minimal"] .click-fx,
-html[data-style="minimal"] .skin-bubbles,
-html[data-style="minimal"] .hero-tags,
-html[data-style="minimal"] .eyebrow-dot,
-html[data-style="minimal"] .hero-rotator,
-html[data-style="minimal"] .gallery-entry__index {
-  display: none !important;
-}
-
-html[data-style="minimal"] .site-header,
-html[data-style="minimal"] .site-header.is-scrolled {
-  background: var(--bg);
-  border-bottom-color: var(--border);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  box-shadow: none;
-}
-
-html[data-style="minimal"] .site-footer {
-  background: var(--bg);
-  border-top-color: var(--border);
-}
-
-html[data-style="minimal"] .section--soft {
-  background: var(--bg-deep);
-}
-
-html[data-style="minimal"] .brand-mark,
-html[data-style="minimal"] .nav-toggle,
-html[data-style="minimal"] .theme-toggle,
-html[data-style="minimal"] .sound-toggle,
-html[data-style="minimal"] .style-toggle {
-  box-shadow: none;
-  background: transparent;
-}
-
-html[data-style="minimal"] .nav-cta {
-  border-color: var(--text);
-  background: transparent;
-  color: var(--text);
-}
-@media (hover: hover), (pointer: fine) {
-
-
-html[data-style="minimal"] .nav-cta:hover {
-  background: var(--text);
-  color: var(--bg);
-  box-shadow: none;
-}
-}
-
-
-html[data-style="minimal"] .accent-text {
-  color: var(--text);
-  text-shadow: none;
-}
-
-html[data-style="minimal"] .hero h1,
-html[data-style="minimal"] .section-head h2,
-html[data-style="minimal"] .archive-head h1 {
-  font-weight: 620;
-  letter-spacing: -0.03em;
-}
-
-html[data-style="minimal"] .quick-card,
-html[data-style="minimal"] .do-card,
-html[data-style="minimal"] .project-card,
-html[data-style="minimal"] .agenda-card,
-html[data-style="minimal"] .wall-card,
-html[data-style="minimal"] .join-panel,
-html[data-style="minimal"] .join-contact,
-html[data-style="minimal"] .faq-item,
-html[data-style="minimal"] .member-profile,
-html[data-style="minimal"] .archive-group,
-html[data-style="minimal"] .gallery-card,
-html[data-style="minimal"] .project-group {
-  background: var(--panel);
-  background-image: none;
-  border-color: var(--border);
-  box-shadow: none;
-}
-@media (hover: hover), (pointer: fine) {
-
-
-html[data-style="minimal"] .project-card:hover,
-html[data-style="minimal"] .quick-card:hover,
-html[data-style="minimal"] .do-card:hover {
-  transform: none;
-  border-color: var(--text);
-  box-shadow: none;
-}
-}
-
-
-html[data-style="minimal"] .button--primary {
-  background: var(--text);
-  border-color: var(--text);
-  color: var(--bg);
-  box-shadow: none;
-}
-@media (hover: hover), (pointer: fine) {
-
-
-html[data-style="minimal"] .button--primary:hover {
-  background: var(--text-soft);
-  border-color: var(--text-soft);
-  transform: none;
-  box-shadow: none;
-}
-}
-
-
-html[data-style="minimal"] .button--secondary {
-  background: transparent;
-  border-color: var(--border-strong);
-  color: var(--text-soft);
-}
-@media (hover: hover), (pointer: fine) {
-
-
-html[data-style="minimal"] .button--secondary:hover {
-  border-color: var(--text);
-  color: var(--text);
-  box-shadow: none;
-  transform: none;
-}
-}
-
-
-html[data-style="minimal"] .quick-path {
-  background: var(--panel-2);
-}
-
-html[data-style="minimal"] .cover-placeholder {
-  background: var(--panel-2);
-}
-
-html[data-style="minimal"] .cover-placeholder::before {
-  opacity: 0.35;
-}
-
-html[data-style="minimal"] .site-footer {
-  padding-bottom: 24px;
-}
-
-/* 图集页：深蓝底板和白卡在极简风里都不成立，
-   换成一张纸、一条细线，图片只留自己的颜色 */
-html[data-style="minimal"] .gallery-board {
-  border: 1px solid var(--border);
-  border-radius: 0;
-  background: var(--panel);
-  box-shadow: none;
-}
-
-html[data-style="minimal"] .gallery-board::before {
-  opacity: 1;
-  background-image:
-    linear-gradient(rgba(22, 22, 20, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(22, 22, 20, 0.05) 1px, transparent 1px);
-}
-
-html[data-style="minimal"] .gallery-item {
-  border: 1px solid var(--border-strong);
-  border-radius: 0;
-  background: var(--panel);
-  box-shadow: none;
-  /* 白卡在白纸上只靠一条线分界，倾斜会把这层关系弄乱 */
-  transform: none;
-}
-
-@media (hover: hover), (pointer: fine) {
-  html[data-style="minimal"] .gallery-item:hover,
-  html[data-style="minimal"] .gallery-item:focus-within {
-    border-color: var(--text);
-    box-shadow: none;
-    transform: none;
-  }
-}
-
-html[data-style="minimal"] .gallery-item img {
-  background: var(--panel-2);
-}
-
-html[data-style="minimal"] .gallery-item__caption {
-  color: var(--muted);
-}
-
-html[data-style="minimal"] .gallery-item__tag {
-  color: var(--text);
-}
-
-html[data-style="minimal"] .gallery-item img[data-src] {
-  background-color: var(--panel-2);
-  background-image: linear-gradient(
-    100deg,
-    transparent 18%,
-    rgba(22, 22, 20, 0.07) 46%,
-    transparent 74%
-  );
-}
-
-html[data-style="minimal"] .gallery-filter {
-  border-color: var(--border);
-  border-radius: 0;
-  background: transparent;
-  color: var(--muted);
-}
-
-html[data-style="minimal"] .gallery-filter:hover,
-html[data-style="minimal"] .gallery-filter[aria-pressed="true"] {
-  border-color: var(--text);
-  background: transparent;
-  color: var(--text);
-}
-
-/* 极简风：小恐龙也走黑白 */
-html[data-style="minimal"] .dino-run {
-  --dino-ink: #171715;
-  --dino-accent: #6f6f66;
-  --dino-dim: #6a6a61;
-  --dino-ground: rgba(23, 23, 21, 0.28);
-  background: #f7f7f3;
-  background-image: none;
-  border-top-color: #e3e3dd;
-}
-
-html[data-style="minimal"][data-theme="dark"] .dino-run {
-  --dino-ink: #f0f0e9;
-  --dino-accent: #b9b9b0;
-  --dino-dim: #96968c;
-  --dino-ground: rgba(240, 240, 233, 0.24);
-  background: #10100f;
-  border-top-color: #2b2b28;
 }
 
 /* ---------------------------------------------------------
@@ -1141,320 +823,224 @@ body.is-dino-visible .hnyz-pet {
 }
 
 
-.style-deck__viewport {
+/* ---------------------------------------------------------
+   笔筒：五支笔各是一个皮肤，转到正前方即应用
+   ---------------------------------------------------------
+   摆位只有一个变量：--rot（筒的转角）。JS 只写它，
+   每支笔的 rotateY(calc(var(--i) * 72deg)) 把自己带到筒上的固定位，
+   近大远小、前亮后暗由 JS 按朝向顺手刷一笔透明度。
+   --------------------------------------------------------- */
+.pen-scene {
   position: relative;
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
-  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 13%, #000 92%, transparent 100%);
-  mask-image: linear-gradient(180deg, transparent 0, #000 13%, #000 92%, transparent 100%);
-  overscroll-behavior: contain;
-  scroll-snap-type: y mandatory;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
+  perspective: 820px;
+  cursor: grab;
+  touch-action: none;
+  outline: none;
 }
 
-.style-deck__viewport::-webkit-scrollbar {
-  display: none;
+.pen-scene:active {
+  cursor: grabbing;
 }
 
-/* 末尾补一段空白，最后一张卡也能滚到正中间 */
-.style-deck__viewport::after {
+.pen-scene:focus-visible {
+  outline: 1px solid rgba(255, 255, 255, 0.35);
+  outline-offset: -8px;
+  border-radius: 26px;
+}
+
+/* 地面光影：给筒一个落点，不悬空 */
+.pen-scene::after {
   content: "";
-  display: block;
-  height: calc((100% - 550px) / 2); /* fallback: 旧内核 */
-  height: max(0px, calc((100% - 550px) / 2));
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  width: 260px;
+  height: 30px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.5), transparent);
 }
 
-.style-card {
-  --card-accent: rgba(96, 165, 250, 0.55);
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-  /* 高度跟内容走，但给个下限：写死 540px 时，屏一矮内容就顶出去 */
-  width: calc(100% - 48px); /* fallback: 旧内核 */
-  max-width: 360px; /* fallback: 旧内核 */
-  width: min(360px, calc(100% - 48px));
-  height: auto;
-  min-height: calc(100% - 30px); /* fallback: 旧内核 */
-  min-height: min(520px, calc(100% - 30px));
-  margin: 10px auto;
-  padding: 48px 24px 26px;
-  scroll-snap-align: center;
-  scroll-snap-stop: always;
-  text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 30px;
+.pen-ring {
+  position: absolute;
+  left: 50%;
+  bottom: 66px;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  transform: rotateY(var(--rot, 0deg));
+}
+
+.pen {
+  position: absolute;
+  left: -17px;
+  bottom: 0;
+  width: 34px;
+  height: 205px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px 8px 4px 4px;
   background:
-    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(255, 255, 255, 0.055), transparent 70%),
-    linear-gradient(180deg, rgba(15, 20, 18, 0.95), rgba(6, 9, 7, 0.97));
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3), 0 34px 80px rgba(0, 0, 0, 0.55);
-  opacity: 0.22;
-  /* 只动透明度和描边：缩放会让滚动容器反复重算吸附点，
-     滚动回调又把活跃卡改回来，低端机上就是那一下抽搐 */
-  transition: opacity 0.35s ease, border-color 0.35s ease;
+    linear-gradient(90deg, rgba(0, 0, 0, 0.34), transparent 26%, rgba(255, 255, 255, 0.16) 42%, transparent 62%, rgba(0, 0, 0, 0.36)),
+    linear-gradient(180deg, var(--pen-a), var(--pen-b));
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  transform: rotateY(calc(var(--i) * 72deg)) translateZ(118px);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.style-card[data-style-option="default"] { --card-accent: rgba(96, 165, 250, 0.55); }
-.style-card[data-style-option="minimal"] { --card-accent: rgba(255, 255, 255, 0.4); }
-.style-card[data-style-option="hacker"] { --card-accent: rgba(57, 255, 136, 0.55); }
-.style-card[data-style-option="term"] { --card-accent: rgba(63, 108, 196, 0.55); }
-
-.style-card::after {
+/* 笔帽 */
+.pen::before {
   content: "";
   position: absolute;
-  top: -1px; /* fallback: 旧内核 */
-  right: -1px; /* fallback: 旧内核 */
-  bottom: -1px; /* fallback: 旧内核 */
-  left: -1px; /* fallback: 旧内核 */
-  inset: -1px;
-  border-radius: inherit;
-  border: 1px solid var(--card-accent);
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  pointer-events: none;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 36px;
+  border-radius: 8px 8px 3px 3px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.28), rgba(255, 255, 255, 0.16) 45%, rgba(0, 0, 0, 0.3)),
+    linear-gradient(180deg, var(--pen-b), var(--pen-a));
 }
 
-.style-card.is-active::after {
-  opacity: 0.55;
-}
-
-.style-card.is-active {
-  opacity: 1;
-  box-shadow: 0 0 0 1px var(--card-accent), 0 34px 90px rgba(0, 0, 0, 0.62);
-}
-
-.style-card__top {
+/* 金属箍 */
+.pen::after {
+  content: "";
   position: absolute;
-  top: 12px;
-  left: 22px;
-  right: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: rgba(255, 255, 255, 0.36);
-  font-family: var(--mono);
-  font-size: 0.58rem;
-  letter-spacing: 0.16em;
+  top: 42px;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.3);
 }
 
-.style-card__current {
-  padding: 3px 8px;
+/* 当前风格：笔帽正中亮一枚点 */
+.pen[data-current="true"]::before {
+  background:
+    radial-gradient(circle 3.5px at 50% 62%, currentColor 40%, transparent 48%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.28), rgba(255, 255, 255, 0.16) 45%, rgba(0, 0, 0, 0.3)),
+    linear-gradient(180deg, var(--pen-b), var(--pen-a));
+}
+
+.pen:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+}
+
+.pen-cup {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  width: 238px;
+  height: 98px;
+  transform: translateX(-50%);
+  border-radius: 14px 14px 30px 30px / 10px 10px 40px 40px;
   border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 999px;
-  color: rgba(255, 255, 255, 0.7);
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.14), transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(0, 0, 0, 0.38));
+  box-shadow: inset 0 8px 18px rgba(0, 0, 0, 0.35), 0 18px 40px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
-.style-card[data-current="true"] .style-card__current {
-  opacity: 1;
-}
-
-.style-card__glyph {
-  display: grid;
-  place-items: center;
-  width: 106px; /* fallback: 旧内核 */
-  width: clamp(82px, 22vw, 106px);
-  height: 106px; /* fallback: 旧内核 */
-  height: clamp(82px, 22vw, 106px);
-  margin-bottom: 4px;
-  border-radius: 26%;
-  font-family: var(--mono);
-  font-size: 30.4px; /* fallback: 旧内核 */
-  font-size: clamp(1.4rem, 5vw, 1.9rem);
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.style-card.is-active .style-card__glyph {
-  transform: translateY(-2px);
-}
-
-.style-card__glyph--default {
-  background: linear-gradient(145deg, #3b82f6, #0ea5e9);
-  color: #ffffff;
-  box-shadow: 0 18px 40px rgba(37, 99, 235, 0.35);
-}
-
-.style-card__glyph--minimal {
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  background: #fbfbf8;
-  color: #141414;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
-}
-
-.style-card__glyph--minimal span {
-  display: block;
-  width: 34%;
-  height: 2px;
-  background: #141414;
-}
-
-.style-card__glyph--hacker {
-  border: 1px solid rgba(57, 255, 136, 0.55);
-  background: #020805;
-  color: #39ff88;
-  box-shadow: 0 0 0 1px rgba(57, 255, 136, 0.12), 0 0 40px rgba(57, 255, 136, 0.18),
-    inset 0 0 28px rgba(57, 255, 136, 0.08);
-}
-
-/* 光场：一枚环，和 halo.html 里那个环同色 */
-.style-card__glyph--halo {
-  border-radius: 50%;
-  border: 2px solid #98e0cf;
-  background: radial-gradient(circle at 50% 50%, rgba(152, 224, 207, 0.16), transparent 68%);
-  position: relative;
-}
-
-.style-card__glyph--halo span {
+/* 筒口的椭圆沿 */
+.pen-cup::before {
+  content: "";
   position: absolute;
-  top: 8px; /* fallback: 旧内核 */
-  right: 8px; /* fallback: 旧内核 */
-  bottom: 8px; /* fallback: 旧内核 */
-  left: 8px; /* fallback: 旧内核 */
-  inset: 8px;
+  top: -7px;
+  left: 0;
+  right: 0;
+  height: 16px;
   border-radius: 50%;
-  border: 1px solid rgba(240, 166, 198, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(0, 0, 0, 0.3));
 }
 
-/* 终端：方角、雾蓝、像素鲸鱼那一路 */
-.style-card__glyph--term {
-  border-radius: 4px;
-  border: 1px solid rgba(63, 108, 196, 0.5);
-  background: #f6f3ed;
-  color: #3f6cc4;
-  font-size: 1.7rem;
-  letter-spacing: 0.02em;
+/* 筒身上的字标 */
+.pen-cup::after {
+  content: "HNYZ";
+  position: absolute;
+  left: 50%;
+  top: 54%;
+  transform: translate(-50%, -50%);
+  color: rgba(255, 255, 255, 0.42);
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.42em;
+  text-indent: 0.42em;
 }
 
-.term-glyph {
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-  font-weight: 500;
+.pen-readout {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 2px 22px 12px;
+  text-align: center;
 }
 
-.style-card__kicker {
+.pen-readout__kicker {
   color: rgba(255, 255, 255, 0.4);
   font-family: var(--mono);
   font-size: 0.6rem;
   letter-spacing: 0.2em;
 }
 
-.style-card__title {
+.pen-readout__title {
   margin: 0;
-  font-size: 30.4px; /* fallback: 旧内核 */
-  font-size: clamp(1.5rem, 5vw, 1.9rem);
+  font-size: clamp(1.3rem, 5vw, 1.6rem);
   font-weight: 600;
   letter-spacing: -0.02em;
   color: #f4f8f5;
 }
 
-.style-card__desc {
+.pen-readout__desc {
   max-width: 30ch;
+  margin: 0;
   color: rgba(255, 255, 255, 0.56);
   font-size: 0.78rem;
   line-height: 1.75;
-  text-wrap: balance; /* 渐进增强：旧内核忽略，避免末行单字 */
+  text-wrap: balance;
+  min-height: 2.6em;
 }
 
-.style-card__swatches {
+.pen-readout__swatches {
   display: flex;
   gap: 8px;
-  margin-top: 2px;
 }
 
-.style-card__swatches i {
+.pen-readout__swatches i {
   display: block;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   background: var(--c);
 }
 
-.style-card__apply {
-  margin-top: auto;
-  padding: 12px 38px;
-  border: 0;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #3b82f6, #38bdf8);
-  color: #ffffff;
+.pen-readout__state {
+  margin: 2px 0 0;
+  color: rgba(255, 255, 255, 0.5);
   font-family: var(--mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.28);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
 }
 
-.style-card[data-style-option="minimal"] .style-card__apply {
-  background: #fbfbf8;
-  color: #141414;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.26);
-}
-
-.style-card[data-style-option="hacker"] .style-card__apply {
-  background: linear-gradient(90deg, #39ff88, #00e5b0);
-  color: #031108;
-  box-shadow: 0 12px 30px rgba(57, 255, 136, 0.24);
-}
-
-/* 棍木这张卡没有简介，内容整体居中，空出来的地方正好是它要说的 */
-.style-card[data-style-option="bare"] {
-  --card-accent: rgba(255, 255, 255, 0.36);
-  justify-content: center;
-  gap: 12px;
-}
-
-.style-card[data-style-option="bare"] .style-card__apply {
-  margin-top: 24px;
-  background: #f7f7f3;
-  color: #1a1a18;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.26);
-}
-@media (hover: hover), (pointer: fine) {
-
-
-.style-card__apply:hover {
-  filter: brightness(1.08);
-  transform: translateY(-1px);
-  box-shadow: 0 16px 34px rgba(37, 99, 235, 0.34);
-}
-}
-
-
-.style-card__apply:focus-visible {
-  outline: 2px solid #ffffff;
-  outline-offset: 3px;
-}
-
-.style-card__apply:disabled {
-  cursor: default;
-  opacity: 0.44;
-  filter: none;
-  transform: none;
-  box-shadow: none;
-}
-
+/* 圆点指示：横排，点谁就把谁的笔转到正前 */
 .style-deck__dots {
-  position: absolute;
-  top: 50%;
-  right: 12px; /* fallback: 旧内核 */
-  right: max(12px, calc(50% - 214px));
   display: flex;
-  flex-direction: column;
-  gap: 9px;
-  transform: translateY(-50%);
-  z-index: 3;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 0 2px;
 }
 
 .style-deck__dot {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -1468,6 +1054,15 @@ body.is-dino-visible .hnyz-pet {
   transform: scale(1.5);
 }
 
+.style-deck.is-opening .pen-scene {
+  animation: penSceneIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes penSceneIn {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .style-deck__hint {
   padding: 10px 22px 0;
   color: rgba(255, 255, 255, 0.28);
@@ -1475,10 +1070,6 @@ body.is-dino-visible .hnyz-pet {
   font-size: 0.56rem;
   letter-spacing: 0.1em;
   text-align: center;
-}
-
-.style-deck.is-opening .style-card.is-active {
-  animation: skinCardIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .style-deck[open] {
@@ -1517,11 +1108,6 @@ html[data-style] .style-deck.is-handoff {
 
 @keyframes skinDeckHandoff {
   to { transform: translateY(-100%); }
-}
-
-@keyframes skinCardIn {
-  from { opacity: 0; transform: translateY(26px) scale(0.96); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes skinDeckOut {
@@ -1596,14 +1182,6 @@ html[data-style] .style-deck.is-handoff {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 8%),
     linear-gradient(180deg, color-mix(in srgb, currentColor 7%, transparent), transparent 6%);
-}
-
-/* 幕布不能和落地页同色：极简风底色就是 #fbfbf8，
-   幕布也是它的话，揭开时整块白在白色上滑走，等于没有转场。
-   压低半档色阶，留一条看得见的边。 */
-.style-wipe[data-next="minimal"] {
-  background: #f2f1eb;
-  color: #141414;
 }
 
 .style-wipe[data-next="default"] {
@@ -1700,12 +1278,23 @@ html[data-style] .style-deck.is-handoff {
     width: 100%;
   }
 
-  .style-deck__dots {
-    right: 10px;
+  .pen-cup {
+    width: 208px;
+    height: 88px;
   }
 
-  .style-card {
-    padding: 20px 26px 24px;
+  .pen {
+    width: 30px;
+    height: 190px;
+    left: -15px;
+  }
+
+  .pen-ring {
+    bottom: 60px;
+  }
+
+  .pen-readout__desc {
+    font-size: 0.72rem;
   }
 }
 
@@ -1717,8 +1306,8 @@ html[data-style] .style-deck.is-handoff {
 
 @media (prefers-reduced-motion: reduce) {
   .skin-bubbles i,
-  .style-card,
-  .style-card__glyph,
+  .pen-scene,
+  .pen,
   .style-wipe,
   .style-wipe__veil,
   .style-wipe__label,
@@ -1947,18 +1536,11 @@ html[data-style="bare"] .bare-note {
   user-select: text;
 }
 
-/* 风格面板里那张卡：一块白，一条灰线 */
-.style-card__glyph--bare {
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background: #ffffff;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
-}
-
-.style-card__glyph--bare span {
-  display: block;
-  width: 26%;
-  height: 1px;
-  background: #c9c9c3;
+/* 笔筒里棍木那支笔：近白，一条灰箍 */
+.pen[data-pen="bare"] {
+  --pen-a: #f4f4f0;
+  --pen-b: #cfcdc4;
+  color: #6b6b64;
 }
 
 /* =========================================================
@@ -2118,18 +1700,15 @@ html[data-style="hacker"] .style-deck {
   background: rgba(2, 6, 4, 0.94);
 }
 
-html[data-style="hacker"] .style-card {
-  border-radius: 2px;
-  background:
-    radial-gradient(ellipse 90% 46% at 50% 0%, rgba(57, 255, 136, 0.06), transparent 70%),
-    linear-gradient(180deg, rgba(8, 15, 10, 0.97), rgba(3, 7, 5, 0.98));
+html[data-style="hacker"] .pen-scene:focus-visible {
+  outline-color: rgba(57, 255, 136, 0.6);
 }
 
-html[data-style="hacker"] .style-card.is-active {
-  box-shadow: 0 0 0 1px rgba(57, 255, 136, 0.55), 0 30px 70px rgba(0, 0, 0, 0.6);
+html[data-style="hacker"] .pen {
+  border-radius: 2px 2px 1px 1px;
 }
 
-html[data-style="hacker"] .style-card__glyph--hacker {
+html[data-style="hacker"] .pen-cup {
   border-radius: 2px;
 }
 
@@ -2431,7 +2010,7 @@ html[data-style="hacker"][data-theme="light"] .site-header .brand-copy strong {
   }
 }
 
-/* 矮屏 / 手表：一屏塞不下一张标准卡，标题栏与提示依次让位，卡片本身必须完整 */
+/* 矮屏 / 手表：一屏塞不下标准笔筒，提示与读数依次让位，筒必须完整 */
 @media (max-height: 560px), (max-width: 300px) {
   .style-deck {
     background: #050807;
@@ -2462,65 +2041,51 @@ html[data-style="hacker"][data-theme="light"] .site-header .brand-copy strong {
     height: 28px;
   }
 
-  .style-card {
-    width: calc(100% - 16px);
-    margin: 6px auto;
-    padding: 16px 12px 14px;
-    gap: 6px;
-    min-height: 0;
-    border-radius: 14px;
+  .pen-scene {
+    min-height: 150px;
   }
 
-  .style-card__top {
-    top: 6px;
-    left: 12px;
-    right: 12px;
-    font-size: 0.48rem;
-    letter-spacing: 0.08em;
+  .pen-ring {
+    bottom: 48px;
   }
 
-  .style-card__glyph {
-    width: 46px; /* fallback: 旧内核 */
-    width: clamp(38px, 16vw, 52px);
-    height: 46px; /* fallback: 旧内核 */
-    height: clamp(38px, 16vw, 52px);
-    font-size: 0.95rem;
-    margin-bottom: 0;
+  .pen {
+    width: 26px;
+    height: 158px;
+    left: -13px;
   }
 
-  .style-card__kicker {
-    font-size: 0.5rem;
-    letter-spacing: 0.12em;
+  .pen-cup {
+    width: 172px;
+    height: 70px;
+    bottom: 6px;
   }
 
-  .style-card__title {
-    font-size: 1rem;
+  .pen-cup::after {
+    font-size: 0.52rem;
   }
 
-  .style-card__desc {
+  .pen-readout {
+    padding: 0 14px 8px;
+    gap: 3px;
+  }
+
+  .pen-readout__desc {
     font-size: 0.66rem;
     line-height: 1.5;
-    max-width: 26ch;
   }
 
-  .style-card__swatches i {
+  .pen-readout__swatches i {
     width: 11px;
     height: 11px;
   }
-
-  .style-card__apply {
-    min-height: 30px;
-    padding: 0 14px;
-    font-size: 0.66rem;
-  }
 }
 
-/* 再窄一档：只留编号、名字和按钮 */
+/* 再窄一档：只留筒、名字和状态行 */
 @media (max-width: 240px) {
-  .style-card__desc,
-  .style-card__swatches,
-  .style-card__kicker,
-  .style-card__current,
+  .pen-readout__desc,
+  .pen-readout__swatches,
+  .pen-readout__kicker,
   .style-deck__title {
     display: none;
   }
@@ -2529,46 +2094,25 @@ html[data-style="hacker"][data-theme="light"] .site-header .brand-copy strong {
     justify-content: flex-end;
     padding: 0 6px 2px;
   }
-
-  .style-card__title {
-    font-size: 0.95rem;
-  }
 }
 
-/* ---------------------------------------------------------
-   9. 横屏矮高度（手机横过来）：压一压面板卡片
-   高度不足时优先保住「当前卡能一眼看全」，图腾、
-   标题、按钮依次收缩，圆点指示器贴边。
-   --------------------------------------------------------- */
+/* 横屏矮高度：压一压筒身，保住读数能一眼看全 */
 @media (max-height: 500px) {
-  .style-card {
-    padding: 12px 20px 14px;
+  .pen {
+    height: 150px;
   }
 
-  .style-card__glyph {
-    width: 56px;
-    height: 56px;
-    border-radius: 14px;
+  .pen-cup {
+    width: 200px;
+    height: 76px;
   }
 
-  .style-card__title {
-    font-size: 1rem;
-  }
-
-  .style-card__desc {
+  .pen-readout__desc {
     font-size: 0.68rem;
     line-height: 1.5;
-  }
-
-  .style-card__apply {
-    padding: 8px 26px;
-  }
-
-  .style-deck__dots {
-    right: 8px;
+    min-height: 0;
   }
 }
-
 
 /* ---------------------------------------------------------
    全屏按钮（所有皮肤共用外观，跟着 .style-toggle 的变量走）
@@ -2600,19 +2144,8 @@ html[data-style="hacker"][data-theme="light"] .site-header .brand-copy strong {
 /* ---------------------------------------------------------
    首页项目区的「全部项目」入口卡
    ---------------------------------------------------------
-   虚线在极简的白底上几乎看不见，黑客风的深绿边也糊。
-   按皮肤各给一档能看见的描边与底色。
+   黑客风的深绿边上糊，按皮肤各给一档能看见的描边与底色。
    --------------------------------------------------------- */
-html[data-style="minimal"] .project-grid > .project-card--more {
-  border: 1px solid var(--border-strong);
-  background: var(--panel-2);
-}
-
-html[data-style="minimal"] .project-grid > .project-card--more:hover {
-  border-color: var(--text);
-  background: var(--panel-3);
-}
-
 html[data-style="hacker"] .project-grid > .project-card--more {
   border-color: rgba(57, 255, 136, 0.34);
   background: rgba(57, 255, 136, 0.035);

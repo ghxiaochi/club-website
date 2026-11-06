@@ -1,25 +1,24 @@
 /* =========================================================
    HNYZ · 风格系统
    ---------------------------------------------------------
-   六个皮肤：
+   五个皮肤，装在一只笔筒里：
      default  现在的蓝白科技风
-     minimal  去装饰的极简风
      hacker   深色终端黑客风（代码雨 / 气泡 / 进度条）
      term     琥珀终端：单色、方角、无阴影，把页面当成一份值班日志
      halo     光场：整屏嵌入 halo.html（HALOFLUX 移植版）
      bare     棍木：整页空白，只留右上角的风格按钮和一句灰字
-   顶栏的方块打开一个竖向卡片面板，切换时用整屏向上擦除。
-   选择写进 localStorage，四个页面共用。
+   顶栏的方块打开笔筒面板：左右拖动（滚轮、方向键也行）
+   旋转笔筒，转到正前方的那支笔就是要用的风格，停稳即应用。
+   切换时仍用整屏向上擦除。选择写进 localStorage，四个页面共用。
    ========================================================= */
 
 (() => {
   "use strict";
 
   const KEY = "hnyz:style";
-  const STYLES = ["default", "minimal", "hacker", "term", "halo", "bare"];
+  const STYLES = ["default", "hacker", "term", "halo", "bare"];
   const LABELS = {
     default: "DEFAULT",
-    minimal: "MINIMAL",
     hacker: "HACKER",
     term: "TERM",
     halo: "HALO",
@@ -27,7 +26,6 @@
   };
   const NAMES = {
     default: "蓝白科技",
-    minimal: "极简",
     hacker: "黑客终端",
     term: "终端",
     halo: "光场",
@@ -126,7 +124,7 @@
   deck.innerHTML = `
     <div class="style-deck__shell">
       <header class="style-deck__head">
-        <p class="style-deck__kicker">HNYZ // STYLE_DECK</p>
+        <p class="style-deck__kicker">HNYZ // PEN_CUP</p>
         <h2 class="style-deck__title" id="style-deck-title">选择网页风格</h2>
         <button class="style-deck__close" type="button" data-style-close aria-label="关闭风格面板">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
@@ -135,210 +133,231 @@
         </button>
       </header>
 
-      <div class="style-deck__viewport" data-style-viewport tabindex="0" role="group" aria-label="风格列表，上下滑动切换">
-        <article class="style-card" data-style-option="default">
-          <div class="style-card__top"><span>01 / DEFAULT</span><span class="style-card__current">当前风格</span></div>
-          <div class="style-card__glyph style-card__glyph--default" aria-hidden="true">&lt;/&gt;</div>
-          <p class="style-card__kicker">BLUE_TECH</p>
-          <h3 class="style-card__title">蓝白科技</h3>
-          <p class="style-card__desc">现在这套蓝白配色。光斑、角色排、桌宠和全部动效都保留。</p>
-          <div class="style-card__swatches" aria-hidden="true">
-            <i style="--c:#f5f9ff"></i><i style="--c:#2563eb"></i><i style="--c:#0f2744"></i>
-          </div>
-          <button class="style-card__apply" type="button" data-style-pick="default">应用此风格</button>
-        </article>
-
-        <article class="style-card" data-style-option="minimal">
-          <div class="style-card__top"><span>02 / MINIMAL</span><span class="style-card__current">当前风格</span></div>
-          <div class="style-card__glyph style-card__glyph--minimal" aria-hidden="true"><span></span></div>
-          <p class="style-card__kicker">LESS_BUT_BETTER</p>
-          <h3 class="style-card__title">极简</h3>
-          <p class="style-card__desc">去掉光斑、装饰和多余阴影，只留内容、细线和黑白灰。</p>
-          <div class="style-card__swatches" aria-hidden="true">
-            <i style="--c:#fbfbf8"></i><i style="--c:#d9d9d3"></i><i style="--c:#161614"></i>
-          </div>
-          <button class="style-card__apply" type="button" data-style-pick="minimal">应用此风格</button>
-        </article>
-
-        <article class="style-card" data-style-option="hacker">
-          <div class="style-card__top"><span>03 / HACKER</span><span class="style-card__current">当前风格</span></div>
-          <div class="style-card__glyph style-card__glyph--hacker" aria-hidden="true">&gt;_</div>
-          <p class="style-card__kicker">ROOT_ACCESS</p>
-          <h3 class="style-card__title">黑客终端</h3>
-          <p class="style-card__desc">纯黑终端、荧光绿和一整屏落下来的代码雨，其余什么都没有。</p>
-          <div class="style-card__swatches" aria-hidden="true">
-            <i style="--c:#030705"></i><i style="--c:#39ff88"></i><i style="--c:#00e5ff"></i>
-          </div>
-          <button class="style-card__apply" type="button" data-style-pick="hacker">应用此风格</button>
-        </article>
-
-        <article class="style-card" data-style-option="term">
-          <div class="style-card__top"><span>04 / TERM</span><span class="style-card__current">当前风格</span></div>
-          <div class="style-card__glyph style-card__glyph--term" aria-hidden="true"><span class="term-glyph">$_</span></div>
-          <p class="style-card__kicker">MIST_BLUE_TTY</p>
-          <h3 class="style-card__title">终端</h3>
-          <p class="style-card__desc">雾蓝白面板、方角、细线分隔。像素鲸鱼与 HNYZ 字标开屏，窗口条、命令行与状态条各就各位。</p>
-          <div class="style-card__swatches" aria-hidden="true">
-            <i style="--c:#f6f3ed"></i><i style="--c:#3f6cc4"></i><i style="--c:#242b3a"></i>
-          </div>
-          <button class="style-card__apply" type="button" data-style-pick="term">应用此风格</button>
-        </article>
-
-        <article class="style-card" data-style-option="halo">
-          <div class="style-card__top"><span>05 / HALO</span><span class="style-card__current">当前风格</span></div>
-          <div class="style-card__glyph style-card__glyph--halo" aria-hidden="true"><span></span></div>
-          <p class="style-card__kicker">BEAT_DRIVEN</p>
-          <h3 class="style-card__title">光场</h3>
-          <p class="style-card__desc">节拍驱动的光环、数据环带和外侧光束，整屏铺满；社团数据填进它的 KPI 与面板。</p>
-          <div class="style-card__swatches" aria-hidden="true">
-            <i style="--c:#08090b"></i><i style="--c:#98e0cf"></i><i style="--c:#f0a6c6"></i>
-          </div>
-          <button class="style-card__apply" type="button" data-style-pick="halo">应用此风格</button>
-        </article>
-
-        <article class="style-card" data-style-option="bare">
-          <div class="style-card__top"><span>06 / BARE</span><span class="style-card__current">当前风格</span></div>
-          <div class="style-card__glyph style-card__glyph--bare" aria-hidden="true"><span></span></div>
-          <p class="style-card__kicker">NOTHING_HERE</p>
-          <h3 class="style-card__title">棍木</h3>
-          <div class="style-card__swatches" aria-hidden="true">
-            <i style="--c:#ffffff"></i><i style="--c:#f2f2ee"></i><i style="--c:#b9b9b4"></i>
-          </div>
-          <button class="style-card__apply" type="button" data-style-pick="bare">应用此风格</button>
-        </article>
+      <div class="pen-scene" data-pen-scene tabindex="0" role="group"
+           aria-label="风格笔筒：左右拖动或用方向键旋转，转到正前方的风格停稳后自动应用">
+        <div class="pen-ring" data-pen-ring><!-- 笔由 JS 按 STYLES 生成 --></div>
+        <div class="pen-cup" aria-hidden="true"></div>
       </div>
 
-      <div class="style-deck__dots" data-style-dots role="group" aria-label="选择风格">
-        <button class="style-deck__dot" type="button" data-style-dot="0" aria-label="第 1 个：蓝白科技" aria-current="true"></button>
-        <button class="style-deck__dot" type="button" data-style-dot="1" aria-label="第 2 个：极简"></button>
-        <button class="style-deck__dot" type="button" data-style-dot="2" aria-label="第 3 个：黑客终端"></button>
-        <button class="style-deck__dot" type="button" data-style-dot="3" aria-label="第 4 个：终端"></button>
-        <button class="style-deck__dot" type="button" data-style-dot="4" aria-label="第 5 个：光场"></button>
-        <button class="style-deck__dot" type="button" data-style-dot="5" aria-label="第 6 个：棍木"></button>
+      <div class="pen-readout" data-pen-readout aria-live="polite">
+        <p class="pen-readout__kicker" data-pen-kicker></p>
+        <h3 class="pen-readout__title" data-pen-name></h3>
+        <p class="pen-readout__desc" data-pen-desc></p>
+        <div class="pen-readout__swatches" data-pen-swatches aria-hidden="true"></div>
+        <p class="pen-readout__state" data-pen-state></p>
       </div>
 
-      <p class="style-deck__hint">上下滑动 / ↑ ↓ 切换 · Esc 关闭</p>
+      <div class="style-deck__dots" data-style-dots role="group" aria-label="直接选择风格">
+        ${STYLES.map((key, i) =>
+          `<button class="style-deck__dot" type="button" data-style-dot="${i}" aria-label="${NAMES[key]}"></button>`
+        ).join("")}
+      </div>
+
+      <p class="style-deck__hint">左右拖动 / 滚轮 / ↑ ↓ 转笔筒 · 停稳即应用 · Esc 关闭</p>
     </div>`;
   document.body.appendChild(deck);
 
-  const viewport = deck.querySelector("[data-style-viewport]");
-  const cards = Array.from(deck.querySelectorAll("[data-style-option]"));
+  const scene = deck.querySelector("[data-pen-scene]");
+  const ring = deck.querySelector("[data-pen-ring]");
   const dots = Array.from(deck.querySelectorAll("[data-style-dot]"));
-  const pickButtons = Array.from(deck.querySelectorAll("[data-style-pick]"));
   const closeButton = deck.querySelector("[data-style-close]");
+  const readout = {
+    kicker: deck.querySelector("[data-pen-kicker]"),
+    name: deck.querySelector("[data-pen-name]"),
+    desc: deck.querySelector("[data-pen-desc]"),
+    swatches: deck.querySelector("[data-pen-swatches]"),
+    state: deck.querySelector("[data-pen-state]")
+  };
 
-  let activeIndex = 0;
-  let scrollRaf = 0;
+  /* 每支笔的配色与文案。body 是笔杆的渐变两端，
+     swatches 延用卡片时代的三个色板，读数区照原样展示。 */
+  const PENS = {
+    default: {
+      body: ["#5ea2ff", "#1d63d8"], ink: "#eaf3ff", kicker: "BLUE_TECH",
+      name: "蓝白科技",
+      desc: "现在这套蓝白配色。光斑、角色排、桌宠和全部动效都保留。",
+      swatches: ["#f5f9ff", "#2563eb", "#0f2744"]
+    },
+    hacker: {
+      body: ["#123322", "#04120a"], ink: "#8fffb4", kicker: "ROOT_ACCESS",
+      name: "黑客终端",
+      desc: "纯黑终端、荧光绿和一整屏落下来的代码雨，其余什么都没有。",
+      swatches: ["#030705", "#39ff88", "#00e5ff"]
+    },
+    term: {
+      body: ["#5f83cf", "#2c4c8f"], ink: "#eef2fb", kicker: "MIST_BLUE_TTY",
+      name: "终端",
+      desc: "雾蓝白面板、方角、细线分隔。像素鲸鱼与 HNYZ 字标开屏，窗口条、命令行与状态条各就各位。",
+      swatches: ["#f6f3ed", "#3f6cc4", "#242b3a"]
+    },
+    halo: {
+      body: ["#22303a", "#0c1013"], ink: "#a9ece0", kicker: "BEAT_DRIVEN",
+      name: "光场",
+      desc: "节拍驱动的光环、数据环带和外侧光束，整屏铺满；社团数据填进它的 KPI 与面板。",
+      swatches: ["#08090b", "#98e0cf", "#f0a6c6"]
+    },
+    bare: {
+      body: ["#f4f4f0", "#cfcdc4"], ink: "#6b6b64", kicker: "NOTHING_HERE",
+      name: "棍木",
+      desc: "把页面全部拿走，只剩右上角的风格按钮和一句灰字。",
+      swatches: ["#ffffff", "#f2f2ee", "#b9b9b4"]
+    }
+  };
+
+  const N = STYLES.length;
+  const STEP = 360 / N;
+
+  /* 生成笔。摆位只有 CSS：rotateY(calc(var(--i) * STEP)) translateZ(R)，
+     JS 只写筒的转角 --rot，拖动时不用逐个碰笔。 */
+  STYLES.forEach((key, i) => {
+    const pen = document.createElement("button");
+    pen.type = "button";
+    pen.className = "pen";
+    pen.dataset.pen = key;
+    pen.style.setProperty("--i", String(i));
+    const conf = PENS[key];
+    pen.style.setProperty("--pen-a", conf.body[0]);
+    pen.style.setProperty("--pen-b", conf.body[1]);
+    pen.style.color = conf.ink;
+    pen.setAttribute("aria-label", `${conf.name}：转到正前方应用`);
+    ring.appendChild(pen);
+  });
+  const pens = Array.from(ring.children);
+
+  let rot = 0;              /* 筒的当前转角（度）。笔 i 在正前 <=> rot = -i*STEP */
+  let dragging = false;
+  let dragMoved = 0;
+  let lastX = 0;
+  let paintQueued = false;
+  let applyTimer = 0;
   let closeTimer = 0;
 
-  function currentIndex() {
-    return Math.max(0, STYLES.indexOf(current));
+  function frontIndex() {
+    return ((Math.round(-rot / STEP) % N) + N) % N;
   }
 
-  function syncCurrentUi() {
-    cards.forEach((card) => {
-      const isCurrent = card.dataset.styleOption === current;
-      card.dataset.current = String(isCurrent);
-      const button = card.querySelector("[data-style-pick]");
-      if (button) {
-        button.disabled = isCurrent;
-        button.textContent = isCurrent ? "当前风格" : "应用此风格";
-      }
-    });
-  }
-
-  function setActive(index) {
-    activeIndex = Math.max(0, Math.min(cards.length - 1, index));
-    cards.forEach((card, i) => {
-      card.classList.toggle("is-active", i === activeIndex);
-    });
-    dots.forEach((dot, i) => {
-      dot.setAttribute("aria-current", String(i === activeIndex));
+  /* 朝向刷亮度：正前 1、正后 -1，笔多但只有五支，直接每帧算也不贵 */
+  function paintPens() {
+    pens.forEach((pen, i) => {
+      const a = ((i * STEP + rot) % 360 + 360) % 360;
+      const face = Math.cos(a * Math.PI / 180);
+      pen.style.opacity = (0.26 + 0.74 * Math.max(0, face) + 0.1 * Math.max(0, -face)).toFixed(3);
+      pen.style.filter = face < -0.08 ? "brightness(0.55)" : "";
+      pen.style.zIndex = String(100 + Math.round(face * 50));
+      pen.tabIndex = face > 0.5 ? 0 : -1;
     });
   }
 
-  /* 卡片高度 = 视口高度 - 上下 margin，用 offsetTop 算中心，避免受布局细节影响 */
-  let programmaticUntil = 0;
-
-  function scrollToCard(index, smooth) {
-    const card = cards[index];
-    if (!card) return;
-    const top = card.offsetTop - (viewport.clientHeight - card.offsetHeight) / 2;
-    /* 平滑滚动期间别让滚动回调改活跃卡：两边互相推，
-       低端机上就是来回抽的那一下 */
-    programmaticUntil = Date.now() + (smooth && !reduce.matches ? 700 : 120);
-    viewport.scrollTo({
-      top: Math.max(0, top),
-      behavior: smooth && !reduce.matches ? "smooth" : "auto"
+  function setReadout(i) {
+    const conf = PENS[STYLES[i]];
+    const isCurrent = STYLES[i] === current;
+    readout.kicker.textContent = conf.kicker;
+    readout.name.textContent = conf.name;
+    readout.desc.textContent = conf.desc;
+    readout.swatches.innerHTML = conf.swatches
+      .map((c) => `<i style="--c:${c}"></i>`).join("");
+    readout.state.textContent = isCurrent ? "● 当前风格" : "停稳后应用";
+    dots.forEach((dot, di) => dot.setAttribute("aria-current", String(di === i)));
+    pens.forEach((pen, pi) => {
+      pen.dataset.current = String(pi === i && isCurrent);
     });
   }
 
-  function syncActiveFromScroll() {
-    if (Date.now() < programmaticUntil) return;
-    if (!viewport.clientHeight) return;
-    const mid = viewport.scrollTop + viewport.clientHeight / 2;
-    let best = 0;
-    let bestGap = Infinity;
-
-    cards.forEach((card, i) => {
-      const gap = Math.abs(card.offsetTop + card.offsetHeight / 2 - mid);
-      if (gap < bestGap) {
-        bestGap = gap;
-        best = i;
-      }
-    });
-
-    if (best !== activeIndex) setActive(best);
+  function setRot(value, animate) {
+    rot = value;
+    ring.style.transition = animate && !reduce.matches
+      ? "transform 0.5s cubic-bezier(0.22, 1, 0.3, 1)"
+      : "none";
+    ring.style.transform = `rotateY(${rot}deg)`;
+    paintPens();
+    setReadout(frontIndex());
   }
 
-  viewport.addEventListener("scroll", () => {
-    if (scrollRaf) return;
-    scrollRaf = window.requestAnimationFrame(() => {
-      scrollRaf = 0;
-      syncActiveFromScroll();
+  /* 转到指定笔（走最短路径），停稳后应用 */
+  function spinToIndex(i, apply) {
+    let target = -i * STEP;
+    while (target - rot > 180) target -= 360;
+    while (target - rot < -180) target += 360;
+    setRot(target, true);
+    window.clearTimeout(applyTimer);
+    if (apply) {
+      applyTimer = window.setTimeout(() => {
+        const key = STYLES[frontIndex()];
+        if (key !== current && !busy) applyStyle(key);
+      }, reduce.matches ? 60 : 470);
+    }
+  }
+
+  /* 拖动：pointer 事件统一管鼠标和触摸 */
+  scene.addEventListener("pointerdown", (event) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    dragging = true;
+    dragMoved = 0;
+    lastX = event.clientX;
+    scene.setPointerCapture(event.pointerId);
+    ring.style.transition = "none";
+    window.clearTimeout(applyTimer);
+  });
+
+  scene.addEventListener("pointermove", (event) => {
+    if (!dragging) return;
+    const dx = event.clientX - lastX;
+    lastX = event.clientX;
+    if (!dx) return;
+    dragMoved += Math.abs(dx);
+    rot += dx * 0.38;
+    ring.style.transform = `rotateY(${rot}deg)`;
+    if (!paintQueued) {
+      paintQueued = true;
+      window.requestAnimationFrame(() => {
+        paintQueued = false;
+        if (dragging) paintPens();
+      });
+    }
+  });
+
+  const endDrag = () => {
+    if (!dragging) return;
+    dragging = false;
+    /* 位移小于阈值算点击，交给笔自己的 click 转过去 */
+    if (dragMoved > 6) spinToIndex(frontIndex(), true);
+  };
+  scene.addEventListener("pointerup", endDrag);
+  scene.addEventListener("pointercancel", endDrag);
+
+  /* 滚轮：一格一支笔 */
+  scene.addEventListener("wheel", (event) => {
+    event.preventDefault();
+    spinToIndex(frontIndex() + (event.deltaY > 0 ? 1 : -1), true);
+  }, { passive: false });
+
+  scene.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      event.preventDefault();
+      spinToIndex(frontIndex() + 1, true);
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      event.preventDefault();
+      spinToIndex(frontIndex() - 1, true);
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      spinToIndex(0, true);
+    } else if (event.key === "End") {
+      event.preventDefault();
+      spinToIndex(N - 1, true);
+    }
+  });
+
+  /* 点某支笔 = 把它转到正前（拖动产生的 click 在 endDrag 里被阈值挡掉） */
+  pens.forEach((pen, i) => {
+    pen.addEventListener("click", () => {
+      if (dragMoved > 6) return;
+      spinToIndex(i, true);
     });
-  }, { passive: true });
+  });
 
   dots.forEach((dot) => {
     dot.addEventListener("click", () => {
-      const index = Number(dot.dataset.styleDot) || 0;
-      scrollToCard(index, true);
-      setActive(index);
-    });
-  });
-
-  viewport.addEventListener("keydown", (event) => {
-    const key = event.key;
-    if (key !== "ArrowDown" && key !== "ArrowUp" && key !== "PageDown" && key !== "PageUp" && key !== "Home" && key !== "End") {
-      return;
-    }
-    event.preventDefault();
-
-    let next = activeIndex;
-    if (key === "ArrowDown" || key === "PageDown") next += 1;
-    if (key === "ArrowUp" || key === "PageUp") next -= 1;
-    if (key === "Home") next = 0;
-    if (key === "End") next = cards.length - 1;
-
-    next = Math.max(0, Math.min(cards.length - 1, next));
-    scrollToCard(next, true);
-    setActive(next);
-  });
-
-  /* 点卡片本体也算选中：以前只有底下的按钮能点，卡片一大片区域点下去没反应，
-     用户会以为面板卡住了。按钮仍然走应用，卡片只负责滚到中间并高亮。 */
-  cards.forEach((card, index) => {
-    card.addEventListener("click", (event) => {
-      if (event.target.closest("[data-style-pick]")) return;
-      scrollToCard(index, true);
-      setActive(index);
-    });
-  });
-
-  pickButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const next = button.dataset.stylePick;
-      applyStyle(next);
+      spinToIndex(Number(dot.dataset.styleDot) || 0, true);
     });
   });
 
@@ -353,42 +372,26 @@
     closeDeck();
   });
 
+  function syncCurrentUi() {
+    setReadout(frontIndex());
+  }
+
   function openDeck() {
     if (!trigger || deck.open) return;
 
-    syncCurrentUi();
-    const index = currentIndex();
-    setActive(index);
+    /* 当前风格先转到正前，再开门 */
+    setRot(-Math.max(0, STYLES.indexOf(current)) * STEP, false);
 
     deck.showModal();
     deck.classList.remove("is-closing");
     deck.classList.add("is-opening");
     document.documentElement.classList.add("is-style-deck-open");
 
-    /* showModal 会把焦点丢给第一张卡并顺手滚过去，先抢回焦点再定位 */
-    viewport.focus({ preventScroll: true });
-
-    window.requestAnimationFrame(() => {
-      if (!deck.open) return;
-      scrollToCard(index, false);
-      setActive(index);
-    });
-
-    window.setTimeout(() => {
-      if (!deck.open || deck.classList.contains("is-closing")) return;
-      scrollToCard(index, false);
-      setActive(index);
-    }, 60);
+    /* showModal 会把焦点丢给第一个可聚焦元素，抢回来给筒 */
+    scene.focus({ preventScroll: true });
 
     window.setTimeout(() => deck.classList.remove("is-opening"), 620);
     trigger.setAttribute("aria-expanded", "true");
-
-    window.setTimeout(() => {
-      if (!deck.open || deck.classList.contains("is-closing")) return;
-      const target = deck.querySelector(".style-card.is-active [data-style-pick]");
-      if (target && !target.disabled) target.focus({ preventScroll: true });
-      else viewport.focus({ preventScroll: true });
-    }, 80);
   }
 
   /* mode = "handoff"：换肤专用。面板不原地淡出，而是整块向上抽走，
@@ -430,7 +433,7 @@
   wipe.setAttribute("aria-hidden", "true");
   wipe.innerHTML = `
     <span class="style-wipe__veil"></span>
-    <span class="style-wipe__label" data-style-wipe-label>MINIMAL</span>
+    <span class="style-wipe__label" data-style-wipe-label>DEFAULT</span>
     <span class="style-wipe__bar"></span>`;
   document.body.appendChild(wipe);
   const wipeLabel = wipe.querySelector("[data-style-wipe-label]");
@@ -467,7 +470,7 @@
   const HALO_VERSION = (() => {
     const own = document.querySelector('script[src*="skins.js"]');
     const match = own && own.src.match(/[?&]v=([^&]+)/);
-    return match ? decodeURIComponent(match[1]) : "20261105k";
+    return match ? decodeURIComponent(match[1]) : "20261105l";
   })();
   let haloFrame = null;
 

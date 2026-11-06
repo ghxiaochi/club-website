@@ -32,7 +32,7 @@
     category: "General",
     categoryId: "DIC_kwDOVVfRI84DKAf-",
     /* 用 pathname 而不是 title：站点有三套文案，同一个区块的标题
-       在极简 / 黑客风下是不一样的。按 title 映射的话，同一个人换个皮肤
+       在黑客风下是不一样的。按 title 映射的话，同一个人换个皮肤
        再留言，就会开出第二个 discussion，评论被劈成两半。 */
     mapping: "pathname",
     strict: "0",
@@ -63,7 +63,7 @@
     if (style === "term") return "transparent_dark";
     /* 蓝白科技风的深色模式偏藏蓝，dark_dimmed 最接近 */
     if (style === "default") return dark ? "dark_dimmed" : "light";
-    /* 极简、棍木：只有黑白两档 */
+    /* 棍木：只有黑白两档 */
     return dark ? "dark" : "light";
   }
 

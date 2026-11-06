@@ -3,7 +3,6 @@
    ---------------------------------------------------------
    只改「字体栈」这一个维度，不动字号和布局：
      default  现代无衬线，标题收紧字距，像产品官网
-     minimal  标题换成衬线，正文仍是黑体，像杂志内页
      hacker   全站等宽，连中文也走等宽回退，像终端窗口
    变量都在 :root 里定义一次，各风格只覆盖 --display / --sans。
    ========================================================= */
@@ -40,32 +39,8 @@ html[data-style="default"] {
   --display-tracking: -0.028em;
 }
 
-/* ---------- 2. 极简：标题走衬线，正文保持黑体 ----------
+/* ---------- 2. 标题字体 ----------
    宋体在大字号下才好看，所以只换标题；正文继续用系统黑体保证可读性 */
-html[data-style="minimal"] {
-  --display: "Songti SC", "Source Han Serif SC", "Noto Serif SC",
-    "Noto Serif CJK SC", "STSong", "SimSun", "Times New Roman", Georgia, serif;
-  --display-tracking: 0.012em;
-}
-
-html[data-style="minimal"] .hero h1,
-html[data-style="minimal"] h2,
-html[data-style="minimal"] h3 {
-  font-weight: 500;
-}
-
-html[data-style="minimal"] .hero h1 {
-  line-height: 1.14;
-}
-
-/* 极简风的眉标、标签不再用等宽，改细一点的衬线小字 */
-html[data-style="minimal"] .eyebrow,
-html[data-style="minimal"] .hero-tag,
-html[data-style="minimal"] .card-label {
-  font-family: var(--display);
-  letter-spacing: 0.08em;
-}
-
 /* ---------- 3. 黑客终端：全站等宽 ---------- */
 html[data-style="hacker"] {
   --sans: "JetBrains Mono", "Cascadia Mono", "SFMono-Regular", "Sarasa Mono SC",

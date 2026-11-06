@@ -144,18 +144,15 @@ html.reveal-ready .project-card[data-reveal] {
   transform: none;
 }
 
-/* ---------- 5. 面板与对话框的出场 ---------- */
-.style-card {
-  transition:
-    transform 0.5s var(--ease-spring),
-    opacity 0.4s ease,
-    border-color 0.3s ease;
+/* ---------- 5. 笔筒面板的出场 ---------- */
+.pen {
+  transition: opacity 0.25s ease;
 }
 @media (hover: hover), (pointer: fine) {
 
 
-.style-card:not(.is-active):hover {
-  transform: scale(0.985);
+.pen:not([data-current="true"]):hover {
+  opacity: 1 !important;
 }
 }
 
@@ -169,7 +166,7 @@ html.reveal-ready .project-card[data-reveal] {
   .theme-toggle,
   .theme-toggle__flip,
   .style-toggle,
-  .style-card,
+  .pen,
   html.reveal-ready [data-reveal] {
     transition-duration: 0.01ms !important;
     transform: none !important;
