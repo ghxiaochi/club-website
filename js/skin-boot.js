@@ -14,7 +14,7 @@
 (function () {
   "use strict";
 
-  var V = "?v=20261105l";
+  var V = "?v=20261105m";
 
   var SKINS = {
     term: ["css/skin-term.css", "css/term-tui.css"],
@@ -65,12 +65,18 @@
     });
   }
 
+  /* 主页就是终端：没存过、或者存的是老的 "default"（还没被迁移过），
+     都按 term 先把表插进去，首帧就是终端，不会先闪一下蓝白 */
   function stored() {
     try {
       var v = window.localStorage.getItem("hnyz:style");
-      return v === "term" || v === "halo" ? v : "";
-    } catch (error) {
+      if (v === "halo") return "halo";
+      if (v === "term") return "term";
+      if (!v) return "term";
+      if (v === "default" && !window.localStorage.getItem("hnyz:home-term")) return "term";
       return "";
+    } catch (error) {
+      return "term";
     }
   }
 

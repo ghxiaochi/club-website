@@ -31,8 +31,8 @@
        换成别的分类要一起去 giscus.app 重新生成 category-id */
     category: "General",
     categoryId: "DIC_kwDOVVfRI84DKAf-",
-    /* 用 pathname 而不是 title：站点有三套文案，同一个区块的标题
-       在黑客风下是不一样的。按 title 映射的话，同一个人换个皮肤
+    /* 用 pathname 而不是 title：站点有两套文案，同一个区块的标题
+       在蓝白 / 黑客风下是不一样的。按 title 映射的话，同一个人换个皮肤
        再留言，就会开出第二个 discussion，评论被劈成两半。 */
     mapping: "pathname",
     strict: "0",

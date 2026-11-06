@@ -24,19 +24,19 @@
 
 ---
 
-### 2. 六套风格
+### 2. 五套风格（首页默认终端）
 
 | 值 | 名称 | 实现 |
 | --- | --- | --- |
+| `term` | 终端（主页） | `css/skin-term.css` + `css/term-tui.css`；没存过选择的访客默认落在这一套 |
 | `default` | 蓝白科技 | `style.css` + `skins.css` |
 | `hacker` | 黑客终端 | `skins.css` + `js/matrix.js`（代码雨） |
-| `term` | 终端 | `css/skin-term.css` + `css/term-tui.css` |
 | `halo` | 光场 | `css/skin-halo.css` + `halo.html` iframe |
 | `bare` | 棍木 | `skins.css` 末尾，整页只留风格按钮 |
 
 **切换与持久化**
 
-- 选择存在 `localStorage` 的 `hnyz:style`，各页面共用。
+- 选择存在 `localStorage` 的 `hnyz:style`，各页面共用；没有该键时用 `term`。
 - `js/skins.js` 暴露 `window.HNYZ_STYLE.apply(name)`，用 `document.documentElement.dataset.style` 驱动全部样式。
 - 顶栏方块按钮打开 `<dialog>` 风格面板，支持点击、方向键、滚动吸附。
 - 切换时整屏向上擦除（`.style-wipe`），换肤发生在幕布盖住之后；`prefers-reduced-motion` 下直接切换。

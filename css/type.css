@@ -1,5 +1,5 @@
 /* =========================================================
-   HNYZ · 三套风格的字体
+   HNYZ · 各套风格的字体
    ---------------------------------------------------------
    只改「字体栈」这一个维度，不动字号和布局：
      default  现代无衬线，标题收紧字距，像产品官网
@@ -39,9 +39,7 @@ html[data-style="default"] {
   --display-tracking: -0.028em;
 }
 
-/* ---------- 2. 标题字体 ----------
-   宋体在大字号下才好看，所以只换标题；正文继续用系统黑体保证可读性 */
-/* ---------- 3. 黑客终端：全站等宽 ---------- */
+/* ---------- 2. 黑客终端：全站等宽 ---------- */
 html[data-style="hacker"] {
   --sans: "JetBrains Mono", "Cascadia Mono", "SFMono-Regular", "Sarasa Mono SC",
     "Noto Sans Mono CJK SC", "Liberation Mono", Consolas, monospace;
