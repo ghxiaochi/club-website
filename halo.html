@@ -233,7 +233,10 @@ const TAU = Math.PI * 2, rnd = Math.random;
 const rr = (a, b) => a + rnd() * (b - a);
 const pick = a => a[(rnd() * a.length) | 0];
 const gauss = () => (rnd() + rnd() + rnd() - 1.5) / 1.5;
-let DPR = Math.min(window.devicePixelRatio || 1, 2);
+/* 轻量模式：主站顶栏的羽毛打开后，iframe 会带 lite=1 进来。
+   像素比压到 1、粒子减半，观感还是那套，只是不再让低端机掉帧。 */
+const LITE = /[?&]lite=1\b/.test(location.search);
+let DPR = Math.min(window.devicePixelRatio || 1, LITE ? 1 : 2);
 const FONT = '"JetBrains Mono",Consolas,monospace';
 
 function mk(w, h) {
@@ -354,6 +357,13 @@ if (BAKED_MINE) PRESETS.MINE = { ...BASE, ...BAKED_MINE };
 const MOBILE_K = { runnerCount: 0.5, flyerCount: 0.55, burstSize: 0.75, bokeh: 0.6 };
 for (const p of Object.values(PRESETS)) for (const k in MOBILE_K) p[k] = k === 'runnerCount' || k === 'bokeh' ? Math.round(p[k] * MOBILE_K[k]) : +(p[k] * MOBILE_K[k]).toFixed(2);
 const C = { ...(PRESETS.MINE || PRESETS.B) };
+if (LITE) {
+  C.runnerCount = Math.max(90, Math.round(C.runnerCount * 0.45));
+  C.hazeCount = Math.max(6, Math.round(C.hazeCount * 0.5));
+  C.flyerCount = Math.max(1, Math.round(C.flyerCount * 0.5));
+  C.burstSize = +(C.burstSize * 0.7).toFixed(2);
+  C.cometBurst = Math.max(3, Math.round(C.cometBurst * 0.7));
+}
 const zf = z => 1 + (z - 1) * C.camZoom;
 
 const TOK = ['load_collection()', 'extract_eq', '∂u/∂t', 'rho', 'grad(p)', 'dt=1e-3', 'assert', 'residual', 'solve()',
@@ -1599,7 +1609,7 @@ let rzT, ready = false, started = false;
 function resizeAll() {
   const r = stage.getBoundingClientRect();
   if (r.width < 20 || r.height < 20) { ready = false; return; }
-  DPR = Math.min(window.devicePixelRatio || 1, 1.75); resizeStage(); resizePanels(); ready = true;
+  DPR = Math.min(window.devicePixelRatio || 1, LITE ? 1 : 1.75); resizeStage(); resizePanels(); ready = true;
   /* 尺寸变了，弧的投影也变了：浮窗重新掷点、重新量宽。
      H 是画布高度，面板会盖住舞台下沿，所以浮窗的可活动范围要按面板顶算 */
   const pn = document.querySelector('.panels');

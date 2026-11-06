@@ -9,7 +9,8 @@
 (() => {
   "use strict";
 
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const liteOn = () => document.documentElement.dataset.lite === "1";
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || liteOn()) return;
 
   const canvas = document.createElement("canvas");
   canvas.className = "click-fx";
@@ -108,6 +109,8 @@
     (event) => {
       if (event.pointerType === "mouse" && event.button !== 0) return;
       if (event.target && event.target.closest && event.target.closest("[data-theme-toggle]")) return;
+      /* 切到轻量模式之后，模块已经建好 canvas 了，在这里挡一下 */
+      if (liteOn()) return;
       add(event.clientX, event.clientY);
     },
     { passive: true, capture: true }

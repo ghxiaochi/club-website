@@ -1,0 +1,124 @@
+/* =========================================================
+   HNYZ · 轻量模式（html[data-lite="1"]）
+   ---------------------------------------------------------
+   只做减法，不改布局：所有尺寸、间距、字号一律不动，
+   关掉的只有「好看但不影响读懂」的东西。
+
+     1. 动画与过渡：统一压到 1ms，等于画面不再随时间变化
+     2. 毛玻璃：backdrop-filter 是这两年在低端机上最贵的一项
+     3. canvas 特效：代码雨、点击涟漪直接不画
+     4. 按钮与提示：羽毛按钮的开启态、右下角那一句话
+
+   最后加载，优先级高于各皮肤。
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   1. 全局：不再有动画
+   --------------------------------------------------------- */
+html[data-lite="1"] {
+  scroll-behavior: auto !important;
+}
+
+html[data-lite="1"] *,
+html[data-lite="1"] *::before,
+html[data-lite="1"] *::after {
+  animation-duration: 1ms !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 1ms !important;
+  transition-delay: 0s !important;
+}
+
+/* 帧率无关的装饰也停掉：滚动进度条、扫描线这类跟着 rAF 走的东西 */
+html[data-lite="1"] .scroll-progress,
+html[data-lite="1"] .scanlines,
+html[data-lite="1"] .crt::after {
+  display: none !important;
+}
+
+/* ---------------------------------------------------------
+   2. 毛玻璃换成实底
+   ---------------------------------------------------------
+   禁用模糊后，半透明的顶栏会让下面的字透上来，必须补一层底色。
+   --------------------------------------------------------- */
+html[data-lite="1"] * {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+html[data-lite="1"] .site-header {
+  background: var(--bg, #fbfcff) !important;
+}
+
+html[data-lite="1"] .style-deck,
+html[data-lite="1"] .site-nav {
+  background: var(--bg, #fbfcff) !important;
+}
+
+/* ---------------------------------------------------------
+   3. canvas 特效不画
+   --------------------------------------------------------- */
+html[data-lite="1"] .matrix-rain,
+html[data-lite="1"] .click-fx {
+  display: none !important;
+}
+
+/* ---------------------------------------------------------
+   4. 顶栏的羽毛按钮
+   ---------------------------------------------------------
+   基础外观在 skins.css 的按钮组里（和风格、刷新同一套），
+   这里只补开启态：羽毛亮起来，一眼能看出现在是轻量模式。
+   --------------------------------------------------------- */
+.lite-toggle svg {
+  width: 17px;
+  height: 17px;
+}
+
+.lite-toggle.is-on {
+  color: var(--blue);
+  border-color: var(--blue);
+  background: var(--blue-soft, rgba(37, 99, 235, 0.1));
+  box-shadow: 0 0 0 3px var(--blue-soft, rgba(37, 99, 235, 0.1));
+}
+
+/* 终端风里不要那圈光晕 */
+.tty .lite-toggle.is-on {
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* ---------------------------------------------------------
+   5. 右下角一句话
+   --------------------------------------------------------- */
+.lite-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 9998;
+  max-width: min(92vw, 460px);
+  padding: 11px 15px;
+  border-radius: 10px;
+  background: rgba(12, 18, 30, 0.94);
+  border: 1px solid rgba(147, 197, 253, 0.28);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.26);
+  color: #e8eefb;
+  font: 13px/1.5 var(--mono, "SFMono-Regular", Consolas, monospace);
+  text-align: center;
+  opacity: 0;
+  transform: translate(-50%, 12px);
+  pointer-events: none;
+  transition: opacity 0.22s ease, transform 0.28s ease;
+}
+
+.lite-toast.is-on {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+@media (max-width: 420px) {
+  .lite-toast {
+    bottom: 14px;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+}

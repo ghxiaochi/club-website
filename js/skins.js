@@ -42,6 +42,11 @@
   /* 记住按钮原本在顶栏的位置，从棍木切回来时要放回去 */
   const triggerHome = trigger ? { parent: trigger.parentNode, next: trigger.nextSibling } : null;
 
+  /* 轻量模式按钮在棍木下也要留着：整个 header 会被藏掉，
+     不留入口的话，开了轻量的人只有切回别的皮肤才能关 */
+  const liteBtn = document.querySelector("[data-lite-toggle]");
+  const liteHome = liteBtn ? { parent: liteBtn.parentNode, next: liteBtn.nextSibling } : null;
+
   let current = HOME_STYLE;
   let busy = false;
   /* 切到全屏皮肤（终端/光场/棍木）前记下滚动位置，
@@ -449,8 +454,12 @@
 
     if (on) {
       document.body.appendChild(trigger);
+      if (liteBtn) document.body.appendChild(liteBtn);
     } else if (triggerHome && triggerHome.parent) {
       triggerHome.parent.insertBefore(trigger, triggerHome.next);
+      if (liteHome && liteHome.parent) {
+        liteHome.parent.insertBefore(liteBtn, liteHome.next);
+      }
     }
   }
 
@@ -467,7 +476,7 @@
   const HALO_VERSION = (() => {
     const own = document.querySelector('script[src*="skins.js"]');
     const match = own && own.src.match(/[?&]v=([^&]+)/);
-    return match ? decodeURIComponent(match[1]) : "20261105r";
+    return match ? decodeURIComponent(match[1]) : "20261105s";
   })();
   let haloFrame = null;
 
@@ -479,7 +488,8 @@
         haloFrame.setAttribute("title", "HNYZ 光场");
         haloFrame.setAttribute("data-halo-frame", "");
         haloFrame.setAttribute("loading", "eager");
-        haloFrame.src = `halo.html?v=${HALO_VERSION}`;
+        const lite = document.documentElement.dataset.lite === "1" ? "&lite=1" : "";
+        haloFrame.src = `halo.html?v=${HALO_VERSION}${lite}`;
         document.body.appendChild(haloFrame);
       }
       haloFrame.hidden = false;
@@ -488,6 +498,14 @@
       haloFrame = null;
     }
   }
+
+  /* 切轻量模式时，已经开着的 iframe 要重开一次，
+     否则里面的 DPR 和粒子数还是老参数 */
+  document.addEventListener("hnyz:lite", () => {
+    if (!haloFrame) return;
+    syncHalo(false);
+    syncHalo(true);
+  });
 
   /* -------------------------------------------------------
      黑客风的代码雨：用到才加载

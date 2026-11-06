@@ -18,6 +18,10 @@
   const root = document.documentElement;
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
 
+  /* 轻量模式：和「减少动效」同等对待，代码雨整块不跑 */
+  const noMotion = () =>
+    reduce.matches || document.documentElement.dataset.lite === "1";
+
   const CHARS = "ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789<>[]{}#$*+-=/\\|";
   const FONT = 15;
   const COL_W = 14;
@@ -131,7 +135,7 @@
   }
 
   function start() {
-    if (running || reduce.matches) return;
+    if (running || noMotion()) return;
     if (root.dataset.style !== "hacker") return;
     if (document.hidden) return;
     running = true;
@@ -148,7 +152,7 @@
   }
 
   function sync() {
-    if (root.dataset.style === "hacker" && !reduce.matches && !document.hidden) start();
+    if (root.dataset.style === "hacker" && !noMotion() && !document.hidden) start();
     else stop();
   }
 
@@ -159,6 +163,7 @@
 
   document.addEventListener("visibilitychange", sync);
   reduce.addEventListener("change", sync);
+  document.addEventListener("hnyz:lite", sync);
 
   let resizeTimer = 0;
   window.addEventListener("resize", () => {

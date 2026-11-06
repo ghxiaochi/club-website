@@ -26,7 +26,8 @@
   const ctx = canvas.getContext("2d", { alpha: false });
   if (!ctx) return;
 
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+    document.documentElement.dataset.lite === "1";
 
   /* -------------------------------------------------------
      一、每个角色的画法（参数取自 src/units.nim）

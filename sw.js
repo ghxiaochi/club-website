@@ -33,7 +33,7 @@
    发版时改 VERSION，更老的缓存在 activate 里被清掉。
    ========================================================= */
 
-const VERSION = "20261105r";
+const VERSION = "20261105s";
 const CACHE = `hnyz-v${VERSION}`;
 
 /* 站内根路径：用 "./" 就地解析，
@@ -76,6 +76,7 @@ const CORE = [
   `./css/type.css${V}`,
   `./css/motion.css${V}`,
   `./css/skins.css${V}`,
+  `./css/lite.css${V}`,
   `./css/personal.css${V}`,
   `./css/pet.css${V}`,
   `./css/avatar-pet.css${V}`,
@@ -92,6 +93,7 @@ const CORE = [
   `./js/theme-icon.js${V}`,
   `./js/skins.js${V}`,
   `./js/fullscreen.js${V}`,
+  `./js/lite.js${V}`,
   `./js/skin-boot.js${V}`,
   `./js/pwa.js${V}`,
   `./js/sfx.js${V}`,
@@ -193,7 +195,7 @@ function isCacheName(name) {
   return name.startsWith("hnyz-v");
 }
 
-/* 从缓存名里取版本号：hnyz-v20261105r → 20261105r */
+/* 从缓存名里取版本号：hnyz-v20261105s → 20261105s */
 function versionOf(name) {
   return name.replace(/^hnyz-v/, "");
 }

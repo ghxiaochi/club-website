@@ -16,6 +16,9 @@
   "use strict";
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  /* 轻量模式按「减少动效」处理：不打字、不跟随指针 */
+  const noMotion = () =>
+    reduceMotion.matches || document.documentElement.dataset.lite === "1";
   const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
   const root = document.documentElement;
 
@@ -100,7 +103,7 @@
       const style = document.documentElement.dataset.style || "default";
       const phrases = (ROTATOR[style] || ROTATOR.default)();
 
-      if (reduceMotion.matches) {
+      if (noMotion()) {
         target.textContent = phrases[0];
         return;
       }
@@ -147,6 +150,8 @@
 
     start();
     document.addEventListener("hnyz:stylechange", start);
+    /* 打开轻量模式时立刻停掉打字，不等下次刷新 */
+    document.addEventListener("hnyz:lite", start);
   }
 
   /* =======================================================
@@ -162,7 +167,7 @@
 
     element.dataset.counted = "true";
 
-    if (reduceMotion.matches || target === 0) {
+    if (noMotion() || target === 0) {
       element.textContent = String(target);
       return;
     }
@@ -204,7 +209,7 @@
   }
 
   function initReveal() {
-    if (reduceMotion.matches) return;
+    if (noMotion()) return;
 
     root.classList.add("reveal-ready");
 
@@ -252,7 +257,7 @@
      四、项目卡片 3D 倾斜
      ======================================================= */
   function initTilt() {
-    if (reduceMotion.matches || !finePointer.matches) return;
+    if (noMotion() || !finePointer.matches) return;
 
     const MAX_TILT = 7;
     let activeCard = null;
@@ -322,7 +327,7 @@
      触屏和「减少动效」下完全不启用。
      ======================================================= */
   function initGlobalGlow() {
-    if (reduceMotion.matches || !finePointer.matches) return;
+    if (noMotion() || !finePointer.matches) return;
 
     const glow = document.createElement("div");
     glow.className = "hnyz-glow";
@@ -366,7 +371,7 @@
      ======================================================= */
   function initTicker() {
     const track = document.querySelector("[data-ticker-track]");
-    if (!track || reduceMotion.matches) return;
+    if (!track || noMotion()) return;
 
     const base = track.firstElementChild;
     if (!base) return;
@@ -405,7 +410,7 @@
     多出一层影响滚动性能。
      ======================================================= */
   function initBgIcons() {
-    if (reduceMotion.matches) return;
+    if (noMotion()) return;
     if (!window.matchMedia("(min-width: 901px)").matches) return;
 
     const icons = [

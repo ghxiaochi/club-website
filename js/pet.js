@@ -27,6 +27,8 @@
   ];
 
   const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const noMotion = () =>
+    motionQuery.matches || document.documentElement.dataset.lite === "1";
   let lineIndex = 0;
   let speechTimer = 0;
   let frame = 0;
@@ -52,7 +54,7 @@
   }
 
   function updateSpinTarget() {
-    targetSpin = motionQuery.matches ? 0 : window.scrollY * 0.24;
+    targetSpin = noMotion() ? 0 : window.scrollY * 0.24;
 
     if (
       motionQuery.matches &&
@@ -103,7 +105,7 @@
     motionQuery.addListener(updateSpinTarget);
   }
 
-  currentSpin = motionQuery.matches ? 0 : window.scrollY * 0.24;
+  currentSpin = noMotion() ? 0 : window.scrollY * 0.24;
   targetSpin = currentSpin;
   applySpin(currentSpin);
 })();

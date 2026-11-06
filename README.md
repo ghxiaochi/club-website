@@ -204,6 +204,7 @@
 - **图片**：图集视口懒加载 + 固定宽高；项目封面与成员头像 `loading="lazy"`；图片统一 WebP。
 - **动画**：只动 `transform` / `opacity`；滚动监听合并到 `requestAnimationFrame`；`prefers-reduced-motion` 关闭非必要动效。
 - **缓存**：仓库数据 10 分钟、Service Worker 分版本；离线优先返回缓存页面。
+- **轻量模式**（`js/lite.js` + `css/lite.css`）：顶栏羽毛按钮，一键关掉动画、毛玻璃与 canvas 特效；没存过偏好又检测到 Save-Data / 2G / 内存 ≤2GB / 核心 ≤2 时自动开启一次。开关状态存在 `hnyz:lite`，切换不刷新页面，各模块监听 `hnyz:lite` 自行启停；光场 iframe 会带 `lite=1` 重新加载，像素比压到 1、粒子减半。
 
 发版时改三处版本号：HTML 里的 `?v=`、`sw.js` 的 `VERSION`、`skin-boot.js` 的 `V`。
 
@@ -230,8 +231,8 @@ python3 -m http.server 8080
 ```
 .
 ├─ index.html / projects.html / member.html / gallery.html / dino.html / 404.html / halo.html
-├─ css/        style · type · skins · skin-term · skin-halo · term-tui · 各页面样式
-├─ js/         main · skins · skin-boot · term-tui · repo-sync · gallery · member · dino …
+├─ css/        style · type · skins · lite · skin-term · skin-halo · term-tui · 各页面样式
+├─ js/         main · skins · lite · skin-boot · term-tui · repo-sync · gallery · member · dino …
 ├─ data/       repos.json（仓库快照）· ladder.json（天梯）· deepy.json（鲸鱼帧）
 ├─ images/     项目封面、角色、图集、图标、Deepy 首帧
 ├─ fonts/      Animdustry 像素字体

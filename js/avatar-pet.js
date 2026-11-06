@@ -478,7 +478,8 @@
   }
 
   function startPinball(startX, startY) {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      document.documentElement.dataset.lite === "1";
 
     const w = pet.offsetWidth * state.scale;
     const h = pet.offsetHeight * state.scale;

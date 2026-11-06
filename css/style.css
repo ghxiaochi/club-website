@@ -2706,6 +2706,7 @@ body.nav-locked {
   .header-actions .style-toggle,
   .header-actions .fullscreen-toggle,
   .header-actions .sync-toggle,
+  .header-actions .lite-toggle,
   .header-actions .nav-toggle {
     width: 26px;
     height: 26px;
@@ -2983,6 +2984,7 @@ body.nav-locked {
   .header-actions .theme-toggle,
   .header-actions .style-toggle,
   .header-actions .sync-toggle,
+  .header-actions .lite-toggle,
   .header-actions .nav-toggle {
     width: 42px;
     height: 42px;
