@@ -427,7 +427,7 @@
       messages.push("部分数据来自本地缓存，10 分钟内不会重复请求 GitHub。");
     }
     if (notices.has("timeout")) {
-      messages.push("GitHub 12 秒没回话，先用本地快照显示；网络正常的话过一会儿刷新即可。");
+      messages.push("GitHub 15 秒没回话，先用本地快照显示；网络正常的话过一会儿刷新即可。");
     }
     if (notices.has("network")) {
       messages.push("请求没发出去（DNS 或被拦），先显示本地快照或占位卡片。");
@@ -603,11 +603,11 @@
     }
 
     /* GitHub 偶尔会挂住不返回。国内直连经常 5 秒才握手完，
-       8 秒会把「线路慢」误判成「断网」，所以放到 12 秒；
+       8 秒会把「线路慢」误判成「断网」，所以放到 15 秒；
        这期间卡片用的是快照 / 缓存，不是空白。 */
     apiHits += 1;
     const controller = new AbortController();
-    const timer = window.setTimeout(() => controller.abort(), 12000);
+    const timer = window.setTimeout(() => controller.abort(), 15000);
 
     try {
       const response = await fetch(apiUrl, {

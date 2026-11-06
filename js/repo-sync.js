@@ -41,8 +41,8 @@
   /* 国内直连 api.github.com 经常 5 秒才刚握手完，卡在 5 秒会把
      「线路慢」误报成「你断网了」。留到 12 秒，正常网络也等得起；
      这期间卡片显示的是本地缓存，不是空白。 */
-  const API_TIMEOUT = 12000;
-  const API_FIRST = 8000;
+  const API_TIMEOUT = 15000;
+  const API_FIRST = 10000;
   const MIRROR_TIMEOUT = 9000;
   const LIMIT_KEEP = 40;
 
@@ -205,7 +205,7 @@
     }
   }
 
-  /* 第一次 8 秒没回话，再给一次 12 秒。
+  /* 第一次 10 秒没回话，再给一次 15 秒。
      国内直连 GitHub 的抖动常常是「第一包丢了、重连就通」，
      直接判死会让用户以为自己断网。总等待上限 20 秒，
      期间进度条一直在走，卡片显示的是缓存，不是空白。 */
@@ -525,7 +525,7 @@
         toast("这些仓库都返回 404：可能已改名或转成私有。", "error");
       } else if (failed.every((item) => item.reason === "timeout")) {
         /* 超时不是断网：浏览器连上了，只是 GitHub 没在 12 秒内回话 */
-        toast("GitHub 12 秒没回话（超时，不是你断网）。现有数据没有动，过一会儿再点一次。", "error");
+        toast("等了两次（10s + 15s）GitHub 都没回话，不是你断网。现有数据没有动，过一会儿再点一次。", "error");
       } else if (failed.every((item) => item.reason === "network")) {
         toast("请求没发出去：DNS 或网络被拦了。现有数据没有动。", "error");
       } else {
