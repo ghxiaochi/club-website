@@ -410,40 +410,32 @@
      六、渲染与降级提示
      ======================================================= */
 
+  /* 提示只出一条。
+     以前是把 403 + 缓存 + 超时拼成一长串，读起来像报错清单，
+     其实都在说同一件事：现在看到的是旧数据。挑最要紧的说一句就够，
+     真要重试，右上角那个刷新按钮一直都在。 */
+  const NOTICE_TEXT = [
+    ["network", "网络不通，先显示缓存。"],
+    ["403", "GitHub 限流，先显示缓存。"],
+    ["timeout", "GitHub 响应慢，先显示缓存。"],
+    ["error", "部分仓库没取到，先显示缓存。"],
+    ["404", "有仓库已找不到，可能改名或转私有。"],
+    ["cache", "当前显示的是缓存数据。"]
+  ];
+
   function updateNotice() {
     if (!renderNote) return;
 
-    const messages = [];
-
-    if (notices.has("403")) {
-      messages.push(
-        "GitHub 暂时限制了未登录访问（每小时 60 次），已改用本地缓存显示。稍后点右上角刷新即可恢复。"
-      );
-    }
-    if (notices.has("404")) {
-      messages.push("有仓库返回 404：可能已被删除、改名或设为私有，卡片仍保留入口。");
-    }
-    if (notices.has("cache")) {
-      messages.push("部分数据来自本地缓存，10 分钟内不会重复请求 GitHub。");
-    }
-    if (notices.has("timeout")) {
-      messages.push("GitHub 15 秒没回话，先用本地快照显示；网络正常的话过一会儿刷新即可。");
-    }
-    if (notices.has("network")) {
-      messages.push("请求没发出去（DNS 或被拦），先显示本地快照或占位卡片。");
-    }
-    if (notices.has("error")) {
-      messages.push("部分仓库没取到，先用缓存或占位卡片顶上。");
+    let text = "";
+    for (const [flag, message] of NOTICE_TEXT) {
+      if (notices.has(flag)) {
+        text = message;
+        break;
+      }
     }
 
-    if (!messages.length) {
-      renderNote.textContent = "";
-      renderNote.hidden = true;
-      return;
-    }
-
-    renderNote.textContent = messages.join(" ");
-    renderNote.hidden = false;
+    renderNote.textContent = text;
+    renderNote.hidden = !text;
   }
 
   /* 首页项目区的收尾卡：5 张卡 + 它正好两行，不再空一整列。
@@ -655,6 +647,23 @@
     }
   }
 
+  /* 固定并发的小工具：同时最多跑 limit 个，顺序返回 */
+  async function mapLimit(items, limit, worker) {
+    const output = new Array(items.length);
+    let cursor = 0;
+
+    const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
+      while (cursor < items.length) {
+        const index = cursor;
+        cursor += 1;
+        output[index] = await worker(items[index], index);
+      }
+    });
+
+    await Promise.all(runners);
+    return output;
+  }
+
   async function loadProjects() {
     if (!grid) return;
 
@@ -664,9 +673,11 @@
     apiHits = 0;
 
     try {
-      /* 首页只请求前 6 个仓库，避免一次消耗太多 GitHub API 配额 */
+      /* 首页只请求前 6 个仓库，避免一次消耗太多 GitHub API 配额。
+         再限一次并发（3 个）：同时挂起 6 条请求，弱网下只会互相拖慢，
+         未登录的 API 也更容易被判成滥用。 */
       const shown = members.slice(0, HOME_LIMIT);
-      const projects = await Promise.all(shown.map((member) => fetchRepo(member)));
+      const projects = await mapLimit(shown, 3, (member) => fetchRepo(member));
       renderProjects(projects);
     } catch (error) {
       /* fetchRepo 已经做过兜底，这里只防御意料之外的渲染异常 */

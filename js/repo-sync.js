@@ -37,7 +37,7 @@
 
   /* 5 个仓库就 5 个并发，不分批。
      以前并发 3，五个仓库要排两轮，白等一个 RTT。 */
-  const MAX_PARALLEL = 10;
+  const MAX_PARALLEL = 4;
   /* 国内直连 api.github.com 经常 5 秒才刚握手完，卡在 5 秒会把
      「线路慢」误报成「你断网了」。留到 12 秒，正常网络也等得起；
      这期间卡片显示的是本地缓存，不是空白。 */
@@ -144,7 +144,7 @@
     if (!sticky) {
       toastTimer = window.setTimeout(() => {
         toastEl.classList.remove("is-visible");
-      }, kind === "error" ? 5200 : 3800);
+      }, kind === "error" ? 4600 : 3600);
     }
     return toastEl;
   }
@@ -429,12 +429,12 @@
     if (running) return;
 
     if (!members.length) {
-      toast("没有可同步的项目，先把仓库写进 <b>js/members.js</b>。", "error");
+      toast("项目清单是空的，没有可同步的仓库。", "error");
       return;
     }
 
     if (navigator.onLine === false) {
-      toast("当前处于离线状态，联网后再点。", "error");
+      toast("现在离线，联网后再试。", "error");
       return;
     }
 
@@ -452,19 +452,19 @@
     /* 点下去立刻有反馈：不等网络，先说自己开始干了 */
     const total = list.length;
     let done = 0;
-    toast(`<b>0</b> / ${total} · 正在刷新，最快的仓库先上屏`, "busy", true);
+    toast(`<b>0</b> / ${total} · 正在同步…`, "busy", true);
 
     /* 3 秒还没结果：多半是 GitHub 那边卡住了。
        与其让圈一直转，不如说出来——用户知道在等，就不会以为坏了。 */
     const slowHint = window.setTimeout(() => {
-      if (running) toastText(`<b>0</b> / ${total} · 网络有点慢，还在等 GitHub 回话`);
+      if (running) toastText(`<b>0</b> / ${total} · GitHub 有点慢，继续等…`);
     }, 4000);
 
     const results = await pool(list, MAX_PARALLEL, async (member) => {
       const result = await syncOne(member);
       done += 1;
       if (done < total) {
-        toastText(`<b>${done}</b> / ${total} · 正在刷新，最快的仓库先上屏`);
+        toastText(`<b>${done}</b> / ${total} · 正在同步…`);
       }
       return result;
     });
@@ -509,9 +509,9 @@
     if (!failed.length) {
       flash("is-done");
       if (changed) {
-        toast(`<b>${ok.length}</b> 个仓库已同步，其中 <b>${changed}</b> 个有改动 · ${time}`);
+        toast(`已更新 <b>${ok.length}</b> 个仓库 · <b>${changed}</b> 个有变化 · ${time}`);
       } else {
-        toast(`已是最新：<b>${ok.length}</b> 个仓库都没有变化 · ${time}`);
+        toast(`已是最新 · <b>${ok.length}</b> 个仓库都没变 · ${time}`);
       }
       return;
     }
@@ -520,23 +520,23 @@
     flash("is-failed");
     if (!ok.length) {
       if (limited) {
-        toast("GitHub 限流了：未登录每小时 60 次，等一会儿再点。现有数据没有动。", "error");
+        toast("GitHub 限流了，过几分钟再试。数据没动。", "error");
       } else if (failed.every((item) => item.reason === "not-found")) {
-        toast("这些仓库都返回 404：可能已改名或转成私有。", "error");
+        toast("仓库都找不到了，可能已改名或转私有。", "error");
       } else if (failed.every((item) => item.reason === "timeout")) {
         /* 超时不是断网：浏览器连上了，只是 GitHub 没在 12 秒内回话 */
-        toast("等了两次（10s + 15s）GitHub 都没回话，不是你断网。现有数据没有动，过一会儿再点一次。", "error");
+        toast("GitHub 一直没回应，稍后再试。数据没动。", "error");
       } else if (failed.every((item) => item.reason === "network")) {
-        toast("请求没发出去：DNS 或网络被拦了。现有数据没有动。", "error");
+        toast("网络不通，检查一下再试。数据没动。", "error");
       } else {
-        toast("这次没连上 GitHub，现有数据没有动，稍后再点一次。", "error");
+        toast("没连上 GitHub，稍后再试。数据没动。", "error");
       }
       return;
     }
 
     const timedOut = failed.filter((item) => item.reason === "timeout").length;
-    const reason = limited ? "被 GitHub 限流" : timedOut ? "超时" : "请求失败";
-    toast(`已同步 <b>${ok.length}</b> 个，${failed.length} 个${reason}；失败的保留原数据。`, "error");
+    const reason = limited ? "被限流" : timedOut ? "超时" : "失败";
+    toast(`已更新 <b>${ok.length}</b> 个，${failed.length} 个${reason}，失败的先用旧数据。`, "error");
   }
 
   /* ---------------------------------------------------------

@@ -12,20 +12,28 @@
 
    运行时三条策略，按资源类型分工：
      1. 页面（HTML）   —— 网络优先。发版后用户第一次打开就是新的；
-                          网络超过 3.5 秒没回应，退回缓存，不让人对着白屏。
+                          网络 4.5 秒没回应就先给缓存，不让人对着白屏。
      2. 带 ?v= 的资源  —— 缓存优先。版本号是手工打的，URL 变内容必变，
-                          缓存永远不会拿到错版本，命中就是 0ms。
+                          命中就是 0ms。
      3. 其余静态资源   —— 先给缓存，同时后台拉一份新的（stale-while-revalidate），
                           下次打开生效。图片、音频、字体都属于这类。
+
+   换版时不再把旧缓存一把火烧掉：
+     上一次发版留下的那份要留着。最常见的故障是新 HTML 还没送到，
+     旧页面问的是 ?v=旧版本，而新缓存里只有新版本号——旧的一删，
+     这个请求就无处可去，网络一慢整页就退成没有样式的裸 HTML。
+     现在保留最近两版，并且允许跨缓存按「同路径、忽略版本号」找一份
+     救急；找到的那份只用来顶这一下，绝不写进新版本号的地址，
+     免得旧内容把新地址占住、以后永远拿不到新版。
 
    跨域请求（giscus、api.github.com）一律放行，不进缓存：
    第三方的响应头我们控制不了，缓存下来只会制造难以排查的怪问题。
    音频拖进度条会带 Range 头，也不进缓存——缓存整段响应喂不了分段请求。
 
-   发版时改 VERSION，旧缓存在 activate 里被清掉。
+   发版时改 VERSION，更老的缓存在 activate 里被清掉。
    ========================================================= */
 
-const VERSION = "20261105q";
+const VERSION = "20261105r";
 const CACHE = `hnyz-v${VERSION}`;
 
 /* 站内根路径：用 "./" 就地解析，
@@ -37,6 +45,20 @@ const ROOT = new URL("./", self.location.href).href;
    否则 cache.match 精确匹配不到，离线时还是一张白页。
    所以版本号只在这里写一次，下面统一拼上去。 */
 const V = `?v=${VERSION}`;
+
+/* 保留几版缓存。2 = 当前 + 上一版：
+   上一版是旧页面请求旧 ?v= 时的唯一救命稻草，再往前就没用了。 */
+const KEEP_VERSIONS = 2;
+
+/* 页面等网络的时间。GitHub Pages 的 CDN 正常 1 秒内就回，
+   4.5 秒还没回多半是线路问题，先把缓存给出去，页面不至于空着。 */
+const PAGE_TIMEOUT = 4500;
+
+/* 单个静态资源的最长等待。比页面宽松：字体、音频大一点正常。 */
+const ASSET_TIMEOUT = 12000;
+
+/* 安装时一次并发下载几个。全并发 60 个会把首屏请求挤到后面。 */
+const INSTALL_BATCH = 8;
 
 /* 第一批：打开任何一页都需要的骨架 */
 const CORE = [
@@ -155,8 +177,36 @@ const EXTRA = [
 /* 离线时用来兜底的页面：优先首页，其次是缓存里任意一页 */
 const OFFLINE_FALLBACK = ["./index.html", "./"];
 
-/* 扩展缓存最多留多少条图片，超了从最早放的开始删 */
+/* 运行时缓存最多留多少条图片，超了从最早放的开始删 */
 const IMAGE_CACHE_LIMIT = 120;
+
+/* 清理不必每次写入都做：遍历上千条 key 是要花时间的。
+   30 秒内重复写入只清一次。 */
+const TRIM_INTERVAL = 30000;
+
+/* ---------- 小工具 ---------- */
+function abs(path) {
+  return new URL(path, self.location.href).href;
+}
+
+function isCacheName(name) {
+  return name.startsWith("hnyz-v");
+}
+
+/* 从缓存名里取版本号：hnyz-v20261105r → 20261105r */
+function versionOf(name) {
+  return name.replace(/^hnyz-v/, "");
+}
+
+/* 按名字挑出要保留的缓存：当前这版优先，其余按版本号从新到旧，
+   只留 KEEP_VERSIONS - 1 个。旧格式（不是 hnyz-v 开头）不认识，
+   交给 activate 一并清掉。 */
+function pickKeep(keys) {
+  const others = keys
+    .filter((key) => key !== CACHE)
+    .sort((a, b) => versionOf(b).localeCompare(versionOf(a)));
+  return [CACHE, ...others.slice(0, KEEP_VERSIONS - 1)];
+}
 
 async function putSafe(cache, url, request) {
   try {
@@ -169,43 +219,155 @@ async function putSafe(cache, url, request) {
   }
 }
 
+/* 写入缓存。带 ?r= 这种纯时间戳的地址先摘掉参数，
+   否则样式表自愈重挂一次就多一条重复条目。 */
+async function cachePut(cache, request, res) {
+  try {
+    if (!res || res.status !== 200) return;
+    let key = request;
+    const url = new URL(request.url);
+    const params = Array.from(url.searchParams.keys());
+    if (params.length === 1 && params[0] === "r") {
+      url.searchParams.delete("r");
+      key = new Request(url.href, { method: "GET" });
+    }
+    await cache.put(key, res);
+  } catch (error) {
+    /* 配额满、响应已被消费，都不影响这次请求 */
+  }
+}
+
+/* 跨缓存找一份能用的：当前版本优先，然后从新到旧翻上一版。
+   先按原地址精确匹配，再按「同路径、忽略 ?v=」找。 */
+async function findInCaches(request) {
+  const keys = (await caches.keys()).filter(isCacheName);
+  const keep = pickKeep(keys);
+  const ordered = keep.concat(keys.filter((key) => !keep.includes(key)));
+
+  for (const name of ordered) {
+    let cache;
+    try {
+      cache = await caches.open(name);
+    } catch (error) {
+      continue;
+    }
+    const exact = await cache.match(request);
+    if (exact) return exact;
+    const loose = await cache.match(request, { ignoreSearch: true });
+    if (loose) return loose;
+  }
+  return null;
+}
+
+/* 图片缓存无限长会把存储撑爆（十几张帖子、头像、截图），
+   超过上限就按放入顺序删最老的一批。 */
+let lastTrim = 0;
+
+async function trimCache(cache, force) {
+  const now = Date.now();
+  if (!force && now - lastTrim < TRIM_INTERVAL) return;
+  lastTrim = now;
+
+  try {
+    const keys = await cache.keys();
+    const images = keys.filter((req) => /\.(png|jpe?g|webp|avif|gif|svg)$/i.test(new URL(req.url).pathname));
+    if (images.length <= IMAGE_CACHE_LIMIT) return;
+    await Promise.all(images.slice(0, images.length - IMAGE_CACHE_LIMIT).map((req) => cache.delete(req)));
+  } catch (error) {
+    /* 清理失败不影响返回结果 */
+  }
+}
+
+async function offlineDocument(cache, request) {
+  for (const path of OFFLINE_FALLBACK) {
+    const hit = await cache.match(abs(path));
+    if (hit) return hit;
+  }
+  const hit = await cache.match(request, { ignoreSearch: true });
+  if (hit) return hit;
+  return new Response("离线，且这一页还没被缓存。", {
+    status: 503,
+    headers: { "Content-Type": "text/plain; charset=utf-8" }
+  });
+}
+
 /* ---------- 安装：预缓存核心资源 ---------- */
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
 
-    /* 逐个 add，而不是 addAll：addAll 是「一个失败全部作废」，
-       某个文件改名或 404 会让整个 SW 装不上，也就没有离线能力。
-       这里允许个别失败，能缓多少缓多少。 */
-    await Promise.all(CORE.map((path) => {
-      const url = new URL(path, self.location.href).href;
-      return putSafe(cache, url);
-    }));
+    /* 分批 add，而不是 addAll：
+       addAll 是「一个失败全部作废」，某个文件改名或 404 会让整个 SW
+       装不上，也就没有离线能力。分批则允许个别失败，能缓多少缓多少；
+       每批 8 个，也不至于一装就占满带宽、把首屏挤在后面。 */
+    let ok = 0;
+    for (let i = 0; i < CORE.length; i += INSTALL_BATCH) {
+      const slice = CORE.slice(i, i + INSTALL_BATCH);
+      const results = await Promise.all(slice.map((path) => putSafe(cache, abs(path))));
+      ok += results.filter((res) => res && res.status === 200).length;
+    }
+
+    /* 一大半都下不到，说明这会儿网络根本不通。宁可这次装失败、
+       继续用旧的 SW（缓存是完整的），也不要装一个空壳进来接管页面——
+       空壳 + 弱网 = 满屏 504。 */
+    if (ok < CORE.length / 3) {
+      throw new Error(`precache failed: ${ok}/${CORE.length}`);
+    }
 
     /* 新版本装好立即接管，不用等用户关掉所有标签页 */
     await self.skipWaiting();
   })());
 });
 
-/* ---------- 激活：清掉旧版本缓存 ---------- */
+/* 换版时把旧缓存里还能用的条目搬过来。
+   带 ?v= 的是版本化资源，旧版内容不能混进新版本；
+   图片、音频、字体这些没有版本号，文件本身没变，直接复制，
+   省掉几十兆的重复下载，也让离线能力在新版装好的一瞬间就是完整的。 */
+async function carryOver(cache, oldName) {
+  let old;
+  try {
+    old = await caches.open(oldName);
+    const keys = await old.keys();
+    for (const req of keys) {
+      const url = new URL(req.url);
+      if (url.search) continue;
+      if (await cache.match(req)) continue;
+      const res = await old.match(req);
+      if (res && res.status === 200) await cache.put(req, res);
+    }
+  } catch (error) {
+    /* 旧缓存读不出来就算了，扩展预热会补上 */
+  }
+}
+
+/* ---------- 激活：只清更老的版本 ---------- */
 self.addEventListener("activate", (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
+    const keep = pickKeep(keys);
+    const older = keys.filter((key) => keep.includes(key) && key !== CACHE);
+
+    const cache = await caches.open(CACHE);
+    for (const name of older) await carryOver(cache, name);
+
     await Promise.all(
       keys
-        .filter((key) => key.startsWith("hnyz-") && key !== CACHE)
+        .filter((key) => key.startsWith("hnyz-") && !keep.includes(key))
         .map((key) => caches.delete(key))
     );
     await self.clients.claim();
 
     /* 第二批不阻塞激活：激活完才有离线能力，图片晚几秒到没关系。
-       失败也不影响已经装好的核心。 */
+       失败也不影响已经装好的核心。串行 + 30ms 间隔，
+       别和用户正在看的页面抢带宽。 */
     (async () => {
-      const cache = await caches.open(CACHE);
       for (const path of EXTRA) {
-        const url = new URL(path, self.location.href).href;
+        const url = abs(path);
         const hit = await cache.match(url);
-        if (!hit) await putSafe(cache, url);
+        if (!hit) {
+          await putSafe(cache, url);
+          await new Promise((resolve) => setTimeout(resolve, 30));
+        }
       }
     })().catch(() => {});
   })());
@@ -224,32 +386,6 @@ function withTimeout(promise, ms) {
       (value) => { clearTimeout(timer); resolve(value); },
       () => { clearTimeout(timer); resolve(null); }
     );
-  });
-}
-
-/* 图片缓存无限长会把存储撑爆（十几张帖子、头像、截图），
-   超过上限就按放入顺序删最老的一批。 */
-async function trimCache(cache) {
-  try {
-    const keys = await cache.keys();
-    const images = keys.filter((req) => /\.(png|jpe?g|webp|avif|gif|svg)$/i.test(new URL(req.url).pathname));
-    if (images.length <= IMAGE_CACHE_LIMIT) return;
-    await Promise.all(images.slice(0, images.length - IMAGE_CACHE_LIMIT).map((req) => cache.delete(req)));
-  } catch (error) {
-    /* 清理失败不影响返回结果 */
-  }
-}
-
-async function offlineDocument(cache, request) {
-  for (const path of OFFLINE_FALLBACK) {
-    const hit = await cache.match(new URL(path, self.location.href).href);
-    if (hit) return hit;
-  }
-  const hit = await cache.match(request, { ignoreSearch: true });
-  if (hit) return hit;
-  return new Response("离线，且这一页还没被缓存。", {
-    status: 503,
-    headers: { "Content-Type": "text/plain; charset=utf-8" }
   });
 }
 
@@ -279,15 +415,17 @@ self.addEventListener("fetch", (event) => {
     event.respondWith((async () => {
       const cache = await caches.open(CACHE);
       const network = fetch(request).then((res) => {
-        if (res && res.ok) cache.put(request, res.clone()).catch(() => {});
+        if (res && res.ok) cachePut(cache, request, res.clone());
         return res;
       }).catch(() => null);
 
-      /* 3.5 秒：够 GitHub Pages 的 CDN 回一次，又不至于让人以为点了没反应 */
-      const fresh = await withTimeout(network, 3500);
+      const fresh = await withTimeout(network, PAGE_TIMEOUT);
       if (fresh && fresh.ok) return fresh;
 
-      const cached = await cache.match(request, { ignoreSearch: true });
+      /* 超时或失败：缓存里的页面立刻顶上。跨版本找，
+         是因为换版后旧页面可能还在问旧地址。 */
+      const cached = (await cache.match(request, { ignoreSearch: true })) ||
+        (await findInCaches(request));
       if (cached) return cached;
 
       return (await network) || offlineDocument(cache, request);
@@ -303,25 +441,29 @@ self.addEventListener("fetch", (event) => {
       if (hit) return hit;
 
       /* 刚发版时最常见的一幕：页面还是旧 HTML，问的是 ?v=老版本，
-         而新缓存里只有 ?v=新版本，旧版本已经被 activate 清掉了。
-         以前这里直接走网络，网络一慢就返回空 504 —— CSS 拿不到，
-         整页退成白底黑字的裸 HTML。改成先忽略版本号在同一路径里找，
-         拿到的多半就是同一个文件，只是版本号不同。 */
-      const sameFile = await cache.match(request, { ignoreSearch: true });
-      if (sameFile) {
-        /* 顺手把这次要的地址也记一份，下次直接命中 */
-        cache.put(request, sameFile.clone()).catch(() => {});
-        return sameFile;
-      }
+         而新缓存里只有 ?v=新版本。以前这里直接走网络，网络一慢就返回
+         空 504 —— CSS 拿不到，整页退成白底黑字的裸 HTML。现在先跨
+         缓存按同路径捞一份救急。
 
-      try {
-        const res = await fetch(request);
-        if (res && res.ok) cache.put(request, res.clone()).catch(() => {});
-        return res;
-      } catch (error) {
-        /* 真没缓存也没网：给一个明确的失败，而不是空白 200 */
-        return new Response("", { status: 504, statusText: "offline" });
-      }
+         捞到就只返回，不写回这个地址：旧 URL 每换一版就多一个，
+         写进去只会让缓存里堆一串永远用不上的副本。下次再请求，
+         ignoreSearch 一样能找到。 */
+      const rescue = await findInCaches(request);
+      if (rescue) return rescue;
+
+      const fresh = await withTimeout(
+        fetch(request)
+          .then((res) => {
+            if (res && res.ok) cachePut(cache, request, res.clone());
+            return res;
+          })
+          .catch(() => null),
+        ASSET_TIMEOUT
+      );
+      if (fresh && fresh.ok) return fresh;
+
+      /* 真没缓存也没网：给一个明确的失败，而不是空白 200 */
+      return new Response("", { status: 504, statusText: "offline" });
     })());
     return;
   }
@@ -337,10 +479,10 @@ self.addEventListener("fetch", (event) => {
     const hit = (await cache.match(request)) ||
       (await cache.match(request, { ignoreSearch: true }));
 
-    const refresh = fetch(request).then((res) => {
+    const network = fetch(request).then((res) => {
       /* data/repos.json 每天更新一次，也走这条：本次给旧值，下次给新值 */
       if (res && res.ok) {
-        cache.put(request, res.clone()).catch(() => {});
+        cachePut(cache, request, res.clone());
         trimCache(cache);
       }
       return res;
@@ -348,10 +490,16 @@ self.addEventListener("fetch", (event) => {
 
     if (hit) return hit;
 
-    /* 必须有兜底响应：refresh 失败时返回 null 的话，
-       respondWith(null) 会抛 TypeError，控制台里是一串看不懂的报错 */
-    const fresh = await refresh;
-    if (fresh) return fresh;
+    const fresh = await withTimeout(network, ASSET_TIMEOUT);
+    if (fresh && fresh.ok) return fresh;
+
+    /* 缓存里没有、网络又慢：跨版本再找一次（上一版留下的大图、
+       字体都在这里），还是不行才认输 */
+    const rescue = await findInCaches(request);
+    if (rescue) return rescue;
+
+    /* 必须有兜底响应：返回 null 的话 respondWith(null) 会抛 TypeError，
+       控制台里是一串看不懂的报错 */
     return new Response("", { status: 504, statusText: "offline" });
   })());
 });

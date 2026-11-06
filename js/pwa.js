@@ -114,7 +114,7 @@
       if (notified) return;
       notified = true;
       injectStyle();
-      toast("站点有新版本，刷新后生效。", "刷新", function () {
+      toast("站点更新了，刷新后生效。", "刷新", function () {
         location.reload();
       }, 10000);
     }
@@ -143,7 +143,7 @@
       if (offlineNotified) return;
       offlineNotified = true;
       injectStyle();
-      toast("已离线，正在用缓存打开页面。", null, null, 4200);
+      toast("离线了，正在用缓存打开。", null, null, 3800);
     });
     window.addEventListener("online", function () {
       offlineNotified = false;
