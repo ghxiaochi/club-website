@@ -426,8 +426,11 @@
     if (notices.has("cache")) {
       messages.push("部分数据来自本地缓存，10 分钟内不会重复请求 GitHub。");
     }
+    if (notices.has("timeout")) {
+      messages.push("GitHub 12 秒没回话，先用本地快照显示；网络正常的话过一会儿刷新即可。");
+    }
     if (notices.has("network")) {
-      messages.push("连不上 GitHub，先显示本地缓存或占位卡片。");
+      messages.push("请求没发出去（DNS 或被拦），先显示本地快照或占位卡片。");
     }
     if (notices.has("error")) {
       messages.push("部分仓库没取到，先用缓存或占位卡片顶上。");
@@ -599,11 +602,12 @@
       return normalizeRepo(snapshot, member);
     }
 
-    /* GitHub 偶尔会挂住不返回：8 秒拿不到就放弃，卡片退回本地数据，
-       免得整组一直停在「正在连接」 */
+    /* GitHub 偶尔会挂住不返回。国内直连经常 5 秒才握手完，
+       8 秒会把「线路慢」误判成「断网」，所以放到 12 秒；
+       这期间卡片用的是快照 / 缓存，不是空白。 */
     apiHits += 1;
     const controller = new AbortController();
-    const timer = window.setTimeout(() => controller.abort(), 8000);
+    const timer = window.setTimeout(() => controller.abort(), 12000);
 
     try {
       const response = await fetch(apiUrl, {
@@ -638,8 +642,8 @@
       setCachedRepo(cacheKey, data);
       return normalizeRepo(data, member);
     } catch (error) {
-      /* 断网、DNS 失败、CORS 等 */
-      notices.add("network");
+      /* 超时和真·断网分开报：前者浏览器已经连上了，只是 GitHub 没回话 */
+      notices.add(controller.signal.aborted ? "timeout" : "network");
       if (cached) {
         notices.add("cache");
         cacheHits += 1;

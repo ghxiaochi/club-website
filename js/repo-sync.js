@@ -38,8 +38,12 @@
   /* 5 个仓库就 5 个并发，不分批。
      以前并发 3，五个仓库要排两轮，白等一个 RTT。 */
   const MAX_PARALLEL = 10;
-  const API_TIMEOUT = 5000;
-  const MIRROR_TIMEOUT = 6000;
+  /* 国内直连 api.github.com 经常 5 秒才刚握手完，卡在 5 秒会把
+     「线路慢」误报成「你断网了」。留到 12 秒，正常网络也等得起；
+     这期间卡片显示的是本地缓存，不是空白。 */
+  const API_TIMEOUT = 12000;
+  const API_FIRST = 8000;
+  const MIRROR_TIMEOUT = 9000;
   const LIMIT_KEEP = 40;
 
   /* 判断「有没有变化」时只看这些字段：
@@ -165,9 +169,9 @@
      --------------------------------------------------------- */
 
   /* 正式接口：字段全，但慢，偶尔超时 */
-  async function fetchApi(member) {
+  async function fetchApi(member, limit) {
     const controller = new AbortController();
-    const timer = window.setTimeout(() => controller.abort(), API_TIMEOUT);
+    const timer = window.setTimeout(() => controller.abort(), limit || API_TIMEOUT);
 
     try {
       const response = await fetch(
@@ -199,6 +203,16 @@
     } finally {
       window.clearTimeout(timer);
     }
+  }
+
+  /* 第一次 8 秒没回话，再给一次 12 秒。
+     国内直连 GitHub 的抖动常常是「第一包丢了、重连就通」，
+     直接判死会让用户以为自己断网。总等待上限 20 秒，
+     期间进度条一直在走，卡片显示的是缓存，不是空白。 */
+  async function fetchApiRetry(member) {
+    const first = await fetchApi(member, API_FIRST);
+    if (first.status !== "fail" || first.reason !== "timeout") return first;
+    return fetchApi(member, API_TIMEOUT);
   }
 
   /* 镜像：ungh.cc，Cloudflare 上的一份 GitHub 只读副本。
@@ -302,7 +316,7 @@
     const key = `${member.user}/${member.repo}`;
     const before = (readCache()[key] || {}).data || null;
 
-    const apiPromise = fetchApi(member);
+    const apiPromise = fetchApiRetry(member);
     const mirrorPromise = fetchMirror(member);
 
     let last = before;
@@ -444,7 +458,7 @@
        与其让圈一直转，不如说出来——用户知道在等，就不会以为坏了。 */
     const slowHint = window.setTimeout(() => {
       if (running) toastText(`<b>0</b> / ${total} · 网络有点慢，还在等 GitHub 回话`);
-    }, 3000);
+    }, 4000);
 
     const results = await pool(list, MAX_PARALLEL, async (member) => {
       const result = await syncOne(member);
@@ -509,13 +523,19 @@
         toast("GitHub 限流了：未登录每小时 60 次，等一会儿再点。现有数据没有动。", "error");
       } else if (failed.every((item) => item.reason === "not-found")) {
         toast("这些仓库都返回 404：可能已改名或转成私有。", "error");
+      } else if (failed.every((item) => item.reason === "timeout")) {
+        /* 超时不是断网：浏览器连上了，只是 GitHub 没在 12 秒内回话 */
+        toast("GitHub 12 秒没回话（超时，不是你断网）。现有数据没有动，过一会儿再点一次。", "error");
+      } else if (failed.every((item) => item.reason === "network")) {
+        toast("请求没发出去：DNS 或网络被拦了。现有数据没有动。", "error");
       } else {
-        toast("连不上 GitHub，检查网络后再试。现有数据没有动。", "error");
+        toast("这次没连上 GitHub，现有数据没有动，稍后再点一次。", "error");
       }
       return;
     }
 
-    const reason = limited ? "被 GitHub 限流" : "请求失败";
+    const timedOut = failed.filter((item) => item.reason === "timeout").length;
+    const reason = limited ? "被 GitHub 限流" : timedOut ? "超时" : "请求失败";
     toast(`已同步 <b>${ok.length}</b> 个，${failed.length} 个${reason}；失败的保留原数据。`, "error");
   }
 

@@ -14,7 +14,7 @@
 (function () {
   "use strict";
 
-  var V = "?v=20261105n";
+  var V = "?v=20261105p";
 
   var SKINS = {
     term: ["css/skin-term.css", "css/term-tui.css"],
@@ -102,6 +102,46 @@
     document.addEventListener("DOMContentLoaded", bindWarm, { once: true });
   } else {
     bindWarm();
+  }
+
+  /* ---------------------------------------------------------
+     样式自愈
+     ---------------------------------------------------------
+     发版后 ?v= 全变，若这道连接刚好拉不到新地址（弱网、被拦、
+     或 SW 里只剩新版本缓存），浏览器会拿不到任何 CSS：整页退成
+     白底黑字的裸 HTML，页头图标、排版全散。这里在 load 之后查一次
+     基础变量 --sans 有没有生效——没有就把样式表按「去掉版本号」
+     的地址重挂一遍，CDN 上那份文件一直都在。
+     --------------------------------------------------------- */
+  function rehangCss() {
+    var root = document.documentElement;
+    /* 挑一个只有 style.css 定义的量：--sans 在终端/黑客皮肤里会被
+       各自的表重写，样式表整体没来时它反而可能是有的 */
+    var probe = window.getComputedStyle(root).getPropertyValue("--measure");
+    if (probe && probe.trim()) return;
+
+    var stamp = Date.now();
+    var links = document.querySelectorAll('link[rel="stylesheet"]');
+    var added = 0;
+    for (var i = 0; i < links.length; i += 1) {
+      var href = links[i].getAttribute("href") || "";
+      if (!href || /^(https?:)?\/\//.test(href)) continue;
+      var base = href.split("#")[0].split("?")[0];
+      var fresh = document.createElement("link");
+      fresh.rel = "stylesheet";
+      fresh.href = base + "?r=" + stamp;
+      document.head.appendChild(fresh);
+      added += 1;
+    }
+    if (added) document.documentElement.classList.add("is-css-retry");
+  }
+
+  if (document.readyState === "complete") {
+    window.setTimeout(rehangCss, 260);
+  } else {
+    window.addEventListener("load", function () {
+      window.setTimeout(rehangCss, 260);
+    }, { once: true });
   }
 
   window.HNYZCSS = { ensure: ensure };

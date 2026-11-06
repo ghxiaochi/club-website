@@ -25,7 +25,7 @@
    发版时改 VERSION，旧缓存在 activate 里被清掉。
    ========================================================= */
 
-const VERSION = "20261105n";
+const VERSION = "20261105p";
 const CACHE = `hnyz-v${VERSION}`;
 
 /* 站内根路径：用 "./" 就地解析，
@@ -301,11 +301,25 @@ self.addEventListener("fetch", (event) => {
       const cache = await caches.open(CACHE);
       const hit = await cache.match(request);
       if (hit) return hit;
+
+      /* 刚发版时最常见的一幕：页面还是旧 HTML，问的是 ?v=老版本，
+         而新缓存里只有 ?v=新版本，旧版本已经被 activate 清掉了。
+         以前这里直接走网络，网络一慢就返回空 504 —— CSS 拿不到，
+         整页退成白底黑字的裸 HTML。改成先忽略版本号在同一路径里找，
+         拿到的多半就是同一个文件，只是版本号不同。 */
+      const sameFile = await cache.match(request, { ignoreSearch: true });
+      if (sameFile) {
+        /* 顺手把这次要的地址也记一份，下次直接命中 */
+        cache.put(request, sameFile.clone()).catch(() => {});
+        return sameFile;
+      }
+
       try {
         const res = await fetch(request);
         if (res && res.ok) cache.put(request, res.clone()).catch(() => {});
         return res;
       } catch (error) {
+        /* 真没缓存也没网：给一个明确的失败，而不是空白 200 */
         return new Response("", { status: 504, statusText: "offline" });
       }
     })());
@@ -318,7 +332,10 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith((async () => {
     const cache = await caches.open(CACHE);
-    const hit = await cache.match(request);
+    /* 同样允许忽略查询串：样式表兜底重挂时会带 ?r=时间戳，
+       这里能直接吃到缓存里那份，不用再赌一次网络 */
+    const hit = (await cache.match(request)) ||
+      (await cache.match(request, { ignoreSearch: true }));
 
     const refresh = fetch(request).then((res) => {
       /* data/repos.json 每天更新一次，也走这条：本次给旧值，下次给新值 */
