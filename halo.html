@@ -52,12 +52,10 @@ header{display:grid;grid-template-columns:minmax(240px,1.7fr) repeat(5,minmax(0,
 .chk{left:0;top:0;will-change:transform;background:rgba(8,9,11,.85);border:1px solid var(--line2);padding:5px 8px;transition:opacity .4s}
 .chk b{display:block;font-size:8px;color:var(--dim);font-weight:600;margin-bottom:3px}
 .chk span{font-size:12px;color:var(--white);font-weight:600;white-space:nowrap}
-/* 竖屏手机：场景整体旋转 -90° 绘制，圆环的几何锚点会跑到屏幕外，
-   所以这一颗改成固定在舞台左下角的角标，只保留轮换与淡入淡出 */
-.chk--m{left:14px;bottom:14px;top:auto;padding:6px 10px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
-.chk--m::before{content:"";position:absolute;left:-14px;top:50%;width:14px;height:1px;background:var(--line2)}
-.chk--m b{font-size:7px;letter-spacing:1.4px}
-.chk--m span{font-size:11px}
+/* 竖屏手机：舞台窄，浮窗缩一号；锚点仍然钉在光弧上，只是几何要按旋转后的屏幕算 */
+.chk--s{padding:5px 8px}
+.chk--s b{font-size:7px;letter-spacing:1.3px;margin-bottom:2px}
+.chk--s span{font-size:11px}
 .console{top:10px;right:14px;border:1px solid var(--line2);padding:3px 8px;background:rgba(8,9,11,.8)}
 .music{top:10px;right:104px;z-index:3;pointer-events:auto;display:flex;align-items:center;gap:6px;border:1px solid var(--line2);padding:2px 8px;background:rgba(8,9,11,.8);user-select:none}
 .music .mbtn{cursor:pointer;display:flex;align-items:center;gap:5px}
@@ -189,11 +187,10 @@ header::-webkit-scrollbar{display:none}
   .kpi .v{font-size:11px}
   /* 面板保持原版的横向卡片流，只把卡片放宽一点，一屏能看全一张 */
   .p{flex:0 0 min(86vw,360px)}
-  /* 舞台只剩一百多像素：浮标缩一号往角上收，别和底部读数叠在一起 */
-  .chk--m{left:8px;bottom:8px;padding:4px 7px}
-  .chk--m::before{left:-8px;width:8px}
-  .chk--m b{font-size:6px;letter-spacing:1px;margin-bottom:2px}
-  .chk--m span{font-size:9.5px}
+  /* 浮标缩到最小一档，别盖住弧上的读数 */
+  .chk--s{padding:4px 7px}
+  .chk--s b{font-size:6px;letter-spacing:1px;margin-bottom:2px}
+  .chk--s span{font-size:9.5px}
   .p h3{font-size:8px;letter-spacing:.4px}
   .ov{font-size:8px}
   .status .big{font-size:9.5px}
@@ -1277,47 +1274,64 @@ const CHECKS = [['CLUB / QUICK INFO', 'QQ 1098931492'], ['MEETING', '每周两�
   ['WHERE', '衡南一中 · 编程社'], ['MAIL', '483677268@qq.com'], ['PROJECTS', '5 个仓库 · 3 位成员']];
 let chkI = 0;
 const chkEl = document.getElementById('chk');
-let chkMobile = false;
-/* 桌面端：浮窗不是钉死在某个坐标，而是从圆环上“随便点”一个可见的弧点，
+let chkSmall = false;
+/* 浮窗不是钉死在某个坐标，而是从圆环上“随便点”一个可见的弧点，
    引线把框钉上去；每换一条文案就重新掷一次，镜头推拉时框也跟着弧走。
-   竖屏手机另走左下角角标（场景旋转绘制，弧点算出来在屏幕外）。 */
+   竖屏手机同样走这一套：场景是转着画的，所以锚点要经过 sceneToScreen 再回屏幕。 */
 let chkA = null, chkOff = 0, chkDist = 140, chkW = 180, chkH = 41, chkTX = -1e9, chkTY = -1e9, chkPickAt = 0;
 let chkSafeH = 560;   // 舞台里真正露在面板上方的部分，浮窗不许压到面板
 
-function chkAnchor(a) {
-  return toScreen(cx + Math.cos(a) * (RO + 18), cy + Math.sin(a) * (RO + 18));
+function sceneToScreen(x, y) {
+  const p = toScreen(x, y);
+  /* 竖屏时画布整体转了 -90°：逻辑坐标 → 屏幕是 (y, SH - x) */
+  return ROT ? { x: p.y, y: SH - p.x } : p;
 }
-/* 框的落点：沿外法线出去 d（124~186），再按 off 上下错开 ±96px。
-   这一屏的圆环半径极大，屏幕上就是一条近乎笔直的竖弧，法线全是水平的。
-   只沿法线摆，框就永远和锚点齐平、一条横线拉过去，看着像“平行”并排；
-   上下错开、距离也随机，框才像随手钉上去的标注。 */
+function chkAnchor(a) {
+  return sceneToScreen(cx + Math.cos(a) * (RO + 18), cy + Math.sin(a) * (RO + 18));
+}
+/* 屏幕上的径向外法线：从圆心指向锚点。竖屏不能用 cos/sin(a)，那是逻辑坐标里的方向 */
+function chkNormal(p) {
+  const c = sceneToScreen(cx, cy);
+  const dx = p.x - c.x, dy = p.y - c.y, L = Math.hypot(dx, dy) || 1;
+  return { x: dx / L, y: dy / L };
+}
+/* 框的落点：沿外法线出去 d，再沿切线错开 off。
+   桌面这一屏的圆环近乎笔直，法线全是水平的，只按法线摆就会和锚点齐平并排；
+   错开后框落在锚点的斜上/斜下，引线带角度，才像标注。 */
 function chkLayout(a, off, d) {
   const p = chkAnchor(a);
-  const rawX = p.x + Math.cos(a) * d - chkW * 0.5;
-  const rawY = p.y + off * 96 - chkH * 0.5;
-  const bx = Math.min(W - chkW - 18, Math.max(18, rawX));
-  const by = Math.min(chkSafeH - chkH - 14, Math.max(72, rawY));
-  return { p, bx, by, clamp: Math.hypot(bx - rawX, by - rawY), left: rawX };
+  const n = chkNormal(p);
+  /* 法线左右偏 15°~34°：桌面避免和锚点齐平并排，手机让框在弧上方散开 */
+  const ang = Math.atan2(n.y, n.x) + off * 0.6;
+  const rawX = p.x + Math.cos(ang) * d - chkW * 0.5;
+  const rawY = p.y + Math.sin(ang) * d - chkH * 0.5;
+  const top = ROT ? 10 : 72;
+  const bx = Math.min(SW - chkW - 10, Math.max(10, rawX));
+  const by = Math.min(chkSafeH - chkH - 8, Math.max(top, rawY));
+  return { p, bx, by, n, clamp: Math.hypot(bx - rawX, by - rawY) };
 }
 function chkPick(prev) {
   const lim = thS * 0.86, ok = [];
   for (let i = 0; i < 96; i++) {
     const a = rr(-lim, lim);
     if (prev != null && Math.abs(a - prev) < 0.15) continue;   // 别在原地打转
-    /* 上下错开、远近也错开，框才不会排成一列贴着弧 */
-    const off = (rnd() < 0.5 ? -1 : 1) * rr(0.55, 1);
-    const d = rr(124, 186);
+    /* 沿切线错开，框才不会和锚点摆成一条线 */
+    const off = (rnd() < 0.5 ? -1 : 1) * rr(0.45, 1);
+    const d = ROT ? rr(52, 86) : rr(124, 186);
     const L = chkLayout(a, off, d);
-    if (L.p.x < 8 || L.p.x > W - 8 || L.p.y < 58 || L.p.y > chkSafeH - 20) continue;
+    if (L.p.x < 6 || L.p.x > SW - 6 || L.p.y < 6 || L.p.y > chkSafeH - 6) continue;
     if (L.clamp > 26) continue;
-    if (L.left < L.p.x + 12) continue;   // 框整体留在弧外，别压到弧和圆内的网线
+    /* 框不能压在锚点上，也不能离太远（引线会变成长斜线） */
+    const inX = L.p.x > L.bx - 4 && L.p.x < L.bx + chkW + 4;
+    const inY = L.p.y > L.by - 4 && L.p.y < L.by + chkH + 4;
+    if (inX && inY) continue;
     const ex = Math.min(L.bx + chkW, Math.max(L.bx, L.p.x));
     const ey = Math.min(L.by + chkH, Math.max(L.by, L.p.y));
     const len = Math.hypot(ex - L.p.x, ey - L.p.y);
-    if (len < 58 || len > 200) continue;
+    if (len < (ROT ? 30 : 58) || len > (ROT ? 120 : 200)) continue;
     ok.push({ a, off, d });
   }
-  return ok.length ? pick(ok) : { a: -thS * 0.34, off: -0.7, d: 140 };
+  return ok.length ? pick(ok) : { a: 0, off: -0.6, d: ROT ? 92 : 140 };
 }
 function chkMeasure() {
   const w = chkEl.offsetWidth, h = chkEl.offsetHeight;
@@ -1325,26 +1339,21 @@ function chkMeasure() {
   if (h > 20) chkH = h;
 }
 function drawCallout() {
-  /* 竖屏手机不跟圆环走：那一套锚点算出来在屏幕外（场景是转着画的），
-     改成固定在舞台左下角的角标，字还是那几个字，几秒换一条 */
-  if (ROT) {
-    if (!chkMobile) {
-      chkMobile = true;
-      chkEl.style.display = '';
-      chkEl.style.transform = '';
-      chkEl.classList.add('chk--m');
-    }
-    return;
-  }
-  if (chkMobile) {
-    chkMobile = false;
-    chkEl.classList.remove('chk--m');
+  /* 浮窗坐标已经算成屏幕坐标，这里必须用单位变换；
+     竖屏时画布还带着 -90° 的旋转，直接画会被转第二次 */
+  S.save(); S.setTransform(DPR, 0, 0, DPR, 0, 0);
+  /* 竖屏换成小号样式，尺寸变了要重选一次 */
+  if (chkSmall !== ROT) {
+    chkSmall = ROT;
+    chkEl.classList.toggle('chk--s', ROT);
+    chkMeasure();
+    chkA = null; chkTX = chkTY = -1e9;
   }
   chkEl.style.display = '';
   if (chkA == null) { chkMeasure(); const c = chkPick(null); chkA = c.a; chkOff = c.off; chkDist = c.d; }
   let L = chkLayout(chkA, chkOff, chkDist), p = L.p;
   /* 镜头把锚点推出画面就再掷一次（限流，免得每次运镜都跳） */
-  if ((p.x < 6 || p.x > W - 6 || p.y < 56 || p.y > chkSafeH - 20) && performance.now() - chkPickAt > 1600) {
+  if ((p.x < 4 || p.x > SW - 4 || p.y < 4 || p.y > chkSafeH - 4) && performance.now() - chkPickAt > 1600) {
     const c = chkPick(chkA);
     chkA = c.a; chkOff = c.off; chkDist = c.d; chkPickAt = performance.now();
     L = chkLayout(chkA, chkOff, chkDist); p = L.p;
@@ -1353,16 +1362,16 @@ function drawCallout() {
     chkTX = L.bx; chkTY = L.by;
     chkEl.style.transform = `translate(${chkTX.toFixed(1)}px,${chkTY.toFixed(1)}px)`;
   }
-  /* 引线：0.8px 细线，从弧上的点连到框最近的边（框本体压住线头）。
-     尺寸沿用旧版，别加粗——粗线在光场里像临时画上去的 */
+  /* 引线：0.8px 细线，从弧上的点连到框最近的边（框本体压住线头） */
   const tx = Math.min(chkTX + chkW, Math.max(chkTX, p.x));
   const ty = Math.min(chkTY + chkH, Math.max(chkTY, p.y));
   S.beginPath(); S.moveTo(p.x, p.y); S.lineTo(tx, ty);
-  S.strokeStyle = 'rgba(0,0,0,.45)'; S.lineWidth = 1.2; S.stroke();
+  S.strokeStyle = 'rgba(0,0,0,.6)'; S.lineWidth = 2; S.stroke();
   S.strokeStyle = 'rgba(235,238,244,.72)'; S.lineWidth = 0.8; S.stroke();
   /* 锚点：3px 小白方块，底下一层极窄的暗色只为了在亮带上不消失 */
   S.fillStyle = 'rgba(0,0,0,.55)'; S.fillRect(p.x - 3, p.y - 3, 6, 6);
   S.fillStyle = '#fff'; S.fillRect(p.x - 1.5, p.y - 1.5, 3, 3);
+  S.restore();
 }
 setInterval(() => {
   chkEl.style.opacity = 0;
@@ -1370,7 +1379,7 @@ setInterval(() => {
     chkI = (chkI + 1) % CHECKS.length;
     document.getElementById('chkK').textContent = CHECKS[chkI][0];
     document.getElementById('chkV').textContent = CHECKS[chkI][1];
-    if (!ROT) { chkMeasure(); const c = chkPick(chkA); chkA = c.a; chkOff = c.off; chkDist = c.d; chkPickAt = performance.now(); chkTX = chkTY = -1e9; }
+    chkMeasure(); const c = chkPick(chkA); chkA = c.a; chkOff = c.off; chkDist = c.d; chkPickAt = performance.now(); chkTX = chkTY = -1e9;
     chkEl.style.opacity = 1;
   }, 420);
 }, 3600);
