@@ -170,7 +170,7 @@
   function loadDeepy() {
     if (deepyData || deepyLoading || !window.fetch) return;
     deepyLoading = true;
-    window.fetch("data/deepy.json?v=20261105u")
+    window.fetch("data/deepy.json?v=20261105v")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         deepyData = d;
@@ -551,7 +551,7 @@
     var cached = readCachedRepos();
     if (cached) renderRepos(box, { repos: cached.repos });
 
-    window.fetch("data/repos.json?v=20261105u")
+    window.fetch("data/repos.json?v=20261105v")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (store) {
         if (!store || !store.repos) {
@@ -849,12 +849,12 @@
     to.classList.add("is-in", "is-fresh");
     void to.offsetWidth;
 
-    /* 线走过三成再擦新内容，看起来是线把内容「带出来」的 */
+    /* 线走两成就开始擦新内容，和旧矩阵的淡出交叠，中间不留白 */
     pathClearTimer = window.setTimeout(function () {
       if (token !== swapToken) return;
       to.classList.remove("is-in");
       pathClearTimer = 0;
-    }, dur ? Math.round(dur * 0.32) : 0);
+    }, dur ? Math.round(dur * 0.2) : 0);
 
     swapTimer = window.setTimeout(function () {
       if (token !== swapToken) return;

@@ -14,7 +14,7 @@
 (function () {
   "use strict";
 
-  var V = "?v=20261105u";
+  var V = "?v=20261105v";
 
   var SKINS = {
     term: ["css/skin-term.css", "css/term-tui.css"],
