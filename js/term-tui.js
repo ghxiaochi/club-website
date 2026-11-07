@@ -170,7 +170,7 @@
   function loadDeepy() {
     if (deepyData || deepyLoading || !window.fetch) return;
     deepyLoading = true;
-    window.fetch("data/deepy.json?v=20261107b")
+    window.fetch("data/deepy.json?v=20261107c")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         deepyData = d;
@@ -553,7 +553,7 @@
     var cached = readCachedRepos();
     if (cached) renderRepos(box, { repos: cached.repos });
 
-    window.fetch("data/repos.json?v=20261107b")
+    window.fetch("data/repos.json?v=20261107c")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (store) {
         if (!store || !store.repos) {
@@ -719,7 +719,7 @@
     grad.setAttribute("y1", "0");
     grad.setAttribute("x2", "1");
     grad.setAttribute("y2", "0");
-    [0, 0.16, 0].forEach(function (opacity) {
+    [0, 0.12, 0].forEach(function (opacity) {
       var stop = document.createElementNS(SVG_NS, "stop");
       stop.setAttribute("offset", String(pathBeamStop.length / 2));
       stop.setAttribute("stop-opacity", String(opacity));
@@ -732,7 +732,7 @@
     pathBeam = document.createElementNS(SVG_NS, "rect");
     pathBeam.setAttribute("class", "tty-path__beam");
     pathBeam.setAttribute("fill", "url(#ttyBeamGrad)");
-    pathBeam.setAttribute("width", "64");
+    pathBeam.setAttribute("width", "56");
     pathSvg.appendChild(pathBeam);
 
     pathGlow = document.createElementNS(SVG_NS, "path");
@@ -750,6 +750,14 @@
     markBox.setAttribute("height", "16");
     markBox.setAttribute("rx", "1");
     markBox.setAttribute("class", "tty-path__mark-box");
+    /* 第二圈涟漪：方框先张开一次，紧跟着再散一圈，
+       一次扩张看着像「闪了一下」，两圈才像「落下去了」 */
+    var markRing = document.createElementNS(SVG_NS, "rect");
+    markRing.setAttribute("width", "16");
+    markRing.setAttribute("height", "16");
+    markRing.setAttribute("rx", "1");
+    markRing.setAttribute("class", "tty-path__mark-ring");
+    pathMark.appendChild(markRing);
     pathMark.appendChild(markBox);
     pathDot = document.createElementNS(SVG_NS, "rect");
     pathDot.setAttribute("class", "tty-path__dot");
@@ -939,26 +947,27 @@
       if (pathBeam) {
         var beamOn = e > 0.28 && e < 0.94;
         pathBeam.style.opacity = beamOn ? "1" : "0";
-        if (beamOn) pathBeam.setAttribute("x", String(Math.round(pt.x - 32)));
+        if (beamOn) pathBeam.setAttribute("x", String(Math.round(pt.x - 28)));
       }
 
       if (p < 1) {
         pathRaf = window.requestAnimationFrame(follow);
       } else {
         pathRaf = 0;
-        pathDot.style.opacity = "0";
+        /* 光标不立刻消失：停在落点上，等整层一起淡出，
+           否则线到了、头没了，像中途断掉 */
         if (pathBeam) pathBeam.style.opacity = "0";
         pathMark.classList.add("is-hit");
         pathMarkTimer = window.setTimeout(function () {
           pathMark.classList.remove("is-hit");
           pathMarkTimer = 0;
-        }, 260);
+        }, 340);
         /* 线在终点多留一小会儿，再整层淡出：给眼睛一个「走到了」的落点 */
         pathHideTimer = window.setTimeout(function () {
           if (token !== swapToken) return;
           pathSvg.classList.remove("is-on");
           pathHideTimer = 0;
-        }, 230);
+        }, 320);
       }
     }
     pathRaf = window.requestAnimationFrame(follow);

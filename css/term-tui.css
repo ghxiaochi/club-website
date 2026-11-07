@@ -400,6 +400,31 @@ html.tty-on .style-deck__shell {
   animation: pathMark 0.24s cubic-bezier(0.2, 0.8, 0.3, 1) both;
 }
 
+/* 第二圈：晚 90ms 起，扩得更大、更淡，像水面上一圈余波 */
+.tty-path__mark-ring {
+  fill: none;
+  stroke: var(--tty-accent);
+  stroke-width: 1;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.tty-path__mark.is-hit .tty-path__mark-ring {
+  animation: pathRing 0.34s cubic-bezier(0.22, 0.7, 0.3, 1) 0.09s both;
+}
+
+@keyframes pathRing {
+  from {
+    opacity: 0.5;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+}
+
 @keyframes pathMark {
   from {
     opacity: 0.9;
@@ -1808,7 +1833,8 @@ html[data-theme="dark"] .tty-deepy {
   }
 
   .tty-stage__bd.is-more::before,
-  .tty-path__mark.is-hit .tty-path__mark-box {
+  .tty-path__mark.is-hit .tty-path__mark-box,
+  .tty-path__mark.is-hit .tty-path__mark-ring {
     animation: none;
   }
 
