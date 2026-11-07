@@ -46,6 +46,9 @@
   z-index: 500;
   display: flex;
   flex-direction: column;
+  /* 刘海屏：终端底色铺到屏幕边缘，内容让开安全区 */
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   background: var(--tty-bg);
   color: var(--tty-ink);
   font-family: ui-monospace, "SF Mono", "Cascadia Mono", "JetBrains Mono", Consolas, "Courier New", monospace;
@@ -265,6 +268,20 @@ html.tty-on .style-deck__shell {
   color: #f6f3ed;
 }
 
+/* 切到这个板块时，编号向外扩一圈淡蓝，接住走线的落点 */
+.tty__rail [role="tab"].is-flash .rail__no {
+  animation: railPing 0.56s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+@keyframes railPing {
+  from {
+    box-shadow: 0 0 0 0 rgba(var(--tty-rgb), 0.55);
+  }
+  to {
+    box-shadow: 0 0 0 14px rgba(var(--tty-rgb), 0);
+  }
+}
+
 .rail__txt {
   display: grid;
   min-width: 0;
@@ -310,39 +327,88 @@ html.tty-on .style-deck__shell {
   background: var(--tty-bg);
 }
 
-/* 板块之间的走线：从左侧 rail 的旧编号，拐进中区标题条，
-   再沿标题条下沿横着走一段。JS 量好坐标写进 path。 */
+/* 板块之间的走线：从旧板块的小方点出发，沿栏边拐进标题条，
+   贴着标题条下沿横走一段，再向下扎进内容区。JS 量好坐标写进 path。
+   三层叠在一起：一层淡光晕、一层 1.8px 主线上、一层彗尾。 */
 .tty-path {
   position: absolute;
   inset: 0;
-  z-index: 5;
+  z-index: 4;
   width: 100%;
   height: 100%;
-  overflow: visible;
+  overflow: hidden;
   pointer-events: none;
   opacity: 0;
+  transition: opacity 0.14s linear;
 }
 
 .tty-path.is-on {
   opacity: 1;
 }
 
-.tty-path__line {
+.tty-path__glow,
+.tty-path__line,
+.tty-path__tail {
   fill: none;
   stroke: var(--tty-accent);
-  stroke-width: 1.5;
-  stroke-linecap: square;
-  stroke-linejoin: miter;
-  opacity: 0.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tty-path__glow {
+  stroke-width: 6;
+  opacity: 0.12;
+}
+
+.tty-path__line {
+  stroke-width: 1.8;
+  opacity: 1;
+}
+
+.tty-path__tail {
+  stroke-width: 2.5;
+  opacity: 0.28;
+  stroke-linecap: butt;
 }
 
 .tty-path__dot {
   fill: var(--tty-accent);
-  opacity: 0;
+  opacity: 1;
 }
 
-.tty-path.is-on .tty-path__dot {
-  opacity: 1;
+/* 扫描光带：64px 宽的竖向渐变，跟着光标走 */
+.tty-path__beam {
+  opacity: 0;
+  transition: opacity 0.18s linear;
+}
+
+#ttyBeamGrad stop {
+  stop-color: var(--tty-accent);
+}
+
+/* 终点的那一下：小方框张开就散，告诉眼睛「到这儿了」 */
+.tty-path__mark-box {
+  fill: none;
+  stroke: var(--tty-accent);
+  stroke-width: 1.5;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.tty-path__mark.is-hit .tty-path__mark-box {
+  animation: pathMark 0.24s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+@keyframes pathMark {
+  from {
+    opacity: 0.9;
+    transform: scale(0.45);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.7);
+  }
 }
 
 .tty-stage__hdr {
@@ -391,6 +457,51 @@ html.tty-on .style-deck__shell {
   min-height: 0;
 }
 
+/* 内容比一屏高时，底部铺一层底色渐隐：不挡点击，
+   只告诉眼睛「下面还有」。滚到底 JS 会把 is-more 摘掉 */
+.tty-stage__bd::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  height: 46px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0), var(--tty-bg) 72%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+
+.tty-stage__bd.is-more::after {
+  opacity: 1;
+}
+
+/* 只靠渐隐还不够明确，右下角给一个小下箭头 */
+.tty-stage__bd::before {
+  content: "↓";
+  position: absolute;
+  right: 12px;
+  bottom: 5px;
+  z-index: 4;
+  color: var(--tty-dim);
+  font-size: 11px;
+  line-height: 1;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+
+.tty-stage__bd.is-more::before {
+  opacity: 0.75;
+  animation: moreBob 1.7s ease-in-out infinite;
+}
+
+@keyframes moreBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(3px); }
+}
+
 /* ---------------------------------------------------------
    6. 方块矩阵：12 列，方块自己声明占几列
       ——切换沿一条路径推进：旧矩阵让位，新矩阵从左侧被
@@ -409,14 +520,14 @@ html.tty-on .style-deck__shell {
   padding: 12px 14px 14px;
   overflow-y: auto;
   overflow-x: hidden;
+  /* 一层和底板同色的纸：切进来时它从左边盖住旧内容，
+     而不是让两层字在半透明里糊在一起 */
+  background: var(--tty-bg);
   -webkit-overflow-scrolling: touch;
   outline: none;
   scrollbar-width: thin;
   scrollbar-color: var(--tty-line-2) transparent;
-  clip-path: inset(0 0 0 0);
-  transition: opacity 0.2s ease, clip-path 0.34s cubic-bezier(0.2, 0.7, 0.2, 1),
-    transform 0.24s cubic-bezier(0.2, 0.7, 0.2, 1);
-  will-change: clip-path, opacity;
+  will-change: opacity;
 }
 
 /* display:grid 会盖掉浏览器给 [hidden] 的 display:none，得自己来 */
@@ -432,18 +543,19 @@ html.tty-on .style-deck__shell {
   background: var(--tty-line-2);
 }
 
-/* 切走的：沿路径方向退半步 + 淡出，不做缩放 */
+/* 切走的：0.14s 淡出。新方块紧跟着逐块浮起，
+   重叠很短，不会出现两套字并排 */
 .tty-grid.is-out {
   z-index: 1;
   opacity: 0;
-  transform: translateY(-6px);
+  transition: opacity 0.14s ease;
   pointer-events: none;
 }
 
-/* 切进来的起点：整块被裁到左侧，再由 JS 撤掉 is-in，从左往右擦出来 */
+/* 切进来的起点：不再整块裁切。整块擦除会在中间帧把两套
+   版式并排摆着，卡片宽窄不一，看着像坏掉；改成方块逐个浮起 */
 .tty-grid.is-in {
   opacity: 1;
-  clip-path: inset(0 100% 0 0);
 }
 
 .tty-grid:focus-visible {
@@ -451,16 +563,16 @@ html.tty-on .style-deck__shell {
   outline-offset: -3px;
 }
 
-/* 新矩阵里的方块顺着路径方向依次落位，一格 18ms，像终端逐格刷出来 */
+/* 新矩阵里的方块顺着路径方向依次落位，一格 22ms，像终端逐格刷出来 */
 .tty-grid.is-fresh .tile {
-  animation: tileRise 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-  animation-delay: calc(var(--ti, 0) * 18ms);
+  animation: tileRise 0.24s cubic-bezier(0.2, 0.75, 0.2, 1) both;
+  animation-delay: calc(var(--ti, 0) * 14ms);
 }
 
 @keyframes tileRise {
   from {
     opacity: 0;
-    transform: translateX(-10px);
+    transform: translateX(-8px);
   }
   to {
     opacity: 1;
@@ -1496,12 +1608,13 @@ html[data-theme="dark"] .tty-deepy {
 /* ---------------------------------------------------------
    16. 中屏：三栏挤不下时先收右栏
    --------------------------------------------------------- */
-@media (max-width: 1180px) {
+@media (max-width: 1340px) {
   .tty__shell {
     grid-template-columns: 168px minmax(0, 1fr);
   }
 
-  /* 右栏先收，12 列的矩阵照旧：1024 宽还撑得住 7/5 */
+  /* 右栏先收：1280 的笔记本上，176 + 216 两栏一夹，
+     中间只剩 860px，两行方块就得滚。收掉右栏换回一屏 */
   .tty__side {
     display: none;
   }
@@ -1542,7 +1655,8 @@ html[data-theme="dark"] .tty-deepy {
   .tty__rail [role="tab"] {
     grid-template-columns: 18px auto;
     gap: 7px;
-    padding: 9px 12px;
+    min-height: 46px;
+    padding: 10px 14px;
     border-left: 0;
     border-bottom: 2px solid transparent;
     flex: none;
@@ -1633,6 +1747,11 @@ html[data-theme="dark"] .tty-deepy {
     display: none;
   }
 
+  /* 「5 块 · 12 栏」是桌面矩阵的指标，手机上没意义 */
+  .tty-stage__stat {
+    display: none;
+  }
+
   .tty__legend kbd {
     border: 0;
     padding: 0;
@@ -1664,6 +1783,19 @@ html[data-theme="dark"] .tty-deepy {
 /* ---------------------------------------------------------
    18. 减少动效
    --------------------------------------------------------- */
+/* 高度吃紧的笔记本（720 / 768）：把间距收紧一点，
+   少滚一屏就能看全两行方块 */
+@media (max-height: 800px) and (min-width: 901px) {
+  .tty-grid {
+    gap: 10px;
+    padding: 10px 12px 12px;
+  }
+
+  .tile__bd {
+    padding: 12px 14px 13px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .tty,
   .tty-grid,
@@ -1673,6 +1805,15 @@ html[data-theme="dark"] .tty-deepy {
 
   .tty-grid.is-fresh .tile {
     animation: none;
+  }
+
+  .tty-stage__bd.is-more::before,
+  .tty-path__mark.is-hit .tty-path__mark-box {
+    animation: none;
+  }
+
+  .tty-stage__bd.is-more::before {
+    opacity: 0.55;
   }
 
   .tty.is-on .tty-ln,

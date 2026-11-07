@@ -71,7 +71,7 @@
 
 - **布局**：左栏四个板块（概览 / 关于 / 作品 / 加入），中区 12 列方块矩阵，右栏当前板块的方块索引，底部命令行与状态条。
 - **方块**：`tile(编号, 标题, 列数, 角标, 内容)`，每块用 `--c` 指定占几列（7+5、5+4+3、8+4、4+4+4），行高 `minmax(min-content, 1fr)`。
-- **切换板块（路径动画）**：旧矩阵不缩放，只轻退 + 淡出；`js/term-tui.js` 在 `.tty__stage` 里量一条折线，从旧板块所在高度拐进中区标题条、再沿下沿横铺。线用 `stroke-dashoffset` 渐显，一个 7×7 的方块光标用 `getPointAtLength` 沿路径跑；走到三成时新矩阵用 `clip-path: inset(0 100% 0 0)` 从左往右擦出来，方块按 18ms 错峰、从左侧 10px 落位。窄屏横排导航时折线自动改成「上方 → 新编号 → 标题条」。`prefers-reduced-motion` 与轻量模式直接切，不画线。
+- **切换板块（路径动画）**：`js/term-tui.js` 在 `.tty` 上量一条带 7px 圆角的折线 —— 从旧板块的小方点出发，斜进中区标题条，贴着下沿横走，末端向下扎进内容区。三层叠画：7px 淡光晕、1.5px 主线、3px 彗尾；8px 方块光标用 `getPointAtLength` 沿路径跑，到终点炸开一个 16px 方框。旧矩阵 0.14s 淡出，新方块按 12ms 错峰从下方 10px 浮起，整段 360–640ms。手机横排标签条时折线改走「旧标签 → 栏底 → 标题条」，内容区支持左右滑翻板块。`prefers-reduced-motion` 与轻量模式直接切，不画线。
 - **命令行**：`overview` / `about` / `work` / `join`、`0-3`、`[` `]`、`h` `l`、方向键；别名 `main` `build` `git` `man` `sched` `faq` `msg` `ssh`；还有 `ls` `whoami` `clear` `help`。
 - **Deepy 鲸鱼**：`data/deepy.json` 存 42×30 的七组帧，离屏 canvas 预渲染 + `drawImage` 播放；静态首帧 `images/deepy/idle.webp` 兜底，待机随机插播，点击换表情。
 

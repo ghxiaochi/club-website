@@ -297,7 +297,9 @@ html[data-lite="2"] .tty {
 .lite-note {
   position: fixed;
   left: 50%;
-  bottom: 26px;
+  /* 抬到命令行上方：终端开着时底部是输入行和状态条，
+     贴底会正好压住它们 */
+  bottom: 88px;
   z-index: 9998;
   width: min(92vw, 382px);
   padding: 13px 16px 12px;
@@ -317,6 +319,15 @@ html[data-lite="2"] .tty {
   transform: translate(-50%, 0);
 }
 
+/* 只有标题时收成一颗胶囊：一句话配一张满宽卡片太空 */
+.lite-note.is-bare {
+  width: auto;
+  max-width: 82vw;
+  padding: 10px 20px;
+  border-radius: 999px;
+  text-align: center;
+}
+
 .lite-note strong {
   display: block;
   font-size: 13.5px;
@@ -333,7 +344,7 @@ html[data-lite="2"] .tty {
 
 @media (max-width: 420px) {
   .lite-note {
-    bottom: 16px;
+    bottom: 92px;
     padding: 12px 14px 11px;
   }
 }
@@ -341,7 +352,7 @@ html[data-lite="2"] .tty {
 .lite-toast {
   position: fixed;
   left: 50%;
-  bottom: 24px;
+  bottom: 84px;
   z-index: 9998;
   max-width: min(92vw, 460px);
   padding: 11px 15px;
@@ -365,7 +376,7 @@ html[data-lite="2"] .tty {
 
 @media (max-width: 420px) {
   .lite-toast {
-    bottom: 14px;
+    bottom: 92px;
     padding: 10px 12px;
     font-size: 12px;
   }

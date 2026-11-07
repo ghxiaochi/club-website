@@ -111,8 +111,8 @@
   }
 
   /* ---------- 提示：带标题的小卡片 ----------
-     切档会让页面少掉一层东西，一句话说不清，
-     所以给标题 + 一行解释。不挡点击、不锁滚动，五秒后自己走。 */
+     只报「现在是什么档」，再给一句下一步怎么点；
+     不铺开关掉了什么。不挡点击、不锁滚动，几秒后自己走。 */
   var noteTimer = 0;
   function note(title, body) {
     if (!document.body) return;
@@ -127,10 +127,14 @@
     el.textContent = "";
     var h = document.createElement("strong");
     h.textContent = title;
-    var p = document.createElement("p");
-    p.textContent = body;
     el.appendChild(h);
-    el.appendChild(p);
+    /* 没有正文就只留标题：切档这件事本身比解释更重要 */
+    if (body) {
+      var p = document.createElement("p");
+      p.textContent = body;
+      el.appendChild(p);
+    }
+    el.classList.toggle("is-bare", !body);
 
     /* 小条和卡片不同时出现，否则底部叠两层 */
     var t = document.querySelector(".lite-toast");
@@ -141,7 +145,7 @@
     window.clearTimeout(noteTimer);
     noteTimer = window.setTimeout(function () {
       el.classList.remove("is-on");
-    }, 5600);
+    }, 3800);
   }
 
   /* ---------- 按钮状态 ---------- */
@@ -231,7 +235,7 @@
     if (quiet) return;
 
     window.setTimeout(function () {
-      if (isOn()) toast("设备有点吃力，已开启轻量模式，右上角那根羽毛可以关掉。");
+      if (isOn()) toast("设备较慢，已开启轻量模式。");
     }, 2600);
   }
 
@@ -259,7 +263,7 @@
       }
     }
 
-    note("已进入极致模式", "只保留终端主页。长按这根羽毛（或点一下）回到轻量模式。");
+    note("已进入极致模式", "长按或点击羽毛返回");
   }
 
   function leaveUltra() {
@@ -273,7 +277,7 @@
       window.HNYZ_STYLE.apply(prev, { instant: true });
     }
 
-    note("已回到轻量模式", "再点一下这根羽毛，就恢复正常模式。");
+    note("已回到轻量模式", "点击羽毛恢复正常");
   }
 
   /* ---------- 长按羽毛 → 极致 ---------- */
@@ -334,11 +338,11 @@
     }
     if (t === 1) {
       set(0);
-      note("已恢复正常模式", "动画、特效和所有页面都回来了。");
+      note("已恢复正常模式");
       return;
     }
     set(1);
-    note("已进入轻量模式", "动画、模糊和粒子已关闭。长按这根羽毛可以进入极致模式。");
+    note("已进入轻量模式", "长按羽毛进入极致模式");
   }
 
   function bindPress() {
@@ -439,11 +443,11 @@
     }
     if (t === 1) {
       set(0);
-      note("已恢复正常模式", "动画、特效和所有页面都回来了。");
+      note("已恢复正常模式");
       return;
     }
     set(1);
-    note("已进入轻量模式", "动画、模糊和粒子已关闭。长按这根羽毛可以进入极致模式。");
+    note("已进入轻量模式", "长按羽毛进入极致模式");
   }
 
   function bind() {

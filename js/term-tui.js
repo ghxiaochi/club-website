@@ -170,7 +170,7 @@
   function loadDeepy() {
     if (deepyData || deepyLoading || !window.fetch) return;
     deepyLoading = true;
-    window.fetch("data/deepy.json?v=20261107a")
+    window.fetch("data/deepy.json?v=20261107b")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         deepyData = d;
@@ -553,7 +553,7 @@
     var cached = readCachedRepos();
     if (cached) renderRepos(box, { repos: cached.repos });
 
-    window.fetch("data/repos.json?v=20261107a")
+    window.fetch("data/repos.json?v=20261107b")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (store) {
         if (!store || !store.repos) {
@@ -595,13 +595,19 @@
   var swapTimer = 0;
   var swapToken = 0;
   var scrollRaf = 0;
-  /* 板块切换的走线层：一条 path + 一个沿路径跑的方块光标 */
+  /* 板块切换的走线层：一条主线 + 一层光晕 + 一段彗尾 + 一个方块光标 */
   var pathSvg = null;
+  var pathGlow = null;
   var pathLine = null;
+  var pathTail = null;
   var pathDot = null;
+  var pathMark = null;
+  var pathBeam = null;
+  var pathBeamStop = [];
   var pathRaf = 0;
   var pathHideTimer = 0;
   var pathClearTimer = 0;
+  var pathMarkTimer = 0;
   var SVG_NS = "http://www.w3.org/2000/svg";
 
   var savedActionsParent = null;
@@ -677,120 +683,282 @@
     return best;
   }
 
+  /* 内容比一屏高时给底部铺一层渐隐。滚到底就摘掉，
+     否则「这里还有」的暗示会一直挂着，反而像没加载完 */
+  function updateOverflow() {
+    if (!stageEl) return;
+    var bd = stageEl.querySelector(".tty-stage__bd");
+    var grid = grids[active];
+    if (!bd || !grid) return;
+    var left = grid.scrollHeight - grid.clientHeight - grid.scrollTop;
+    bd.classList.toggle("is-more", left > 8);
+  }
+
   /* ---------------------------------------------------------
      板块切换：沿一条走线推进
      ---------------------------------------------------------
-     旧矩阵原地让位（轻退 + 淡出），一条折线从左侧 rail 的
-     旧编号出发，走到新编号、拐进中区标题条、再横着铺开；
-     线走到四成时新矩阵从左侧被「打印」出来。整段没有缩放。
+     旧矩阵先退半步淡出，一条线从旧板块的小方点出发：沿栏边
+     走到新编号、拐进标题条、贴着标题条下沿横走，最后向下扎进
+     内容区；线走到三成时新矩阵从左往右被「打印」出来。
+     线条分三层叠着画 —— 9px 淡光晕、1.8px 主线、3px 彗尾 ——
+     光标是 8px 方块，到终点会炸开一个小方框。
      --------------------------------------------------------- */
   function ensurePathLayer() {
-    if (pathSvg || !stageEl) return;
+    if (pathSvg || !root) return;
     pathSvg = document.createElementNS(SVG_NS, "svg");
     pathSvg.setAttribute("class", "tty-path");
     pathSvg.setAttribute("aria-hidden", "true");
     pathSvg.setAttribute("focusable", "false");
+
+    /* 扫描光带：一条竖向的淡蓝渐变，跟着光标走，
+       让「线扫过的地方」有被照亮的感觉 */
+    var defs = document.createElementNS(SVG_NS, "defs");
+    var grad = document.createElementNS(SVG_NS, "linearGradient");
+    grad.setAttribute("id", "ttyBeamGrad");
+    grad.setAttribute("x1", "0");
+    grad.setAttribute("y1", "0");
+    grad.setAttribute("x2", "1");
+    grad.setAttribute("y2", "0");
+    [0, 0.16, 0].forEach(function (opacity) {
+      var stop = document.createElementNS(SVG_NS, "stop");
+      stop.setAttribute("offset", String(pathBeamStop.length / 2));
+      stop.setAttribute("stop-opacity", String(opacity));
+      grad.appendChild(stop);
+      pathBeamStop.push(stop);
+    });
+    defs.appendChild(grad);
+    pathSvg.appendChild(defs);
+
+    pathBeam = document.createElementNS(SVG_NS, "rect");
+    pathBeam.setAttribute("class", "tty-path__beam");
+    pathBeam.setAttribute("fill", "url(#ttyBeamGrad)");
+    pathBeam.setAttribute("width", "64");
+    pathSvg.appendChild(pathBeam);
+
+    pathGlow = document.createElementNS(SVG_NS, "path");
+    pathGlow.setAttribute("class", "tty-path__glow");
     pathLine = document.createElementNS(SVG_NS, "path");
     pathLine.setAttribute("class", "tty-path__line");
+    pathTail = document.createElementNS(SVG_NS, "path");
+    pathTail.setAttribute("class", "tty-path__tail");
+    /* 位置放在 <g> 上，缩放动画放在 rect 上：
+       CSS transform 会盖掉 SVG 的 transform 属性，混在一层会跳位 */
+    pathMark = document.createElementNS(SVG_NS, "g");
+    pathMark.setAttribute("class", "tty-path__mark");
+    var markBox = document.createElementNS(SVG_NS, "rect");
+    markBox.setAttribute("width", "16");
+    markBox.setAttribute("height", "16");
+    markBox.setAttribute("rx", "1");
+    markBox.setAttribute("class", "tty-path__mark-box");
+    pathMark.appendChild(markBox);
     pathDot = document.createElementNS(SVG_NS, "rect");
     pathDot.setAttribute("class", "tty-path__dot");
-    pathDot.setAttribute("width", "7");
-    pathDot.setAttribute("height", "7");
+    pathDot.setAttribute("width", "8");
+    pathDot.setAttribute("height", "8");
     pathDot.setAttribute("rx", "1");
+
+    pathSvg.appendChild(pathGlow);
     pathSvg.appendChild(pathLine);
+    pathSvg.appendChild(pathTail);
+    pathSvg.appendChild(pathMark);
     pathSvg.appendChild(pathDot);
-    stageEl.appendChild(pathSvg);
+    /* 挂在 .tty 上而不是中区：线要能跨过左栏和中区之间的边界，
+       挂在中区里会被裁掉一半 */
+    root.appendChild(pathSvg);
   }
 
   function clearPath() {
     if (pathRaf) { window.cancelAnimationFrame(pathRaf); pathRaf = 0; }
     if (pathHideTimer) { window.clearTimeout(pathHideTimer); pathHideTimer = 0; }
     if (pathClearTimer) { window.clearTimeout(pathClearTimer); pathClearTimer = 0; }
+    if (pathMarkTimer) { window.clearTimeout(pathMarkTimer); pathMarkTimer = 0; }
     if (!pathSvg) return;
     pathSvg.classList.remove("is-on");
-    pathLine.style.transition = "none";
-    pathLine.style.strokeDasharray = "";
-    pathLine.style.strokeDashoffset = "";
+    pathMark.classList.remove("is-hit");
+    [pathGlow, pathLine, pathTail].forEach(function (el) {
+      el.style.transition = "none";
+      el.style.strokeDasharray = "";
+      el.style.strokeDashoffset = "";
+    });
     pathDot.style.opacity = "";
+    if (pathBeam) pathBeam.style.opacity = "0";
   }
 
-  /* 量两栏的位置，生成一条「rail → 标题条 → 横铺」的折线，返回时长 */
+  /* 折线 → 带小圆角的路径。拐角半径 7px，线拐弯时不会戳出一个尖 */
+  function roundedPath(pts, radius) {
+    var clean = [pts[0]];
+    for (var i = 1; i < pts.length; i += 1) {
+      var prev = clean[clean.length - 1];
+      if (Math.abs(pts[i][0] - prev[0]) > 0.5 || Math.abs(pts[i][1] - prev[1]) > 0.5) {
+        clean.push(pts[i]);
+      }
+    }
+    if (clean.length < 2) return "";
+
+    var d = "M" + clean[0][0] + " " + clean[0][1];
+    for (var j = 1; j < clean.length - 1; j += 1) {
+      var a = clean[j - 1], c = clean[j], b = clean[j + 1];
+      var v1x = c[0] - a[0], v1y = c[1] - a[1];
+      var v2x = b[0] - c[0], v2y = b[1] - c[1];
+      var l1 = Math.sqrt(v1x * v1x + v1y * v1y);
+      var l2 = Math.sqrt(v2x * v2x + v2y * v2y);
+      if (!l1 || !l2) { d += "L" + c[0] + " " + c[1]; continue; }
+      var r = Math.min(radius, l1 / 2, l2 / 2);
+      var ax = c[0] - (v1x / l1) * r, ay = c[1] - (v1y / l1) * r;
+      var bx = c[0] + (v2x / l2) * r, by = c[1] + (v2y / l2) * r;
+      d += "L" + ax + " " + ay + "Q" + c[0] + " " + c[1] + " " + bx + " " + by;
+    }
+    var last = clean[clean.length - 1];
+    return d + "L" + last[0] + " " + last[1];
+  }
+
+  /* 量栏位，生成一条「旧编号 → 新编号 → 标题条 → 内容区」的折线，
+     把线画出来、让光标跑一遍，返回时长 */
   function playPath(fromIndex, toIndex, token) {
-    if (!railEl || !stageEl) return 0;
+    if (!railEl || !stageEl || !root) return 0;
     var a = railEl.children[fromIndex];
     var b = railEl.children[toIndex];
     if (!a || !b) return 0;
 
-    var sr = stageEl.getBoundingClientRect();
-    if (!sr.width || !sr.height) return 0;
-
     ensurePathLayer();
+    if (!pathSvg) return 0;
+
+    /* 以 SVG 自身左上角为原点：.tty 有安全区 padding 时，
+       border box 和 SVG 的定位起点会差一截 */
+    var pr = pathSvg.getBoundingClientRect();
+    if (!pr.width || !pr.height) return 0;
 
     var ar = a.getBoundingClientRect();
-    var br = b.getBoundingClientRect();
-    var rr = railEl.getBoundingClientRect();
+    var sr = stageEl.getBoundingClientRect();
     var hdr = stageEl.querySelector(".tty-stage__hdr");
-    var top = hdr ? hdr.offsetHeight : 34;
-    /* 线只在内容区里走：起点压在中区左缘（或上缘）与旧板块同高/同列的位置，
-       不做负坐标，免得横穿 rail 盖住文字 */
-    var verticalRail = rr.height >= rr.width;
-    var ay = Math.round(Math.max(
-      ar.top + ar.height / 2 - sr.top,
-      br.top + br.height / 2 - sr.top
-    ));
-    var ax = Math.round(ar.left + ar.width / 2 - sr.left);
-    var endX = Math.round(Math.min(sr.width - 26, Math.max(sr.width * 0.56, 220)));
-    var d;
+    var hr = hdr ? hdr.getBoundingClientRect() : null;
+    var railBox = railEl.getBoundingClientRect();
+    var verticalRail = railBox.height >= railBox.width;
+
+    /* 标题条下沿：线贴在这条边上走，不会压住标题文字 */
+    /* 走在标题条下沿往上 4px：压着边框线会看不出是「线」，
+       再往上又会蹭到标题文字 */
+    var hdrBottom = (hr ? hr.bottom - 4 : sr.top + 30) - pr.top;
+    var stageLeft = sr.left - pr.left;
+    var stageRight = sr.right - pr.left;
+    var endX = Math.round(Math.min(stageRight - 32, stageLeft + sr.width * 0.5));
+    var endY = Math.round(hdrBottom + 22);
+    var pts;
 
     if (verticalRail) {
-      /* 起点跟旧板块同高；离标题条太近时往下让一点，折线才看得出来 */
-      ay = Math.max(top + 64, Math.min(sr.height - 40, ay));
-      d = "M0 " + ay + "H12V" + (top + 2) + "H" + endX;
+      /* 从原来那个板块的小方点出发，斜进标题条左端。
+         起点用旧项：线从「你刚才在看的地方」滑到新内容，
+         方向和信息流向一致 */
+      var sx = Math.round(ar.right - pr.left - 6);
+      var sy = Math.round(ar.top + ar.height / 2 - pr.top);
+      var gateX = Math.round(stageLeft + 14);
+      pts = [
+        [sx, sy],
+        [gateX, Math.round(hdrBottom)],
+        [endX, Math.round(hdrBottom)],
+        [endX, endY]
+      ];
     } else {
-      ax = Math.max(10, Math.min(sr.width - 10, ax));
-      var bx = Math.max(ax + 24, Math.round(br.left + br.width / 2 - sr.left));
-      /* 横排 rail 时终点要落在新编号右侧，别让线折回去 */
-      endX = Math.min(sr.width - 26, Math.max(endX, bx + 70));
-      d = "M" + ax + " 0V10H" + Math.min(sr.width - 10, bx) +
-        "V" + (top + 2) + "H" + endX;
+      /* 横排标签条：从旧标签底部垂直落下，沿栏底横到中区左端，
+         再贴着标题条走 —— 全程不穿过其他标签的文字 */
+      var ox = Math.round(ar.left + ar.width / 2 - pr.left);
+      var railBottom = Math.round(railBox.bottom - pr.top + 2);
+      pts = [
+        /* 从旧标签内部下方拉出来，能看出线是从「刚才看的那一栏」出发 */
+        [ox, Math.round(ar.bottom - pr.top - 12)],
+        [ox, railBottom],
+        [Math.round(stageLeft + 14), railBottom],
+        [Math.round(stageLeft + 14), Math.round(hdrBottom)],
+        [endX, Math.round(hdrBottom)],
+        [endX, endY]
+      ];
     }
 
+    var d = roundedPath(pts, 7);
+    if (!d) return 0;
+
+    if (pathGlow) pathGlow.setAttribute("d", d);
     pathLine.setAttribute("d", d);
+    pathTail.setAttribute("d", d);
+    pathSvg.classList.add("is-on");
+    pathMark.classList.remove("is-hit");
+
     var len = 0;
     try { len = pathLine.getTotalLength(); } catch (e) { len = 0; }
     if (!len) return 0;
 
-    pathSvg.classList.add("is-on");
+    var dur = Math.max(420, Math.min(640, Math.round(len * 0.7)));
+    var dash = len + " " + len;
+
+    [pathGlow, pathLine].forEach(function (el) {
+      el.style.transition = "none";
+      el.style.strokeDasharray = dash;
+      el.style.strokeDashoffset = len;
+    });
+    /* 彗尾：20px 一段，跟着光标走；9999 的第二段保证只剩这一段可见 */
+    pathTail.style.transition = "none";
+    pathTail.style.strokeDasharray = "20 9999";
+    pathTail.style.strokeDashoffset = "20";
+
+    /* 光带只铺在内容区（标题条下沿到中区底部） */
+    if (pathBeam) {
+      var beamTop = hdrBottom + 2;
+      var beamH = Math.max(0, sr.bottom - pr.top - beamTop);
+      pathBeam.setAttribute("y", String(beamTop));
+      pathBeam.setAttribute("height", String(beamH));
+      pathBeam.style.opacity = "0";
+    }
+
     var p0 = pathLine.getPointAtLength(0);
-    pathDot.setAttribute("transform", "translate(" + (p0.x - 3) + "," + (p0.y - 3) + ")");
-    pathLine.style.transition = "none";
-    pathLine.style.strokeDasharray = len + " " + len;
-    pathLine.style.strokeDashoffset = len;
+    pathDot.setAttribute("transform", "translate(" + (p0.x - 4) + "," + (p0.y - 4) + ")");
     pathDot.style.opacity = "1";
+    pathMark.setAttribute("transform", "translate(" + (endX - 8) + "," + (endY - 8) + ")");
     void pathLine.getBoundingClientRect();
 
-    var dur = Math.max(340, Math.min(560, Math.round(len * 0.9)));
-    pathLine.style.transition = "stroke-dashoffset " + dur + "ms cubic-bezier(0.25, 0.8, 0.3, 1)";
-    pathLine.style.strokeDashoffset = "0";
+    var ease = "cubic-bezier(0.24, 0.76, 0.2, 1)";
+    [pathGlow, pathLine].forEach(function (el) {
+      el.style.transition = "stroke-dashoffset " + dur + "ms " + ease;
+      el.style.strokeDashoffset = "0";
+    });
 
     var t0 = 0;
     function follow(now) {
-      if (token !== swapToken) return;
+      if (token !== swapToken) { pathRaf = 0; return; }
       if (!t0) t0 = now;
       var p = Math.min(1, (now - t0) / dur);
-      var e = 1 - Math.pow(1 - p, 3);
-      var pt = pathLine.getPointAtLength(len * e);
-      pathDot.setAttribute("transform", "translate(" + (pt.x - 3) + "," + (pt.y - 3) + ")");
+      /* 和 CSS 那条 cubic-bezier 近似：慢起、快走、轻收 */
+      var e = p < 0.5
+        ? 4 * p * p * p
+        : 1 - Math.pow(-2 * p + 2, 3) / 2;
+      var at = len * e;
+      var pt = pathLine.getPointAtLength(at);
+      pathDot.setAttribute("transform", "translate(" + (pt.x - 4) + "," + (pt.y - 4) + ")");
+      pathTail.style.strokeDashoffset = String(20 - at);
+
+      /* 中后段才亮，起手那截在栏里没什么可照的 */
+      if (pathBeam) {
+        var beamOn = e > 0.28 && e < 0.94;
+        pathBeam.style.opacity = beamOn ? "1" : "0";
+        if (beamOn) pathBeam.setAttribute("x", String(Math.round(pt.x - 32)));
+      }
+
       if (p < 1) {
         pathRaf = window.requestAnimationFrame(follow);
       } else {
         pathRaf = 0;
         pathDot.style.opacity = "0";
+        if (pathBeam) pathBeam.style.opacity = "0";
+        pathMark.classList.add("is-hit");
+        pathMarkTimer = window.setTimeout(function () {
+          pathMark.classList.remove("is-hit");
+          pathMarkTimer = 0;
+        }, 260);
+        /* 线在终点多留一小会儿，再整层淡出：给眼睛一个「走到了」的落点 */
         pathHideTimer = window.setTimeout(function () {
           if (token !== swapToken) return;
           pathSvg.classList.remove("is-on");
           pathHideTimer = 0;
-        }, 220);
+        }, 230);
       }
     }
     pathRaf = window.requestAnimationFrame(follow);
@@ -807,6 +975,7 @@
       /* 首次打开也走这里：把当前板块显示出来并画好两栏 */
       grids[active].hidden = false;
       paintChrome();
+      updateOverflow();
       try { grids[active].focus({ preventScroll: true }); } catch (e) { /* 忽略 */ }
       return;
     }
@@ -832,10 +1001,12 @@
       to.classList.remove("is-in", "is-fresh");
       to.scrollTop = to.scrollTop || 0;
       markSide(nearestTile(to));
+      updateOverflow();
       return;
     }
 
     /* 连按数字键时上一段可能还没收尾，先把别的矩阵清干净 */
+    clearPath();
     for (var gi = 0; gi < grids.length; gi += 1) {
       if (grids[gi] === from || grids[gi] === to) continue;
       grids[gi].classList.remove("is-in", "is-fresh", "is-out");
@@ -844,19 +1015,22 @@
     from.classList.remove("is-in", "is-fresh");
     to.classList.remove("is-in", "is-fresh", "is-out");
 
+    var railItem = railEl ? railEl.children[next] : null;
+    if (railItem) {
+      railItem.classList.remove("is-flash");
+      void railItem.offsetWidth;
+      railItem.classList.add("is-flash");
+      window.setTimeout(function () { railItem.classList.remove("is-flash"); }, 700);
+    }
+
     var dur = playPath(fromIndex, next, token);
 
+    /* 旧的先退（0.14s 淡出），新方块紧跟着逐块浮起。
+       不做整块裁切：擦除边界会把两套卡片并排摆出来 */
     from.classList.add("is-out");
     to.hidden = false;
-    to.classList.add("is-in", "is-fresh");
+    to.classList.add("is-fresh");
     void to.offsetWidth;
-
-    /* 线走两成就开始擦新内容，和旧矩阵的淡出交叠，中间不留白 */
-    pathClearTimer = window.setTimeout(function () {
-      if (token !== swapToken) return;
-      to.classList.remove("is-in");
-      pathClearTimer = 0;
-    }, dur ? Math.round(dur * 0.2) : 0);
 
     swapTimer = window.setTimeout(function () {
       if (token !== swapToken) return;
@@ -864,8 +1038,9 @@
       from.classList.remove("is-out");
       to.classList.remove("is-fresh");
       markSide(nearestTile(to));
+      updateOverflow();
       swapTimer = 0;
-    }, 240);
+    }, 360);
 
     try { to.focus({ preventScroll: true }); } catch (e) { /* 忽略 */ }
   }
@@ -1051,9 +1226,41 @@
       if (scrollRaf) return;
       scrollRaf = window.requestAnimationFrame(function () {
         scrollRaf = 0;
-        if (grid === grids[active]) markSide(nearestTile(grid));
+        if (grid === grids[active]) {
+          markSide(nearestTile(grid));
+          updateOverflow();
+        }
       });
     }, true);
+
+    /* 手机：内容区左右滑切换板块。终端没有侧滑菜单，
+       手势是最快的入口；纵向位移更大时立刻让给滚动 */
+    var swipeX = 0, swipeY = 0, swipeOn = false;
+    stageEl.addEventListener("touchstart", function (e) {
+      if (e.touches.length !== 1) { swipeOn = false; return; }
+      swipeX = e.touches[0].clientX;
+      swipeY = e.touches[0].clientY;
+      swipeOn = true;
+    }, { passive: true });
+
+    stageEl.addEventListener("touchmove", function (e) {
+      if (!swipeOn || e.touches.length !== 1) return;
+      var dy = Math.abs(e.touches[0].clientY - swipeY);
+      var dx = Math.abs(e.touches[0].clientX - swipeX);
+      if (dy > 16 && dy > dx) swipeOn = false;
+    }, { passive: true });
+
+    stageEl.addEventListener("touchend", function (e) {
+      if (!swipeOn) return;
+      swipeOn = false;
+      var t = e.changedTouches && e.changedTouches[0];
+      if (!t) return;
+      var dx = t.clientX - swipeX;
+      var dy = t.clientY - swipeY;
+      /* 横着走过 56px、且明显比纵向多，才算一次翻页 */
+      if (Math.abs(dx) < 56 || Math.abs(dx) < Math.abs(dy) * 1.6) return;
+      step(dx < 0 ? 1 : -1);
+    }, { passive: true });
 
     /* 输入行 */
     var form = root.querySelector(".tty__prompt");
@@ -1069,6 +1276,15 @@
 
   /* 这些监听绑在 document 上，模块加载时只绑一次：
      TUI 是「切走就拆、切回重建」的，绑在 build() 里会一路累积 */
+  var resizeRaf = 0;
+  window.addEventListener("resize", function () {
+    if (resizeRaf) return;
+    resizeRaf = window.requestAnimationFrame(function () {
+      resizeRaf = 0;
+      if (isOpen) updateOverflow();
+    });
+  });
+
   document.addEventListener("keydown", function (e) {
     if (!isOpen) return;
     if (e.target === inputEl) return; /* 输入行里让 shell 自己处理 */
