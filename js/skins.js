@@ -476,7 +476,7 @@
   const HALO_VERSION = (() => {
     const own = document.querySelector('script[src*="skins.js"]');
     const match = own && own.src.match(/[?&]v=([^&]+)/);
-    return match ? decodeURIComponent(match[1]) : "20261105t";
+    return match ? decodeURIComponent(match[1]) : "20261105u";
   })();
   let haloFrame = null;
 

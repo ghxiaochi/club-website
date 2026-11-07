@@ -302,11 +302,47 @@ html.tty-on .style-deck__shell {
    5. 中区：板块标题条 + 方块矩阵
    --------------------------------------------------------- */
 .tty__stage {
+  position: relative;
   display: flex;
   flex-direction: column;
   min-width: 0;
   min-height: 0;
   background: var(--tty-bg);
+}
+
+/* 板块之间的走线：从左侧 rail 的旧编号，拐进中区标题条，
+   再沿标题条下沿横着走一段。JS 量好坐标写进 path。 */
+.tty-path {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.tty-path.is-on {
+  opacity: 1;
+}
+
+.tty-path__line {
+  fill: none;
+  stroke: var(--tty-accent);
+  stroke-width: 1.25;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+  opacity: 0.75;
+}
+
+.tty-path__dot {
+  fill: var(--tty-accent);
+  opacity: 0;
+}
+
+.tty-path.is-on .tty-path__dot {
+  opacity: 1;
 }
 
 .tty-stage__hdr {
@@ -357,7 +393,8 @@ html.tty-on .style-deck__shell {
 
 /* ---------------------------------------------------------
    6. 方块矩阵：12 列，方块自己声明占几列
-      ——切换时的「放大缩小渐变」就在这层做
+      ——切换沿一条路径推进：旧矩阵让位，新矩阵从左侧被
+      「打印」出来（clip-path 擦除），不再整块缩放。
    --------------------------------------------------------- */
 .tty-grid {
   position: absolute;
@@ -376,8 +413,10 @@ html.tty-on .style-deck__shell {
   outline: none;
   scrollbar-width: thin;
   scrollbar-color: var(--tty-line-2) transparent;
-  transition: opacity 0.24s ease, transform 0.28s cubic-bezier(0.2, 0.7, 0.2, 1), filter 0.24s ease;
-  will-change: transform, opacity;
+  clip-path: inset(0 0 0 0);
+  transition: opacity 0.2s ease, clip-path 0.34s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.24s cubic-bezier(0.2, 0.7, 0.2, 1);
+  will-change: clip-path, opacity;
 }
 
 /* display:grid 会盖掉浏览器给 [hidden] 的 display:none，得自己来 */
@@ -393,19 +432,18 @@ html.tty-on .style-deck__shell {
   background: var(--tty-line-2);
 }
 
-/* 切走的：缩小 + 淡出，稍微虚化一点，视觉上「退到后面」 */
+/* 切走的：沿路径方向退半步 + 淡出，不做缩放 */
 .tty-grid.is-out {
   z-index: 1;
   opacity: 0;
-  transform: scale(0.94);
-  filter: blur(1.5px);
+  transform: translateY(-6px);
   pointer-events: none;
 }
 
-/* 切进来的起点：比正常大一点，再缩回去 */
+/* 切进来的起点：整块被裁到左侧，再由 JS 撤掉 is-in，从左往右擦出来 */
 .tty-grid.is-in {
-  opacity: 0;
-  transform: scale(1.045);
+  opacity: 1;
+  clip-path: inset(0 100% 0 0);
 }
 
 .tty-grid:focus-visible {
@@ -413,16 +451,16 @@ html.tty-on .style-deck__shell {
   outline-offset: -3px;
 }
 
-/* 新矩阵里的方块依次浮起，一格 26ms，不是整块一起亮 */
+/* 新矩阵里的方块顺着路径方向依次落位，一格 18ms，像终端逐格刷出来 */
 .tty-grid.is-fresh .tile {
-  animation: tileRise 0.36s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-  animation-delay: calc(var(--ti, 0) * 26ms);
+  animation: tileRise 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: calc(var(--ti, 0) * 18ms);
 }
 
 @keyframes tileRise {
   from {
     opacity: 0;
-    transform: translateY(8px) scale(0.985);
+    transform: translateX(-10px);
   }
   to {
     opacity: 1;

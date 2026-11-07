@@ -170,7 +170,7 @@
   function loadDeepy() {
     if (deepyData || deepyLoading || !window.fetch) return;
     deepyLoading = true;
-    window.fetch("data/deepy.json?v=20261105t")
+    window.fetch("data/deepy.json?v=20261105u")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         deepyData = d;
@@ -551,7 +551,7 @@
     var cached = readCachedRepos();
     if (cached) renderRepos(box, { repos: cached.repos });
 
-    window.fetch("data/repos.json?v=20261105t")
+    window.fetch("data/repos.json?v=20261105u")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (store) {
         if (!store || !store.repos) {
@@ -593,6 +593,14 @@
   var swapTimer = 0;
   var swapToken = 0;
   var scrollRaf = 0;
+  /* 板块切换的走线层：一条 path + 一个沿路径跑的方块光标 */
+  var pathSvg = null;
+  var pathLine = null;
+  var pathDot = null;
+  var pathRaf = 0;
+  var pathHideTimer = 0;
+  var pathClearTimer = 0;
+  var SVG_NS = "http://www.w3.org/2000/svg";
 
   var savedActionsParent = null;
   var savedActionsNext = null;
@@ -668,8 +676,121 @@
   }
 
   /* ---------------------------------------------------------
-     板块切换：旧矩阵缩小淡出，新矩阵从略大缩回并淡入
+     板块切换：沿一条走线推进
+     ---------------------------------------------------------
+     旧矩阵原地让位（轻退 + 淡出），一条折线从左侧 rail 的
+     旧编号出发，走到新编号、拐进中区标题条、再横着铺开；
+     线走到四成时新矩阵从左侧被「打印」出来。整段没有缩放。
      --------------------------------------------------------- */
+  function ensurePathLayer() {
+    if (pathSvg || !stageEl) return;
+    pathSvg = document.createElementNS(SVG_NS, "svg");
+    pathSvg.setAttribute("class", "tty-path");
+    pathSvg.setAttribute("aria-hidden", "true");
+    pathSvg.setAttribute("focusable", "false");
+    pathLine = document.createElementNS(SVG_NS, "path");
+    pathLine.setAttribute("class", "tty-path__line");
+    pathDot = document.createElementNS(SVG_NS, "rect");
+    pathDot.setAttribute("class", "tty-path__dot");
+    pathDot.setAttribute("width", "7");
+    pathDot.setAttribute("height", "7");
+    pathDot.setAttribute("rx", "1");
+    pathSvg.appendChild(pathLine);
+    pathSvg.appendChild(pathDot);
+    stageEl.appendChild(pathSvg);
+  }
+
+  function clearPath() {
+    if (pathRaf) { window.cancelAnimationFrame(pathRaf); pathRaf = 0; }
+    if (pathHideTimer) { window.clearTimeout(pathHideTimer); pathHideTimer = 0; }
+    if (pathClearTimer) { window.clearTimeout(pathClearTimer); pathClearTimer = 0; }
+    if (!pathSvg) return;
+    pathSvg.classList.remove("is-on");
+    pathLine.style.transition = "none";
+    pathLine.style.strokeDasharray = "";
+    pathLine.style.strokeDashoffset = "";
+    pathDot.style.opacity = "";
+  }
+
+  /* 量两栏的位置，生成一条「rail → 标题条 → 横铺」的折线，返回时长 */
+  function playPath(fromIndex, toIndex, token) {
+    if (!railEl || !stageEl) return 0;
+    var a = railEl.children[fromIndex];
+    var b = railEl.children[toIndex];
+    if (!a || !b) return 0;
+
+    var sr = stageEl.getBoundingClientRect();
+    if (!sr.width || !sr.height) return 0;
+
+    ensurePathLayer();
+
+    var ar = a.getBoundingClientRect();
+    var br = b.getBoundingClientRect();
+    var rr = railEl.getBoundingClientRect();
+    var hdr = stageEl.querySelector(".tty-stage__hdr");
+    var top = hdr ? hdr.offsetHeight : 34;
+    /* 线只在内容区里走：起点压在中区左缘（或上缘）与旧板块同高/同列的位置，
+       不做负坐标，免得横穿 rail 盖住文字 */
+    var verticalRail = rr.height >= rr.width;
+    var ay = Math.round(ar.top + ar.height / 2 - sr.top);
+    var ax = Math.round(ar.left + ar.width / 2 - sr.left);
+    var endX = Math.round(Math.min(sr.width - 26, Math.max(sr.width * 0.56, 220)));
+    var d;
+
+    if (verticalRail) {
+      ay = Math.max(10, Math.min(sr.height - 10, ay));
+      d = "M0 " + ay + "H18V" + (top + 2) + "H" + endX;
+    } else {
+      ax = Math.max(10, Math.min(sr.width - 10, ax));
+      var bx = Math.max(ax + 24, Math.round(br.left + br.width / 2 - sr.left));
+      /* 横排 rail 时终点要落在新编号右侧，别让线折回去 */
+      endX = Math.min(sr.width - 26, Math.max(endX, bx + 70));
+      d = "M" + ax + " 0V10H" + Math.min(sr.width - 10, bx) +
+        "V" + (top + 2) + "H" + endX;
+    }
+
+    pathLine.setAttribute("d", d);
+    var len = 0;
+    try { len = pathLine.getTotalLength(); } catch (e) { len = 0; }
+    if (!len) return 0;
+
+    pathSvg.classList.add("is-on");
+    var p0 = pathLine.getPointAtLength(0);
+    pathDot.setAttribute("transform", "translate(" + (p0.x - 3) + "," + (p0.y - 3) + ")");
+    pathLine.style.transition = "none";
+    pathLine.style.strokeDasharray = len + " " + len;
+    pathLine.style.strokeDashoffset = len;
+    pathDot.style.opacity = "1";
+    void pathLine.getBoundingClientRect();
+
+    var dur = Math.max(340, Math.min(560, Math.round(len * 0.9)));
+    pathLine.style.transition = "stroke-dashoffset " + dur + "ms cubic-bezier(0.25, 0.8, 0.3, 1)";
+    pathLine.style.strokeDashoffset = "0";
+
+    var t0 = 0;
+    function follow(now) {
+      if (token !== swapToken) return;
+      if (!t0) t0 = now;
+      var p = Math.min(1, (now - t0) / dur);
+      var e = 1 - Math.pow(1 - p, 3);
+      var pt = pathLine.getPointAtLength(len * e);
+      pathDot.setAttribute("transform", "translate(" + (pt.x - 3) + "," + (pt.y - 3) + ")");
+      if (p < 1) {
+        pathRaf = window.requestAnimationFrame(follow);
+      } else {
+        pathRaf = 0;
+        pathDot.style.opacity = "0";
+        pathHideTimer = window.setTimeout(function () {
+          if (token !== swapToken) return;
+          pathSvg.classList.remove("is-on");
+          pathHideTimer = 0;
+        }, 220);
+      }
+    }
+    pathRaf = window.requestAnimationFrame(follow);
+    return dur;
+  }
+
   function goto(i, opts) {
     if (!built) return;
     var n = BLOCKS.length;
@@ -684,6 +805,7 @@
       return;
     }
 
+    var fromIndex = active;
     var from = grids[active];
     var to = grids[next];
 
@@ -694,8 +816,10 @@
     paintChrome();
 
     if (swapTimer) { window.clearTimeout(swapTimer); swapTimer = 0; }
+    if (pathClearTimer) { window.clearTimeout(pathClearTimer); pathClearTimer = 0; }
 
-    if (!motionOK() || instant) {
+    if (!motionOK() || instant || document.documentElement.dataset.lite === "1") {
+      clearPath();
       from.hidden = true;
       from.classList.remove("is-out");
       to.hidden = false;
@@ -705,18 +829,28 @@
       return;
     }
 
-    /* 旧矩阵：缩小 + 淡出，同时让位给新矩阵 */
+    /* 连按数字键时上一段可能还没收尾，先把别的矩阵清干净 */
+    for (var gi = 0; gi < grids.length; gi += 1) {
+      if (grids[gi] === from || grids[gi] === to) continue;
+      grids[gi].classList.remove("is-in", "is-fresh", "is-out");
+      grids[gi].hidden = true;
+    }
+    from.classList.remove("is-in", "is-fresh");
+    to.classList.remove("is-in", "is-fresh", "is-out");
+
+    var dur = playPath(fromIndex, next, token);
+
     from.classList.add("is-out");
     to.hidden = false;
     to.classList.add("is-in", "is-fresh");
     void to.offsetWidth;
 
-    window.requestAnimationFrame(function () {
-      window.requestAnimationFrame(function () {
-        if (token !== swapToken) return;
-        to.classList.remove("is-in");
-      });
-    });
+    /* 线走过三成再擦新内容，看起来是线把内容「带出来」的 */
+    pathClearTimer = window.setTimeout(function () {
+      if (token !== swapToken) return;
+      to.classList.remove("is-in");
+      pathClearTimer = 0;
+    }, dur ? Math.round(dur * 0.32) : 0);
 
     swapTimer = window.setTimeout(function () {
       if (token !== swapToken) return;
@@ -725,7 +859,7 @@
       to.classList.remove("is-fresh");
       markSide(nearestTile(to));
       swapTimer = 0;
-    }, 150);
+    }, 240);
 
     try { to.focus({ preventScroll: true }); } catch (e) { /* 忽略 */ }
   }
@@ -1097,11 +1231,13 @@
     close();
     stopDeepy();
     if (swapTimer) { window.clearTimeout(swapTimer); swapTimer = 0; }
+    clearPath();
     swapToken += 1;
     if (root && root.parentNode) root.parentNode.removeChild(root);
     root = null; railEl = null; stageEl = null; sideEl = null;
     echoEl = null; inputEl = null; clockEl = null; upEl = null;
     sideListEl = null; grids = [];
+    pathSvg = null; pathLine = null; pathDot = null;
     built = false;
     active = 0;
   }

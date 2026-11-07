@@ -61,7 +61,9 @@
   /* 页脚默认自动巡航；天梯页在 HTML 上写 data-mode="manual"，
      进去就能自己跳。localStorage 里的偏好只对带切换按钮的页面生效。 */
   let mode = strip.dataset.mode === "manual" ? "manual" : "auto";
-  let activated = !reduce.matches;
+  /* 手动局（天梯页）先站着等第一下空格/点击，不空跑；
+     页脚那条自动巡航的跑道才一进来就跑 */
+  let activated = !reduce.matches && mode === "auto";
   let visible = false;
   let running = false;
   let raf = 0;
@@ -168,6 +170,9 @@
 
   if (reduce.matches) mode = "manual";
   else if (!hasControls && strip.dataset.mode !== "manual") mode = "auto";
+
+  /* 记住的偏好是自动档才自动开跑；手动档一律等人先动一下 */
+  if (mode === "auto" && !reduce.matches) activated = true;
 
   function readPalette() {
     const cs = window.getComputedStyle(strip);
@@ -896,6 +901,16 @@
     scoreEl.textContent = `HI ${pad(hiScore)}  ${pad(next)}`;
   }
 
+  /* 手动局在没开跑之前，提示语就说「开始」，别写「起跳」 */
+  function updateHint() {
+    if (!hintEl) return;
+    if (!activated && mode === "manual") {
+      hintEl.textContent = "空格 / 点击 → 开始";
+      return;
+    }
+    hintEl.textContent = mode === "auto" ? "自动躲避 · 开" : "空格 / 点击 → 起跳";
+  }
+
   function setMode(next, userInitiated) {
     if (next !== "auto" && next !== "manual") return;
     mode = next;
@@ -905,9 +920,7 @@
       button.setAttribute("aria-pressed", String(button.dataset.dinoMode === mode));
     });
 
-    if (hintEl) {
-      hintEl.textContent = mode === "auto" ? "自动躲避 · 开" : "空格 / 点击 → 起跳";
-    }
+    updateHint();
 
     if (mode === "auto" && !activated) {
       activated = true;
@@ -960,6 +973,8 @@
     if (!activated) {
       activated = true;
       resetRun();
+      updateHint();
+      startLoop();
     }
 
     if (dead) {
@@ -2554,6 +2569,12 @@
 
   function startLoop() {
     if (running || !visible || document.hidden) return;
+    /* 手动局还没开始：只画一张静态待机画面，不起循环，省得空转 */
+    if (!activated && mode === "manual") {
+      ensureBuilt();
+      draw(0);
+      return;
+    }
     running = true;
     lastTime = 0;
     raf = window.requestAnimationFrame(loop);
@@ -2574,18 +2595,22 @@
     jump();
   });
 
-  document.addEventListener("keydown", (event) => {
-    /* 空格只在自己切换到手动模式时才接管，不去抢页面的滚动键 */
-    if (!visible || mode !== "manual") return;
-    if (event.key !== " " && event.key !== "ArrowUp" && event.code !== "Space") return;
-    if (root.classList.contains("is-style-deck-open")) return;
+  /* 只有手动局（天梯页）才需要键盘接管；
+     页脚那条自动跑道不抢空格，省一个全局监听 */
+  if (hasControls || strip.dataset.mode === "manual") {
+    document.addEventListener("keydown", (event) => {
+      /* 空格只在自己切换到手动模式时才接管，不去抢页面的滚动键 */
+      if (!visible || mode !== "manual") return;
+      if (event.key !== " " && event.key !== "ArrowUp" && event.code !== "Space") return;
+      if (root.classList.contains("is-style-deck-open")) return;
 
-    const active = document.activeElement;
-    if (active && (active.closest("input, textarea, select, button, a, [contenteditable='true']"))) return;
+      const active = document.activeElement;
+      if (active && (active.closest("input, textarea, select, button, a, [contenteditable='true']"))) return;
 
-    event.preventDefault();
-    jump();
-  });
+      event.preventDefault();
+      jump();
+    });
+  }
 
   /* 切风格会同时改 data-style 和 data-theme：两个监听如果各重建一遍，
      一次切换就要烘两整套贴图。合并到下一帧，只做一次。 */
