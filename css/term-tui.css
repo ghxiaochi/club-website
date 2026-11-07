@@ -330,10 +330,10 @@ html.tty-on .style-deck__shell {
 .tty-path__line {
   fill: none;
   stroke: var(--tty-accent);
-  stroke-width: 1.25;
+  stroke-width: 1.5;
   stroke-linecap: square;
   stroke-linejoin: miter;
-  opacity: 0.75;
+  opacity: 0.9;
 }
 
 .tty-path__dot {
