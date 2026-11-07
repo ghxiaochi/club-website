@@ -117,6 +117,31 @@
     }
   }
 
+  /* 把当前档位告诉 Service Worker 和一片很小的状态缓存。
+     SW 装完会串行预热六十多张图、几段音效；极简档的机器不该
+     替这些预付流量，所以它在预取前先读这里写的值。 */
+  var STATE_CACHE = "hnyz-state";
+
+  function publish(t) {
+    try {
+      if (window.caches && window.Response) {
+        var url = new URL("__hnyz_lite", document.baseURI).href;
+        window.caches.open(STATE_CACHE).then(function (store) {
+          return store.put(
+            url,
+            new Response(String(t), { headers: { "content-type": "text/plain" } })
+          );
+        }).catch(function () { /* 隐私模式或存储满了 */ });
+      }
+    } catch (error) { /* 老内核 */ }
+
+    try {
+      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({ type: "lite", tier: t });
+      }
+    } catch (error) { /* 没有 SW */ }
+  }
+
   /* 极简档的图片闸门（在各页 <head> 里）把 src 换成了 1×1 占位，
      原地址存在 data-ultra-src。退出极简时按原样放回去，
      静态图（头像、徽章）就不用刷新也能回来。 */
@@ -144,6 +169,7 @@
     write(AUTO_KEY, options && options.auto ? "1" : null);
 
     if (was === 2 && t < 2) restoreImages();
+    publish(t);
 
     syncButtons();
     /* 派发在 document 上：各模块都监听 document，
@@ -298,6 +324,18 @@
   }
 
   maybeAuto();
+  /* 首帧就把档位写进去：SW 更新时正好读到 */
+  publish(tier());
+
+  /* 首次访问时 SW 还在装，controller 是空的，上面那次消息发不出去；
+     等它就绪再补一次，让安装完的预取立刻知道该不该拉图 */
+  try {
+    if (navigator.serviceWorker) {
+      navigator.serviceWorker.ready.then(function () {
+        publish(tier());
+      }).catch(function () { /* 没有 SW */ });
+    }
+  } catch (error) { /* 老内核 */ }
 
   window.HNYZ_LITE = {
     tier: tier,

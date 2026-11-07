@@ -73,13 +73,13 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="stylesheet" href="css/style.css?v=20261105w">
-  <link rel="stylesheet" href="css/pet.css?v=20261105w">
-  <link rel="stylesheet" href="css/personal.css?v=20261105w">
-  <link rel="stylesheet" href="css/avatar-pet.css?v=20261105w">
-  <link rel="stylesheet" href="css/skins.css?v=20261105w">
-  <link rel="stylesheet" href="css/lite.css?v=20261105w">
-  <script src="js/skin-boot.js?v=20261105w"></script>
+  <link rel="stylesheet" href="css/style.css?v=20261105x">
+  <link rel="stylesheet" href="css/pet.css?v=20261105x">
+  <link rel="stylesheet" href="css/personal.css?v=20261105x">
+  <link rel="stylesheet" href="css/avatar-pet.css?v=20261105x">
+  <link rel="stylesheet" href="css/skins.css?v=20261105x">
+  <link rel="stylesheet" href="css/lite.css?v=20261105x">
+  <script src="js/skin-boot.js?v=20261105x"></script>
   <script>
     /* 轻量 / 极简预置：弱设备（省流量、2G、内存 ≤2G、核心 ≤2）首帧就走低配，
        避免先跑一遍动画再关。手动开过的以 localStorage 为准（1 轻量 / 2 极简）。
@@ -139,31 +139,31 @@
       }
     })();
   </script>
-  <link rel="stylesheet" href="css/type.css?v=20261105w">
-  <link rel="stylesheet" href="css/motion.css?v=20261105w">
-  <link rel="preload" href="css/guestbook.css?v=20261105w" as="style">
-  <link rel="stylesheet" href="css/guestbook.css?v=20261105w" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/guestbook.css?v=20261105w"></noscript>
+  <link rel="stylesheet" href="css/type.css?v=20261105x">
+  <link rel="stylesheet" href="css/motion.css?v=20261105x">
+  <link rel="preload" href="css/guestbook.css?v=20261105x" as="style">
+  <link rel="stylesheet" href="css/guestbook.css?v=20261105x" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/guestbook.css?v=20261105x"></noscript>
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <!-- 项目卡片、全部项目折叠页和复制按钮由 js/main.js 驱动 -->
-  <script src="js/sfx.js?v=20261105w" defer></script>
-  <script src="js/theme.js?v=20261105w" defer></script>
-  <script src="js/theme-icon.js?v=20261105w" defer></script>
-  <script src="js/members.js?v=20261105w" defer></script>
-  <script src="js/main.js?v=20261105w" defer></script>
-  <script src="js/repo-sync.js?v=20261105w" defer></script>
-  <script src="js/pet.js?v=20261105w" defer></script>
-  <script src="js/avatar-pet.js?v=20261105w" defer></script>
-  <script src="js/personal.js?v=20261105w" defer></script>
-  <script src="js/click-fx.js?v=20261105w" defer></script>
-  <script src="js/term-tui.js?v=20261105w" defer></script>
-  <script src="js/skins.js?v=20261105w" defer></script>
-  <script src="js/fullscreen.js?v=20261105w" defer></script>
-  <script src="js/lite.js?v=20261105w" defer></script>
-  <script src="js/copy.js?v=20261105w" defer></script>
-  <script src="js/pwa.js?v=20261105w" defer></script>
-  <script src="js/guestbook.js?v=20261105w" defer></script>
+  <script src="js/sfx.js?v=20261105x" defer></script>
+  <script src="js/theme.js?v=20261105x" defer></script>
+  <script src="js/theme-icon.js?v=20261105x" defer></script>
+  <script src="js/members.js?v=20261105x" defer></script>
+  <script src="js/main.js?v=20261105x" defer></script>
+  <script src="js/repo-sync.js?v=20261105x" defer></script>
+  <script src="js/pet.js?v=20261105x" defer></script>
+  <script src="js/avatar-pet.js?v=20261105x" defer></script>
+  <script src="js/personal.js?v=20261105x" defer></script>
+  <script src="js/click-fx.js?v=20261105x" defer></script>
+  <script src="js/term-tui.js?v=20261105x" defer></script>
+  <script src="js/skins.js?v=20261105x" defer></script>
+  <script src="js/fullscreen.js?v=20261105x" defer></script>
+  <script src="js/lite.js?v=20261105x" defer></script>
+  <script src="js/copy.js?v=20261105x" defer></script>
+  <script src="js/pwa.js?v=20261105x" defer></script>
+  <script src="js/guestbook.js?v=20261105x" defer></script>
   <script>
     /* 页脚跑道不参与首屏，也不该为「只看了首屏的人」付钱：
        等它进入视口前 600px 再拉样式和脚本。
@@ -179,7 +179,7 @@
         if (document.querySelector("link[data-dino-css]")) return;
         var link = document.createElement("link");
         link.rel = "stylesheet";
-        link.href = "css/dino.css?v=20261105w";
+        link.href = "css/dino.css?v=20261105x";
         link.setAttribute("data-dino-css", "");
         document.head.appendChild(link);
       }
@@ -190,7 +190,7 @@
         if (document.documentElement.dataset.lite === "2") return;
         loadCss();
         var script = document.createElement("script");
-        script.src = "js/dino.js?v=20261105w";
+        script.src = "js/dino.js?v=20261105x";
         script.async = true;
         document.body.appendChild(script);
       }

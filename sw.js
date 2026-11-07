@@ -33,7 +33,7 @@
    发版时改 VERSION，更老的缓存在 activate 里被清掉。
    ========================================================= */
 
-const VERSION = "20261105w";
+const VERSION = "20261105x";
 const CACHE = `hnyz-v${VERSION}`;
 
 /* 站内根路径：用 "./" 就地解析，
@@ -195,7 +195,7 @@ function isCacheName(name) {
   return name.startsWith("hnyz-v");
 }
 
-/* 从缓存名里取版本号：hnyz-v20261105w → 20261105w */
+/* 从缓存名里取版本号：hnyz-v20261105x → 20261105x */
 function versionOf(name) {
   return name.replace(/^hnyz-v/, "");
 }
@@ -293,18 +293,52 @@ async function offlineDocument(cache, request) {
   });
 }
 
+/* ---------- 档位：极简（2）不预取图片、音频与动画字体 ----------
+   页面在切档时把当前档位写进 hnyz-state 缓存，并 postMessage 一份。
+   SW 装/激活时读一次：极简档的机器不该替图集、立绘、音效和
+   动画字体预付那几百 KB 到几 MB —— 它连看都不看。 */
+const STATE_CACHE = "hnyz-state";
+const STATE_KEY = "./__hnyz_lite";
+let liteTier = "0";
+
+async function readTier() {
+  try {
+    const store = await caches.open(STATE_CACHE);
+    const hit = await store.match(abs(STATE_KEY));
+    if (hit) liteTier = (await hit.text()).trim() || "0";
+  } catch (error) {
+    /* 读不到就当完整档 */
+  }
+  return liteTier;
+}
+
+self.addEventListener("message", (event) => {
+  const data = event.data || {};
+  if (data.type === "lite") liteTier = String(data.tier || "0");
+});
+
 /* ---------- 安装：预缓存核心资源 ---------- */
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
+    const tier = await readTier();
+    /* 极简档不装动画字体（标题走系统栈）与 PWA 大图标，
+       只留 favicon —— 地址栏那个小图标还得有 */
+    const core = tier === "2"
+      ? CORE.filter(
+          (path) =>
+            path.indexOf("./fonts/") !== 0 &&
+            path.indexOf("./images/icon-") !== 0
+        )
+      : CORE;
 
     /* 分批 add，而不是 addAll：
        addAll 是「一个失败全部作废」，某个文件改名或 404 会让整个 SW
        装不上，也就没有离线能力。分批则允许个别失败，能缓多少缓多少；
        每批 8 个，也不至于一装就占满带宽、把首屏挤在后面。 */
     let ok = 0;
-    for (let i = 0; i < CORE.length; i += INSTALL_BATCH) {
-      const slice = CORE.slice(i, i + INSTALL_BATCH);
+    for (let i = 0; i < core.length; i += INSTALL_BATCH) {
+      const slice = core.slice(i, i + INSTALL_BATCH);
       const results = await Promise.all(slice.map((path) => putSafe(cache, abs(path))));
       ok += results.filter((res) => res && res.status === 200).length;
     }
@@ -312,8 +346,8 @@ self.addEventListener("install", (event) => {
     /* 一大半都下不到，说明这会儿网络根本不通。宁可这次装失败、
        继续用旧的 SW（缓存是完整的），也不要装一个空壳进来接管页面——
        空壳 + 弱网 = 满屏 504。 */
-    if (ok < CORE.length / 3) {
-      throw new Error(`precache failed: ${ok}/${CORE.length}`);
+    if (ok < core.length / 3) {
+      throw new Error(`precache failed: ${ok}/${core.length}`);
     }
 
     /* 新版本装好立即接管，不用等用户关掉所有标签页 */
@@ -363,7 +397,11 @@ self.addEventListener("activate", (event) => {
        失败也不影响已经装好的核心。串行 + 30ms 间隔，
        别和用户正在看的页面抢带宽。 */
     (async () => {
+      await readTier();
+      /* 极简档一张图、一段音频都不预取；中途切档也会在这里停下 */
+      if (liteTier === "2") return;
       for (const path of EXTRA) {
+        if (liteTier === "2") return;
         const url = abs(path);
         const hit = await cache.match(url);
         if (!hit) {
