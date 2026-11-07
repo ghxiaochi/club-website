@@ -44,6 +44,12 @@
   /* ×1 下一整个昼夜循环的秒数 */
   const DAY_CYCLE = 34;
 
+  /* 彩蛋改用积分门槛，不再有等级：
+     2000 分（约 80 秒不撞）天就塌下来，一局只塌一次；
+     800 分之后开始放无敌星，之后每 16~24 秒来一颗。 */
+  const EXTINCT_AT = 2000;
+  const STAR_AT = 800;
+
   let W = 0;
   let H = 0;
   let DPR = 1;
@@ -96,13 +102,17 @@
   /* 进化演出：里程碑轻闪、领队进化辉光 */
   let flash = 0;
   let stageGlow = 0;
-  /* 50 级解锁的无敌星：吃到后 3 秒穿过一切 */
+  /* 800 分之后上路的无敌星：吃到后 3 秒穿过一切 */
   let starTimer = 0;
   let starIn = 14;
+  /* 本局是否已经塌过天：彩蛋一局只演一次 */
+  let extinctDone = false;
+  /* 快到时候那句前兆，也只说一次 */
+  let omenShown = false;
   /* 游戏内昼夜循环（0~1）与时间加速倍率 */
   let gameClock = 0.1;
   let timeScale = 1;
-  /* 100 级灭绝演出：非空时接管整条 update */
+  /* 2000 分灭绝彩蛋：非空时接管整条 update */
   let cine = null;
   /* 演出里的粒子、灰烬、火星：数组复用，不每帧新建 */
   let sparks = [];
@@ -429,7 +439,7 @@
     });
   }
 
-  /* 十六进制颜色插值：恐龙 20 级以后随等级换羽色 */
+  /* 十六进制颜色插值：羽色按皮肤墨色微调明暗 */
   function lerpHex(a, b, t) {
     const pa = [1, 3, 5].map((i) => parseInt(a.slice(i, i + 2), 16));
     const pb = [1, 3, 5].map((i) => parseInt(b.slice(i, i + 2), 16));
@@ -705,7 +715,7 @@
     skyGrad = { night, dusk, blue, blood, dead };
   }
 
-  /* 一次性把不随等级变的东西全烘出来 */
+  /* 一次性把不随分数变的东西全烘出来 */
   function buildScenery() {
     buildSun();
     moonSprite = buildMoonSprite();
@@ -729,7 +739,10 @@
 
     W = nextW;
     H = nextH;
-    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    /* 轻量模式把像素比压到 1：4K 屏上等于少画四分之三的像素，
+       像素恐龙的边缘反而更利落 */
+    DPR = Math.min(window.devicePixelRatio || 1,
+      document.documentElement.dataset.lite === "1" ? 1 : 2);
 
     canvas.width = Math.round(W * DPR);
     canvas.height = Math.round(H * DPR);
@@ -818,6 +831,8 @@
     stageGlow = 0;
     starTimer = 0;
     starIn = 14;
+    extinctDone = false;
+    omenShown = false;
     cine = null;
     hideDinos = false;
     sparks = [];
@@ -1037,6 +1052,18 @@
     }
   }
 
+  /* 无敌星：挂在跳跃最高点附近，得跳一下才够得着 */
+  function spawnStar() {
+    coins.push({
+      kind: "star",
+      x: W + 40,
+      /* 和金币拱门最高一排同高：跳起来刚好够到，不会飘在跳跃线之上 */
+      lift: 46 * S,
+      spin: 0,
+      got: false
+    });
+  }
+
   function obstacleGap() {
     /* 速度越快，间隔时间稍短，但至少留出一次跳跃的距离 */
     return Math.max(0.95, 1.55 - speed / 900) + Math.random() * 0.45;
@@ -1157,7 +1184,7 @@
       coin.got = true;
       burstCoin(coin);
 
-      /* 50 级解锁：金色星星给 3 秒无敌冲刺 */
+      /* 无敌星：金色星星给 3 秒无敌冲刺 */
       if (coin.kind === "star") {
         starTimer = 3;
         pop("STAR POWER // 3S", "combo");
@@ -1247,6 +1274,26 @@
     score = distance / 14;
     updateScore(false);
 
+    /* 灭绝彩蛋：只看积分，不看等级。到线就接管这一局 */
+    if (!extinctDone && score >= EXTINCT_AT) {
+      extinctDone = true;
+      startExtinction();
+      return;
+    }
+
+    /* 快塌天的时候先给一句前兆，别让陨石显得凭空出现 */
+    if (!omenShown && score >= EXTINCT_AT * 0.85) {
+      omenShown = true;
+      pop("天边有点不对…", "omen");
+    }
+
+    /* 无敌星：800 分之后定时上路 */
+    starIn -= dt;
+    if (starIn <= 0) {
+      if (score >= STAR_AT) spawnStar();
+      starIn = 16 + Math.random() * 8;
+    }
+
     if (stageGlow > 0) stageGlow = Math.max(0, stageGlow - dt);
     if (flash > 0) flash = Math.max(0, flash - dt * 1.4);
     if (starTimer > 0) starTimer = Math.max(0, starTimer - dt);
@@ -1295,7 +1342,7 @@
   }
 
   /* -------------------------------------------------------
-     四之二、100 级灭绝演出
+     四之二、2000 分灭绝彩蛋
      ---------------------------------------------------------
      天塌 → 巨型陨石 → 爆炸 → 废墟。砸完就停在结局里：
      恐龙没了，地上留一个坑和几块墓碑，画面中间压一句中文，
@@ -1465,7 +1512,7 @@
     strip.classList.remove("is-cine", "is-extinct");
     if (timeEl) timeEl.classList.remove("is-locked");
     resetRun();
-    pop("时间重新流动", "level");
+    pop("时间重新流动", "score");
   }
 
   function updateCinematic(dt) {
@@ -2576,10 +2623,17 @@
     }
   }
 
+  /* 终端主页是一层全屏 TUI，纸带页面被盖在下面。
+     布局盒子还在，IntersectionObserver 照样报「可见」，
+     恐龙就会在看不见的地方空转 —— 这里把它一起算进去 */
+  function shellBlocked() {
+    return document.documentElement.classList.contains("tty-on");
+  }
+
   if ("IntersectionObserver" in window) {
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => setVisible(entry.isIntersecting));
+        entries.forEach((entry) => setVisible(entry.isIntersecting && !shellBlocked()));
       },
       { threshold: 0.08 }
     );
@@ -2596,7 +2650,7 @@
       scrollQueued = false;
       const rect = strip.getBoundingClientRect();
       const onScreen = rect.top < window.innerHeight && rect.bottom > 0;
-      setVisible(onScreen);
+      setVisible(onScreen && !shellBlocked());
     });
   }
 
@@ -2606,6 +2660,13 @@
      交给 IntersectionObserver 的首次回调，或在 load（布局已完成）后再校 */
   if (document.readyState === "complete") syncVisibility();
   else window.addEventListener("load", syncVisibility, { once: true });
+
+  /* TUI 开 / 关不会触发滚动，自己盯一下根节点的 class */
+  const shellObserver = new MutationObserver(() => {
+    if (shellBlocked()) setVisible(false);
+    else syncVisibility();
+  });
+  shellObserver.observe(root, { attributes: true, attributeFilter: ["class"] });
 
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
@@ -2635,6 +2696,14 @@
   } else {
     window.addEventListener("resize", onStageResize);
   }
+
+  /* 轻量模式切换：只换画布分辨率，不重置分数。
+     把尺寸清零逼 measure 重算，再让主循环下一帧重画 */
+  document.addEventListener("hnyz:lite", () => {
+    W = 0;
+    measure();
+    if (visible && !running) startLoop();
+  });
 
   /* 天梯页点「再来一局」时派发这个事件，比让它自己数秒重开可控 */
   strip.addEventListener("dino:restart", function () {

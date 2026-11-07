@@ -163,8 +163,14 @@
   color: var(--dino-accent);
 }
 
-.dino-run__pop[data-tone="level"] {
+.dino-run__pop[data-tone="score"] {
   color: var(--dino-ink);
+}
+
+/* 前兆：天边那句「不太对」，用一点暗红，和金币的金、连击的青分开 */
+.dino-run__pop[data-tone="omen"] {
+  color: var(--red, #dc2626);
+  letter-spacing: 0.16em;
 }
 
 .dino-run__pop.is-on {

@@ -123,5 +123,13 @@ window.HNYZ_GALLERY = [
     tag: "梗图",
     w: 548,
     h: 768
+  },
+  {
+    src: "images/gallery/meme-15.webp",
+    thumb: "images/gallery/thumb/meme-15.webp",
+    title: "老实赚钱",
+    tag: "梗图",
+    w: 1280,
+    h: 720
   }
 ];

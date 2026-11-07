@@ -153,6 +153,7 @@
 - 页脚跑道只在进入视口前 600px 才注入 `dino.js`（88KB），首屏不为它付费。
 - 榜单 `data/ladder.json` 由 `.github/workflows/ladder.yml` 汇总标题带 `[DINO]` 的 Issues 生成，分数有上限与去重。
 - 提交入口在 `dino.html` 的说明区，按模板开 Issue 即可。
+- 彩蛋全按**积分**触发，没有等级：800 分之后每 16~24 秒放一颗无敌星；2000 分天降陨石，一局只演一次，点「时间回溯」重开。
 
 ---
 
@@ -204,7 +205,7 @@
 - **图片**：图集视口懒加载 + 固定宽高；项目封面与成员头像 `loading="lazy"`；图片统一 WebP。
 - **动画**：只动 `transform` / `opacity`；滚动监听合并到 `requestAnimationFrame`；`prefers-reduced-motion` 关闭非必要动效。
 - **缓存**：仓库数据 10 分钟、Service Worker 分版本；离线优先返回缓存页面。
-- **轻量模式**（`js/lite.js` + `css/lite.css`）：顶栏羽毛按钮，一键关掉动画、毛玻璃与 canvas 特效；没存过偏好又检测到 Save-Data / 2G / 内存 ≤2GB / 核心 ≤2 时自动开启一次。开关状态存在 `hnyz:lite`，切换不刷新页面，各模块监听 `hnyz:lite` 自行启停；光场 iframe 会带 `lite=1` 重新加载，像素比压到 1、粒子减半。
+- **轻量模式**（`js/lite.js` + `css/lite.css`）：顶栏羽毛按钮或 `Shift+L`，一键关掉动画、毛玻璃与 canvas 特效；电脑上额外停掉鼠标光晕、卡片 3D 倾斜、背景图标与跑马灯，画布像素比降到 1。没存过偏好又检测到 Save-Data / 2G / 内存 ≤2GB / 核心 ≤2（或 4GB 内存 + 4 核）/ 系统「减少动效」时自动开启一次。开关状态存在 `hnyz:lite`，切换不刷新页面，各模块监听 `hnyz:lite` 自行启停；光场 iframe 会带 `lite=1` 重新加载，像素比压到 1、粒子减半。
 
 发版时改三处版本号：HTML 里的 `?v=`、`sw.js` 的 `VERSION`、`skin-boot.js` 的 `V`。
 

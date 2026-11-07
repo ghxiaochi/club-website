@@ -26,7 +26,8 @@
   const ctx = canvas.getContext("2d", { alpha: false });
   if (!ctx) return;
 
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+  const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let reduce = motionQuery.matches ||
     document.documentElement.dataset.lite === "1";
 
   /* -------------------------------------------------------
@@ -731,6 +732,15 @@
   window.addEventListener("resize", () => {
     window.clearTimeout(resizeTimer);
     resizeTimer = window.setTimeout(() => api.resize(), 180);
+  });
+
+  /* 轻量模式切换：停掉主循环，画一帧静止画面；关掉再跑起来。
+     桌面这一层粒子占的是整屏，是轻量模式最该省的地方 */
+  document.addEventListener("hnyz:lite", (event) => {
+    reduce = motionQuery.matches || !!(event.detail && event.detail.on);
+    if (!visible) return;
+    stop();
+    start();
   });
 
   document.addEventListener("visibilitychange", () => {

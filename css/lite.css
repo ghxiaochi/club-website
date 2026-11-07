@@ -32,6 +32,7 @@ html[data-lite="1"] *::after {
 /* 帧率无关的装饰也停掉：滚动进度条、扫描线这类跟着 rAF 走的东西 */
 html[data-lite="1"] .scroll-progress,
 html[data-lite="1"] .scanlines,
+html[data-lite="1"] .hnyz-scanlines,
 html[data-lite="1"] .crt::after {
   display: none !important;
 }
@@ -88,7 +89,49 @@ html[data-lite="1"] .click-fx {
 }
 
 /* ---------------------------------------------------------
-   5. 右下角一句话
+   5. 电脑：桌面专属的重装饰也一起停
+   ---------------------------------------------------------
+   手机上大部分装饰本来就不生成；桌面是反过来的——光斑、
+   背景图标、跑马灯、鼠标光晕、卡片倾斜全在跑，4K 屏上最贵
+   的就是这些大面积半透明层。这里按「只是装饰」整批关掉，
+   正文、卡片、按钮的尺寸和位置一律不动。
+   --------------------------------------------------------- */
+@media (min-width: 900px) {
+  html[data-lite="1"] .bg-orbs,
+  html[data-lite="1"] .bg-icons,
+  html[data-lite="1"] .hnyz-glow,
+  html[data-lite="1"] .hnyz-ticker,
+  html[data-lite="1"] .hero::before,
+  html[data-lite="1"] .hero::after {
+    display: none !important;
+  }
+
+  /* 悬停不再上浮、不再 3D 倾斜：少一层合成，鼠标划过也更稳 */
+  html[data-lite="1"] .project-card,
+  html[data-lite="1"] .project-card:hover,
+  html[data-lite="1"] .project-card:hover .project-cover img,
+  html[data-lite="1"] .hero-stat:hover,
+  html[data-lite="1"] .gallery-item:hover,
+  html[data-lite="1"] .style-card:hover,
+  html[data-lite="1"] .btn:hover,
+  html[data-lite="1"] .project-source:hover .source-arrow {
+    transform: none !important;
+  }
+
+  /* 大块阴影在 4K 上是一整屏的填充成本，平掉之后边界靠描边撑住 */
+  html[data-lite="1"] .site-header,
+  html[data-lite="1"] .project-card,
+  html[data-lite="1"] .gallery-item,
+  html[data-lite="1"] .join-card,
+  html[data-lite="1"] .style-deck,
+  html[data-lite="1"] .ladder-play,
+  html[data-lite="1"] .ladder-board {
+    box-shadow: none !important;
+  }
+}
+
+/* ---------------------------------------------------------
+   6. 右下角一句话
    --------------------------------------------------------- */
 .lite-toast {
   position: fixed;

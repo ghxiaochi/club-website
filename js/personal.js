@@ -275,6 +275,15 @@
     document.addEventListener(
       "pointermove",
       (event) => {
+        /* 轻量模式一开，下一帧就不再算倾斜，不用重建模块 */
+        if (noMotion()) {
+          if (activeCard) {
+            reset(activeCard);
+            activeCard = null;
+          }
+          return;
+        }
+
         const card = event.target instanceof Element
           ? event.target.closest(".project-card")
           : null;
@@ -348,6 +357,13 @@
     window.addEventListener(
       "pointermove",
       (event) => {
+        if (noMotion()) {
+          if (visible) {
+            glow.classList.remove("is-on");
+            visible = false;
+          }
+          return;
+        }
         if (!visible) {
           glow.classList.add("is-on");
           visible = true;
@@ -572,6 +588,21 @@
   /* =======================================================
      九、启动
      ======================================================= */
+  /* 开轻量模式时收掉已经建好的桌面装饰：
+     光晕节点直接删，倾斜复位。再关掉时会重新按需生成，
+     所以来回切不需要刷新页面。 */
+  document.addEventListener("hnyz:lite", (event) => {
+    if (!(event.detail && event.detail.on)) return;
+
+    const glow = document.querySelector(".hnyz-glow");
+    if (glow) glow.remove();
+
+    document.querySelectorAll(".is-tilting").forEach((card) => {
+      card.classList.remove("is-tilting");
+      card.style.transform = "";
+    });
+  });
+
   initRotator();
   initReveal();
   initTilt();

@@ -4,6 +4,10 @@
    给低性能设备（老手机、学校的旧电脑、开了省流量的浏览器）一个开关：
    关掉所有非必要的动画、模糊和 canvas 特效，只留下内容本身。
 
+   电脑上额外关掉的东西：跟着鼠标走的光晕、项目卡的 3D 倾斜、
+   桌面专属的背景图标与跑马灯、首屏那层粒子画布；画布的像素比也降到 1，
+   4K 屏少画四分之三的像素。
+
    什么时候会开：
      1. 手动点顶栏那根羽毛；
      2. 上次开过，这次照旧（localStorage 的 hnyz:lite）；
@@ -73,7 +77,7 @@
       var btn = buttons[i];
       btn.setAttribute("aria-pressed", on ? "true" : "false");
       btn.setAttribute("aria-label", on ? "关闭轻量模式" : "开启轻量模式（适合低性能设备）");
-      btn.setAttribute("title", on ? "轻量模式：已开启 · 点击关闭" : "轻量模式：关闭 · 点击开启");
+      btn.setAttribute("title", on ? "轻量模式：已开启 · 点击关闭（Shift+L）" : "轻量模式：关闭 · 点击开启（Shift+L）");
       btn.classList.toggle("is-on", on);
     }
   }
@@ -102,13 +106,40 @@
     write(KEY, "1");
     write(AUTO_KEY, "1");
 
+    /* 系统里开了「减少动效」的人，别再说「设备吃力」——
+       这不是性能问题，是偏好，照着做就行，也不用弹提示打扰 */
+    var quiet = false;
+    try {
+      quiet = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    } catch (error) { /* 老内核 */ }
+
+    if (quiet) return;
+
     window.setTimeout(function () {
       if (isOn()) toast("设备有点吃力，已开启轻量模式，右上角那根羽毛可以关掉。");
     }, 2600);
   }
 
+  /* 电脑上加一个快捷键：Shift+L。
+     输入框里按 L 不算，别把留言板写成“轻量模式”。 */
+  function onKey(event) {
+    if (!event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (event.key !== "L" && event.key !== "l") return;
+
+    var el = event.target;
+    var tag = el && el.tagName ? el.tagName.toLowerCase() : "";
+    if (tag === "input" || tag === "textarea" || tag === "select" || (el && el.isContentEditable)) return;
+
+    event.preventDefault();
+    var next = !isOn();
+    set(next, { auto: false });
+    toast(next ? "轻量模式：动画、模糊、阴影和粒子都关了" : "已恢复完整效果");
+  }
+
   function bind() {
     syncButtons();
+
+    document.addEventListener("keydown", onKey);
 
     document.addEventListener("click", function (event) {
       var btn = event.target.closest ? event.target.closest("[data-lite-toggle]") : null;
@@ -116,7 +147,7 @@
       event.preventDefault();
       var next = !isOn();
       set(next, { auto: false });
-      toast(next ? "轻量模式已开启：动画和背景特效已关闭" : "已恢复完整效果");
+      toast(next ? "轻量模式：动画、模糊、阴影和粒子都关了" : "已恢复完整效果");
     });
   }
 
