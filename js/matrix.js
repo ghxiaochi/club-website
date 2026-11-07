@@ -20,7 +20,7 @@
 
   /* 轻量模式：和「减少动效」同等对待，代码雨整块不跑 */
   const noMotion = () =>
-    reduce.matches || document.documentElement.dataset.lite === "1";
+    reduce.matches || document.documentElement.dataset.lite;
 
   const CHARS = "ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789<>[]{}#$*+-=/\\|";
   const FONT = 15;

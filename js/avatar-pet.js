@@ -17,6 +17,9 @@
   const pet = document.querySelector("[data-hnyz-avatar]");
   if (!pet) return;
 
+  /* 极简档：桌宠是纯装饰，连事件都不挂 */
+  if (document.documentElement.dataset.lite === "2") return;
+
   const trigger = pet.querySelector("[data-hnyz-avatar-trigger]");
   const speech = pet.querySelector("[data-hnyz-avatar-speech]");
   const avatarImg = pet.querySelector(".hnyz-avatar__img");
@@ -479,7 +482,7 @@
 
   function startPinball(startX, startY) {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
-      document.documentElement.dataset.lite === "1";
+      document.documentElement.dataset.lite;
 
     const w = pet.offsetWidth * state.scale;
     const h = pet.offsetHeight * state.scale;

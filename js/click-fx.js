@@ -9,7 +9,7 @@
 (() => {
   "use strict";
 
-  const liteOn = () => document.documentElement.dataset.lite === "1";
+  const liteOn = () => document.documentElement.dataset.lite;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || liteOn()) return;
 
   const canvas = document.createElement("canvas");

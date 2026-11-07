@@ -13,6 +13,9 @@
   const pet = document.querySelector("[data-hnyz-pet]");
   if (!pet) return;
 
+  /* 极简档：校徽整块 display:none，事件和 rAF 一并不挂 */
+  if (document.documentElement.dataset.lite === "2") return;
+
   const trigger = pet.querySelector("[data-hnyz-pet-trigger]");
   const badgeWrap = pet.querySelector("[data-hnyz-pet-badge]");
   const speech = pet.querySelector("[data-hnyz-pet-speech]");
@@ -28,7 +31,7 @@
 
   const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   const noMotion = () =>
-    motionQuery.matches || document.documentElement.dataset.lite === "1";
+    motionQuery.matches || document.documentElement.dataset.lite;
   let lineIndex = 0;
   let speechTimer = 0;
   let frame = 0;

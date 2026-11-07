@@ -18,7 +18,7 @@
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   /* 轻量模式按「减少动效」处理：不打字、不跟随指针 */
   const noMotion = () =>
-    reduceMotion.matches || document.documentElement.dataset.lite === "1";
+    reduceMotion.matches || document.documentElement.dataset.lite;
   const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
   const root = document.documentElement;
 

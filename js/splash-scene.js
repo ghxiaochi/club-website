@@ -28,7 +28,7 @@
 
   const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   let reduce = motionQuery.matches ||
-    document.documentElement.dataset.lite === "1";
+    document.documentElement.dataset.lite;
 
   /* -------------------------------------------------------
      一、每个角色的画法（参数取自 src/units.nim）

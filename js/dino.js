@@ -747,7 +747,7 @@
     /* 轻量模式把像素比压到 1：4K 屏上等于少画四分之三的像素，
        像素恐龙的边缘反而更利落 */
     DPR = Math.min(window.devicePixelRatio || 1,
-      document.documentElement.dataset.lite === "1" ? 1 : 2);
+      document.documentElement.dataset.lite ? 1 : 2);
 
     canvas.width = Math.round(W * DPR);
     canvas.height = Math.round(H * DPR);

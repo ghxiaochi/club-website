@@ -49,6 +49,8 @@
   function play(name, options) {
     const key = ALIAS[name] || name;
     if (!enabled || !SRC[key]) return null;
+    /* 极简档不播：解码 MP3 对这类设备是实打实的开销 */
+    if (document.documentElement.dataset.lite === "2") return null;
 
     const opts = options || {};
     const list = pool(key);

@@ -28,6 +28,11 @@
   /* 项目清单在 js/members.js，避免和页面逻辑混在一起 */
   const members = Array.isArray(window.HNYZ_MEMBERS) ? window.HNYZ_MEMBERS : [];
 
+  /* 极简档（data-lite="2"）：图片一张都不请求，封面直接走占位块。
+     读 dataset 而不是 HNYZ_LITE —— 这个脚本可能比 lite.js 先执行，
+     而 dataset 是 <head> 里的预置脚本在解析前就写好的，永远拿得到 */
+  const isUltra = () => document.documentElement.dataset.lite === "2";
+
   const API_BASE = "https://api.github.com/repos";
 
   /* 每天由 GitHub Actions 抓一次的静态快照。
@@ -264,8 +269,8 @@
     const wrap = document.createElement("div");
     wrap.className = "project-cover";
 
-    /* coverImg 为空：直接使用渐变 + 网格线占位 */
-    if (!project.coverImg) {
+    /* coverImg 为空、或处于极简档：不请求图片，直接用占位块 */
+    if (!project.coverImg || isUltra()) {
       wrap.appendChild(createCoverPlaceholder(project));
     } else {
       const image = document.createElement("img");
@@ -753,6 +758,7 @@
     sprites.setAttribute("aria-hidden", "true");
 
     (Array.isArray(profile.sprites) ? profile.sprites : []).forEach((sprite, index) => {
+      if (isUltra()) return; /* 立绘一张 400×400，极简档不加载 */
       const src = normalizeCover(sprite && sprite.src);
       if (!src) return;
 

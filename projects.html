@@ -74,58 +74,97 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="stylesheet" href="css/style.css?v=20261105v">
-  <link rel="stylesheet" href="css/pet.css?v=20261105v">
-  <link rel="stylesheet" href="css/avatar-pet.css?v=20261105v">
-  <link rel="stylesheet" href="css/skins.css?v=20261105v">
-  <link rel="stylesheet" href="css/lite.css?v=20261105v">
-  <script src="js/skin-boot.js?v=20261105v"></script>
+  <link rel="stylesheet" href="css/style.css?v=20261105w">
+  <link rel="stylesheet" href="css/pet.css?v=20261105w">
+  <link rel="stylesheet" href="css/avatar-pet.css?v=20261105w">
+  <link rel="stylesheet" href="css/skins.css?v=20261105w">
+  <link rel="stylesheet" href="css/lite.css?v=20261105w">
+  <script src="js/skin-boot.js?v=20261105w"></script>
   <script>
-    /* 轻量模式预置：弱设备（省流量、2G、内存 ≤2G、核心 ≤2）首帧就走低配，
-       避免先跑一遍动画再关。手动开关过的以 localStorage 为准。 */
+    /* 轻量 / 极简预置：弱设备（省流量、2G、内存 ≤2G、核心 ≤2）首帧就走低配，
+       避免先跑一遍动画再关。手动开过的以 localStorage 为准（1 轻量 / 2 极简）。
+
+       极简档在 <body> 解析前就装一道图片闸门：所有 <img> 一插进 DOM 就被
+       换成 1×1 透明占位，原地址留在 data-ultra-src。图片是整站最大的一笔
+       流量（图集六百多 KB、立绘与封面几 MB），拦在请求发出之前才算真省下。 */
     (function () {
+      var tier = 0;
       try {
         var v = localStorage.getItem("hnyz:lite");
-        var on = v === "1";
-        if (v === null) {
+        if (v === "1") tier = 1;
+        else if (v === "2") tier = 2;
+        else if (v === null) {
           var c = navigator.connection || {};
           var mem = navigator.deviceMemory || 0;
           var cpu = navigator.hardwareConcurrency || 0;
-          on = !!(c.saveData || /(^|-)2g$/.test(c.effectiveType || "") ||
+          var low = !!(c.saveData || /(^|-)2g$/.test(c.effectiveType || "") ||
             (mem && mem <= 2) || (cpu && cpu <= 2) ||
             (mem && mem <= 4 && cpu && cpu <= 4) ||
             window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+          if (low) tier = 1;
         }
-        if (on) document.documentElement.dataset.lite = "1";
       } catch (error) { /* 隐私模式下忽略 */ }
+
+      if (!tier) return;
+      document.documentElement.dataset.lite = String(tier);
+      if (tier < 2) return;
+
+      var BLANK = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+      function gate(img) {
+        if (!img || img.tagName !== "IMG" || img.hasAttribute("data-ultra-src")) return;
+        var src = img.getAttribute("src");
+        if (!src || src.slice(0, 5) === "data:") return;
+        img.setAttribute("data-ultra-src", src);
+        img.setAttribute("src", BLANK);
+      }
+      function scan(node) {
+        if (!node || node.nodeType !== 1) return;
+        if (node.tagName === "IMG") { gate(node); return; }
+        if (!node.querySelectorAll) return;
+        var imgs = node.querySelectorAll("img");
+        for (var i = 0; i < imgs.length; i += 1) gate(imgs[i]);
+      }
+      if (window.MutationObserver) {
+        var mo = new MutationObserver(function (list) {
+          for (var i = 0; i < list.length; i += 1) {
+            var added = list[i].addedNodes;
+            for (var j = 0; j < added.length; j += 1) scan(added[j]);
+          }
+        });
+        mo.observe(document.documentElement, { childList: true, subtree: true });
+        /* 首屏的图跑完就撤，别让观察器跟着整页活一辈子 */
+        window.addEventListener("load", function () {
+          window.setTimeout(function () { mo.disconnect(); }, 600);
+        }, { once: true });
+      }
     })();
   </script>
-  <link rel="stylesheet" href="css/type.css?v=20261105v">
-  <link rel="stylesheet" href="css/motion.css?v=20261105v">
-  <link rel="preload" href="css/dino.css?v=20261105v" as="style">
-  <link rel="stylesheet" href="css/dino.css?v=20261105v" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/dino.css?v=20261105v"></noscript>
-  <link rel="stylesheet" href="css/personal.css?v=20261105v">
-  <link rel="stylesheet" href="css/characters.css?v=20261105v">
+  <link rel="stylesheet" href="css/type.css?v=20261105w">
+  <link rel="stylesheet" href="css/motion.css?v=20261105w">
+  <link rel="preload" href="css/dino.css?v=20261105w" as="style">
+  <link rel="stylesheet" href="css/dino.css?v=20261105w" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/dino.css?v=20261105w"></noscript>
+  <link rel="stylesheet" href="css/personal.css?v=20261105w">
+  <link rel="stylesheet" href="css/characters.css?v=20261105w">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
-  <script src="js/sfx.js?v=20261105v" defer></script>
-  <script src="js/theme.js?v=20261105v" defer></script>
-  <script src="js/theme-icon.js?v=20261105v" defer></script>
-  <script src="js/members.js?v=20261105v" defer></script>
-  <script src="js/main.js?v=20261105v" defer></script>
-  <script src="js/repo-sync.js?v=20261105v" defer></script>
-  <script src="js/pet.js?v=20261105v" defer></script>
-  <script src="js/avatar-pet.js?v=20261105v" defer></script>
-  <script src="js/splash-scene.js?v=20261105v" defer></script>
-  <script src="js/characters.js?v=20261105v" defer></script>
-  <script src="js/personal.js?v=20261105v" defer></script>
-  <script src="js/click-fx.js?v=20261105v" defer></script>
-  <script src="js/skins.js?v=20261105v" defer></script>
-  <script src="js/fullscreen.js?v=20261105v" defer></script>
-  <script src="js/lite.js?v=20261105v" defer></script>
-  <script src="js/copy.js?v=20261105v" defer></script>
-  <script src="js/pwa.js?v=20261105v" defer></script>
+  <script src="js/sfx.js?v=20261105w" defer></script>
+  <script src="js/theme.js?v=20261105w" defer></script>
+  <script src="js/theme-icon.js?v=20261105w" defer></script>
+  <script src="js/members.js?v=20261105w" defer></script>
+  <script src="js/main.js?v=20261105w" defer></script>
+  <script src="js/repo-sync.js?v=20261105w" defer></script>
+  <script src="js/pet.js?v=20261105w" defer></script>
+  <script src="js/avatar-pet.js?v=20261105w" defer></script>
+  <script src="js/splash-scene.js?v=20261105w" defer></script>
+  <script src="js/characters.js?v=20261105w" defer></script>
+  <script src="js/personal.js?v=20261105w" defer></script>
+  <script src="js/click-fx.js?v=20261105w" defer></script>
+  <script src="js/skins.js?v=20261105w" defer></script>
+  <script src="js/fullscreen.js?v=20261105w" defer></script>
+  <script src="js/lite.js?v=20261105w" defer></script>
+  <script src="js/copy.js?v=20261105w" defer></script>
+  <script src="js/pwa.js?v=20261105w" defer></script>
   <script>
     /* 页脚跑道不参与首屏，也不该为「只看了首屏的人」付钱：
        等它进入视口前 600px 再拉脚本。以前 load 完就 idle 注入，
@@ -136,7 +175,7 @@
         if (loaded) return;
         loaded = true;
         var script = document.createElement("script");
-        script.src = "js/dino.js?v=20261105v";
+        script.src = "js/dino.js?v=20261105w";
         script.async = true;
         document.body.appendChild(script);
       }
@@ -376,7 +415,7 @@
     <div class="hnyz-pet__board" aria-hidden="true"></div>
     <button class="hnyz-pet__stage" type="button" data-hnyz-pet-trigger aria-label="和衡南一中校徽打个招呼">
       <span class="hnyz-pet__badge-wrap" data-hnyz-pet-badge aria-hidden="true">
-        <img class="hnyz-pet__badge" src="images/pet/badge-school-hd.webp" alt="" width="360" height="360">
+        <img class="hnyz-pet__badge" src="images/pet/badge-school-hd.webp" alt="" width="360" height="360" loading="lazy" decoding="async">
       </span>
     </button>
     <p class="hnyz-pet__speech" data-hnyz-pet-speech role="status" aria-live="polite"></p>
@@ -386,7 +425,7 @@
   <div class="hnyz-avatar" data-hnyz-avatar>
     <p class="hnyz-avatar__speech" data-hnyz-avatar-speech role="status" aria-live="polite"></p>
     <button class="hnyz-avatar__button" type="button" data-hnyz-avatar-trigger aria-label="和 ghxiaochi 的像素头像互动">
-      <img class="hnyz-avatar__img" src="images/pet/ghxiaochi-avatar.webp" alt="ghxiaochi 的像素头像" width="648" height="954">
+      <img class="hnyz-avatar__img" loading="lazy" decoding="async" src="images/pet/ghxiaochi-avatar.webp" alt="ghxiaochi 的像素头像" width="648" height="954">
       <span class="hnyz-avatar__name" aria-hidden="true">@ghxiaochi</span>
     </button>
   </div>

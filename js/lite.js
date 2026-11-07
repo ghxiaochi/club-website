@@ -1,22 +1,29 @@
 /* =========================================================
-   HNYZ · 轻量模式
+   HNYZ · 轻量模式 / 极简模式
    ---------------------------------------------------------
-   给低性能设备（老手机、学校的旧电脑、开了省流量的浏览器）一个开关：
-   关掉所有非必要的动画、模糊和 canvas 特效，只留下内容本身。
+   两档减法，按设备能不能扛分开：
 
-   电脑上额外关掉的东西：跟着鼠标走的光晕、项目卡的 3D 倾斜、
-   桌面专属的背景图标与跑马灯、首屏那层粒子画布；画布的像素比也降到 1，
-   4K 屏少画四分之三的像素。
+     轻量（data-lite="1"）—— 老手机、学校旧电脑、开了省流量的浏览器
+       关掉所有非必要的动画、模糊和 canvas 特效，只留下内容本身。
+       电脑上额外关掉鼠标光晕、卡片 3D 倾斜、桌面背景图标与跑马灯，
+       画布像素比也降到 1。
 
-   什么时候会开：
-     1. 手动点顶栏那根羽毛；
-     2. 上次开过，这次照旧（localStorage 的 hnyz:lite）；
-     3. 第一次来、又检测到设备吃力（Save-Data、2G、内存 ≤2G、
-        核心 ≤2 个），自动开一次，右下角说一句，随时能关。
+     极简（data-lite="2"）—— 超低端：十年前的上网本、2G 网络、
+       只剩 512MB 内存的机器
+       在轻量之上再砍掉「图」这一整层：项目封面、成员立绘、图集缩略图、
+       头像、首屏角色画布一律不请求（省下几百 KB 到几 MB），
+       字体退回系统栈，渐变、圆角、阴影、描边全部拍平成纸面。
+       页面退化成一份能读、能点的纯文字文档。
+
+   怎么开：
+     1. 点顶栏那根羽毛 → 轻量；
+     2. 长按那根羽毛 650ms → 极简（再长按一次退出）；
+     3. 上次开过，这次照旧（localStorage 的 hnyz:lite 存 1 或 2）；
+     4. 第一次来、设备又明显吃力（Save-Data、2G、内存 ≤2G、核心 ≤2）
+        自动开一次轻量，右下角说一句，随时能关。
 
    切换不刷新页面：
      CSS 立刻生效；canvas 模块监听 hnyz:lite 事件，自己停。
-   这样点一下就能看出差别，不用等整页重载。
    ========================================================= */
 
 (function () {
@@ -25,6 +32,9 @@
   var KEY = "hnyz:lite";
   var AUTO_KEY = "hnyz:lite:auto";
   var root = document.documentElement;
+
+  /* 长按多久算「要极简」。太短容易误触，太长像卡住 */
+  var HOLD_MS = 650;
 
   function read(key) {
     try {
@@ -43,8 +53,20 @@
     }
   }
 
+  /* 0 关 / 1 轻量 / 2 极简 */
+  function tier() {
+    var v = root.dataset.lite;
+    if (v === "2") return 2;
+    if (v === "1") return 1;
+    return 0;
+  }
+
   function isOn() {
-    return root.dataset.lite === "1";
+    return tier() > 0;
+  }
+
+  function ultra() {
+    return tier() === 2;
   }
 
   /* ---------- 右下角一句话 ---------- */
@@ -70,35 +92,68 @@
   }
 
   /* ---------- 按钮状态 ---------- */
+  var LABEL = {
+    0: "开启轻量模式（适合低性能设备）",
+    1: "关闭轻量模式（长按进入极简模式）",
+    2: "退出极简模式"
+  };
+  var TIP = {
+    0: "轻量模式：关闭 · 点击开启 · 长按进入极简（Shift+L）",
+    1: "轻量模式：已开启 · 点击关闭 · 长按进入极简（Shift+L）",
+    2: "极简模式：已开启 · 点击或长按退出"
+  };
+
   function syncButtons() {
-    var on = isOn();
+    var t = tier();
     var buttons = document.querySelectorAll("[data-lite-toggle]");
     for (var i = 0; i < buttons.length; i += 1) {
       var btn = buttons[i];
-      btn.setAttribute("aria-pressed", on ? "true" : "false");
-      btn.setAttribute("aria-label", on ? "关闭轻量模式" : "开启轻量模式（适合低性能设备）");
-      btn.setAttribute("title", on ? "轻量模式：已开启 · 点击关闭（Shift+L）" : "轻量模式：关闭 · 点击开启（Shift+L）");
-      btn.classList.toggle("is-on", on);
+      btn.setAttribute("aria-pressed", t > 0 ? "true" : "false");
+      btn.setAttribute("aria-label", LABEL[t]);
+      btn.setAttribute("title", TIP[t]);
+      btn.setAttribute("data-tier", String(t));
+      btn.classList.toggle("is-on", t > 0);
+      btn.classList.toggle("is-ultra", t === 2);
+    }
+  }
+
+  /* 极简档的图片闸门（在各页 <head> 里）把 src 换成了 1×1 占位，
+     原地址存在 data-ultra-src。退出极简时按原样放回去，
+     静态图（头像、徽章）就不用刷新也能回来。 */
+  function restoreImages() {
+    var imgs = document.querySelectorAll("img[data-ultra-src]");
+    for (var i = 0; i < imgs.length; i += 1) {
+      var img = imgs[i];
+      var src = img.getAttribute("data-ultra-src");
+      img.removeAttribute("data-ultra-src");
+      if (src) img.setAttribute("src", src);
     }
   }
 
   /* ---------- 开关 ---------- */
-  function set(on, options) {
-    if (on) root.dataset.lite = "1";
+  function set(next, options) {
+    var t = next === true ? 1 : next === false ? 0 : Number(next);
+    if (t !== 1 && t !== 2) t = 0;
+
+    var was = tier();
+
+    if (t > 0) root.dataset.lite = String(t);
     else delete root.dataset.lite;
 
-    write(KEY, on ? "1" : "0");
+    write(KEY, String(t));
     write(AUTO_KEY, options && options.auto ? "1" : null);
+
+    if (was === 2 && t < 2) restoreImages();
 
     syncButtons();
     /* 派发在 document 上：各模块都监听 document，
        从 window 发出去的事件不会往下冒泡，收不到 */
-    document.dispatchEvent(new CustomEvent("hnyz:lite", { detail: { on: on } }));
+    document.dispatchEvent(
+      new CustomEvent("hnyz:lite", { detail: { on: t > 0, tier: t } })
+    );
   }
 
-  /* 首次访问 + 设备吃力：自动开一次。
-     head 里的预置脚本已经挂上了 data-lite，这里只补存储和提示。
-     用户关过之后写的是 "0"，不会再自动开。 */
+  /* ---------- 首次访问自动开轻量 ---------- */
   function maybeAuto() {
     if (read(KEY) !== null) return;
     if (!isOn()) return;
@@ -120,10 +175,80 @@
     }, 2600);
   }
 
-  /* 电脑上加一个快捷键：Shift+L。
-     输入框里按 L 不算，别把留言板写成“轻量模式”。 */
+  /* ---------- 长按羽毛 → 极简 ---------- */
+  var holdTimer = 0;
+  var holdTarget = null;
+  /* 这一次按下是不是已经长按生效过？
+     长按之后浏览器还会补一个 click，得在抬起时把它吞掉，
+     否则刚进极简又被那一下点回关闭。按了多久都能对上，
+     不靠定时器猜。 */
+  var pressWasLong = false;
+  var swallowClick = false;
+
+  function clearHold() {
+    if (holdTimer) {
+      window.clearTimeout(holdTimer);
+      holdTimer = 0;
+    }
+    if (holdTarget) {
+      holdTarget.classList.remove("is-holding");
+      holdTarget = null;
+    }
+  }
+
+  function enterUltra() {
+    set(2, { auto: false });
+    toast("极简模式：图片、字体和装饰全部关掉，只留文字。再长按羽毛退出。");
+  }
+
+  function leaveUltra() {
+    set(0, { auto: false });
+    toast("已恢复完整效果。项目封面和图集是刷新后才重新载入的。");
+  }
+
+  function pressStart(btn) {
+    clearHold();
+    pressWasLong = false;
+    holdTarget = btn;
+    btn.classList.add("is-holding");
+    holdTimer = window.setTimeout(function () {
+      holdTimer = 0;
+      pressWasLong = true;
+      btn.classList.remove("is-holding");
+      holdTarget = null;
+
+      if (tier() === 2) leaveUltra();
+      else enterUltra();
+    }, HOLD_MS);
+  }
+
+  function bindPress() {
+    document.addEventListener("pointerdown", function (event) {
+      var btn = event.target.closest ? event.target.closest("[data-lite-toggle]") : null;
+      if (!btn) return;
+      /* 鼠标只认左键；触摸和笔都算 */
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      pressStart(btn);
+    }, { passive: true });
+
+    /* 不能用 blur：按下按钮会让它拿到焦点，原焦点元素一 blur
+       就会把刚点着的长按计时器清掉，长按永远等不到 650ms */
+    ["pointerup", "pointercancel", "pointerleave"].forEach(function (type) {
+      document.addEventListener(type, clearHold, { passive: true, capture: true });
+    });
+
+    /* 抬起时才知道这一下是长按：把紧随其后的 click 标记为吞掉 */
+    document.addEventListener("pointerup", function () {
+      if (!pressWasLong) return;
+      pressWasLong = false;
+      swallowClick = true;
+      window.setTimeout(function () { swallowClick = false; }, 600);
+    }, { passive: true, capture: true });
+  }
+
+  /* ---------- 键盘：Shift+L 切轻量，Shift+Alt+L 切极简 ---------- */
   function onKey(event) {
-    if (!event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (!event.shiftKey || event.ctrlKey || event.metaKey) return;
     if (event.key !== "L" && event.key !== "l") return;
 
     var el = event.target;
@@ -131,21 +256,36 @@
     if (tag === "input" || tag === "textarea" || tag === "select" || (el && el.isContentEditable)) return;
 
     event.preventDefault();
-    var next = !isOn();
+
+    if (event.altKey) {
+      if (tier() === 2) leaveUltra();
+      else enterUltra();
+      return;
+    }
+
+    var next = isOn() ? 0 : 1;
     set(next, { auto: false });
     toast(next ? "轻量模式：动画、模糊、阴影和粒子都关了" : "已恢复完整效果");
   }
 
   function bind() {
     syncButtons();
-
+    bindPress();
     document.addEventListener("keydown", onKey);
 
     document.addEventListener("click", function (event) {
       var btn = event.target.closest ? event.target.closest("[data-lite-toggle]") : null;
       if (!btn) return;
       event.preventDefault();
-      var next = !isOn();
+
+      if (swallowClick) {
+        swallowClick = false;
+        return;
+      }
+
+      var t = tier();
+      /* 极简态点一下就是退出；其余在关/开轻量之间切 */
+      var next = t === 0 ? 1 : 0;
       set(next, { auto: false });
       toast(next ? "轻量模式：动画、模糊、阴影和粒子都关了" : "已恢复完整效果");
     });
@@ -160,8 +300,11 @@
   maybeAuto();
 
   window.HNYZ_LITE = {
+    tier: tier,
+    toast: toast,
     isOn: isOn,
+    isUltra: ultra,
     set: set,
-    toggle: function () { set(!isOn(), { auto: false }); }
+    toggle: function () { set(isOn() ? 0 : 1, { auto: false }); }
   };
 })();

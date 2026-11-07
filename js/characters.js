@@ -15,6 +15,10 @@
   const stage = document.querySelector("[data-char-stage]");
   if (!stage) return;
 
+  /* 极简档：这一片全是图（站位小人、立绘、装饰），一张都不建。
+     连按钮都不生成，CSS 那边也把 .char-splash 藏起来了 */
+  if (document.documentElement.dataset.lite === "2") return;
+
   const bubbleHost = document.querySelector("[data-char-bubble]");
 
   const splash = document.querySelector("[data-char-splash]");

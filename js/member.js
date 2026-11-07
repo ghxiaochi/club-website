@@ -12,6 +12,9 @@
   const members = Array.isArray(window.HNYZ_MEMBERS) ? window.HNYZ_MEMBERS : [];
   const profiles = window.HNYZ_PROFILES || {};
 
+  /* 极简档：封面、立绘、贴纸一张都不建 */
+  const isUltra = () => document.documentElement.dataset.lite === "2";
+
   const root = document.querySelector("[data-member-root]");
   const heroEl = document.querySelector("#member-hero");
   const grid = document.querySelector("#member-projects");
@@ -115,6 +118,7 @@
     sprites.setAttribute("aria-hidden", "true");
 
     (Array.isArray(profile.sprites) ? profile.sprites : []).forEach((sprite, index) => {
+      if (isUltra()) return;
       const src = (sprite && sprite.src) || "";
       if (!src) return;
       const img = document.createElement("img");
@@ -166,7 +170,7 @@
     const wrap = document.createElement("div");
     wrap.className = "project-cover";
 
-    if (member.coverImg) {
+    if (member.coverImg && !isUltra()) {
       const img = document.createElement("img");
       img.src = member.coverImg;
       img.alt = member.title || member.repo;

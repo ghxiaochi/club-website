@@ -1,5 +1,5 @@
 /* =========================================================
-   HNYZ · 轻量模式（html[data-lite="1"]）
+   HNYZ · 轻量模式（html[data-lite]）
    ---------------------------------------------------------
    只做减法，不改布局：所有尺寸、间距、字号一律不动，
    关掉的只有「好看但不影响读懂」的东西。
@@ -15,13 +15,13 @@
 /* ---------------------------------------------------------
    1. 全局：不再有动画
    --------------------------------------------------------- */
-html[data-lite="1"] {
+html[data-lite] {
   scroll-behavior: auto !important;
 }
 
-html[data-lite="1"] *,
-html[data-lite="1"] *::before,
-html[data-lite="1"] *::after {
+html[data-lite] *,
+html[data-lite] *::before,
+html[data-lite] *::after {
   animation-duration: 1ms !important;
   animation-delay: 0s !important;
   animation-iteration-count: 1 !important;
@@ -30,10 +30,10 @@ html[data-lite="1"] *::after {
 }
 
 /* 帧率无关的装饰也停掉：滚动进度条、扫描线这类跟着 rAF 走的东西 */
-html[data-lite="1"] .scroll-progress,
-html[data-lite="1"] .scanlines,
-html[data-lite="1"] .hnyz-scanlines,
-html[data-lite="1"] .crt::after {
+html[data-lite] .scroll-progress,
+html[data-lite] .scanlines,
+html[data-lite] .hnyz-scanlines,
+html[data-lite] .crt::after {
   display: none !important;
 }
 
@@ -42,25 +42,25 @@ html[data-lite="1"] .crt::after {
    ---------------------------------------------------------
    禁用模糊后，半透明的顶栏会让下面的字透上来，必须补一层底色。
    --------------------------------------------------------- */
-html[data-lite="1"] * {
+html[data-lite] * {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
 }
 
-html[data-lite="1"] .site-header {
+html[data-lite] .site-header {
   background: var(--bg, #fbfcff) !important;
 }
 
-html[data-lite="1"] .style-deck,
-html[data-lite="1"] .site-nav {
+html[data-lite] .style-deck,
+html[data-lite] .site-nav {
   background: var(--bg, #fbfcff) !important;
 }
 
 /* ---------------------------------------------------------
    3. canvas 特效不画
    --------------------------------------------------------- */
-html[data-lite="1"] .matrix-rain,
-html[data-lite="1"] .click-fx {
+html[data-lite] .matrix-rain,
+html[data-lite] .click-fx {
   display: none !important;
 }
 
@@ -70,6 +70,14 @@ html[data-lite="1"] .click-fx {
    基础外观在 skins.css 的按钮组里（和风格、刷新同一套），
    这里只补开启态：羽毛亮起来，一眼能看出现在是轻量模式。
    --------------------------------------------------------- */
+.lite-toggle {
+  position: relative;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
 .lite-toggle svg {
   width: 17px;
   height: 17px;
@@ -82,10 +90,54 @@ html[data-lite="1"] .click-fx {
   box-shadow: 0 0 0 3px var(--blue-soft, rgba(37, 99, 235, 0.1));
 }
 
+/* 极简档：实心蓝，和轻量的淡淡一圈区分开 */
+.lite-toggle.is-ultra,
+.lite-toggle.is-ultra.is-on {
+  color: #fff;
+  border-color: var(--blue);
+  background: var(--blue);
+  box-shadow: none;
+}
+
 /* 终端风里不要那圈光晕 */
 .tty .lite-toggle.is-on {
   box-shadow: none !important;
   background: transparent !important;
+}
+
+.tty .lite-toggle.is-ultra {
+  color: var(--blue) !important;
+}
+
+/* 长按 650ms 才进极简：手指按住的这段时间得有点回应，
+   否则用户不知道「按住了没有」。一圈从内向外收的描边刚好够用，
+   而且只在轻量档放行（极简档本身要求零动画）。 */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-lite="1"] .lite-toggle.is-holding::after {
+    animation-duration: 0.65s !important;
+  }
+}
+
+.lite-toggle.is-holding::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 10px;
+  border: 1px solid currentColor;
+  opacity: 0.35;
+  pointer-events: none;
+  animation: lite-hold 0.65s linear both;
+}
+
+@keyframes lite-hold {
+  from {
+    transform: scale(0.78);
+    opacity: 0.5;
+  }
+  to {
+    transform: scale(1);
+    opacity: 0.12;
+  }
 }
 
 /* ---------------------------------------------------------
@@ -97,41 +149,235 @@ html[data-lite="1"] .click-fx {
    正文、卡片、按钮的尺寸和位置一律不动。
    --------------------------------------------------------- */
 @media (min-width: 900px) {
-  html[data-lite="1"] .bg-orbs,
-  html[data-lite="1"] .bg-icons,
-  html[data-lite="1"] .hnyz-glow,
-  html[data-lite="1"] .hnyz-ticker,
-  html[data-lite="1"] .hero::before,
-  html[data-lite="1"] .hero::after {
+  html[data-lite] .bg-orbs,
+  html[data-lite] .bg-icons,
+  html[data-lite] .hnyz-glow,
+  html[data-lite] .hnyz-ticker,
+  html[data-lite] .hero::before,
+  html[data-lite] .hero::after {
     display: none !important;
   }
 
   /* 悬停不再上浮、不再 3D 倾斜：少一层合成，鼠标划过也更稳 */
-  html[data-lite="1"] .project-card,
-  html[data-lite="1"] .project-card:hover,
-  html[data-lite="1"] .project-card:hover .project-cover img,
-  html[data-lite="1"] .hero-stat:hover,
-  html[data-lite="1"] .gallery-item:hover,
-  html[data-lite="1"] .style-card:hover,
-  html[data-lite="1"] .btn:hover,
-  html[data-lite="1"] .project-source:hover .source-arrow {
+  html[data-lite] .project-card,
+  html[data-lite] .project-card:hover,
+  html[data-lite] .project-card:hover .project-cover img,
+  html[data-lite] .hero-stat:hover,
+  html[data-lite] .gallery-item:hover,
+  html[data-lite] .style-card:hover,
+  html[data-lite] .btn:hover,
+  html[data-lite] .project-source:hover .source-arrow {
     transform: none !important;
   }
 
   /* 大块阴影在 4K 上是一整屏的填充成本，平掉之后边界靠描边撑住 */
-  html[data-lite="1"] .site-header,
-  html[data-lite="1"] .project-card,
-  html[data-lite="1"] .gallery-item,
-  html[data-lite="1"] .join-card,
-  html[data-lite="1"] .style-deck,
-  html[data-lite="1"] .ladder-play,
-  html[data-lite="1"] .ladder-board {
+  html[data-lite] .site-header,
+  html[data-lite] .project-card,
+  html[data-lite] .gallery-item,
+  html[data-lite] .join-card,
+  html[data-lite] .style-deck,
+  html[data-lite] .ladder-play,
+  html[data-lite] .ladder-board {
     box-shadow: none !important;
   }
 }
 
 /* ---------------------------------------------------------
-   6. 右下角一句话
+   6. 极简档：只留文字
+   ---------------------------------------------------------
+   超低端设备（512MB 内存、2G、十年前的上网本）连「画一张图」
+   都吃力。这一档在轻量之上再砍掉整层图像与排版装饰：
+
+     · 图片一张都不请求（head 里的闸门负责拦截，见各页 <head>）
+     · 字体退回系统栈，不加载自定义字形
+     · 渐变、阴影、圆角、描边、倾斜全部拍平
+     · 卡片退成「一页纸」：底色、一条细线、黑字
+
+   尺寸和位置照旧，只改「看起来贵不贵」，不改「读不读得懂」。
+   --------------------------------------------------------- */
+
+html[data-lite="2"] {
+  --radius-sm: 0px;
+  --radius: 0px;
+  --radius-lg: 0px;
+}
+
+/* 字体：全站一套系统无衬线，等宽留给代码和数字 */
+html[data-lite="2"] body,
+html[data-lite="2"] button,
+html[data-lite="2"] input,
+html[data-lite="2"] textarea,
+html[data-lite="2"] select {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif !important;
+}
+
+html[data-lite="2"] :where(h1, h2, h3, h4, h5, h6, .display-title, .hero-title) {
+  font-family: inherit !important;
+  letter-spacing: 0 !important;
+  text-shadow: none !important;
+}
+
+html[data-lite="2"] :where(code, pre, kbd, samp, .mono, [class*="terminal"]) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace !important;
+}
+
+/* 圆角拍平：这一条全局生效，但不改盒子尺寸与位置 */
+html[data-lite="2"] *,
+html[data-lite="2"] *::before,
+html[data-lite="2"] *::after {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  filter: none !important;
+}
+
+/* 渐变、悬浮、倾斜只拿内容块开刀。
+   不能全局 background-image: none —— 终端风整块外壳的边框、
+   网格、扫描线都是画在背景层上的，一刀切会让主页散架 */
+html[data-lite="2"] :where(
+  .project-card,
+  .join-card,
+  .style-card,
+  .style-deck,
+  .hero-stat,
+  .hero,
+  .gallery-item,
+  .ladder-play,
+  .ladder-board,
+  .guestbook-entry,
+  .site-header,
+  .site-footer,
+  .btn,
+  .btn-primary,
+  .btn-ghost
+) {
+  background-image: none !important;
+}
+
+html[data-lite="2"] :where(
+  .project-card,
+  .gallery-item,
+  .hero-stat,
+  .style-card,
+  .btn,
+  .project-source,
+  .project-cover img
+) {
+  transform: none !important;
+}
+
+/* 标题后半句本来靠 background-clip: text 上渐变，
+   背景图一拍平字就透明了：这里换回实色填充 */
+html[data-lite="2"] .accent-text {
+  background-image: none !important;
+  -webkit-text-fill-color: currentColor !important;
+  color: var(--blue) !important;
+}
+
+/* 图片：闸门已把 src 换成 1×1 占位，这里直接不占位，
+   空出来的地方用一行说明文字交代，别让读者以为是坏了 */
+html[data-lite="2"] img {
+  display: none !important;
+}
+
+html[data-lite="2"] .project-cover {
+  display: grid;
+  place-items: center;
+  background: var(--panel-2, #eef2f8) !important;
+  border: 1px solid var(--border, #d8e0ec);
+}
+
+html[data-lite="2"] .project-cover::after {
+  content: "极简模式 · 封面未加载";
+  position: static;
+  inset: auto;
+  background: none;
+  font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
+  color: var(--muted, #64748b);
+  letter-spacing: 0;
+}
+
+/* 占位卡里那圈渐变网格、`</>`、仓库名全部让位，
+   只留上面那行「封面未加载」，免得和 ::after 叠在一起 */
+html[data-lite="2"] .cover-placeholder {
+  display: none !important;
+}
+
+/* 图集：卡片留一条标题，图位换成说明 */
+html[data-lite="2"] .gallery-item {
+  background: var(--panel, #fff) !important;
+  border: 1px solid var(--border, #d8e0ec);
+}
+
+html[data-lite="2"] .gallery-item__button {
+  display: grid;
+  place-items: center;
+  min-height: 96px;
+  background: var(--panel-2, #eef2f8) !important;
+  border-bottom: 1px solid var(--border, #d8e0ec);
+  cursor: default;
+}
+
+html[data-lite="2"] .gallery-item__button::before {
+  content: "极简模式 · 图片未加载";
+  font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
+  color: var(--muted, #64748b);
+}
+
+/* 头像、徽章、角色立绘所在的整块装饰层不占位 */
+html[data-lite="2"] .hnyz-avatar,
+html[data-lite="2"] .hnyz-pet,
+html[data-lite="2"] .char-splash,
+html[data-lite="2"] .member-chibi {
+  display: none !important;
+}
+
+/* 边框改用一条细实线，块与块之间靠留白分开 */
+html[data-lite="2"] :where(.project-card, .join-card, .style-card, .hero-stat, .ladder-play, .ladder-board) {
+  border: 1px solid var(--border, #d8e0ec) !important;
+  background: var(--panel, #fff) !important;
+}
+
+/* 极简时按钮就是个方框，不再有渐变和悬浮 */
+html[data-lite="2"] :where(.btn, .btn-primary, .btn-ghost) {
+  background: transparent !important;
+  border: 1px solid currentColor !important;
+  color: inherit !important;
+}
+
+/* 顶栏和底部保持一条分隔线就够 */
+html[data-lite="2"] .site-header,
+html[data-lite="2"] .site-footer {
+  background: var(--bg, #fbfcff) !important;
+  border-bottom: 1px solid var(--border, #d8e0ec);
+}
+
+
+/* 主题图标是一张 22KB 的雪碧图：极简档改成文字符号，
+   规则一覆盖，浏览器就不会再为它发请求 */
+html[data-lite="2"] .theme-toggle__flip {
+  background-image: none !important;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  line-height: 1;
+}
+
+html[data-lite="2"] .theme-toggle__flip::after {
+  content: "◐";
+}
+
+html[data-lite="2"] .theme-toggle[aria-pressed="true"] .theme-toggle__flip::after,
+html[data-lite="2"][data-theme="dark"] .theme-toggle__flip::after {
+  content: "●";
+}
+
+/* ---------------------------------------------------------
+   7. 右下角一句话
+   --------------------------------------------------------- */
+
+
    --------------------------------------------------------- */
 .lite-toast {
   position: fixed;
