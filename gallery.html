@@ -72,19 +72,20 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="stylesheet" href="css/style.css?v=20261105y">
-  <link rel="stylesheet" href="css/pet.css?v=20261105y">
-  <link rel="stylesheet" href="css/personal.css?v=20261105y">
-  <link rel="stylesheet" href="css/skins.css?v=20261105y">
-  <link rel="stylesheet" href="css/lite.css?v=20261105y">
-  <script src="js/skin-boot.js?v=20261105y"></script>
+  <link rel="stylesheet" href="css/style.css?v=20261105z">
+  <link rel="stylesheet" href="css/pet.css?v=20261105z">
+  <link rel="stylesheet" href="css/personal.css?v=20261105z">
+  <link rel="stylesheet" href="css/skins.css?v=20261105z">
+  <link rel="stylesheet" href="css/lite.css?v=20261105z">
+  <script src="js/skin-boot.js?v=20261105z"></script>
   <script>
-    /* 轻量 / 极简预置：弱设备（省流量、2G、内存 ≤2G、核心 ≤2）首帧就走低配，
-       避免先跑一遍动画再关。手动开过的以 localStorage 为准（1 轻量 / 2 极简）。
+    /* 轻量 / 极致预置：弱设备（2G、内存 ≤2G、核心 ≤2）首帧就走低配，
+       避免先跑一遍动画再关。手动开过的以 localStorage 为准（1 轻量 / 2 极致）。
 
-       极简档在 <body> 解析前就装一道图片闸门：所有 <img> 一插进 DOM 就被
-       换成 1×1 透明占位，原地址留在 data-ultra-src。图片是整站最大的一笔
-       流量（图集六百多 KB、立绘与封面几 MB），拦在请求发出之前才算真省下。 */
+       极致档要的是性能，不是少下几张图：它只保留终端主页，
+       其余页面在这里首帧就跳回 index.html，根本不会渲染。
+       图片闸门仍然装一道 —— 极致的首页只剩终端，纸带层的 <img>
+       连解码都不该做，拦在请求之前最省。 */
     (function () {
       var tier = 0;
       try {
@@ -106,6 +107,12 @@
       if (!tier) return;
       document.documentElement.dataset.lite = String(tier);
       if (tier < 2) return;
+
+      /* 极致只保留终端主页 */
+      if (!/\/$/.test(location.pathname) && !/index\.html?$/i.test(location.pathname)) {
+        location.replace("index.html");
+        return;
+      }
 
       var BLANK = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
       function gate(img) {
@@ -137,32 +144,32 @@
       }
     })();
   </script>
-  <!-- 极简档：首帧就把图片藏掉。外链 CSS 要到后面才应用，
+  <!-- 极致档：首帧就把图片藏掉。外链 CSS 要到后面才应用，
        在这之前 lazy 图片会被判定为「在视口里」先拉一遍 -->
   <style>html[data-lite="2"] img{display:none!important}</style>
-  <link rel="stylesheet" href="css/type.css?v=20261105y">
-  <link rel="stylesheet" href="css/motion.css?v=20261105y">
-  <link rel="preload" href="css/dino.css?v=20261105y" as="style">
-  <link rel="stylesheet" href="css/dino.css?v=20261105y" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/dino.css?v=20261105y"></noscript>
+  <link rel="stylesheet" href="css/type.css?v=20261105z">
+  <link rel="stylesheet" href="css/motion.css?v=20261105z">
+  <link rel="preload" href="css/dino.css?v=20261105z" as="style">
+  <link rel="stylesheet" href="css/dino.css?v=20261105z" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/dino.css?v=20261105z"></noscript>
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
-  <script src="js/sfx.js?v=20261105y" defer></script>
-  <script src="js/theme.js?v=20261105y" defer></script>
-  <script src="js/theme-icon.js?v=20261105y" defer></script>
-  <script src="js/members.js?v=20261105y" defer></script>
-  <script src="js/main.js?v=20261105y" defer></script>
-  <script src="js/repo-sync.js?v=20261105y" defer></script>
-  <script src="js/pet.js?v=20261105y" defer></script>
-  <script src="js/gallery-data.js?v=20261105y" defer></script>
-  <script src="js/gallery.js?v=20261105y" defer></script>
-  <script src="js/personal.js?v=20261105y" defer></script>
-  <script src="js/click-fx.js?v=20261105y" defer></script>
-  <script src="js/skins.js?v=20261105y" defer></script>
-  <script src="js/fullscreen.js?v=20261105y" defer></script>
-  <script src="js/lite.js?v=20261105y" defer></script>
-  <script src="js/copy.js?v=20261105y" defer></script>
-  <script src="js/pwa.js?v=20261105y" defer></script>
+  <script src="js/sfx.js?v=20261105z" defer></script>
+  <script src="js/theme.js?v=20261105z" defer></script>
+  <script src="js/theme-icon.js?v=20261105z" defer></script>
+  <script src="js/members.js?v=20261105z" defer></script>
+  <script src="js/main.js?v=20261105z" defer></script>
+  <script src="js/repo-sync.js?v=20261105z" defer></script>
+  <script src="js/pet.js?v=20261105z" defer></script>
+  <script src="js/gallery-data.js?v=20261105z" defer></script>
+  <script src="js/gallery.js?v=20261105z" defer></script>
+  <script src="js/personal.js?v=20261105z" defer></script>
+  <script src="js/click-fx.js?v=20261105z" defer></script>
+  <script src="js/skins.js?v=20261105z" defer></script>
+  <script src="js/fullscreen.js?v=20261105z" defer></script>
+  <script src="js/lite.js?v=20261105z" defer></script>
+  <script src="js/copy.js?v=20261105z" defer></script>
+  <script src="js/pwa.js?v=20261105z" defer></script>
   <script>
     /* 页脚跑道不参与首屏，也不该为「只看了首屏的人」付钱：
        等它进入视口前 600px 再拉脚本。以前 load 完就 idle 注入，
@@ -173,7 +180,7 @@
         if (loaded) return;
         loaded = true;
         var script = document.createElement("script");
-        script.src = "js/dino.js?v=20261105y";
+        script.src = "js/dino.js?v=20261105z";
         script.async = true;
         document.body.appendChild(script);
       }

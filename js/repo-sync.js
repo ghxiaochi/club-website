@@ -30,6 +30,9 @@
 (() => {
   "use strict";
 
+  /* 极致档只留终端主页：这一层 UI 不会显示，别建 DOM、别发请求 */
+  if (document.documentElement.dataset.lite === "2") return;
+
   const API_BASE = "https://api.github.com/repos";
   const MIRROR_BASE = "https://ungh.cc/repos";
   const CACHE_KEY = "hnyz:github-repo-cache:v1";

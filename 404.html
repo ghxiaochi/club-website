@@ -2,7 +2,19 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script>
+    /* 极致模式只保留终端主页：这一页不是终端，首帧就回首页。
+       三个独立页没有 index 那套预置脚本，所以单独拦一道 */
+    (function () {
+      try {
+        if (localStorage.getItem("hnyz:lite") === "2") {
+          document.documentElement.dataset.lite = "2";
+          location.replace("index.html");
+        }
+      } catch (error) { /* 隐私模式 */ }
+    })();
+  </script>  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex">
   <!-- 这个页面会被 GitHub Pages 在任意深度下返回，相对路径会失效，
        所以用 <base> 把所有引用钉在站点根目录。

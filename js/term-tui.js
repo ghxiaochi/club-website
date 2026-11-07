@@ -170,7 +170,7 @@
   function loadDeepy() {
     if (deepyData || deepyLoading || !window.fetch) return;
     deepyLoading = true;
-    window.fetch("data/deepy.json?v=20261105y")
+    window.fetch("data/deepy.json?v=20261105z")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         deepyData = d;
@@ -201,7 +201,9 @@
       deepyTimer = window.requestAnimationFrame(stepDeepy);
     };
 
-    if (motionOK()) {
+    /* 极致档：只留这一张静态首帧，不取 deepy.json、不开 rAF。
+       这条 rAF 是终端里唯一一直在跑的东西，停掉它才叫真省 */
+    if (motionOK() && document.documentElement.dataset.lite !== "2") {
       /* 首屏先让位给文字，鲸鱼等浏览器闲下来再动 */
       if (window.requestIdleCallback) window.requestIdleCallback(start, { timeout: 1600 });
       else window.setTimeout(start, 900);
@@ -551,7 +553,7 @@
     var cached = readCachedRepos();
     if (cached) renderRepos(box, { repos: cached.repos });
 
-    window.fetch("data/repos.json?v=20261105y")
+    window.fetch("data/repos.json?v=20261105z")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (store) {
         if (!store || !store.repos) {
@@ -909,13 +911,22 @@
       }
     }
 
+    /* 极致档只留终端主页：跳页命令没有去处，直接说清楚 */
+    if (document.documentElement.dataset.lite === "2" &&
+        (k === "gallery" || k === "member" || k === "members" || k === "projects" || k === "repos")) {
+      echo("极致模式：只保留终端主页。项目与作品在这个终端的 <span class='t-cyn'>work</span> 板块。");
+      return;
+    }
+
     switch (k) {
       case "help":
       case "?":
         echo("可用命令：<br>" +
           "　<span class='t-cyn'>overview about work join</span>　切到对应板块<br>" +
           "　<span class='t-cyn'>0-3</span>　切板块　<span class='t-cyn'>ls</span>　列出板块<br>" +
-          "　<span class='t-cyn'>gallery member projects</span>　打开对应页面<br>" +
+          (document.documentElement.dataset.lite === "2"
+            ? ""
+            : "　<span class='t-cyn'>gallery member projects</span>　打开对应页面<br>") +
           "　<span class='t-cyn'>whoami clear</span>　我是谁 / 清屏");
         return;
       case "ls":
@@ -1082,6 +1093,10 @@
   function adoptActions() {
     var ha = document.querySelector(".header-actions");
     if (!ha) return;
+    /* 已经搬进来了就别再搬一次：反复 open 会把「原来的位置」
+       记成终端顶栏，关闭时按钮被插进已拆掉的节点里 */
+    var dock = root.querySelector(".tty__actions");
+    if (dock && ha.parentNode === dock) return;
     savedActionsParent = ha.parentNode;
     savedActionsNext = ha.nextSibling;
     root.querySelector(".tty__actions").appendChild(ha);
@@ -1113,7 +1128,10 @@
     goto(active, { instant: true });
     tick();
     if (tickTimer) window.clearInterval(tickTimer);
-    tickTimer = window.setInterval(tick, 1000);
+    /* 极致档：时钟停在打开那一刻，不再每秒重绘一次整行 */
+    if (document.documentElement.dataset.lite !== "2") {
+      tickTimer = window.setInterval(tick, 1000);
+    }
   }
 
   function close() {
@@ -1255,7 +1273,8 @@
     if (on && !document.querySelector("section.hero")) return;
     if (on) {
       if (!built) build();
-      open();
+      /* 已经开着就不要再 open 一次：adoptActions 与 goto 都会重跑 */
+      if (!isOpen) open();
     } else if (built) {
       teardown();
     }

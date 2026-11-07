@@ -33,7 +33,7 @@
    发版时改 VERSION，更老的缓存在 activate 里被清掉。
    ========================================================= */
 
-const VERSION = "20261105y";
+const VERSION = "20261105z";
 const CACHE = `hnyz-v${VERSION}`;
 
 /* 站内根路径：用 "./" 就地解析，
@@ -195,7 +195,7 @@ function isCacheName(name) {
   return name.startsWith("hnyz-v");
 }
 
-/* 从缓存名里取版本号：hnyz-v20261105y → 20261105y */
+/* 从缓存名里取版本号：hnyz-v20261105z → 20261105z */
 function versionOf(name) {
   return name.replace(/^hnyz-v/, "");
 }
@@ -293,9 +293,9 @@ async function offlineDocument(cache, request) {
   });
 }
 
-/* ---------- 档位：极简（2）不预取图片、音频与动画字体 ----------
+/* ---------- 档位：极致（2）不预取图片、音频与动画字体 ----------
    页面在切档时把当前档位写进 hnyz-state 缓存，并 postMessage 一份。
-   SW 装/激活时读一次：极简档的机器不该替图集、立绘、音效和
+   SW 装/激活时读一次：极致档的机器不该替图集、立绘、音效和
    动画字体预付那几百 KB 到几 MB —— 它连看都不看。 */
 const STATE_CACHE = "hnyz-state";
 const STATE_KEY = "./__hnyz_lite";
@@ -322,7 +322,7 @@ self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
     const tier = await readTier();
-    /* 极简档不装动画字体（标题走系统栈）与 PWA 大图标，
+    /* 极致档不装动画字体（标题走系统栈）与 PWA 大图标，
        只留 favicon —— 地址栏那个小图标还得有 */
     const core = tier === "2"
       ? CORE.filter(
@@ -398,7 +398,7 @@ self.addEventListener("activate", (event) => {
        别和用户正在看的页面抢带宽。 */
     (async () => {
       await readTier();
-      /* 极简档一张图、一段音频都不预取；中途切档也会在这里停下 */
+      /* 极致档一张图、一段音频都不预取；中途切档也会在这里停下 */
       if (liteTier === "2") return;
       for (const path of EXTRA) {
         if (liteTier === "2") return;

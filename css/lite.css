@@ -90,13 +90,18 @@ html[data-lite] .click-fx {
   box-shadow: 0 0 0 3px var(--blue-soft, rgba(37, 99, 235, 0.1));
 }
 
-/* 极简档：实心蓝，和轻量的淡淡一圈区分开 */
+/* 极致档：实心蓝 + 一圈静态光。
+   不做呼吸动画 —— 极致档要省性能，发光是画一次就停的阴影 */
 .lite-toggle.is-ultra,
 .lite-toggle.is-ultra.is-on {
   color: #fff;
   border-color: var(--blue);
   background: var(--blue);
-  box-shadow: none;
+  box-shadow:
+    0 0 0 1px rgba(59, 130, 246, 0.72),
+    0 0 0 4px rgba(59, 130, 246, 0.16),
+    0 0 16px rgba(59, 130, 246, 0.75),
+    0 0 36px rgba(59, 130, 246, 0.45);
 }
 
 /* 终端风里不要那圈光晕 */
@@ -105,13 +110,22 @@ html[data-lite] .click-fx {
   background: transparent !important;
 }
 
-.tty .lite-toggle.is-ultra {
-  color: var(--blue) !important;
+/* 但极致态要保留：它是「这台机器只剩终端」的唯一标记 */
+.tty .lite-toggle.is-ultra,
+.tty .lite-toggle.is-ultra.is-on {
+  color: #fff !important;
+  border-color: var(--blue) !important;
+  background: var(--blue) !important;
+  box-shadow:
+    0 0 0 1px rgba(59, 130, 246, 0.75),
+    0 0 0 4px rgba(59, 130, 246, 0.18),
+    0 0 16px rgba(59, 130, 246, 0.78),
+    0 0 36px rgba(59, 130, 246, 0.48) !important;
 }
 
-/* 长按 650ms 才进极简：手指按住的这段时间得有点回应，
+/* 长按 650ms 才进极致：手指按住的这段时间得有点回应，
    否则用户不知道「按住了没有」。一圈从内向外收的描边刚好够用，
-   而且只在轻量档放行（极简档本身要求零动画）。 */
+   而且只在轻量档放行（极致档本身要求零动画）。 */
 @media (prefers-reduced-motion: no-preference) {
   html[data-lite="1"] .lite-toggle.is-holding::after {
     animation-duration: 0.65s !important;
@@ -183,179 +197,58 @@ html[data-lite] .click-fx {
 }
 
 /* ---------------------------------------------------------
-   6. 极简档：只留文字
+   6. 极致档：只留终端主页
    ---------------------------------------------------------
-   超低端设备（512MB 内存、2G、十年前的上网本）连「画一张图」
-   都吃力。这一档在轻量之上再砍掉整层图像与排版装饰：
+   省的不是流量，是性能：少一层 DOM 参与布局，少一堆持续动画
+   占着主线程，少一次大图解码与合成。
 
-     · 图片一张都不请求（head 里的闸门负责拦截，见各页 <head>）
-     · 字体退回系统栈，不加载自定义字形
-     · 渐变、阴影、圆角、描边、倾斜全部拍平
-     · 卡片退成「一页纸」：底色、一条细线、黑字
+     · 纸带层整块不绘制（#main / 页头页脚 / 背景装饰）
+     · 皮肤锁定 term，TUI 是唯一界面（JS 那边锁的）
+     · 终端里所有 animation / transition 停掉：光标不闪、行不逐条打印
+     · 鲸鱼 rAF 与时钟 interval 由 JS 停；图片不建、不解码
 
-   尺寸和位置照旧，只改「看起来贵不贵」，不改「读不读得懂」。
+   其他页面在 <head> 就跳回 index.html，根本走不到这里。
    --------------------------------------------------------- */
 
-html[data-lite="2"] {
-  --radius-sm: 0px;
-  --radius: 0px;
-  --radius-lg: 0px;
+/* 顶栏里没用的按钮在极致档置灰不可点，但不 display:none。
+   一隐藏，按钮组会重排，长按抬手的瞬间手指下就换成别的按钮，
+   click 会落到「风格」上把面板打开 */
+html[data-lite="2"] .sound-toggle,
+html[data-lite="2"] .style-toggle,
+html[data-lite="2"] .sync-toggle {
+  opacity: 0.38;
+  pointer-events: none;
 }
 
-/* 字体：全站一套系统无衬线，等宽留给代码和数字 */
-html[data-lite="2"] body,
-html[data-lite="2"] button,
-html[data-lite="2"] input,
-html[data-lite="2"] textarea,
-html[data-lite="2"] select {
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI",
-    "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif !important;
-}
-
-html[data-lite="2"] :where(h1, h2, h3, h4, h5, h6, .display-title, .hero-title) {
-  font-family: inherit !important;
-  letter-spacing: 0 !important;
-  text-shadow: none !important;
-}
-
-html[data-lite="2"] :where(code, pre, kbd, samp, .mono, [class*="terminal"]) {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace !important;
-}
-
-/* 圆角拍平：这一条全局生效，但不改盒子尺寸与位置 */
-html[data-lite="2"] *,
-html[data-lite="2"] *::before,
-html[data-lite="2"] *::after {
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  text-shadow: none !important;
-  filter: none !important;
-}
-
-/* 渐变、悬浮、倾斜只拿内容块开刀。
-   不能全局 background-image: none —— 终端风整块外壳的边框、
-   网格、扫描线都是画在背景层上的，一刀切会让主页散架 */
-html[data-lite="2"] :where(
-  .project-card,
-  .join-card,
-  .style-card,
-  .style-deck,
-  .hero-stat,
-  .hero,
-  .gallery-item,
-  .ladder-play,
-  .ladder-board,
-  .guestbook-entry,
-  .site-header,
-  .site-footer,
-  .btn,
-  .btn-primary,
-  .btn-ghost
-) {
-  background-image: none !important;
-}
-
-html[data-lite="2"] :where(
-  .project-card,
-  .gallery-item,
-  .hero-stat,
-  .style-card,
-  .btn,
-  .project-source,
-  .project-cover img
-) {
-  transform: none !important;
-}
-
-/* 标题后半句本来靠 background-clip: text 上渐变，
-   背景图一拍平字就透明了：这里换回实色填充 */
-html[data-lite="2"] .accent-text {
-  background-image: none !important;
-  -webkit-text-fill-color: currentColor !important;
-  color: var(--blue) !important;
-}
-
-/* 图片：闸门已把 src 换成 1×1 占位，这里直接不占位，
-   空出来的地方用一行说明文字交代，别让读者以为是坏了 */
-html[data-lite="2"] img {
+/* 纸带层：TUI 开着时整块撤掉，连布局都不参与。
+   没开 TUI（异常兜底）时这些规则不生效，页面仍然可读，不会白屏 */
+html[data-lite="2"].tty-on #main,
+html[data-lite="2"].tty-on .site-header,
+html[data-lite="2"].tty-on .site-footer,
+html[data-lite="2"].tty-on .boot,
+html[data-lite="2"].tty-on .skip-link,
+html[data-lite="2"].tty-on .bg-orbs,
+html[data-lite="2"].tty-on .bg-icons,
+html[data-lite="2"].tty-on .hnyz-glow,
+html[data-lite="2"].tty-on .hnyz-ticker,
+html[data-lite="2"].tty-on .hnyz-avatar,
+html[data-lite="2"].tty-on .hnyz-pet,
+html[data-lite="2"].tty-on .char-splash {
   display: none !important;
 }
 
-html[data-lite="2"] .project-cover {
-  display: grid;
-  place-items: center;
-  background: var(--panel-2, #eef2f8) !important;
-  border: 1px solid var(--border, #d8e0ec);
+/* 终端里不再有任何随时间变化的东西。
+   打字的 steps、方块浮起、光标闪烁、hover 过渡，全停 */
+html[data-lite="2"] .tty,
+html[data-lite="2"] .tty *,
+html[data-lite="2"] .tty *::before,
+html[data-lite="2"] .tty *::after {
+  animation: none !important;
+  transition: none !important;
 }
 
-html[data-lite="2"] .project-cover::after {
-  content: "极简模式 · 封面未加载";
-  position: static;
-  inset: auto;
-  background: none;
-  font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
-  color: var(--muted, #64748b);
-  letter-spacing: 0;
-}
-
-/* 占位卡里那圈渐变网格、`</>`、仓库名全部让位，
-   只留上面那行「封面未加载」，免得和 ::after 叠在一起 */
-html[data-lite="2"] .cover-placeholder {
-  display: none !important;
-}
-
-/* 图集：卡片留一条标题，图位换成说明 */
-html[data-lite="2"] .gallery-item {
-  background: var(--panel, #fff) !important;
-  border: 1px solid var(--border, #d8e0ec);
-}
-
-html[data-lite="2"] .gallery-item__button {
-  display: grid;
-  place-items: center;
-  min-height: 96px;
-  background: var(--panel-2, #eef2f8) !important;
-  border-bottom: 1px solid var(--border, #d8e0ec);
-  cursor: default;
-}
-
-html[data-lite="2"] .gallery-item__button::before {
-  content: "极简模式 · 图片未加载";
-  font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
-  color: var(--muted, #64748b);
-}
-
-/* 头像、徽章、角色立绘所在的整块装饰层不占位 */
-html[data-lite="2"] .hnyz-avatar,
-html[data-lite="2"] .hnyz-pet,
-html[data-lite="2"] .char-splash,
-html[data-lite="2"] .member-chibi {
-  display: none !important;
-}
-
-/* 边框改用一条细实线，块与块之间靠留白分开 */
-html[data-lite="2"] :where(.project-card, .join-card, .style-card, .hero-stat, .ladder-play, .ladder-board) {
-  border: 1px solid var(--border, #d8e0ec) !important;
-  background: var(--panel, #fff) !important;
-}
-
-/* 极简时按钮就是个方框，不再有渐变和悬浮 */
-html[data-lite="2"] :where(.btn, .btn-primary, .btn-ghost) {
-  background: transparent !important;
-  border: 1px solid currentColor !important;
-  color: inherit !important;
-}
-
-/* 顶栏和底部保持一条分隔线就够 */
-html[data-lite="2"] .site-header,
-html[data-lite="2"] .site-footer {
-  background: var(--bg, #fbfcff) !important;
-  border-bottom: 1px solid var(--border, #d8e0ec);
-}
-
-
-/* 主题图标是一张 22KB 的雪碧图：极简档改成文字符号，
-   规则一覆盖，浏览器就不会再为它发请求 */
+/* 主题按钮的图标来自雪碧图，极致档换成文字符号：
+   一张 22KB 的图，不请求也就不解码 */
 html[data-lite="2"] .theme-toggle__flip {
   background-image: none !important;
   display: grid;
@@ -373,12 +266,73 @@ html[data-lite="2"][data-theme="dark"] .theme-toggle__flip::after {
   content: "●";
 }
 
+/* 终端里的跨页入口：点了只会被守卫弹回首页，不如不显示 */
+html[data-lite="2"] .tty a[href$=".html"] {
+  display: none !important;
+}
+
+/* 图不解码：首页只剩文字，一张图都不需要 */
+html[data-lite="2"] img {
+  display: none !important;
+}
+
+/* 终端外壳保持实色，不叠毛玻璃 */
+html[data-lite="2"] .tty {
+  background: var(--tty-bg) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
 /* ---------------------------------------------------------
-   7. 右下角一句话
+   7. 右下角提示与按钮发光
    --------------------------------------------------------- */
 
+/* 切档提示卡：标题 + 一行解释。不挡点击、不锁滚动，
+   五秒后自己走；切档时给用户一个明确的「刚才发生了什么」 */
+.lite-note {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  z-index: 9998;
+  width: min(92vw, 382px);
+  padding: 13px 16px 12px;
+  border-radius: 12px;
+  background: rgba(10, 16, 28, 0.96);
+  border: 1px solid rgba(147, 197, 253, 0.26);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.32);
+  color: #eaf1fc;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 14px);
+  transition: opacity 0.2s ease, transform 0.24s ease;
+}
 
-   --------------------------------------------------------- */
+.lite-note.is-on {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.lite-note strong {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.lite-note p {
+  margin: 5px 0 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: #a9b8cf;
+}
+
+@media (max-width: 420px) {
+  .lite-note {
+    bottom: 16px;
+    padding: 12px 14px 11px;
+  }
+}
+
 .lite-toast {
   position: fixed;
   left: 50%;

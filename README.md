@@ -206,12 +206,13 @@
 - **图片**：图集视口懒加载 + 固定宽高；项目封面与成员头像 `loading="lazy"`；图片统一 WebP。
 - **动画**：只动 `transform` / `opacity`；滚动监听合并到 `requestAnimationFrame`；`prefers-reduced-motion` 关闭非必要动效。
 - **缓存**：仓库数据 10 分钟、Service Worker 分版本；离线优先返回缓存页面。
-- **轻量模式 / 极简模式**（`js/lite.js` + `css/lite.css`）：两档减法，同一个羽毛按钮。
-  - **轻量**（`data-lite="1"`）：点击羽毛或 `Shift+L`，关掉动画、毛玻璃与 canvas 特效；电脑上额外停掉鼠标光晕、卡片 3D 倾斜、背景图标与跑马灯，画布像素比降到 1。没存过偏好又检测到 Save-Data / 2G / 内存 ≤2GB / 核心 ≤2（或 4GB 内存 + 4 核）/ 系统「减少动效」时自动开启一次。
-  - **极简**（`data-lite="2"`）：**长按羽毛 650ms**（桌面 `Shift+Alt+L`），给超低端设备（512MB 内存、2G、十年前的上网本）用。在轻量之上再砍掉整层图像：项目封面改文字占位、图集只留标题、成员立绘与头像不建、角色卡整块不启动、音效与桌宠不初始化、页脚跑道不加载、字体退回系统栈、渐变阴影圆角全部拍平。
-  - 图片不是「加载完再藏」——各页 `<head>` 的预置脚本在解析前就写好 `data-lite="2"`，并挂一道 `MutationObserver` 闸门，把插进 DOM 的 `<img>` 换成 1×1 占位（原地址存 `data-ultra-src`，退出时回填）；静态徽章与头像改用 `loading="lazy"`，配合 `display:none` 就不会发请求。实测四个页面在极简档下**图片请求数为 0**。
+- **轻量模式 / 极致模式**（`js/lite.js` + `css/lite.css`）：两档减法，同一根羽毛按钮，状态是一条线：
+  `正常 --点一下--> 轻量 --点一下--> 正常`；`轻量 --长按 650ms--> 极致 --长按/点一下--> 轻量`。
+  - **轻量**（`data-lite="1"`）：点一下羽毛（桌面 `Shift+L`），弹一张「已进入轻量模式」的提示卡；关掉动画、毛玻璃与 canvas 特效。电脑上额外停掉鼠标光晕、卡片 3D 倾斜、背景图标与跑马灯，画布像素比降到 1。没存过偏好又检测到 2G / 内存 ≤2GB / 核心 ≤2（或 4GB + 4 核）/ 系统「减少动效」时自动开启一次。
+  - **极致**（`data-lite="2"`）：长按羽毛 650ms（桌面 `Shift+Alt+L`）。**省的是性能，不是流量**：只保留终端主页 —— 皮肤锁死 `term`、纸带层整块 `display:none`、首页之外的页面在 `<head>` 就 `location.replace("index.html")`、TUI 里的跨页入口隐藏、`main.js` / `repo-sync.js` / `personal.js` / `guestbook.js` / `sfx.js` / `pet.js` 等在入口处直接 return、鲸鱼 rAF 与时钟 `setInterval` 不启动、图片不解码、终端内所有 `animation` / `transition` 停掉。按钮实心蓝 + 一圈静态光，是「这台机器只剩终端」的唯一标记。
+  - 交互细节：长按抬手时浏览器补的那一次 click 会在捕获阶段整条吞掉（切档会重排顶栏，手指下可能已经换成别的按钮）；短按在 `pointerup` 里按实际按住时长判定，不依赖 click —— 低端机上 650ms 定时器被主线程推迟也不会漏。
   - 开关状态存在 `hnyz:lite`（`1` / `2` / 删掉），切换不刷新页面，各模块监听 `hnyz:lite` 的 `detail.tier` 自行启停；光场 iframe 会带 `lite=1` 重新加载，像素比压到 1、粒子减半。
-  - **Service Worker 也看档位**：页面把档位写进 `hnyz-state` 缓存并 `postMessage` 给 SW，SW 装完后那轮串行预取在极简档下整段跳过。实测缓存条目 101 → 49，图片 39 → 1（只剩 favicon），音频与动画字体 0。
+  - **Service Worker 也看档位**：页面把档位写进 `hnyz-state` 缓存并 `postMessage` 给 SW，SW 装完后那轮串行预取在极致档下整段跳过。
 
 发版时改三处版本号：HTML 里的 `?v=`、`sw.js` 的 `VERSION`、`skin-boot.js` 的 `V`。
 

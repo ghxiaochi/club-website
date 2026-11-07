@@ -2,7 +2,19 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+  <script>
+    /* 极致模式只保留终端主页：这一页不是终端，首帧就回首页。
+       三个独立页没有 index 那套预置脚本，所以单独拦一道 */
+    (function () {
+      try {
+        if (localStorage.getItem("hnyz:lite") === "2") {
+          document.documentElement.dataset.lite = "2";
+          location.replace("index.html");
+        }
+      } catch (error) { /* 隐私模式 */ }
+    })();
+  </script>  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="HNYZ 编程社的像素小恐龙天梯榜：跑一局，看你能排到第几。">
   <meta name="theme-color" content="#081426">
 
@@ -38,9 +50,9 @@
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="application-name" content="HNYZ">
 
-  <link rel="stylesheet" href="css/style.css?v=20261105y">
-  <link rel="stylesheet" href="css/dino.css?v=20261105y">
-  <link rel="stylesheet" href="css/ladder.css?v=20261105y">
+  <link rel="stylesheet" href="css/style.css?v=20261105z">
+  <link rel="stylesheet" href="css/dino.css?v=20261105z">
+  <link rel="stylesheet" href="css/ladder.css?v=20261105z">
 </head>
 <body class="ladder-page">
 
@@ -125,7 +137,7 @@
 
   </main>
 
-  <script src="js/dino.js?v=20261105y" defer></script>
-  <script src="js/ladder.js?v=20261105y" defer></script>
+  <script src="js/dino.js?v=20261105z" defer></script>
+  <script src="js/ladder.js?v=20261105z" defer></script>
 </body>
 </html>

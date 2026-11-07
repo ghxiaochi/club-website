@@ -56,6 +56,9 @@
 
   function readStored() {
     try {
+      /* 极致档只留终端主页：皮肤锁死在 term，TUI 由下面的初始同步打开 */
+      const lite = window.localStorage.getItem("hnyz:lite");
+      if (document.documentElement.dataset.lite === "2" || lite === "2") return "term";
       const value = window.localStorage.getItem(KEY);
       /* 主页换成终端之前，蓝白风存的是 "default"；这批人第一次进来
          跟新访客一样落到终端，之后自己选的蓝白会照常记住 */
@@ -360,6 +363,8 @@
 
   function openDeck() {
     if (!trigger || deck.open) return;
+    /* 极致档只留终端主页：没有第二套皮肤可选，面板也别打开 */
+    if (document.documentElement.dataset.lite === "2") return;
 
     syncCurrentUi();
     const index = currentIndex();
@@ -476,7 +481,7 @@
   const HALO_VERSION = (() => {
     const own = document.querySelector('script[src*="skins.js"]');
     const match = own && own.src.match(/[?&]v=([^&]+)/);
-    return match ? decodeURIComponent(match[1]) : "20261105y";
+    return match ? decodeURIComponent(match[1]) : "20261105z";
   })();
   let haloFrame = null;
 
@@ -654,8 +659,12 @@
     });
   }
 
-  async function applyStyle(next) {
+  async function applyStyle(next, opts) {
     if (!STYLES.includes(next) || busy) return;
+
+    /* 极致档只留终端主页：除 term 外的皮肤一律不接。
+       退出极致时 lite.js 会先落回轻量档，再来恢复原皮肤 */
+    if (document.documentElement.dataset.lite === "2" && next !== "term") return;
 
     if (next === current) {
       closeDeck();
@@ -668,7 +677,8 @@
       scrollMemo = window.scrollY || window.pageYOffset || 0;
     }
 
-    if (reduce.matches) {
+    /* 切档时直接换，不播整屏幕布：极致档要的就是零开销 */
+    if (reduce.matches || (opts && opts.instant)) {
       closeDeck();
       commit(next);
       if (FIXED_STYLES[next] === undefined && scrollMemo > 0) {

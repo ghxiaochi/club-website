@@ -14,7 +14,7 @@
   const grid = document.querySelector("#gallery-grid");
   if (!grid) return;
 
-  /* 极简档：一张图都不请求，网格退成「标题 + 说明」的清单 */
+  /* 极致档：一张图都不请求，网格退成「标题 + 说明」的清单 */
   const isUltra = () => document.documentElement.dataset.lite === "2";
 
   const countEl = document.querySelector("#gallery-count");
@@ -83,7 +83,7 @@
     button.type = "button";
     button.setAttribute("aria-label", `查看大图：${item.title || "图集图片"}`);
 
-    /* 极简档连 thumb 都不建：<img> 一旦出现，浏览器就会开请求 */
+    /* 极致档连 thumb 都不建：<img> 一旦出现，浏览器就会开请求 */
     if (!isUltra()) {
       const image = document.createElement("img");
       /* 首屏两行先加载，其余等滚到附近再给 src。
@@ -121,7 +121,7 @@
 
     button.addEventListener("click", () => {
       if (isUltra()) {
-        if (window.HNYZ_LITE) window.HNYZ_LITE.toast("极简模式不加载大图，长按右上角那根羽毛可以退出。");
+        if (window.HNYZ_LITE) window.HNYZ_LITE.toast("极致模式不加载大图，长按右上角那根羽毛可以退出。");
         return;
       }
       openLightbox(index);

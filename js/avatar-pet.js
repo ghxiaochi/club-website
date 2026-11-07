@@ -17,7 +17,7 @@
   const pet = document.querySelector("[data-hnyz-avatar]");
   if (!pet) return;
 
-  /* 极简档：桌宠是纯装饰，连事件都不挂 */
+  /* 极致档：桌宠是纯装饰，连事件都不挂 */
   if (document.documentElement.dataset.lite === "2") return;
 
   const trigger = pet.querySelector("[data-hnyz-avatar-trigger]");

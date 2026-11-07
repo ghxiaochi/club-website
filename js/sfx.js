@@ -10,6 +10,9 @@
 (() => {
   "use strict";
 
+  /* 极致档只留终端主页：这一层 UI 不会显示，别建 DOM、别发请求 */
+  if (document.documentElement.dataset.lite === "2") return;
+
   const SRC = {
     hover: "audio/jump.mp3",
     click: "audio/pat.mp3",
@@ -49,7 +52,7 @@
   function play(name, options) {
     const key = ALIAS[name] || name;
     if (!enabled || !SRC[key]) return null;
-    /* 极简档不播：解码 MP3 对这类设备是实打实的开销 */
+    /* 极致档不播：解码 MP3 对这类设备是实打实的开销 */
     if (document.documentElement.dataset.lite === "2") return null;
 
     const opts = options || {};

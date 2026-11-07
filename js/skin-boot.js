@@ -14,7 +14,7 @@
 (function () {
   "use strict";
 
-  var V = "?v=20261105y";
+  var V = "?v=20261105z";
 
   var SKINS = {
     term: ["css/skin-term.css", "css/term-tui.css"],
@@ -69,6 +69,11 @@
      都按 term 先把表插进去，首帧就是终端，不会先闪一下蓝白 */
   function stored() {
     try {
+      /* 极致档只留终端主页：不管上次存的是哪套皮肤，首帧就是 term。
+         这里同时看 dataset 和 localStorage —— skin-boot 在 <head> 里
+         比档位预置脚本先执行，此时 dataset 可能还没写上 */
+      var lite = window.localStorage.getItem("hnyz:lite");
+      if (document.documentElement.dataset.lite === "2" || lite === "2") return "term";
       var v = window.localStorage.getItem("hnyz:style");
       if (v === "halo") return "halo";
       if (v === "term") return "term";
@@ -87,6 +92,8 @@
   /* 只有当鼠标真的移到「风格」按钮上（或键盘聚焦它）时才预热其余皮肤：
      不切皮肤的人一个字节都不用付 */
   function warm() {
+    /* 极致档没有别的皮肤可选，别把另外几套的 CSS 拉下来 */
+    if (document.documentElement.dataset.lite === "2") return;
     Object.keys(SKINS).forEach(function (name) { ensure(name); });
   }
 

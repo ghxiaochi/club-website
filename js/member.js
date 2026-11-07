@@ -12,7 +12,7 @@
   const members = Array.isArray(window.HNYZ_MEMBERS) ? window.HNYZ_MEMBERS : [];
   const profiles = window.HNYZ_PROFILES || {};
 
-  /* 极简档：封面、立绘、贴纸一张都不建 */
+  /* 极致档：封面、立绘、贴纸一张都不建 */
   const isUltra = () => document.documentElement.dataset.lite === "2";
 
   const root = document.querySelector("[data-member-root]");

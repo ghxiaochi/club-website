@@ -1,25 +1,31 @@
 /* =========================================================
-   HNYZ · 轻量模式 / 极简模式
+   HNYZ · 轻量模式 / 极致模式
    ---------------------------------------------------------
-   两档减法，按设备能不能扛分开：
+   两档减法，都从同一根羽毛进去：
 
-     轻量（data-lite="1"）—— 老手机、学校旧电脑、开了省流量的浏览器
-       关掉所有非必要的动画、模糊和 canvas 特效，只留下内容本身。
-       电脑上额外关掉鼠标光晕、卡片 3D 倾斜、桌面背景图标与跑马灯，
-       画布像素比也降到 1。
+     正常（0）──点一下──▶ 轻量（1）──点一下──▶ 正常
+                          │
+                        长按
+                          ▼
+                       极致（2）──长按 / 点一下──▶ 轻量（1）
 
-     极简（data-lite="2"）—— 超低端：十年前的上网本、2G 网络、
-       只剩 512MB 内存的机器
-       在轻量之上再砍掉「图」这一整层：项目封面、成员立绘、图集缩略图、
-       头像、首屏角色画布一律不请求（省下几百 KB 到几 MB），
-       字体退回系统栈，渐变、圆角、阴影、描边全部拍平成纸面。
-       页面退化成一份能读、能点的纯文字文档。
+   轻量（data-lite="1"）—— 老手机、学校旧电脑
+     关掉所有非必要的动画、模糊和 canvas 特效，只留下内容本身。
+     电脑上额外关掉鼠标光晕、卡片 3D 倾斜、背景图标与跑马灯，
+     画布像素比也降到 1。
+
+   极致（data-lite="2"）—— 超低端：十年前的上网本、512MB 内存
+     不是省流量，是省性能：这一档只保留终端主页（index.html +
+     term 皮肤 + TUI），其余页面一律跳回来，纸带层整块不绘制，
+     图像与动效类脚本全部早退。终端里的四个板块仍是完整文字，
+     所以「只留主页」不等于「只剩一屏」。
 
    怎么开：
-     1. 点顶栏那根羽毛 → 轻量；
-     2. 长按那根羽毛 650ms → 极简（再长按一次退出）；
-     3. 上次开过，这次照旧（localStorage 的 hnyz:lite 存 1 或 2）；
-     4. 第一次来、设备又明显吃力（Save-Data、2G、内存 ≤2G、核心 ≤2）
+     1. 点顶栏那根羽毛 → 轻量，弹一张提示卡；
+     2. 再点一下 → 正常；
+     3. 长按那根羽毛 650ms → 极致（只留终端主页），按钮发光；
+     4. 极致下长按（或点一下）→ 回到轻量；再点一下 → 正常；
+     5. 第一次来、设备又明显吃力（Save-Data、2G、内存 ≤2G、核心 ≤2）
         自动开一次轻量，右下角说一句，随时能关。
 
    切换不刷新页面：
@@ -31,9 +37,10 @@
 
   var KEY = "hnyz:lite";
   var AUTO_KEY = "hnyz:lite:auto";
+  var PREV_KEY = "hnyz:ultra:prev";
   var root = document.documentElement;
 
-  /* 长按多久算「要极简」。太短容易误触，太长像卡住 */
+  /* 长按多久算「要极致」。太短容易误触，太长像卡住 */
   var HOLD_MS = 650;
 
   function read(key) {
@@ -53,7 +60,7 @@
     }
   }
 
-  /* 0 关 / 1 轻量 / 2 极简 */
+  /* 0 关 / 1 轻量 / 2 极致 */
   function tier() {
     var v = root.dataset.lite;
     if (v === "2") return 2;
@@ -69,7 +76,19 @@
     return tier() === 2;
   }
 
-  /* ---------- 右下角一句话 ---------- */
+  /* 极致只认首页：根路径或 index.html */
+  function onHome() {
+    var p = location.pathname;
+    return /\/$/.test(p) || /index\.html?$/i.test(p);
+  }
+
+  function guard() {
+    if (!ultra() || onHome()) return false;
+    location.replace("index.html");
+    return true;
+  }
+
+  /* ---------- 提示：一句小条 ---------- */
   var toastTimer = 0;
   function toast(text) {
     if (!document.body) return;
@@ -91,16 +110,50 @@
     }, 4200);
   }
 
+  /* ---------- 提示：带标题的小卡片 ----------
+     切档会让页面少掉一层东西，一句话说不清，
+     所以给标题 + 一行解释。不挡点击、不锁滚动，五秒后自己走。 */
+  var noteTimer = 0;
+  function note(title, body) {
+    if (!document.body) return;
+    var el = document.querySelector(".lite-note");
+    if (!el) {
+      el = document.createElement("div");
+      el.className = "lite-note";
+      el.setAttribute("role", "status");
+      el.setAttribute("aria-live", "polite");
+      document.body.appendChild(el);
+    }
+    el.textContent = "";
+    var h = document.createElement("strong");
+    h.textContent = title;
+    var p = document.createElement("p");
+    p.textContent = body;
+    el.appendChild(h);
+    el.appendChild(p);
+
+    /* 小条和卡片不同时出现，否则底部叠两层 */
+    var t = document.querySelector(".lite-toast");
+    if (t) t.classList.remove("is-on");
+
+    void el.offsetWidth;
+    el.classList.add("is-on");
+    window.clearTimeout(noteTimer);
+    noteTimer = window.setTimeout(function () {
+      el.classList.remove("is-on");
+    }, 5600);
+  }
+
   /* ---------- 按钮状态 ---------- */
   var LABEL = {
-    0: "开启轻量模式（适合低性能设备）",
-    1: "关闭轻量模式（长按进入极简模式）",
-    2: "退出极简模式"
+    0: "开启轻量模式（点一下开启，长按直接进入极致模式）",
+    1: "关闭轻量模式（长按进入极致模式）",
+    2: "回到轻量模式"
   };
   var TIP = {
-    0: "轻量模式：关闭 · 点击开启 · 长按进入极简（Shift+L）",
-    1: "轻量模式：已开启 · 点击关闭 · 长按进入极简（Shift+L）",
-    2: "极简模式：已开启 · 点击或长按退出"
+    0: "轻量模式：关闭 · 点一下开启 · 长按进入极致模式",
+    1: "轻量模式：已开启 · 点一下关闭 · 长按进入极致模式",
+    2: "极致模式：只保留终端主页 · 长按或点一下回到轻量"
   };
 
   function syncButtons() {
@@ -118,8 +171,7 @@
   }
 
   /* 把当前档位告诉 Service Worker 和一片很小的状态缓存。
-     SW 装完会串行预热六十多张图、几段音效；极简档的机器不该
-     替这些预付流量，所以它在预取前先读这里写的值。 */
+     SW 装完会串行预热一批资源；极致档的机器不该替这些预付。 */
   var STATE_CACHE = "hnyz-state";
 
   function publish(t) {
@@ -142,9 +194,8 @@
     } catch (error) { /* 没有 SW */ }
   }
 
-  /* 极简档的图片闸门（在各页 <head> 里）把 src 换成了 1×1 占位，
-     原地址存在 data-ultra-src。退出极简时按原样放回去，
-     静态图（头像、徽章）就不用刷新也能回来。 */
+  /* 极致档的图片闸门（在各页 <head> 里）把 src 换成了 1×1 占位，
+     原地址存在 data-ultra-src。退出极致时按原样放回去。 */
   function restoreImages() {
     var imgs = document.querySelectorAll("img[data-ultra-src]");
     for (var i = 0; i < imgs.length; i += 1) {
@@ -201,15 +252,65 @@
     }, 2600);
   }
 
-  /* ---------- 长按羽毛 → 极简 ---------- */
+  /* ---------- 极致：只留终端主页 ---------- */
+  function enterUltra() {
+    /* 记下进来之前在哪个皮肤，回到轻量时原样还回去 */
+    var prev = window.HNYZ_STYLE ? window.HNYZ_STYLE.current() : "";
+    if (prev && prev !== "term") write(PREV_KEY, prev);
+
+    if (!onHome()) {
+      /* 先落档位再跳：新页面的 <head> 预置会直接按极致渲染 */
+      set(2, { auto: false });
+      location.href = "index.html";
+      return;
+    }
+
+    set(2, { auto: false });
+
+    /* 只留终端：皮肤必须是 term，TUI 必须开着 */
+    if (window.HNYZ_STYLE) {
+      if (window.HNYZ_STYLE.current() === "term") {
+        if (window.HNYZTUI) window.HNYZTUI.sync(true);
+      } else {
+        window.HNYZ_STYLE.apply("term", { instant: true });
+      }
+    }
+
+    note("已进入极致模式", "只保留终端主页。长按这根羽毛（或点一下）回到轻量模式。");
+  }
+
+  function leaveUltra() {
+    var prev = read(PREV_KEY);
+    write(PREV_KEY, null);
+
+    set(1, { auto: false });
+
+    /* 从纸带进来的，把纸带还回去；本来就在终端的就留在终端 */
+    if (prev && prev !== "term" && window.HNYZ_STYLE) {
+      window.HNYZ_STYLE.apply(prev, { instant: true });
+    }
+
+    note("已回到轻量模式", "再点一下这根羽毛，就恢复正常模式。");
+  }
+
+  /* ---------- 长按羽毛 → 极致 ---------- */
   var holdTimer = 0;
   var holdTarget = null;
-  /* 这一次按下是不是已经长按生效过？
-     长按之后浏览器还会补一个 click，得在抬起时把它吞掉，
-     否则刚进极简又被那一下点回关闭。按了多久都能对上，
-     不靠定时器猜。 */
-  var pressWasLong = false;
-  var swallowClick = false;
+
+  /* 这一次按下是不是已经被长按消费掉了？
+     每次 pointerdown 都重置，所以长按之后浏览器补的那一下 click
+     只会被吞一次，不会波及用户紧接着的下一次点击。
+     以前用「600ms 时间窗」判断，快速再点会被误吞——就是那个
+     「点一下、长按、再点没反应」的 bug。 */
+  var pressHandled = false;
+  /* 长按抬手后浏览器补的那一下 click，不一定是落在羽毛上：
+     切档会重排顶栏，手指下可能已经换成「风格」按钮。
+     所以这一次 click 要在捕获阶段整条吞掉，而不是只判断 target */
+  var swallowClickOnce = false;
+
+  var pressX = 0;
+  var pressY = 0;
+  var pressAt = 0;
 
   function clearHold() {
     if (holdTimer) {
@@ -222,24 +323,17 @@
     }
   }
 
-  function enterUltra() {
-    set(2, { auto: false });
-    toast("极简模式：图片、字体和装饰全部关掉，只留文字。再长按羽毛退出。");
-  }
-
-  function leaveUltra() {
-    set(0, { auto: false });
-    toast("已恢复完整效果。项目封面和图集是刷新后才重新载入的。");
-  }
-
-  function pressStart(btn) {
+  function pressStart(btn, event) {
     clearHold();
-    pressWasLong = false;
+    pressHandled = false;
     holdTarget = btn;
+    pressX = event.clientX;
+    pressY = event.clientY;
+    pressAt = Date.now();
     btn.classList.add("is-holding");
     holdTimer = window.setTimeout(function () {
       holdTimer = 0;
-      pressWasLong = true;
+      pressHandled = true;
       btn.classList.remove("is-holding");
       holdTarget = null;
 
@@ -248,31 +342,91 @@
     }, HOLD_MS);
   }
 
+  /* 短按：正常 ↔ 轻量；极致下回轻量 */
+  function handleTap() {
+    var t = tier();
+    if (t === 2) {
+      leaveUltra();
+      return;
+    }
+    if (t === 1) {
+      set(0, { auto: false });
+      note("已恢复正常模式", "动画、特效和所有页面都回来了。");
+      return;
+    }
+    set(1, { auto: false });
+    note("已进入轻量模式", "动画、模糊和粒子已关闭。长按这根羽毛可以进入极致模式。");
+  }
+
   function bindPress() {
+    /* 长按抬手那一下的 click 一律吃掉，别让它触发别的按钮 */
+    document.addEventListener("click", function (event) {
+      if (!swallowClickOnce) return;
+      swallowClickOnce = false;
+      event.preventDefault();
+      event.stopPropagation();
+    }, { capture: true });
+
     document.addEventListener("pointerdown", function (event) {
       var btn = event.target.closest ? event.target.closest("[data-lite-toggle]") : null;
       if (!btn) return;
       /* 鼠标只认左键；触摸和笔都算 */
       if (event.pointerType === "mouse" && event.button !== 0) return;
-      pressStart(btn);
+      pressStart(btn, event);
     }, { passive: true });
 
-    /* 不能用 blur：按下按钮会让它拿到焦点，原焦点元素一 blur
-       就会把刚点着的长按计时器清掉，长按永远等不到 650ms */
-    ["pointerup", "pointercancel", "pointerleave"].forEach(function (type) {
-      document.addEventListener(type, clearHold, { passive: true, capture: true });
-    });
+    /* 短按在 pointerup 里直接判，不靠 click。
+       长按之后浏览器补的那一下 click 很容易和下一次真实点击撞在
+       一起（旧实现用 600ms 时间窗吞它，结果吞掉了用户的点击）——
+       现在一次按下只对应一次 pointerup，没有补发事件可混。 */
+    function pressEnd() {
+      if (!holdTarget) return;
+      var held = Date.now() - pressAt;
+      clearHold();
 
-    /* 抬起时才知道这一下是长按：把紧随其后的 click 标记为吞掉 */
-    document.addEventListener("pointerup", function () {
-      if (!pressWasLong) return;
-      pressWasLong = false;
-      swallowClick = true;
-      window.setTimeout(function () { swallowClick = false; }, 600);
-    }, { passive: true, capture: true });
+      /* 长按已经由上面的定时器处理过 */
+      if (pressHandled) {
+        pressHandled = false;
+        swallowClickOnce = true;
+        /* click 紧跟 pointerup 同步派发，0ms 定时器在它之后；
+           万一浏览器没补 click，也不会留到下一次点击 */
+        window.setTimeout(function () { swallowClickOnce = false; }, 0);
+        return;
+      }
+
+      /* 定时器被主线程耽误了：抬起时按实际时长补一次 */
+      if (held >= HOLD_MS) {
+        pressHandled = true;
+        if (tier() === 2) leaveUltra();
+        else enterUltra();
+        return;
+      }
+
+      handleTap();
+    }
+
+    document.addEventListener("pointerup", pressEnd, { passive: true, capture: true });
+    document.addEventListener("pointercancel", pressEnd, { passive: true, capture: true });
+
+    document.addEventListener("pointermove", function (event) {
+      if (!holdTimer) return;
+      if (Math.abs(event.clientX - pressX) > 12 || Math.abs(event.clientY - pressY) > 12) {
+        clearHold();
+      }
+    }, { passive: true });
+
+    /* 只接键盘触发的 click（detail === 0）。
+       指针点击已经在 pointerup 里做完了，这里再执行会翻两次 */
+    document.addEventListener("click", function (event) {
+      var btn = event.target.closest ? event.target.closest("[data-lite-toggle]") : null;
+      if (!btn) return;
+      event.preventDefault();
+      if (event.detail !== 0) return;
+      handleTap();
+    });
   }
 
-  /* ---------- 键盘：Shift+L 切轻量，Shift+Alt+L 切极简 ---------- */
+  /* ---------- 键盘：Shift+L 切轻量，Shift+Alt+L 切极致 ---------- */
   function onKey(event) {
     if (!event.shiftKey || event.ctrlKey || event.metaKey) return;
     if (event.key !== "L" && event.key !== "l") return;
@@ -289,32 +443,24 @@
       return;
     }
 
-    var next = isOn() ? 0 : 1;
-    set(next, { auto: false });
-    toast(next ? "轻量模式：动画、模糊、阴影和粒子都关了" : "已恢复完整效果");
+    var t = tier();
+    if (t === 2) {
+      leaveUltra();
+      return;
+    }
+    if (t === 1) {
+      set(0, { auto: false });
+      note("已恢复正常模式", "动画、特效和所有页面都回来了。");
+      return;
+    }
+    set(1, { auto: false });
+    note("已进入轻量模式", "动画、模糊和粒子已关闭。长按这根羽毛可以进入极致模式。");
   }
 
   function bind() {
     syncButtons();
     bindPress();
     document.addEventListener("keydown", onKey);
-
-    document.addEventListener("click", function (event) {
-      var btn = event.target.closest ? event.target.closest("[data-lite-toggle]") : null;
-      if (!btn) return;
-      event.preventDefault();
-
-      if (swallowClick) {
-        swallowClick = false;
-        return;
-      }
-
-      var t = tier();
-      /* 极简态点一下就是退出；其余在关/开轻量之间切 */
-      var next = t === 0 ? 1 : 0;
-      set(next, { auto: false });
-      toast(next ? "轻量模式：动画、模糊、阴影和粒子都关了" : "已恢复完整效果");
-    });
   }
 
   if (document.readyState === "loading") {
@@ -337,9 +483,13 @@
     }
   } catch (error) { /* 老内核 */ }
 
+  /* 没有预置脚本的独立页（天梯、光场、404）在这里兜一次 */
+  guard();
+
   window.HNYZ_LITE = {
     tier: tier,
     toast: toast,
+    note: note,
     isOn: isOn,
     isUltra: ultra,
     set: set,

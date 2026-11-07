@@ -13,7 +13,7 @@
   const pet = document.querySelector("[data-hnyz-pet]");
   if (!pet) return;
 
-  /* 极简档：校徽整块 display:none，事件和 rAF 一并不挂 */
+  /* 极致档：校徽整块 display:none，事件和 rAF 一并不挂 */
   if (document.documentElement.dataset.lite === "2") return;
 
   const trigger = pet.querySelector("[data-hnyz-pet-trigger]");
