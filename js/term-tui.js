@@ -732,13 +732,17 @@
     /* 线只在内容区里走：起点压在中区左缘（或上缘）与旧板块同高/同列的位置，
        不做负坐标，免得横穿 rail 盖住文字 */
     var verticalRail = rr.height >= rr.width;
-    var ay = Math.round(ar.top + ar.height / 2 - sr.top);
+    var ay = Math.round(Math.max(
+      ar.top + ar.height / 2 - sr.top,
+      br.top + br.height / 2 - sr.top
+    ));
     var ax = Math.round(ar.left + ar.width / 2 - sr.left);
     var endX = Math.round(Math.min(sr.width - 26, Math.max(sr.width * 0.56, 220)));
     var d;
 
     if (verticalRail) {
-      ay = Math.max(10, Math.min(sr.height - 10, ay));
+      /* 起点跟旧板块同高；离标题条太近时往下让一点，折线才看得出来 */
+      ay = Math.max(top + 64, Math.min(sr.height - 40, ay));
       d = "M0 " + ay + "H12V" + (top + 2) + "H" + endX;
     } else {
       ax = Math.max(10, Math.min(sr.width - 10, ax));
