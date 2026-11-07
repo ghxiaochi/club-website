@@ -301,13 +301,23 @@ const STATE_CACHE = "hnyz-state";
 const STATE_KEY = "./__hnyz_lite";
 let liteTier = "0";
 
-async function readTier() {
-  try {
-    const store = await caches.open(STATE_CACHE);
-    const hit = await store.match(abs(STATE_KEY));
-    if (hit) liteTier = (await hit.text()).trim() || "0";
-  } catch (error) {
-    /* 读不到就当完整档 */
+/* wait=true 时反复等一会儿：全新访客的第一次加载，页面里的 lite.js
+   还没把档位写进 hnyz-state，SW 却已经开始装。读不到就早退会把
+   整批图片预取下来，正好和「极致只留终端」相反 */
+async function readTier(wait) {
+  const tries = wait ? 4 : 1;
+  for (let i = 0; i < tries; i += 1) {
+    try {
+      const store = await caches.open(STATE_CACHE);
+      const hit = await store.match(abs(STATE_KEY));
+      if (hit) {
+        liteTier = (await hit.text()).trim() || "0";
+        return liteTier;
+      }
+    } catch (error) {
+      /* 读不到就当完整档 */
+    }
+    if (i < tries - 1) await new Promise((resolve) => setTimeout(resolve, 250));
   }
   return liteTier;
 }
@@ -397,7 +407,7 @@ self.addEventListener("activate", (event) => {
        失败也不影响已经装好的核心。串行 + 30ms 间隔，
        别和用户正在看的页面抢带宽。 */
     (async () => {
-      await readTier();
+      await readTier(true);
       /* 极致档一张图、一段音频都不预取；中途切档也会在这里停下 */
       if (liteTier === "2") return;
       for (const path of EXTRA) {
