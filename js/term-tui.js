@@ -739,7 +739,7 @@
 
     if (verticalRail) {
       ay = Math.max(10, Math.min(sr.height - 10, ay));
-      d = "M0 " + ay + "H18V" + (top + 2) + "H" + endX;
+      d = "M0 " + ay + "H12V" + (top + 2) + "H" + endX;
     } else {
       ax = Math.max(10, Math.min(sr.width - 10, ax));
       var bx = Math.max(ax + 24, Math.round(br.left + br.width / 2 - sr.left));
