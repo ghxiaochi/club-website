@@ -14,9 +14,6 @@
   const grid = document.querySelector("#gallery-grid");
   if (!grid) return;
 
-  /* 极致档：一张图都不请求，网格退成「标题 + 说明」的清单 */
-  const isUltra = () => document.documentElement.dataset.lite === "2";
-
   const countEl = document.querySelector("#gallery-count");
   const filterBar = document.querySelector("[data-gallery-filters]");
 
@@ -83,26 +80,23 @@
     button.type = "button";
     button.setAttribute("aria-label", `查看大图：${item.title || "图集图片"}`);
 
-    /* 极致档连 thumb 都不建：<img> 一旦出现，浏览器就会开请求 */
-    if (!isUltra()) {
-      const image = document.createElement("img");
-      /* 首屏两行先加载，其余等滚到附近再给 src。
-         图集一共六百多 KB，以前 loading="lazy" 在 Chrome 上仍会把
-         3 屏内的图全拉下来，等于首屏替整个页面付流量。
+    const image = document.createElement("img");
+    /* 首屏两行先加载，其余等滚到附近再给 src。
+       图集一共六百多 KB，以前 loading="lazy" 在 Chrome 上仍会把
+       3 屏内的图全拉下来，等于首屏替整个页面付流量。
 
-         网格里用 560px 宽的 thumb（约原图 43%），点开灯箱才换原图。
-         桌面一列约 290px、手机约 350px，两倍屏也够。 */
-      const gridSrc = item.thumb || item.src;
-      const eager = index < 4;
-      image.src = eager ? gridSrc : PLACEHOLDER;
-      if (!eager) image.dataset.src = gridSrc;
-      image.alt = item.title || "HNYZ 图集图片";
-      image.loading = eager ? "eager" : "lazy";
-      image.decoding = "async";
-      image.width = item.w || 800;
-      image.height = item.h || 1000;
-      button.appendChild(image);
-    }
+       网格里用 560px 宽的 thumb（约原图 43%），点开灯箱才换原图。
+       桌面一列约 290px、手机约 350px，两倍屏也够。 */
+    const gridSrc = item.thumb || item.src;
+    const eager = index < 4;
+    image.src = eager ? gridSrc : PLACEHOLDER;
+    if (!eager) image.dataset.src = gridSrc;
+    image.alt = item.title || "HNYZ 图集图片";
+    image.loading = eager ? "eager" : "lazy";
+    image.decoding = "async";
+    image.width = item.w || 800;
+    image.height = item.h || 1000;
+    button.appendChild(image);
 
     const caption = document.createElement("figcaption");
     caption.className = "gallery-item__caption";
@@ -120,10 +114,6 @@
     }
 
     button.addEventListener("click", () => {
-      if (isUltra()) {
-        if (window.HNYZ_LITE) window.HNYZ_LITE.toast("极致模式不加载大图，长按右上角那根羽毛可以退出。");
-        return;
-      }
       openLightbox(index);
     });
 

@@ -72,20 +72,18 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="stylesheet" href="css/style.css?v=20261105z">
-  <link rel="stylesheet" href="css/pet.css?v=20261105z">
-  <link rel="stylesheet" href="css/personal.css?v=20261105z">
-  <link rel="stylesheet" href="css/skins.css?v=20261105z">
-  <link rel="stylesheet" href="css/lite.css?v=20261105z">
-  <script src="js/skin-boot.js?v=20261105z"></script>
+  <link rel="stylesheet" href="css/style.css?v=20261107a">
+  <link rel="stylesheet" href="css/pet.css?v=20261107a">
+  <link rel="stylesheet" href="css/personal.css?v=20261107a">
+  <link rel="stylesheet" href="css/skins.css?v=20261107a">
+  <link rel="stylesheet" href="css/lite.css?v=20261107a">
+  <script src="js/skin-boot.js?v=20261107a"></script>
   <script>
     /* 轻量 / 极致预置：弱设备（2G、内存 ≤2G、核心 ≤2）首帧就走低配，
        避免先跑一遍动画再关。手动开过的以 localStorage 为准（1 轻量 / 2 极致）。
 
-       极致档要的是性能，不是少下几张图：它只保留终端主页，
-       其余页面在这里首帧就跳回 index.html，根本不会渲染。
-       图片闸门仍然装一道 —— 极致的首页只剩终端，纸带层的 <img>
-       连解码都不该做，拦在请求之前最省。 */
+       极致档只保留终端主页：其余页面在这里首帧就跳回 index.html，
+       根本不会渲染。图片照常加载 —— 省的是动画、模糊与布局，不是图。 */
     (function () {
       var tier = 0;
       try {
@@ -113,63 +111,31 @@
         location.replace("index.html");
         return;
       }
-
-      var BLANK = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-      function gate(img) {
-        if (!img || img.tagName !== "IMG" || img.hasAttribute("data-ultra-src")) return;
-        var src = img.getAttribute("src");
-        if (!src || src.slice(0, 5) === "data:") return;
-        img.setAttribute("data-ultra-src", src);
-        img.setAttribute("src", BLANK);
-      }
-      function scan(node) {
-        if (!node || node.nodeType !== 1) return;
-        if (node.tagName === "IMG") { gate(node); return; }
-        if (!node.querySelectorAll) return;
-        var imgs = node.querySelectorAll("img");
-        for (var i = 0; i < imgs.length; i += 1) gate(imgs[i]);
-      }
-      if (window.MutationObserver) {
-        var mo = new MutationObserver(function (list) {
-          for (var i = 0; i < list.length; i += 1) {
-            var added = list[i].addedNodes;
-            for (var j = 0; j < added.length; j += 1) scan(added[j]);
-          }
-        });
-        mo.observe(document.documentElement, { childList: true, subtree: true });
-        /* 首屏的图跑完就撤，别让观察器跟着整页活一辈子 */
-        window.addEventListener("load", function () {
-          window.setTimeout(function () { mo.disconnect(); }, 600);
-        }, { once: true });
-      }
     })();
   </script>
-  <!-- 极致档：首帧就把图片藏掉。外链 CSS 要到后面才应用，
-       在这之前 lazy 图片会被判定为「在视口里」先拉一遍 -->
-  <style>html[data-lite="2"] img{display:none!important}</style>
-  <link rel="stylesheet" href="css/type.css?v=20261105z">
-  <link rel="stylesheet" href="css/motion.css?v=20261105z">
-  <link rel="preload" href="css/dino.css?v=20261105z" as="style">
-  <link rel="stylesheet" href="css/dino.css?v=20261105z" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/dino.css?v=20261105z"></noscript>
+  <link rel="stylesheet" href="css/type.css?v=20261107a">
+  <link rel="stylesheet" href="css/motion.css?v=20261107a">
+  <link rel="preload" href="css/dino.css?v=20261107a" as="style">
+  <link rel="stylesheet" href="css/dino.css?v=20261107a" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/dino.css?v=20261107a"></noscript>
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
-  <script src="js/sfx.js?v=20261105z" defer></script>
-  <script src="js/theme.js?v=20261105z" defer></script>
-  <script src="js/theme-icon.js?v=20261105z" defer></script>
-  <script src="js/members.js?v=20261105z" defer></script>
-  <script src="js/main.js?v=20261105z" defer></script>
-  <script src="js/repo-sync.js?v=20261105z" defer></script>
-  <script src="js/pet.js?v=20261105z" defer></script>
-  <script src="js/gallery-data.js?v=20261105z" defer></script>
-  <script src="js/gallery.js?v=20261105z" defer></script>
-  <script src="js/personal.js?v=20261105z" defer></script>
-  <script src="js/click-fx.js?v=20261105z" defer></script>
-  <script src="js/skins.js?v=20261105z" defer></script>
-  <script src="js/fullscreen.js?v=20261105z" defer></script>
-  <script src="js/lite.js?v=20261105z" defer></script>
-  <script src="js/copy.js?v=20261105z" defer></script>
-  <script src="js/pwa.js?v=20261105z" defer></script>
+  <script src="js/sfx.js?v=20261107a" defer></script>
+  <script src="js/theme.js?v=20261107a" defer></script>
+  <script src="js/theme-icon.js?v=20261107a" defer></script>
+  <script src="js/members.js?v=20261107a" defer></script>
+  <script src="js/main.js?v=20261107a" defer></script>
+  <script src="js/repo-sync.js?v=20261107a" defer></script>
+  <script src="js/pet.js?v=20261107a" defer></script>
+  <script src="js/gallery-data.js?v=20261107a" defer></script>
+  <script src="js/gallery.js?v=20261107a" defer></script>
+  <script src="js/personal.js?v=20261107a" defer></script>
+  <script src="js/click-fx.js?v=20261107a" defer></script>
+  <script src="js/skins.js?v=20261107a" defer></script>
+  <script src="js/fullscreen.js?v=20261107a" defer></script>
+  <script src="js/lite.js?v=20261107a" defer></script>
+  <script src="js/copy.js?v=20261107a" defer></script>
+  <script src="js/pwa.js?v=20261107a" defer></script>
   <script>
     /* 页脚跑道不参与首屏，也不该为「只看了首屏的人」付钱：
        等它进入视口前 600px 再拉脚本。以前 load 完就 idle 注入，
@@ -180,7 +146,7 @@
         if (loaded) return;
         loaded = true;
         var script = document.createElement("script");
-        script.src = "js/dino.js?v=20261105z";
+        script.src = "js/dino.js?v=20261107a";
         script.async = true;
         document.body.appendChild(script);
       }
@@ -275,7 +241,7 @@
             <path class="sync-ico" d="M20.5 3.4v5.2h-5.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
-        <button class="lite-toggle" type="button" data-lite-toggle aria-pressed="false" aria-label="开启轻量模式（适合低性能设备）" title="轻量模式：关闭 · 点击开启">
+        <button class="lite-toggle" type="button" data-lite-toggle aria-pressed="false" aria-label="开启轻量模式（点一下开启，长按直接进入极致模式）" title="轻量模式：关闭 · 点一下开启 · 长按进入极致模式">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M19.4 4.6c.4 6.6-3.4 11.2-8.4 11.2-2.8 0-4.8-1.8-4.8-4.4 0-4.6 5.2-6.8 13.2-6.8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
             <path d="M4.2 19.8c2.4-4.4 5.8-7.6 10.2-9.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>

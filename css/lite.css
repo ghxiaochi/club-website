@@ -37,6 +37,12 @@ html[data-lite] .crt::after {
   display: none !important;
 }
 
+/* 动画停了之后，will-change 留下的合成层只是白占显存。
+   低端机显存本来就紧，这一条能实打实少几层位图 */
+html[data-lite] * {
+  will-change: auto !important;
+}
+
 /* ---------------------------------------------------------
    2. 毛玻璃换成实底
    ---------------------------------------------------------
@@ -205,7 +211,7 @@ html[data-lite] .click-fx {
      · 纸带层整块不绘制（#main / 页头页脚 / 背景装饰）
      · 皮肤锁定 term，TUI 是唯一界面（JS 那边锁的）
      · 终端里所有 animation / transition 停掉：光标不闪、行不逐条打印
-     · 鲸鱼 rAF 与时钟 interval 由 JS 停；图片不建、不解码
+     · 鲸鱼 rAF 与时钟 interval 由 JS 停；图片照常加载
 
    其他页面在 <head> 就跳回 index.html，根本走不到这里。
    --------------------------------------------------------- */
@@ -271,10 +277,9 @@ html[data-lite="2"] .tty a[href$=".html"] {
   display: none !important;
 }
 
-/* 图不解码：首页只剩文字，一张图都不需要 */
-html[data-lite="2"] img {
-  display: none !important;
-}
+/* 图片照常加载、照常显示：极致省的是持续动画、模糊与大块布局，
+   不是把内容也一起删掉。终端里的鲸鱼、头像这类小图都留着；
+   纸带层的图看不见，是因为 #main 整块不参与渲染，不是在这里藏的。 */
 
 /* 终端外壳保持实色，不叠毛玻璃 */
 html[data-lite="2"] .tty {

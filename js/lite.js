@@ -17,8 +17,9 @@
    极致（data-lite="2"）—— 超低端：十年前的上网本、512MB 内存
      不是省流量，是省性能：这一档只保留终端主页（index.html +
      term 皮肤 + TUI），其余页面一律跳回来，纸带层整块不绘制，
-     图像与动效类脚本全部早退。终端里的四个板块仍是完整文字，
-     所以「只留主页」不等于「只剩一屏」。
+     动效类脚本全部早退。终端里的四个板块仍是完整文字，
+     所以「只留主页」不等于「只剩一屏」。图片照常加载 ——
+     极致省的是持续动画、模糊与大块布局，不是把内容也删掉。
 
    怎么开：
      1. 点顶栏那根羽毛 → 轻量，弹一张提示卡；
@@ -36,7 +37,6 @@
   "use strict";
 
   var KEY = "hnyz:lite";
-  var AUTO_KEY = "hnyz:lite:auto";
   var PREV_KEY = "hnyz:ultra:prev";
   var root = document.documentElement;
 
@@ -194,32 +194,16 @@
     } catch (error) { /* 没有 SW */ }
   }
 
-  /* 极致档的图片闸门（在各页 <head> 里）把 src 换成了 1×1 占位，
-     原地址存在 data-ultra-src。退出极致时按原样放回去。 */
-  function restoreImages() {
-    var imgs = document.querySelectorAll("img[data-ultra-src]");
-    for (var i = 0; i < imgs.length; i += 1) {
-      var img = imgs[i];
-      var src = img.getAttribute("data-ultra-src");
-      img.removeAttribute("data-ultra-src");
-      if (src) img.setAttribute("src", src);
-    }
-  }
-
   /* ---------- 开关 ---------- */
-  function set(next, options) {
+  function set(next) {
     var t = next === true ? 1 : next === false ? 0 : Number(next);
     if (t !== 1 && t !== 2) t = 0;
-
-    var was = tier();
 
     if (t > 0) root.dataset.lite = String(t);
     else delete root.dataset.lite;
 
     write(KEY, String(t));
-    write(AUTO_KEY, options && options.auto ? "1" : null);
 
-    if (was === 2 && t < 2) restoreImages();
     publish(t);
 
     syncButtons();
@@ -236,7 +220,6 @@
     if (!isOn()) return;
 
     write(KEY, "1");
-    write(AUTO_KEY, "1");
 
     /* 系统里开了「减少动效」的人，别再说「设备吃力」——
        这不是性能问题，是偏好，照着做就行，也不用弹提示打扰 */
@@ -260,12 +243,12 @@
 
     if (!onHome()) {
       /* 先落档位再跳：新页面的 <head> 预置会直接按极致渲染 */
-      set(2, { auto: false });
+      set(2);
       location.href = "index.html";
       return;
     }
 
-    set(2, { auto: false });
+    set(2);
 
     /* 只留终端：皮肤必须是 term，TUI 必须开着 */
     if (window.HNYZ_STYLE) {
@@ -283,7 +266,7 @@
     var prev = read(PREV_KEY);
     write(PREV_KEY, null);
 
-    set(1, { auto: false });
+    set(1);
 
     /* 从纸带进来的，把纸带还回去；本来就在终端的就留在终端 */
     if (prev && prev !== "term" && window.HNYZ_STYLE) {
@@ -350,11 +333,11 @@
       return;
     }
     if (t === 1) {
-      set(0, { auto: false });
+      set(0);
       note("已恢复正常模式", "动画、特效和所有页面都回来了。");
       return;
     }
-    set(1, { auto: false });
+    set(1);
     note("已进入轻量模式", "动画、模糊和粒子已关闭。长按这根羽毛可以进入极致模式。");
   }
 
@@ -379,7 +362,7 @@
        长按之后浏览器补的那一下 click 很容易和下一次真实点击撞在
        一起（旧实现用 600ms 时间窗吞它，结果吞掉了用户的点击）——
        现在一次按下只对应一次 pointerup，没有补发事件可混。 */
-    function pressEnd() {
+    function pressEnd(cancelled) {
       if (!holdTarget) return;
       var held = Date.now() - pressAt;
       clearHold();
@@ -387,12 +370,17 @@
       /* 长按已经由上面的定时器处理过 */
       if (pressHandled) {
         pressHandled = false;
+        if (cancelled) return;
         swallowClickOnce = true;
         /* click 紧跟 pointerup 同步派发，0ms 定时器在它之后；
            万一浏览器没补 click，也不会留到下一次点击 */
         window.setTimeout(function () { swallowClickOnce = false; }, 0);
         return;
       }
+
+      /* 手指按下后被系统收走（开始滚动、来电、切 App）：
+         这不是一次点击，只清理，不切档 */
+      if (cancelled) return;
 
       /* 定时器被主线程耽误了：抬起时按实际时长补一次 */
       if (held >= HOLD_MS) {
@@ -405,12 +393,13 @@
       handleTap();
     }
 
-    document.addEventListener("pointerup", pressEnd, { passive: true, capture: true });
-    document.addEventListener("pointercancel", pressEnd, { passive: true, capture: true });
+    document.addEventListener("pointerup", function () { pressEnd(false); }, { passive: true, capture: true });
+    document.addEventListener("pointercancel", function () { pressEnd(true); }, { passive: true, capture: true });
 
     document.addEventListener("pointermove", function (event) {
       if (!holdTimer) return;
-      if (Math.abs(event.clientX - pressX) > 12 || Math.abs(event.clientY - pressY) > 12) {
+      /* 触摸时手指很难完全不动：留 16px 余量，轻微抖动不算「滑动」 */
+      if (Math.abs(event.clientX - pressX) > 16 || Math.abs(event.clientY - pressY) > 16) {
         clearHold();
       }
     }, { passive: true });
@@ -449,11 +438,11 @@
       return;
     }
     if (t === 1) {
-      set(0, { auto: false });
+      set(0);
       note("已恢复正常模式", "动画、特效和所有页面都回来了。");
       return;
     }
-    set(1, { auto: false });
+    set(1);
     note("已进入轻量模式", "动画、模糊和粒子已关闭。长按这根羽毛可以进入极致模式。");
   }
 
@@ -493,6 +482,6 @@
     isOn: isOn,
     isUltra: ultra,
     set: set,
-    toggle: function () { set(isOn() ? 0 : 1, { auto: false }); }
+    toggle: function () { set(isOn() ? 0 : 1); }
   };
 })();

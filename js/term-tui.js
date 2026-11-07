@@ -170,7 +170,7 @@
   function loadDeepy() {
     if (deepyData || deepyLoading || !window.fetch) return;
     deepyLoading = true;
-    window.fetch("data/deepy.json?v=20261105z")
+    window.fetch("data/deepy.json?v=20261107a")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         deepyData = d;
@@ -553,7 +553,7 @@
     var cached = readCachedRepos();
     if (cached) renderRepos(box, { repos: cached.repos });
 
-    window.fetch("data/repos.json?v=20261105z")
+    window.fetch("data/repos.json?v=20261107a")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (store) {
         if (!store || !store.repos) {
@@ -1029,6 +1029,12 @@
       var cp = e.target.closest("[data-copy]");
       if (cp) { doCopy(cp); return; }
       if (e.target.closest("[data-open-guestbook]")) {
+        /* 极致档：关掉终端就等于把纸带层放出来，和「只留终端」冲突。
+           这里只解释一句，不真的跳走 */
+        if (document.documentElement.dataset.lite === "2") {
+          echo("极致模式：只保留终端主页。留言板要回到轻量模式才能打开。");
+          return;
+        }
         close();
         window.setTimeout(function () {
           var el = document.getElementById("guestbook");
@@ -1082,7 +1088,9 @@
   });
 
   window.addEventListener("hashchange", function () {
-    /* 从别处带 #guestbook 这类锚点进来时，让位给真正的页面内容 */
+    /* 从别处带 #guestbook 这类锚点进来时，让位给真正的页面内容。
+       极致档没有「真正的页面内容」可让，终端继续占着 */
+    if (document.documentElement.dataset.lite === "2") return;
     if (isOpen && window.location.hash) close();
   });
 

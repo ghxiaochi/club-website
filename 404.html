@@ -3,24 +3,27 @@
 <head>
   <meta charset="UTF-8">
 
-  <script>
-    /* 极致模式只保留终端主页：这一页不是终端，首帧就回首页。
-       三个独立页没有 index 那套预置脚本，所以单独拦一道 */
-    (function () {
-      try {
-        if (localStorage.getItem("hnyz:lite") === "2") {
-          document.documentElement.dataset.lite = "2";
-          location.replace("index.html");
-        }
-      } catch (error) { /* 隐私模式 */ }
-    })();
-  </script>  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex">
   <!-- 这个页面会被 GitHub Pages 在任意深度下返回，相对路径会失效，
        所以用 <base> 把所有引用钉在站点根目录。
        站点现在挂在自定义域名（CNAME: hnyzbcs.de5.net）下，根就是 /；
        以后若退回 ghxiaochi.github.io/club-website/，这一行要跟着改。 -->
   <base href="/">
+  <script>
+    /* 极致模式只保留终端主页：这一页不是终端，首帧就回首页。
+       必须放在 <base> 之后：GitHub Pages 会在任意深度返回 404，
+       相对路径 "index.html" 会解析成 /foo/index.html，再 404 一次。
+       三个独立页没有 index 那套预置脚本，所以单独拦一道 */
+    (function () {
+      try {
+        if (localStorage.getItem("hnyz:lite") === "2") {
+          document.documentElement.dataset.lite = "2";
+          location.replace(new URL("index.html", document.baseURI).href);
+        }
+      } catch (error) { /* 隐私模式 */ }
+    })();
+  </script>
   <meta name="theme-color" content="#0b0f16">
   <title>404｜这条路径不存在 · HNYZ</title>
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">

@@ -209,10 +209,10 @@
 - **轻量模式 / 极致模式**（`js/lite.js` + `css/lite.css`）：两档减法，同一根羽毛按钮，状态是一条线：
   `正常 --点一下--> 轻量 --点一下--> 正常`；`轻量 --长按 650ms--> 极致 --长按/点一下--> 轻量`。
   - **轻量**（`data-lite="1"`）：点一下羽毛（桌面 `Shift+L`），弹一张「已进入轻量模式」的提示卡；关掉动画、毛玻璃与 canvas 特效。电脑上额外停掉鼠标光晕、卡片 3D 倾斜、背景图标与跑马灯，画布像素比降到 1。没存过偏好又检测到 2G / 内存 ≤2GB / 核心 ≤2（或 4GB + 4 核）/ 系统「减少动效」时自动开启一次。
-  - **极致**（`data-lite="2"`）：长按羽毛 650ms（桌面 `Shift+Alt+L`）。**省的是性能，不是流量**：只保留终端主页 —— 皮肤锁死 `term`、纸带层整块 `display:none`、首页之外的页面在 `<head>` 就 `location.replace("index.html")`、TUI 里的跨页入口隐藏、`main.js` / `repo-sync.js` / `personal.js` / `guestbook.js` / `sfx.js` / `pet.js` 等在入口处直接 return、鲸鱼 rAF 与时钟 `setInterval` 不启动、图片不解码、终端内所有 `animation` / `transition` 停掉。按钮实心蓝 + 一圈静态光，是「这台机器只剩终端」的唯一标记。
+  - **极致**（`data-lite="2"`）：长按羽毛 650ms（桌面 `Shift+Alt+L`）。**省的是性能，不是流量**：只保留终端主页 —— 皮肤锁死 `term`、纸带层整块 `display:none`、首页之外的页面在 `<head>` 就 `location.replace("index.html")`、TUI 里的跨页入口隐藏、`main.js` / `repo-sync.js` / `personal.js` / `guestbook.js` / `sfx.js` / `pet.js` 等在入口处直接 return、鲸鱼 rAF 与时钟 `setInterval` 不启动、终端内所有 `animation` / `transition` 停掉。**图片照常加载**：省的是持续动画、模糊与大块布局，不是把内容删掉；终端里的鲸鱼、头像都还在。按钮实心蓝 + 一圈静态光，是「这台机器只剩终端」的唯一标记。
   - 交互细节：长按抬手时浏览器补的那一次 click 会在捕获阶段整条吞掉（切档会重排顶栏，手指下可能已经换成别的按钮）；短按在 `pointerup` 里按实际按住时长判定，不依赖 click —— 低端机上 650ms 定时器被主线程推迟也不会漏。
   - 开关状态存在 `hnyz:lite`（`1` / `2` / 删掉），切换不刷新页面，各模块监听 `hnyz:lite` 的 `detail.tier` 自行启停；光场 iframe 会带 `lite=1` 重新加载，像素比压到 1、粒子减半。
-  - **Service Worker 也看档位**：页面把档位写进 `hnyz-state` 缓存并 `postMessage` 给 SW，SW 装完后那轮串行预取在极致档下整段跳过。
+  - **Service Worker 也看档位**：页面把档位写进 `hnyz-state` 缓存并 `postMessage` 给 SW，SW 激活后那轮串行预取在极致档下整段跳过（只是不提前下载，页面要用到的图仍然正常请求）。
 
 发版时改三处版本号：HTML 里的 `?v=`、`sw.js` 的 `VERSION`、`skin-boot.js` 的 `V`。
 

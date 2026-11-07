@@ -33,7 +33,7 @@
    发版时改 VERSION，更老的缓存在 activate 里被清掉。
    ========================================================= */
 
-const VERSION = "20261105z";
+const VERSION = "20261107a";
 const CACHE = `hnyz-v${VERSION}`;
 
 /* 站内根路径：用 "./" 就地解析，
@@ -195,7 +195,7 @@ function isCacheName(name) {
   return name.startsWith("hnyz-v");
 }
 
-/* 从缓存名里取版本号：hnyz-v20261105z → 20261105z */
+/* 从缓存名里取版本号：hnyz-v20261107a → 20261107a */
 function versionOf(name) {
   return name.replace(/^hnyz-v/, "");
 }
@@ -293,17 +293,19 @@ async function offlineDocument(cache, request) {
   });
 }
 
-/* ---------- 档位：极致（2）不预取图片、音频与动画字体 ----------
+/* ---------- 档位：极致（2）不在后台预取扩展资源 ----------
+   注意：极致档仍然正常加载它要用的图片、字体和音频，
+   这里跳过的只是「装完 SW 主动替用户先下一遍」的那一批。
    页面在切档时把当前档位写进 hnyz-state 缓存，并 postMessage 一份。
-   SW 装/激活时读一次：极致档的机器不该替图集、立绘、音效和
-   动画字体预付那几百 KB 到几 MB —— 它连看都不看。 */
+   SW 激活时读一次：极致档的机器只看终端主页，没必要替图集、立绘、
+   音效预付那几百 KB 到几 MB。 */
 const STATE_CACHE = "hnyz-state";
 const STATE_KEY = "./__hnyz_lite";
 let liteTier = "0";
 
 /* wait=true 时反复等一会儿：全新访客的第一次加载，页面里的 lite.js
-   还没把档位写进 hnyz-state，SW 却已经开始装。读不到就早退会把
-   整批图片预取下来，正好和「极致只留终端」相反 */
+   还没把档位写进 hnyz-state，SW 就已经激活。读不到就当成完整档，
+   会把整批扩展资源预取下来；等最多 1 秒比猜错更划算 */
 async function readTier(wait) {
   const tries = wait ? 4 : 1;
   for (let i = 0; i < tries; i += 1) {
@@ -331,24 +333,14 @@ self.addEventListener("message", (event) => {
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
-    const tier = await readTier();
-    /* 极致档不装动画字体（标题走系统栈）与 PWA 大图标，
-       只留 favicon —— 地址栏那个小图标还得有 */
-    const core = tier === "2"
-      ? CORE.filter(
-          (path) =>
-            path.indexOf("./fonts/") !== 0 &&
-            path.indexOf("./images/icon-") !== 0
-        )
-      : CORE;
 
     /* 分批 add，而不是 addAll：
        addAll 是「一个失败全部作废」，某个文件改名或 404 会让整个 SW
        装不上，也就没有离线能力。分批则允许个别失败，能缓多少缓多少；
        每批 8 个，也不至于一装就占满带宽、把首屏挤在后面。 */
     let ok = 0;
-    for (let i = 0; i < core.length; i += INSTALL_BATCH) {
-      const slice = core.slice(i, i + INSTALL_BATCH);
+    for (let i = 0; i < CORE.length; i += INSTALL_BATCH) {
+      const slice = CORE.slice(i, i + INSTALL_BATCH);
       const results = await Promise.all(slice.map((path) => putSafe(cache, abs(path))));
       ok += results.filter((res) => res && res.status === 200).length;
     }
@@ -356,8 +348,8 @@ self.addEventListener("install", (event) => {
     /* 一大半都下不到，说明这会儿网络根本不通。宁可这次装失败、
        继续用旧的 SW（缓存是完整的），也不要装一个空壳进来接管页面——
        空壳 + 弱网 = 满屏 504。 */
-    if (ok < core.length / 3) {
-      throw new Error(`precache failed: ${ok}/${core.length}`);
+    if (ok < CORE.length / 3) {
+      throw new Error(`precache failed: ${ok}/${CORE.length}`);
     }
 
     /* 新版本装好立即接管，不用等用户关掉所有标签页 */
@@ -398,7 +390,10 @@ self.addEventListener("activate", (event) => {
 
     await Promise.all(
       keys
-        .filter((key) => key.startsWith("hnyz-") && !keep.includes(key))
+        /* 只清旧版本缓存。以前这里是 startsWith("hnyz-")，
+           hnyz-state（档位小本子）不匹配 hnyz-v，会被一起删掉，
+           激活后就再也读不到档位了 */
+        .filter((key) => isCacheName(key) && !keep.includes(key))
         .map((key) => caches.delete(key))
     );
     await self.clients.claim();
