@@ -588,20 +588,48 @@ html.tty-on .style-deck__shell {
   outline-offset: -3px;
 }
 
+/* 矩阵的呼吸：鼠标走到哪儿，整块板就朝那边偏一点。
+   角度刻意压得很小——目标是「这页有厚度」，不是「这页在晃」。
+   --tx / --ty 由 JS 每帧写，值域 -1~1 */
+html:not([data-lite="1"]):not([data-lite="2"]) .tty__stage.is-tilting .tty-grid {
+  /* 朝指针那边抬起来一点：像是板子被手指按着的那一角翘了一下 */
+  transform:
+    perspective(1400px)
+    rotateY(calc(var(--tx, 0) * -2.6deg))
+    rotateX(calc(var(--ty, 0) * 1.6deg))
+    translate3d(calc(var(--tx, 0) * 3px), calc(var(--ty, 0) * 3px), 0)
+    scale(1.008);
+  transform-origin: 50% 45%;
+  will-change: transform;
+}
+
+/* 每块再按自己离画面中心的远近错开一点：
+   近的朝指针推出去、远的往回收，整块板就有了厚度。
+   --mx / --my 由 JS 按格子位置写一次，值域约 -4~4 / -3~3 */
+html:not([data-lite="1"]):not([data-lite="2"]) .tty__stage.is-tilting .tile {
+  transform: translate3d(
+    calc(var(--tx, 0) * var(--mx, 0) * 1px),
+    calc(var(--ty, 0) * var(--my, 0) * 1px),
+    0
+  );
+}
+
 /* 新矩阵里的方块顺着路径方向依次落位，一格 22ms，像终端逐格刷出来 */
 .tty-grid.is-fresh .tile {
   animation: tileRise 0.24s cubic-bezier(0.2, 0.75, 0.2, 1) both;
   animation-delay: calc(var(--ti, 0) * 14ms);
 }
 
+/* 用独立的 translate 而不是 transform：transform 留给视差的
+   错位用，两者叠在一起才不会互相顶掉 */
 @keyframes tileRise {
   from {
     opacity: 0;
-    transform: translateX(-8px);
+    translate: -8px 0;
   }
   to {
     opacity: 1;
-    transform: none;
+    translate: 0 0;
   }
 }
 
@@ -886,6 +914,50 @@ html.tty-on .style-deck__shell {
 /* 深色面板下 Deepy 的深蓝描边会陷进底色，抬一点亮度把轮廓找回来 */
 html[data-theme="dark"] .tty-deepy {
   filter: brightness(1.12) saturate(0.96);
+}
+
+/* 游出去的那只：整屏一层 canvas，浮在方块和标题条上面。
+   它走了以后格子里要留白，所以把原来那只先收起来 */
+.tty-deepy.is-away {
+  opacity: 0;
+  transition: opacity 0.18s ease-out;
+}
+
+.tty-whale {
+  position: absolute;
+  inset: 0;
+  /* canvas 是替换元素：只给 inset 不会拉伸，会退回 300×150 的默认尺寸 */
+  width: 100%;
+  height: 100%;
+  z-index: 6;
+  display: block;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s linear;
+}
+
+.tty-whale.is-on {
+  opacity: 1;
+}
+
+/* 只用来量长度的路径，不画出来 */
+.tty-whale-path {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* 被鲸鱼从头顶蹭过的方块：轻轻沉一下再弹回来 */
+.tile.is-kicked {
+  animation: tileKick 0.47s cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+
+@keyframes tileKick {
+  0% { translate: 0 0; filter: brightness(1); }
+  28% { translate: 0 3px; filter: brightness(0.985); }
+  100% { translate: 0 0; filter: brightness(1); }
 }
 
 .tty-pixel {

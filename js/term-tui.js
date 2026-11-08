@@ -170,7 +170,7 @@
   function loadDeepy() {
     if (deepyData || deepyLoading || !window.fetch) return;
     deepyLoading = true;
-    window.fetch("data/deepy.json?v=20261107c")
+    window.fetch("data/deepy.json?v=20261108a")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         deepyData = d;
@@ -211,6 +211,9 @@
 
     el.addEventListener("click", function () {
       if (!deepyData) return;
+      /* 正常档：整只游出去兜一圈；轻量档 / 极致档 / 减弱动效：
+         只换个表情，别在省电的机器上跑一整屏 canvas */
+      if (crossWhale(el)) return;
       var pool = ["happy", "poke-left", "poke-right", "idle-spout"];
       playDeepy(pool[Math.floor(Math.random() * pool.length)]);
     });
@@ -230,8 +233,402 @@
     deepyStart = 0;
   }
 
-  var GLYPH = {
-    H: ["101", "101", "111", "101", "101"],
+  /* ---------------------------------------------------------
+     巡游：点一下 Deepy，它从格子里游出去，绕过整块矩阵，
+     掠过标题条，再从左上角回到自己的格子。
+     路径：Catmull-Rom 转三次贝塞尔，借一条离屏 SVG path
+     量长度取点，速度按缓动走；身后拖几颗上浮的气泡。
+     --------------------------------------------------------- */
+  var WHALE_SWIM = "swim";
+  var WHALE_ROWS = 27;
+  var whaleCv = null;
+  var whaleCtx = null;
+  var whaleRaf = 0;
+  var whaleDpr = 1;
+  var whalePathEl = null;
+  var whaleBubbles = [];
+  var whaleBubbleAt = 0;
+  var whaleTiles = [];
+  var whaleKickTimers = [];
+  var whaleBusy = false;
+
+  /* 只有正常档画这条线：轻量档给个表情，极致档连 canvas 都不该有 */
+  function whaleAllowed() {
+    if (!motionOK()) return false;
+    var tier = document.documentElement.dataset.lite;
+    return tier !== "1" && tier !== "2";
+  }
+
+  function ensureWhaleLayer() {
+    if (!root) return;
+    if (!whaleCv) {
+      whaleCv = document.createElement("canvas");
+      whaleCv.className = "tty-whale";
+      whaleCv.setAttribute("aria-hidden", "true");
+      root.appendChild(whaleCv);
+      whaleCtx = whaleCv.getContext("2d");
+    }
+    if (!whalePathEl) {
+      var svg = document.createElementNS(SVG_NS, "svg");
+      svg.setAttribute("class", "tty-whale-path");
+      svg.setAttribute("aria-hidden", "true");
+      whalePathEl = document.createElementNS(SVG_NS, "path");
+      svg.appendChild(whalePathEl);
+      root.appendChild(svg);
+    }
+  }
+
+  /* 一串点 → 一条不会在拐弯处顿一下的曲线 */
+  function whaleCurve(pts) {
+    if (pts.length < 2) return "";
+    var d = "M" + pts[0][0] + " " + pts[0][1];
+    for (var i = 0; i < pts.length - 1; i += 1) {
+      var p0 = pts[i - 1] || pts[i];
+      var p1 = pts[i];
+      var p2 = pts[i + 1];
+      var p3 = pts[i + 2] || p2;
+      var c1x = p1[0] + (p2[0] - p0[0]) / 6;
+      var c1y = p1[1] + (p2[1] - p0[1]) / 6;
+      var c2x = p2[0] - (p3[0] - p1[0]) / 6;
+      var c2y = p2[1] - (p3[1] - p1[1]) / 6;
+      d += "C" + c1x + " " + c1y + "," + c2x + " " + c2y + "," + p2[0] + " " + p2[1];
+    }
+    return d;
+  }
+
+  /* 画布铺在 .tty 的 padding box 上：iPhone 有安全区时，
+     原点和 root 的 border box 差一截，所以一律以画布自身为坐标原点 */
+  function whaleSurface() {
+    if (!whaleCtx || !whaleCv) return null;
+    var cr = whaleCv.getBoundingClientRect();
+    if (!cr.width || !cr.height) return null;
+    whaleDpr = Math.min(2, window.devicePixelRatio || 1);
+    var w = Math.round(cr.width * whaleDpr);
+    var h = Math.round(cr.height * whaleDpr);
+    if (whaleCv.width !== w || whaleCv.height !== h) {
+      whaleCv.width = w;
+      whaleCv.height = h;
+    }
+    whaleCtx.setTransform(whaleDpr, 0, 0, whaleDpr, 0, 0);
+    whaleCtx.imageSmoothingEnabled = false;
+    return { w: cr.width, h: cr.height, left: cr.left, top: cr.top };
+  }
+
+  function clearWhaleKicks() {
+    whaleKickTimers.forEach(function (id) { window.clearTimeout(id); });
+    whaleKickTimers = [];
+    whaleTiles.forEach(function (t) { t.el.classList.remove("is-kicked"); });
+  }
+
+  function stopWhale(restore) {
+    whaleBusy = false;
+    if (whaleRaf) { window.cancelAnimationFrame(whaleRaf); whaleRaf = 0; }
+    if (whaleCv) {
+      whaleCv.classList.remove("is-on");
+      if (whaleCtx) whaleCtx.clearRect(0, 0, whaleCv.width, whaleCv.height);
+    }
+    whaleBubbles = [];
+    clearWhaleKicks();
+    if (restore) {
+      var live = root ? root.querySelector(".tty-deepy.is-away") : null;
+      if (live) live.classList.remove("is-away");
+    }
+  }
+
+  function crossWhale(el) {
+    if (whaleBusy || !root || !stageEl || !whaleAllowed()) return false;
+    var frames = deepyFrames(WHALE_SWIM);
+    if (!frames) return false;
+
+    ensureWhaleLayer();
+    var box = whaleSurface();
+    if (!box) return false;
+
+    var sr = stageEl.getBoundingClientRect();
+    var wr = el.getBoundingClientRect();
+    if (!wr.width) return false;
+
+    var ww = wr.width;
+    var wh = wr.height;
+    var sx = wr.left - box.left + ww / 2;
+    var sy = wr.top - box.top + wh / 2;
+    var stageL = sr.left - box.left;
+    var stageR = sr.right - box.left;
+    var stageT = sr.top - box.top;
+    var stageB = sr.bottom - box.top;
+    var spanY = stageB - stageT;
+    var hdr = stageEl.querySelector(".tty-stage__hdr");
+    var hr = hdr ? hdr.getBoundingClientRect() : null;
+    var hdrMid = (hr ? (hr.top + hr.bottom) / 2 : sr.top + 30) - box.top;
+    /* 别盖上顶栏：时钟和那排按钮被鲸鱼压住会像画错了，
+       所以整条路径的上限压在顶栏下沿再往下半个身子 */
+    var topEl = root.querySelector(".tty__top");
+    var tr = topEl ? topEl.getBoundingClientRect() : null;
+    var topSafe = Math.max((tr ? tr.bottom - box.top : 0) + wh * 0.52, stageT + wh * 0.46);
+
+    /* 出格 → 撑到右上 → 沿标题条横穿 → 左下 → 回格。
+       y 都收在画布内，鲸鱼不会半截被切掉 */
+    var pts = [
+      [sx, sy],
+      [Math.min(stageR - ww * 0.55, sx + ww * 1.5), Math.max(topSafe, sy - wh * 0.95)],
+      [stageR - ww * 0.62, stageT + spanY * 0.32],
+      [stageR - ww * 0.95, Math.max(topSafe, hdrMid)],
+      [stageL + (stageR - stageL) * 0.42, Math.max(topSafe, hdrMid - wh * 0.12)],
+      [stageL + ww * 0.78, stageT + spanY * 0.17],
+      [sx, sy]
+    ];
+
+    var d = whaleCurve(pts);
+    if (!d) return false;
+
+    whalePathEl.setAttribute("d", d);
+    var len = 0;
+    try { len = whalePathEl.getTotalLength(); } catch (e) { len = 0; }
+    if (!len) return false;
+
+    /* 缓存一次方块位置：飞行途中每帧去量 rect 会一直触发布局 */
+    whaleTiles = [];
+    var grid = grids[active];
+    if (grid) {
+      Array.prototype.forEach.call(grid.children, function (node) {
+        var r = node.getBoundingClientRect();
+        whaleTiles.push({
+          el: node,
+          x: r.left - box.left + r.width / 2,
+          y: r.top - box.top + r.height / 2,
+          w: r.width,
+          h: r.height,
+          hit: false
+        });
+      });
+    }
+
+    var dur = Math.max(1500, Math.min(2600, Math.round(len * 1.55)));
+    var bubbleGap = 150;
+    var t0 = 0;
+    var lastPaint = -1;
+
+    whaleBusy = true;
+    whaleBubbles = [];
+    whaleBubbleAt = 0;
+    el.classList.add("is-away");
+    whaleCv.classList.add("is-on");
+
+    function paint(now) {
+      if (!whaleBusy || !whaleCtx) { whaleRaf = 0; return; }
+      if (!t0) t0 = now;
+      var p = Math.min(1, (now - t0) / dur);
+      /* 起手就有速度，收尾软着地：线走完刚好把鲸鱼送回格子 */
+      var e = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+      var at = len * e;
+      var pt = whalePathEl.getPointAtLength(at);
+      var ahead = whalePathEl.getPointAtLength(Math.min(len, at + 10));
+      var vx = ahead.x - pt.x;
+      /* 素材朝左：往右游时镜像 */
+      var flip = vx > 0.4 ? -1 : 1;
+      var grow = 1 + 0.18 * Math.sin(Math.PI * p);
+      var bob = Math.sin(now / 260) * 2.4;
+      var dw = ww * grow;
+      var dh = wh * grow;
+      var cx = pt.x;
+      var cy = pt.y + bob;
+
+      whaleCtx.clearRect(0, 0, box.w, box.h);
+
+      /* 尾迹：身后 160px 的路径上画一条渐隐的线。
+         整段一条路径 + 线性渐变，别分小段描：圆头叠在一起会糊成一条块 */
+      var wakeLen = Math.min(at, 160);
+      if (wakeLen > 10) {
+        var wFrom = whalePathEl.getPointAtLength(at - wakeLen);
+        var wGrad = whaleCtx.createLinearGradient(wFrom.x, wFrom.y, pt.x, pt.y);
+        wGrad.addColorStop(0, "rgba(63, 108, 196, 0)");
+        wGrad.addColorStop(1, "rgba(63, 108, 196, 0.42)");
+        whaleCtx.beginPath();
+        for (var wi = 0; wi <= 10; wi += 1) {
+          var q = whalePathEl.getPointAtLength(at - wakeLen + (wakeLen / 10) * wi);
+          if (wi === 0) whaleCtx.moveTo(q.x, q.y);
+          else whaleCtx.lineTo(q.x, q.y);
+        }
+        whaleCtx.lineCap = "round";
+        whaleCtx.lineJoin = "round";
+        whaleCtx.strokeStyle = wGrad;
+        whaleCtx.lineWidth = 2;
+        whaleCtx.stroke();
+      }
+
+      /* 气泡：从尾巴的位置吐出来，自己往上飘 */
+      if (now - whaleBubbleAt > bubbleGap && p > 0.04 && p < 0.96) {
+        whaleBubbleAt = now;
+        whaleBubbles.push({
+          x: cx - vx * 1.6 + (Math.random() - 0.5) * 10,
+          y: cy + (Math.random() - 0.5) * 14 + dh * 0.18,
+          r: 1.4 + Math.random() * 1.8,
+          vy: -16 - Math.random() * 14,
+          drift: (Math.random() - 0.5) * 9,
+          life: 1,
+          born: now
+        });
+      }
+      for (var bi = whaleBubbles.length - 1; bi >= 0; bi -= 1) {
+        var bb = whaleBubbles[bi];
+        var age = (now - bb.born) / 900;
+        if (age >= 1) { whaleBubbles.splice(bi, 1); continue; }
+        var bx = bb.x + bb.drift * age;
+        var by = bb.y + bb.vy * age;
+        whaleCtx.globalAlpha = (1 - age) * 0.8;
+        whaleCtx.fillStyle = "#7FA8DC";
+        whaleCtx.fillRect(Math.round(bx), Math.round(by), Math.max(2, Math.round(bb.r)), Math.max(2, Math.round(bb.r)));
+      }
+      whaleCtx.globalAlpha = 1;
+
+      /* 被蹭到的方块轻轻沉一下：只在它从方块正上方掠过时触发一次 */
+      for (var ti = 0; ti < whaleTiles.length; ti += 1) {
+        var tl = whaleTiles[ti];
+        if (tl.hit) continue;
+        if (Math.abs(cx - tl.x) < tl.w / 2 + ww * 0.3 && Math.abs(cy - tl.y) < tl.h / 2 + wh * 0.35) {
+          tl.hit = true;
+          tl.el.classList.add("is-kicked");
+          (function (node) {
+            whaleKickTimers.push(window.setTimeout(function () {
+              node.classList.remove("is-kicked");
+            }, 470));
+          })(tl.el);
+        }
+      }
+
+      var idx = Math.floor((now - t0) / 160) % frames.length;
+      if (idx !== lastPaint || true) {
+        whaleCtx.save();
+        whaleCtx.translate(Math.round(cx), Math.round(cy));
+        whaleCtx.scale(flip, 1);
+        /* swim 帧底下三行是水面线：在格子里是「浮在水上」，
+           飞出来就成了一块横板，只画到第 27 行（保留肚皮和两侧水花） */
+        whaleCtx.drawImage(
+          frames[idx].c, 0, 0, DEEPY_W, WHALE_ROWS,
+          -Math.round(dw / 2), -Math.round(dh / 2), Math.round(dw), Math.round(dh * WHALE_ROWS / DEEPY_H)
+        );
+        whaleCtx.restore();
+        lastPaint = idx;
+      }
+
+      if (p < 1) {
+        whaleRaf = window.requestAnimationFrame(paint);
+      } else {
+        whaleRaf = 0;
+        whaleBusy = false;
+        whaleCv.classList.remove("is-on");
+        whaleCtx.clearRect(0, 0, box.w, box.h);
+        el.classList.remove("is-away");
+        clearWhaleKicks();
+        playDeepy("happy");
+      }
+    }
+
+    whaleRaf = window.requestAnimationFrame(paint);
+    return true;
+  }
+
+  /* ---------------------------------------------------------
+     视差：鼠标在终端里走，整块矩阵跟着轻轻偏一点，
+     像一块有厚度的玻璃板；指针离开就慢慢回正。
+     只在「精确指针 + 正常档 + 没要求减弱动效」时开。
+     --------------------------------------------------------- */
+  var tiltTX = 0;
+  var tiltTY = 0;
+  var tiltX = 0;
+  var tiltY = 0;
+  var tiltRaf = 0;
+
+  function tiltAllowed() {
+    if (!motionOK() || !stageEl) return false;
+    var tier = document.documentElement.dataset.lite;
+    if (tier === "1" || tier === "2") return false;
+    return !!(window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches);
+  }
+
+  function paintTilt() {
+    if (!stageEl) return;
+    stageEl.style.setProperty("--tx", tiltX.toFixed(3));
+    stageEl.style.setProperty("--ty", tiltY.toFixed(3));
+  }
+
+  /* 阻尼跟随：直接绑在 pointermove 上会一格一格跳，这里补一层缓动 */
+  function tiltStep() {
+    if (!stageEl) { tiltRaf = 0; return; }
+    tiltX += (tiltTX - tiltX) * 0.12;
+    tiltY += (tiltTY - tiltY) * 0.12;
+    if (Math.abs(tiltTX - tiltX) < 0.002 && Math.abs(tiltTY - tiltY) < 0.002) {
+      tiltX = tiltTX;
+      tiltY = tiltTY;
+      paintTilt();
+      tiltRaf = 0;
+      if (!tiltX && !tiltY) stageEl.classList.remove("is-tilting");
+      return;
+    }
+    paintTilt();
+    tiltRaf = window.requestAnimationFrame(tiltStep);
+  }
+
+  function kickTilt() {
+    if (!tiltRaf) tiltRaf = window.requestAnimationFrame(tiltStep);
+  }
+
+  function resetTilt() {
+    tiltTX = 0;
+    tiltTY = 0;
+    tiltX = 0;
+    tiltY = 0;
+    if (tiltRaf) { window.cancelAnimationFrame(tiltRaf); tiltRaf = 0; }
+    if (stageEl) {
+      stageEl.classList.remove("is-tilting");
+      stageEl.style.removeProperty("--tx");
+      stageEl.style.removeProperty("--ty");
+    }
+  }
+
+  /* 每块离画面中心多远 → 视差位移的系数。用 offsetLeft/offsetTop，
+     量的是布局位置，不受 transform 影响，切板块时也读得到 */
+  function stampDepth() {
+    grids.forEach(function (g) {
+      if (!g || g.hidden) return;
+      var w = g.clientWidth;
+      var h = g.clientHeight;
+      if (!w || !h) return;
+      Array.prototype.forEach.call(g.children, function (n) {
+        if (!n.style) return;
+        var mx = ((n.offsetLeft + n.offsetWidth / 2) / w - 0.5) * 2;
+        var my = ((n.offsetTop + n.offsetHeight / 2) / h - 0.5) * 2;
+        mx = Math.max(-1, Math.min(1, mx));
+        my = Math.max(-1, Math.min(1, my));
+        n.style.setProperty("--mx", (mx * 4).toFixed(2));
+        n.style.setProperty("--my", (my * 3).toFixed(2));
+      });
+    });
+  }
+
+  function bindTilt() {
+    if (!root || !stageEl) return;
+
+    root.addEventListener("pointermove", function (e) {
+      if (!tiltAllowed()) return;
+      var r = stageEl.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      var nx = ((e.clientX - r.left) / r.width) * 2 - 1;
+      var ny = ((e.clientY - r.top) / r.height) * 2 - 1;
+      tiltTX = Math.max(-1, Math.min(1, nx));
+      tiltTY = Math.max(-1, Math.min(1, ny));
+      stageEl.classList.add("is-tilting");
+      kickTilt();
+    }, { passive: true });
+
+    root.addEventListener("pointerleave", function () {
+      tiltTX = 0;
+      tiltTY = 0;
+      kickTilt();
+    });
+  }
+
+  var GLYPH = {    H: ["101", "101", "111", "101", "101"],
     N: ["1001", "1101", "1011", "1001", "1001"],
     Y: ["101", "101", "010", "010", "010"],
     Z: ["1111", "0001", "0010", "1000", "1111"]
@@ -553,7 +950,7 @@
     var cached = readCachedRepos();
     if (cached) renderRepos(box, { repos: cached.repos });
 
-    window.fetch("data/repos.json?v=20261107c")
+    window.fetch("data/repos.json?v=20261108a")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (store) {
         if (!store || !store.repos) {
@@ -983,6 +1380,7 @@
     if (next === active) {
       /* 首次打开也走这里：把当前板块显示出来并画好两栏 */
       grids[active].hidden = false;
+      stampDepth();
       paintChrome();
       updateOverflow();
       try { grids[active].focus({ preventScroll: true }); } catch (e) { /* 忽略 */ }
@@ -1007,6 +1405,7 @@
       from.hidden = true;
       from.classList.remove("is-out");
       to.hidden = false;
+      stampDepth();
       to.classList.remove("is-in", "is-fresh");
       to.scrollTop = to.scrollTop || 0;
       markSide(nearestTile(to));
@@ -1038,6 +1437,7 @@
        不做整块裁切：擦除边界会把两套卡片并排摆出来 */
     from.classList.add("is-out");
     to.hidden = false;
+    stampDepth();
     to.classList.add("is-fresh");
     void to.offsetWidth;
 
@@ -1290,8 +1690,15 @@
     if (resizeRaf) return;
     resizeRaf = window.requestAnimationFrame(function () {
       resizeRaf = 0;
-      if (isOpen) updateOverflow();
+      if (isOpen) { updateOverflow(); stampDepth(); }
     });
+  });
+
+  /* 切到轻量/极致：视差当场停下，别在省电的档位上继续跟着指针算。
+     看事件里的 tier 而不是属性：属性的写入顺序将来若有调整，这里也不会漏 */
+  document.addEventListener("hnyz:lite", function (e) {
+    var tier = e && e.detail ? e.detail.tier : 0;
+    if (tier !== 0 || !tiltAllowed()) resetTilt();
   });
 
   document.addEventListener("keydown", function (e) {
@@ -1471,6 +1878,8 @@
     mountDeepy(root.querySelector(".tty-grid .tty-deepy"));
 
     bindRoot();
+    bindTilt();
+    stampDepth();
     built = true;
 
     /* 作品板块：本地缓存优先，静态快照兜底 */
@@ -1485,6 +1894,8 @@
   function teardown() {
     close();
     stopDeepy();
+    stopWhale(false);
+    resetTilt();
     if (swapTimer) { window.clearTimeout(swapTimer); swapTimer = 0; }
     clearPath();
     swapToken += 1;

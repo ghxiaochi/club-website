@@ -73,7 +73,9 @@
 - **方块**：`tile(编号, 标题, 列数, 角标, 内容)`，每块用 `--c` 指定占几列（7+5、5+4+3、8+4、4+4+4），行高 `minmax(min-content, 1fr)`。
 - **切换板块（路径动画）**：`js/term-tui.js` 在 `.tty` 上量一条带 7px 圆角的折线 —— 从旧板块的小方点出发，斜进中区标题条，贴着下沿横走，末端向下扎进内容区。三层叠画：7px 淡光晕、1.5px 主线、3px 彗尾；8px 方块光标用 `getPointAtLength` 沿路径跑，到终点炸开一个 16px 方框。旧矩阵 0.14s 淡出，新方块按 12ms 错峰从下方 10px 浮起，整段 360–640ms。手机横排标签条时折线改走「旧标签 → 栏底 → 标题条」，内容区支持左右滑翻板块。`prefers-reduced-motion` 与轻量模式直接切，不画线。
 - **命令行**：`overview` / `about` / `work` / `join`、`0-3`、`[` `]`、`h` `l`、方向键；别名 `main` `build` `git` `man` `sched` `faq` `msg` `ssh`；还有 `ls` `whoami` `clear` `help`。
-- **Deepy 鲸鱼**：`data/deepy.json` 存 42×30 的七组帧，离屏 canvas 预渲染 + `drawImage` 播放；静态首帧 `images/deepy/idle.webp` 兜底，待机随机插播，点击换表情。
+- **Deepy 鲸鱼**：`data/deepy.json` 存 42×30 的七组帧，离屏 canvas 预渲染 + `drawImage` 播放；静态首帧 `images/deepy/idle.webp` 兜底，待机随机插播。
+- **点鲸鱼巡游**：正常档点一下，鲸鱼从方块里游出去 —— 一条 Catmull-Rom 曲线带它绕到右上、掠过标题条、从左上回到原位，约 1.5–2.6s。整屏一张 `.tty-whale` canvas，身后拖 160px 渐隐尾迹和几颗上浮气泡；被它从头顶蹭过的方块会沉一下再弹回（`is-kicked`）。轻量 / 极致 / 减弱动效下不游，只换个表情。
+- **矩阵视差**：指针在终端里移动时，`.tty-grid` 绕 X/Y 轴轻微倾斜（≤2.6°），每块再按离中心远近做 0–4px 的错位，像一块有厚度的板。阻尼用 rAF 补间，停下就自动停帧；`@media (hover: hover) and (pointer: fine)` 才开，轻量 / 极致 / 减弱动效一律不倾斜。方块的浮起与碰撞改用独立的 `translate` 属性，把 `transform` 留给视差，两者不打架。
 
 ---
 
