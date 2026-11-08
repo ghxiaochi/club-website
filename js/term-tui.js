@@ -170,7 +170,7 @@
   function loadDeepy() {
     if (deepyData || deepyLoading || !window.fetch) return;
     deepyLoading = true;
-    window.fetch("data/deepy.json?v=20261108a")
+    window.fetch("data/deepy.json?v=20261108b")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         deepyData = d;
@@ -438,14 +438,18 @@
       /* 尾迹：身后 160px 的路径上画一条渐隐的线。
          整段一条路径 + 线性渐变，别分小段描：圆头叠在一起会糊成一条块 */
       var wakeLen = Math.min(at, 160);
-      if (wakeLen > 10) {
+      /* 收到鲸鱼身后一点：素材尾巴和背之间有透明缝，
+         线一直画到中心会从缝里透出来，像划在身上的划痕 */
+      var wakeEnd = Math.max(0, at - ww * 0.34);
+      if (wakeLen > 10 && wakeEnd - (at - wakeLen) > 10) {
         var wFrom = whalePathEl.getPointAtLength(at - wakeLen);
-        var wGrad = whaleCtx.createLinearGradient(wFrom.x, wFrom.y, pt.x, pt.y);
+        var wTo = whalePathEl.getPointAtLength(wakeEnd);
+        var wGrad = whaleCtx.createLinearGradient(wFrom.x, wFrom.y, wTo.x, wTo.y);
         wGrad.addColorStop(0, "rgba(63, 108, 196, 0)");
         wGrad.addColorStop(1, "rgba(63, 108, 196, 0.42)");
         whaleCtx.beginPath();
         for (var wi = 0; wi <= 10; wi += 1) {
-          var q = whalePathEl.getPointAtLength(at - wakeLen + (wakeLen / 10) * wi);
+          var q = whalePathEl.getPointAtLength(at - wakeLen + ((wakeEnd - (at - wakeLen)) / 10) * wi);
           if (wi === 0) whaleCtx.moveTo(q.x, q.y);
           else whaleCtx.lineTo(q.x, q.y);
         }
@@ -950,7 +954,7 @@
     var cached = readCachedRepos();
     if (cached) renderRepos(box, { repos: cached.repos });
 
-    window.fetch("data/repos.json?v=20261108a")
+    window.fetch("data/repos.json?v=20261108b")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (store) {
         if (!store || !store.repos) {
