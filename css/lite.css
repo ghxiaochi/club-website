@@ -253,23 +253,13 @@ html[data-lite="2"] .tty *::after {
   transition: none !important;
 }
 
-/* 主题按钮的图标来自雪碧图，极致档换成文字符号：
-   一张 22KB 的图，不请求也就不解码 */
+/* 主题按钮的图标来自一张 21KB 的雪碧图，极致档换成纯 CSS 的半月：
+   图不请求也不解码。画法写在 <head> 的兜底样式里，和「雪碧图没到」
+   共用同一段——顺带把原来那个 "◐" 字形也去掉了，字体里没有这个字
+   的设备会显示成豆腐块 */
 html[data-lite="2"] .theme-toggle__flip {
-  background-image: none !important;
   display: grid;
   place-items: center;
-  font-size: 15px;
-  line-height: 1;
-}
-
-html[data-lite="2"] .theme-toggle__flip::after {
-  content: "◐";
-}
-
-html[data-lite="2"] .theme-toggle[aria-pressed="true"] .theme-toggle__flip::after,
-html[data-lite="2"][data-theme="dark"] .theme-toggle__flip::after {
-  content: "●";
 }
 
 /* 终端里的跨页入口：点了只会被守卫弹回首页，不如不显示 */

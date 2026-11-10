@@ -2969,11 +2969,41 @@ body.nav-locked {
   bottom: 46px;
 }
 
-/* 小屏顶栏：品牌 + 六个圆形按钮在 390px 上挤成一条，
-   音效和全屏让位给风格、主题、刷新和菜单，点起来才不误触 */
-@media (max-width: 420px) {
+/* 窄屏顶栏：七个按钮在 600px 以下按 44px 排会横向溢出
+   （430px 实测溢出 64px，菜单键直接被挤出屏幕）。600px 以下先统一
+   收到 38px，七个按钮 = 278px，加上品牌也排得下 */
+@media (max-width: 720px) {
   .header-actions {
     gap: 2px;
+  }
+
+  .header-actions .theme-toggle,
+  .header-actions .style-toggle,
+  .header-actions .sync-toggle,
+  .header-actions .lite-toggle,
+  .header-actions .nav-toggle,
+  .header-actions .sound-toggle,
+  .header-actions .fullscreen-toggle {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+  }
+}
+
+/* 手机顶栏：460px 以下七个按钮怎么排都不够（实测 421–450 之间
+   按钮组会被顶出屏幕，多出一条横向滚动），这一档让音效和全屏
+   先让位给风格、主题、刷新和菜单，点起来也不容易误触 */
+@media (max-width: 480px) {
+  /* 顶栏永远只排一行：宁可挤一点，也不能让菜单键掉到第二行去
+     （掉下去以后 .site-header 会变成两层，底下的 hero 被顶掉一截） */
+  .header-inner {
+    gap: 8px;
+    flex-wrap: nowrap;
+  }
+
+  .header-actions {
+    gap: 2px;
+    flex-shrink: 0;
   }
 
   .header-actions .sound-toggle,
@@ -2981,18 +3011,58 @@ body.nav-locked {
     display: none;
   }
 
+}
+
+/* 窄屏上品牌只留 HNYZ 三个字：中文副标题占着一大截，
+   七个按钮就再也排不下了 */
+@media (max-width: 560px) {
+  .brand-copy span {
+    display: none;
+  }
+}
+
+/* 360px 这一档（很多 Android 机正好是这个宽度）：五个按钮 38px 加上
+   品牌刚好排得下，再把品牌收紧一点留出余量 */
+@media (max-width: 386px) {
+  .brand {
+    gap: 8px;
+  }
+
+  .brand-mark {
+    width: 32px;
+    height: 32px;
+  }
+
+  .brand-mark svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .brand-copy strong {
+    font-size: 0.95rem;
+    letter-spacing: 0.1em;
+  }
+}
+
+/* 320px（iPhone SE 一代那种）：再收一档，仍然不换行 */
+@media (max-width: 340px) {
+  .header-actions {
+    gap: 1px;
+  }
+
   .header-actions .theme-toggle,
   .header-actions .style-toggle,
   .header-actions .sync-toggle,
   .header-actions .lite-toggle,
   .header-actions .nav-toggle {
-    width: 42px;
-    height: 42px;
-    min-width: 42px;
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
   }
 
-  .brand-copy span {
-    display: none;
+  .brand-copy strong {
+    font-size: 0.9rem;
+    letter-spacing: 0.06em;
   }
 }
 

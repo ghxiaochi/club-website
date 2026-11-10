@@ -14,7 +14,7 @@
 (function () {
   "use strict";
 
-  var V = "?v=20261108b";
+  var V = "?v=20261108c";
 
   var SKINS = {
     term: ["css/skin-term.css", "css/term-tui.css"],
@@ -112,44 +112,115 @@
   }
 
   /* ---------------------------------------------------------
+     雪碧图体检
+     ---------------------------------------------------------
+     主题按钮的太阳/月亮是一张 21KB 的 webp（.theme-toggle__flip 的
+     背景图）。图没到，按钮里就是一个空白的格子。
+     提前探一次，失败就挂 no-sprite，由 <head> 里那段兜底样式
+     画一个纯 CSS 的半月顶上——不依赖任何字形，也不会是空白。
+     --------------------------------------------------------- */
+  function probeSprite() {
+    if (document.documentElement.dataset.lite === "2") return;
+    try {
+      var probe = new Image();
+      probe.onerror = function () {
+        document.documentElement.classList.add("no-sprite");
+      };
+      probe.src = "assets/moon-sun-sprite.webp";
+    } catch (error) { /* 隐私模式下忽略 */ }
+  }
+  probeSprite();
+
+  /* ---------------------------------------------------------
      样式自愈
      ---------------------------------------------------------
-     发版后 ?v= 全变，若这道连接刚好拉不到新地址（弱网、被拦、
-     或 SW 里只剩新版本缓存），浏览器会拿不到任何 CSS：整页退成
-     白底黑字的裸 HTML，页头图标、排版全散。这里在 load 之后查一次
-     基础变量 --sans 有没有生效——没有就把样式表按「去掉版本号」
-     的地址重挂一遍，CDN 上那份文件一直都在。
+     发版后 ?v= 全变。若某一条连接没拉到（弱网、被拦、SW 只回了半截），
+     后果分两种：
+       · 一张都没到 —— 整页白底黑字，谁都看得出坏了；
+       · 只少了一两张 —— 更麻烦。页面看着"还能用"，但顶栏按钮退回
+         浏览器的灰方块、主题图标是个空格子、首屏 $ 提示挤进正文，
+         一眼像是乱码。2026-11 在 360px 的手机上就是这样。
+     以前这里只查 --measure（只有 style.css 定义），所以第二种情况
+     永远查不出来。现在逐个 <link> 体检：加载失败（error 事件）
+     或 sheet 里一条规则都没有，就把这一张按去掉版本号的地址重挂一次。
+     重挂的地址带 ?r= 时间戳，SW 的「其余静态资源」那条会 ignoreSearch
+     命中缓存里那份，弱网也能顶上。
      --------------------------------------------------------- */
-  function rehangCss() {
-    var root = document.documentElement;
-    /* 挑一个只有 style.css 定义的量：--sans 在终端/黑客皮肤里会被
-       各自的表重写，样式表整体没来时它反而可能是有的 */
-    var probe = window.getComputedStyle(root).getPropertyValue("--measure");
-    if (probe && probe.trim()) return;
+  var DEAD = "data-css-dead";
+  var RETRIED = "data-css-retried";
+  var HEAL_ROUNDS = 1;
 
-    var stamp = Date.now();
+  /* 只有真的加载失败才会触发 error：还在下载中的表不会被误判 */
+  document.addEventListener("error", function (event) {
+    var node = event.target;
+    if (!node || node.tagName !== "LINK" || node.rel !== "stylesheet") return;
+    node.setAttribute(DEAD, "1");
+    /* 页面早就 load 完了才坏（多半是切皮肤时补的那张）：当场补一次 */
+    if (document.readyState === "complete") {
+      window.setTimeout(function () { healCss(HEAL_ROUNDS); }, 300);
+    }
+  }, true);
+
+  function sickLinks() {
     var links = document.querySelectorAll('link[rel="stylesheet"]');
-    var added = 0;
+    var out = [];
     for (var i = 0; i < links.length; i += 1) {
-      var href = links[i].getAttribute("href") || "";
+      var link = links[i];
+      var href = link.getAttribute("href") || "";
       if (!href || /^(https?:)?\/\//.test(href)) continue;
-      var base = href.split("#")[0].split("?")[0];
+      /* 已经重挂过的就不再叠：地址里带 ?r= 的一律跳过 */
+      if (href.indexOf("?r=") > -1) continue;
+      /* 已经补过一张的表不再重复补：原件留在 DOM 里当备胎，
+         第二轮体检时会再看一次，别让它一直被判成"病了" */
+      if (link.getAttribute(RETRIED)) continue;
+      if (link.getAttribute(DEAD)) { out.push(link); continue; }
+      /* 切皮肤时动态补进来的表可能还在路上，sheet 为空也算正常，
+         这种只认 error 事件，别在这里误判成没到 */
+      if (link.hasAttribute("data-skin-css")) continue;
+      var sheet = link.sheet;
+      if (!sheet) { out.push(link); continue; }
+      /* 读到的是空文件、或一张根本不是样式表的错误页，都算没到 */
+      var count = 0;
+      try { count = sheet.cssRules ? sheet.cssRules.length : 0; }
+      catch (error) { count = 0; }
+      if (count === 0) out.push(link);
+    }
+    return out;
+  }
+
+  function healCss(round) {
+    var sick = sickLinks();
+    if (!sick.length) return;
+    var stamp = Date.now();
+    /* personal.css 里放着主题图标的雪碧图。它整份没到时，按钮里就是
+       一个空格子——顺手把 no-sprite 挂上，让兜底那段画个纯 CSS 半月 */
+    for (var k = 0; k < sick.length; k += 1) {
+      if ((sick[k].getAttribute("href") || "").indexOf("personal.css") > -1) {
+        document.documentElement.classList.add("no-sprite");
+      }
+    }
+    for (var i = 0; i < sick.length; i += 1) {
+      var base = (sick[i].getAttribute("href") || "").split("#")[0].split("?")[0];
+      if (!base) continue;
       var fresh = document.createElement("link");
       fresh.rel = "stylesheet";
+      /* 原本 media="print" 的懒加载表（留言板样式）重挂时直接生效 */
+      fresh.media = "all";
       fresh.href = base + "?r=" + stamp;
       document.head.appendChild(fresh);
-      added += 1;
+      sick[i].setAttribute(RETRIED, "1");
     }
-    if (added) document.documentElement.classList.add("is-css-retry");
+    document.documentElement.classList.add("is-css-retry");
+    if (round < HEAL_ROUNDS) {
+      window.setTimeout(function () { healCss(round + 1); }, 1400);
+    }
   }
 
-  if (document.readyState === "complete") {
-    window.setTimeout(rehangCss, 260);
-  } else {
-    window.addEventListener("load", function () {
-      window.setTimeout(rehangCss, 260);
-    }, { once: true });
+  function startHeal() {
+    window.setTimeout(function () { healCss(0); }, 300);
   }
+  if (document.readyState === "complete") startHeal();
+  else window.addEventListener("load", startHeal, { once: true });
 
   window.HNYZCSS = { ensure: ensure };
 })();

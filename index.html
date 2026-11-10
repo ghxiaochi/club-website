@@ -73,13 +73,51 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="stylesheet" href="css/style.css?v=20261108b">
-  <link rel="stylesheet" href="css/pet.css?v=20261108b">
-  <link rel="stylesheet" href="css/personal.css?v=20261108b">
-  <link rel="stylesheet" href="css/avatar-pet.css?v=20261108b">
-  <link rel="stylesheet" href="css/skins.css?v=20261108b">
-  <link rel="stylesheet" href="css/lite.css?v=20261108b">
-  <script src="js/skin-boot.js?v=20261108b"></script>
+  <!-- 顶栏兜底样式（内联）
+       弱网、拦截、或 SW 只回来半截的时候，可能有一两张外链表拿不到。
+       缺 style.css 是整页裸奔；缺 skins.css / personal.css 时更像"乱码"：
+       顶栏按钮退回浏览器的灰方块、风格与主题图标变成空白、
+       首屏那句 $ 提示失去字体与间距、被当成正文挤进段落里。
+       2026-11 真机上就是这样。
+       这里只放一套"看起来还算正常"的最小样式；权重压到 0（:where），
+       正式样式一到就全部覆盖，不会和它们打架。 -->
+  <style>
+    :where(.header-inner){display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;gap:10px}
+    :where(.brand){display:inline-flex;align-items:center;gap:10px;min-width:0}
+    :where(.brand-mark){display:grid;place-items:center;width:36px;height:36px;border:1px solid rgba(15,42,80,.14);border-radius:10px;color:#2563eb;background:#fff}
+    :where(.brand-mark svg){width:19px;height:19px}
+    :where(.brand-copy){display:flex;flex-direction:column;line-height:1.25;overflow:hidden}
+    :where(.brand-copy strong){font-size:1rem;letter-spacing:.14em;white-space:nowrap}
+    :where(.header-actions){display:flex;align-items:center;gap:4px;flex:0 0 auto;margin-left:auto}
+    :where(.header-actions > button){display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;padding:0;margin:0;border:1px solid rgba(15,42,80,.14);border-radius:12px;background:#fff;color:#526b89;-webkit-appearance:none;appearance:none;font:inherit;line-height:1;cursor:pointer}
+    :where(.header-actions > button > svg){width:18px;height:18px;display:block}
+    :where(.style-toggle__grid){display:grid;grid-template-columns:repeat(2,5px);grid-template-rows:repeat(2,5px);gap:3px}
+    :where(.style-toggle__grid i){display:block;width:5px;height:5px;border-radius:1px;background:currentColor;opacity:.72}
+    :where(.theme-toggle__flip){display:block;width:18px;height:18px}
+    :where(.nav-toggle span){display:block;width:16px;height:2px;margin:3px auto;border-radius:2px;background:currentColor}
+    :where(.hero-rotator){display:flex;align-items:center;gap:6px;margin:14px 0 0;min-height:1.5em;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;letter-spacing:.01em;color:#526b89}
+    :where(.hero-rotator__prompt){color:#2563eb;font-weight:600}
+    :where(.hero-rotator__caret){display:block;width:7px;height:1.1em;background:#2563eb}
+    /* 雪碧图拿不到（弱网，或 personal.css 整份没来）时不要留一个空白方块：
+       纯 CSS 画个半月，18px，和雪碧图同尺寸。极致档也走这一套，
+       免得多一条"◐"的字形依赖。 */
+    :is(html.no-sprite, html[data-lite="2"]) .theme-toggle__flip{
+      border-radius:50%;
+      /* 实心圆挖掉一个偏右的圆，剩下的就是月牙 */
+      background-color:currentColor !important;
+      background-image:none !important;
+      -webkit-mask:radial-gradient(circle at 74% 50%,transparent 0 41%,#000 42%);
+      mask:radial-gradient(circle at 74% 50%,transparent 0 41%,#000 42%);
+      opacity:.92;
+    }
+  </style>
+  <link rel="stylesheet" href="css/style.css?v=20261108c">
+  <link rel="stylesheet" href="css/pet.css?v=20261108c">
+  <link rel="stylesheet" href="css/personal.css?v=20261108c">
+  <link rel="stylesheet" href="css/avatar-pet.css?v=20261108c">
+  <link rel="stylesheet" href="css/skins.css?v=20261108c">
+  <link rel="stylesheet" href="css/lite.css?v=20261108c">
+  <script src="js/skin-boot.js?v=20261108c"></script>
   <script>
     /* 轻量 / 极致预置：弱设备（2G、内存 ≤2G、核心 ≤2）首帧就走低配，
        避免先跑一遍动画再关。手动开过的以 localStorage 为准（1 轻量 / 2 极致）。
@@ -115,31 +153,31 @@
       }
     })();
   </script>
-  <link rel="stylesheet" href="css/type.css?v=20261108b">
-  <link rel="stylesheet" href="css/motion.css?v=20261108b">
-  <link rel="preload" href="css/guestbook.css?v=20261108b" as="style">
-  <link rel="stylesheet" href="css/guestbook.css?v=20261108b" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/guestbook.css?v=20261108b"></noscript>
+  <link rel="stylesheet" href="css/type.css?v=20261108c">
+  <link rel="stylesheet" href="css/motion.css?v=20261108c">
+  <link rel="preload" href="css/guestbook.css?v=20261108c" as="style">
+  <link rel="stylesheet" href="css/guestbook.css?v=20261108c" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/guestbook.css?v=20261108c"></noscript>
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <!-- 项目卡片、全部项目折叠页和复制按钮由 js/main.js 驱动 -->
-  <script src="js/sfx.js?v=20261108b" defer></script>
-  <script src="js/theme.js?v=20261108b" defer></script>
-  <script src="js/theme-icon.js?v=20261108b" defer></script>
-  <script src="js/members.js?v=20261108b" defer></script>
-  <script src="js/main.js?v=20261108b" defer></script>
-  <script src="js/repo-sync.js?v=20261108b" defer></script>
-  <script src="js/pet.js?v=20261108b" defer></script>
-  <script src="js/avatar-pet.js?v=20261108b" defer></script>
-  <script src="js/personal.js?v=20261108b" defer></script>
-  <script src="js/click-fx.js?v=20261108b" defer></script>
-  <script src="js/term-tui.js?v=20261108b" defer></script>
-  <script src="js/skins.js?v=20261108b" defer></script>
-  <script src="js/fullscreen.js?v=20261108b" defer></script>
-  <script src="js/lite.js?v=20261108b" defer></script>
-  <script src="js/copy.js?v=20261108b" defer></script>
-  <script src="js/pwa.js?v=20261108b" defer></script>
-  <script src="js/guestbook.js?v=20261108b" defer></script>
+  <script src="js/sfx.js?v=20261108c" defer></script>
+  <script src="js/theme.js?v=20261108c" defer></script>
+  <script src="js/theme-icon.js?v=20261108c" defer></script>
+  <script src="js/members.js?v=20261108c" defer></script>
+  <script src="js/main.js?v=20261108c" defer></script>
+  <script src="js/repo-sync.js?v=20261108c" defer></script>
+  <script src="js/pet.js?v=20261108c" defer></script>
+  <script src="js/avatar-pet.js?v=20261108c" defer></script>
+  <script src="js/personal.js?v=20261108c" defer></script>
+  <script src="js/click-fx.js?v=20261108c" defer></script>
+  <script src="js/term-tui.js?v=20261108c" defer></script>
+  <script src="js/skins.js?v=20261108c" defer></script>
+  <script src="js/fullscreen.js?v=20261108c" defer></script>
+  <script src="js/lite.js?v=20261108c" defer></script>
+  <script src="js/copy.js?v=20261108c" defer></script>
+  <script src="js/pwa.js?v=20261108c" defer></script>
+  <script src="js/guestbook.js?v=20261108c" defer></script>
   <script>
     /* 页脚跑道不参与首屏，也不该为「只看了首屏的人」付钱：
        等它进入视口前 600px 再拉样式和脚本。
@@ -155,7 +193,7 @@
         if (document.querySelector("link[data-dino-css]")) return;
         var link = document.createElement("link");
         link.rel = "stylesheet";
-        link.href = "css/dino.css?v=20261108b";
+        link.href = "css/dino.css?v=20261108c";
         link.setAttribute("data-dino-css", "");
         document.head.appendChild(link);
       }
@@ -166,7 +204,7 @@
         if (document.documentElement.dataset.lite === "2") return;
         loadCss();
         var script = document.createElement("script");
-        script.src = "js/dino.js?v=20261108b";
+        script.src = "js/dino.js?v=20261108c";
         script.async = true;
         document.body.appendChild(script);
       }
