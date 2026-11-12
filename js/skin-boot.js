@@ -14,7 +14,7 @@
 (function () {
   "use strict";
 
-  var V = "?v=20261108c";
+  var V = "?v=20261112a";
 
   var SKINS = {
     term: ["css/skin-term.css", "css/term-tui.css"],
@@ -115,19 +115,51 @@
      雪碧图体检
      ---------------------------------------------------------
      主题按钮的太阳/月亮是一张 21KB 的 webp（.theme-toggle__flip 的
-     背景图）。图没到，按钮里就是一个空白的格子。
-     提前探一次，失败就挂 no-sprite，由 <head> 里那段兜底样式
-     画一个纯 CSS 的半月顶上——不依赖任何字形，也不会是空白。
+     背景图）。这张图跟 <link> 里的样式表不是一个世界的东西：
+     表到了、图没到，按钮里照样是一个空白格子。
+
+     所以兜底不再是"图失败才画"，而是**默认就画**：
+     CSS 里 html:not(.sprite-ok) 先用纯 CSS 画月牙（深色下画空心太阳），
+     只有这里确认图片真的能解码，才挂 HTML.sprite-ok 换回雪碧图。
+
+     这样无论图是 404、被拦、弱网卡住还是解码失败，
+     按钮里永远不会是一个空白方块。
      --------------------------------------------------------- */
   function probeSprite() {
-    if (document.documentElement.dataset.lite === "2") return;
+    var root = document.documentElement;
+    if (root.dataset.lite === "2") return;
+
+    var probe;
     try {
-      var probe = new Image();
-      probe.onerror = function () {
-        document.documentElement.classList.add("no-sprite");
-      };
+      probe = new Image();
+    } catch (error) {
+      return; /* 隐私模式下忽略，月牙兜底照常显示 */
+    }
+
+    function ok() {
+      root.classList.add("sprite-ok");
+      root.classList.remove("no-sprite");
+    }
+    function bad() {
+      root.classList.add("no-sprite");
+    }
+
+    probe.onload = function () {
+      /* 有的浏览器 onload 了，真正绘制时才因为内存/格式解码失败崩掉 */
+      if (typeof probe.decode === "function") {
+        probe.decode().then(ok, bad);
+      } else {
+        ok();
+      }
+    };
+    probe.onerror = bad;
+
+    /* 用文档地址解析，别写死相对路径：挂在子目录下也一样找得到 */
+    try {
+      probe.src = new URL("assets/moon-sun-sprite.webp", document.baseURI).href;
+    } catch (error) {
       probe.src = "assets/moon-sun-sprite.webp";
-    } catch (error) { /* 隐私模式下忽略 */ }
+    }
   }
   probeSprite();
 

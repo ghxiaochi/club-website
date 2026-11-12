@@ -33,7 +33,7 @@
    发版时改 VERSION，更老的缓存在 activate 里被清掉。
    ========================================================= */
 
-const VERSION = "20261108c";
+const VERSION = "20261112a";
 const CACHE = `hnyz-v${VERSION}`;
 
 /* 站内根路径：用 "./" 就地解析，
@@ -56,6 +56,10 @@ const PAGE_TIMEOUT = 4500;
 
 /* 单个静态资源的最长等待。比页面宽松：字体、音频大一点正常。 */
 const ASSET_TIMEOUT = 12000;
+
+/* 带 ?v= 的资源问网络时等多久。这类文件都是 CSS/JS，几十 KB，
+   正常一秒内就回；3.5 秒还没回就别让首屏干等了，拿上一版顶上。 */
+const VERSIONED_TIMEOUT = 3500;
 
 /* 安装时一次并发下载几个。全并发 60 个会把首屏请求挤到后面。 */
 const INSTALL_BATCH = 8;
@@ -195,7 +199,7 @@ function isCacheName(name) {
   return name.startsWith("hnyz-v");
 }
 
-/* 从缓存名里取版本号：hnyz-v20261108c → 20261108c */
+/* 从缓存名里取版本号：hnyz-v20261112a → 20261112a */
 function versionOf(name) {
   return name.replace(/^hnyz-v/, "");
 }
@@ -485,17 +489,17 @@ self.addEventListener("fetch", (event) => {
       const hit = await cache.match(request);
       if (hit) return hit;
 
-      /* 刚发版时最常见的一幕：页面还是旧 HTML，问的是 ?v=老版本，
-         而新缓存里只有 ?v=新版本。以前这里直接走网络，网络一慢就返回
-         空 504 —— CSS 拿不到，整页退成白底黑字的裸 HTML。现在先跨
-         缓存按同路径捞一份救急。
+      /* 这个版本号缓存里没有，只有两种可能：
+         a. 刚发版，新 HTML 已经在问新地址 —— 必须问网络，不能拿旧版顶；
+         b. 页面是旧的，问的是 ?v=老版本 —— 新缓存里当然没有。
 
-         捞到就只返回，不写回这个地址：旧 URL 每换一版就多一个，
-         写进去只会让缓存里堆一串永远用不上的副本。下次再请求，
-         ignoreSearch 一样能找到。 */
-      const rescue = await findInCaches(request);
-      if (rescue) return rescue;
+         以前这里先跨版本捞同路径的旧文件顶上去，看似聪明，实际是
+         2026-11 那次「顶栏挤成一团」的元凶：新 HTML 配上了上一版的
+         style.css，按钮还是旧的尺寸，菜单键被挤出屏幕。
+         版本号就是内容指纹，捞到别的版本等于给了份错的。
 
+         所以现在改成：先问网络（3 秒），拿不到才用旧版救急。
+         弱网/断网时行为跟以前一样，正常网络下永远不会新旧混搭。 */
       const fresh = await withTimeout(
         fetch(request)
           .then((res) => {
@@ -503,9 +507,14 @@ self.addEventListener("fetch", (event) => {
             return res;
           })
           .catch(() => null),
-        ASSET_TIMEOUT
+        VERSIONED_TIMEOUT
       );
       if (fresh && fresh.ok) return fresh;
+
+      /* 网络不行了才跨版本捞。捞到只返回、不写回这个地址：
+         旧 URL 每换一版就多一个，写进去只会堆一串永远用不上的副本。 */
+      const rescue = await findInCaches(request);
+      if (rescue) return rescue;
 
       /* 真没缓存也没网：给一个明确的失败，而不是空白 200 */
       return new Response("", { status: 504, statusText: "offline" });

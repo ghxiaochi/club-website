@@ -175,7 +175,7 @@
   height: 17px;
 }
 
-/* 月亮 / 太阳雪碧图：显示 18px，源图每帧 54px，留 3 倍余量给高分屏 */
+/* 月亮 / 太阳雪碧图：显示 18px，60 帧，横向拼成 1080px */
 .theme-toggle__flip {
   display: block;
   width: 18px;
@@ -187,9 +187,27 @@
   pointer-events: none;
 }
 
-html[data-style="hacker"] .theme-toggle__flip {
-  /* 蓝色 210° 转到荧光绿 120°，顺时针退回 90° */
-  filter: hue-rotate(-90deg) saturate(1.45) brightness(1.06);
+/* 主题按钮：雪碧图没确认能解码之前，先用内联 SVG 的太阳/月亮顶上。
+   mask 上色，跟着主题色和皮肤走；skin-boot 探到图真能解码了，
+   才挂 html.sprite-ok 换回那 60 帧雪碧图。弱网、图 404、
+   personal.css 整份没到，这个格子都不会是空白。 */
+html:not(.sprite-ok) .theme-toggle__flip{
+  background-image:none !important;
+  background-color:currentColor !important;
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='4.3'/%3E%3Cpath d='M12 2.2v2.5M12 19.3v2.5M2.2 12h2.5M19.3 12h2.5M5.1 5.1l1.8 1.8M17.1 17.1l1.8 1.8M18.9 5.1 17.1 6.9M6.9 17.1l-1.8 1.8'/%3E%3C/svg%3E");
+  -webkit-mask-repeat:no-repeat;
+  -webkit-mask-position:center;
+  -webkit-mask-size:18px 18px;
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='4.3'/%3E%3Cpath d='M12 2.2v2.5M12 19.3v2.5M2.2 12h2.5M19.3 12h2.5M5.1 5.1l1.8 1.8M17.1 17.1l1.8 1.8M18.9 5.1 17.1 6.9M6.9 17.1l-1.8 1.8'/%3E%3C/svg%3E");
+  mask-repeat:no-repeat;
+  mask-position:center;
+  mask-size:18px 18px;
+  opacity:.92;
+}
+/* 深色换成月牙，跟雪碧图两帧的语义一致 */
+html[data-theme="dark"]:not(.sprite-ok) .theme-toggle__flip{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20.9 13.7A8.8 8.8 0 1 1 10.3 3.1a6.9 6.9 0 0 0 10.6 10.6z' fill='%23000'/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20.9 13.7A8.8 8.8 0 1 1 10.3 3.1a6.9 6.9 0 0 0 10.6 10.6z' fill='%23000'/%3E%3C/svg%3E");
 }
 
 /* ---------- 2.5 主题切换：从按钮长出的圆 ---------- */

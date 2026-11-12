@@ -257,6 +257,10 @@ code {
   justify-content: space-between;
   gap: 24px;
   min-height: 72px;
+  /* 顶栏是「品牌 + 按钮组」两截。品牌这一截必须可压缩，
+     否则字号被系统放大、或者视口比 360 还窄的时候，
+     按钮组会被顶出屏幕右侧，菜单键只露半截。 */
+  min-width: 0;
 }
 
 .brand {
@@ -264,7 +268,9 @@ code {
   align-items: center;
   gap: 12px;
   color: var(--text);
-  flex-shrink: 0;
+  min-width: 0;
+  flex-shrink: 1;
+  overflow: hidden;
 }
 @media (hover: hover), (pointer: fine) {
 
@@ -285,6 +291,8 @@ code {
   background: var(--panel);
   color: var(--blue);
   box-shadow: inset 0 0 16px rgba(37, 99, 235, 0.08);
+  /* 品牌先缩文字、后缩图标：图标是识别点，别第一个被压扁 */
+  flex: 0 0 auto;
 }
 
 .brand-mark svg {
@@ -295,6 +303,8 @@ code {
 .brand-copy {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
   line-height: 1.25;
 }
 
@@ -303,12 +313,18 @@ code {
   font-size: 1.02rem;
   letter-spacing: 0.16em;
   color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .brand-copy span {
   color: var(--muted);
   font-size: var(--fs-meta);
   letter-spacing: 0.12em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .site-nav {
@@ -3042,6 +3058,18 @@ body.nav-locked {
     font-size: 0.95rem;
     letter-spacing: 0.1em;
   }
+
+  /* 再往下（320px 的小屏、或者系统字号被调大），38px 的按钮就不够了：
+     让按钮跟着视口一起收，而不是让菜单键被挤出屏幕右缘 */
+  .header-actions .theme-toggle,
+  .header-actions .style-toggle,
+  .header-actions .sync-toggle,
+  .header-actions .lite-toggle,
+  .header-actions .nav-toggle {
+    width: clamp(30px, 9vw, 38px);
+    height: clamp(30px, 9vw, 38px);
+    min-width: 0;
+  }
 }
 
 /* 320px（iPhone SE 一代那种）：再收一档，仍然不换行 */
@@ -3055,9 +3083,23 @@ body.nav-locked {
   .header-actions .sync-toggle,
   .header-actions .lite-toggle,
   .header-actions .nav-toggle {
-    width: 34px;
-    height: 34px;
-    min-width: 34px;
+    width: clamp(26px, 9vw, 34px);
+    height: clamp(26px, 9vw, 34px);
+    min-width: 0;
+  }
+
+  .brand {
+    gap: 6px;
+  }
+
+  .brand-mark {
+    width: 28px;
+    height: 28px;
+  }
+
+  .brand-mark svg {
+    width: 15px;
+    height: 15px;
   }
 
   .brand-copy strong {

@@ -98,26 +98,36 @@
     :where(.hero-rotator){display:flex;align-items:center;gap:6px;margin:14px 0 0;min-height:1.5em;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;letter-spacing:.01em;color:#526b89}
     :where(.hero-rotator__prompt){color:#2563eb;font-weight:600}
     :where(.hero-rotator__caret){display:block;width:7px;height:1.1em;background:#2563eb}
-    /* 雪碧图拿不到（弱网，或 personal.css 整份没来）时不要留一个空白方块：
-       纯 CSS 画个半月，18px，和雪碧图同尺寸。极致档也走这一套，
-       免得多一条"◐"的字形依赖。 */
-    :is(html.no-sprite, html[data-lite="2"]) .theme-toggle__flip{
-      border-radius:50%;
-      /* 实心圆挖掉一个偏右的圆，剩下的就是月牙 */
-      background-color:currentColor !important;
+    /* 主题按钮：雪碧图没确认能解码之前，先用内联 SVG 的太阳/月亮顶上。
+       mask 上色，跟着主题色和皮肤走；skin-boot 探到图真能解码了，
+       才挂 html.sprite-ok 换回那 60 帧雪碧图。弱网、图 404、
+       personal.css 整份没到，这个格子都不会是空白。 */
+    html:not(.sprite-ok) .theme-toggle__flip{
       background-image:none !important;
-      -webkit-mask:radial-gradient(circle at 74% 50%,transparent 0 41%,#000 42%);
-      mask:radial-gradient(circle at 74% 50%,transparent 0 41%,#000 42%);
+      background-color:currentColor !important;
+      -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='4.3'/%3E%3Cpath d='M12 2.2v2.5M12 19.3v2.5M2.2 12h2.5M19.3 12h2.5M5.1 5.1l1.8 1.8M17.1 17.1l1.8 1.8M18.9 5.1 17.1 6.9M6.9 17.1l-1.8 1.8'/%3E%3C/svg%3E");
+      -webkit-mask-repeat:no-repeat;
+      -webkit-mask-position:center;
+      -webkit-mask-size:18px 18px;
+      mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='4.3'/%3E%3Cpath d='M12 2.2v2.5M12 19.3v2.5M2.2 12h2.5M19.3 12h2.5M5.1 5.1l1.8 1.8M17.1 17.1l1.8 1.8M18.9 5.1 17.1 6.9M6.9 17.1l-1.8 1.8'/%3E%3C/svg%3E");
+      mask-repeat:no-repeat;
+      mask-position:center;
+      mask-size:18px 18px;
       opacity:.92;
     }
+    /* 深色换成月牙，跟雪碧图两帧的语义一致 */
+    html[data-theme="dark"]:not(.sprite-ok) .theme-toggle__flip{
+      -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20.9 13.7A8.8 8.8 0 1 1 10.3 3.1a6.9 6.9 0 0 0 10.6 10.6z' fill='%23000'/%3E%3C/svg%3E");
+      mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20.9 13.7A8.8 8.8 0 1 1 10.3 3.1a6.9 6.9 0 0 0 10.6 10.6z' fill='%23000'/%3E%3C/svg%3E");
+    }
   </style>
-  <link rel="stylesheet" href="css/style.css?v=20261108c">
-  <link rel="stylesheet" href="css/pet.css?v=20261108c">
-  <link rel="stylesheet" href="css/personal.css?v=20261108c">
-  <link rel="stylesheet" href="css/avatar-pet.css?v=20261108c">
-  <link rel="stylesheet" href="css/skins.css?v=20261108c">
-  <link rel="stylesheet" href="css/lite.css?v=20261108c">
-  <script src="js/skin-boot.js?v=20261108c"></script>
+  <link rel="stylesheet" href="css/style.css?v=20261112a">
+  <link rel="stylesheet" href="css/pet.css?v=20261112a">
+  <link rel="stylesheet" href="css/personal.css?v=20261112a">
+  <link rel="stylesheet" href="css/avatar-pet.css?v=20261112a">
+  <link rel="stylesheet" href="css/skins.css?v=20261112a">
+  <link rel="stylesheet" href="css/lite.css?v=20261112a">
+  <script src="js/skin-boot.js?v=20261112a"></script>
   <script>
     /* 轻量 / 极致预置：弱设备（2G、内存 ≤2G、核心 ≤2）首帧就走低配，
        避免先跑一遍动画再关。手动开过的以 localStorage 为准（1 轻量 / 2 极致）。
@@ -153,31 +163,31 @@
       }
     })();
   </script>
-  <link rel="stylesheet" href="css/type.css?v=20261108c">
-  <link rel="stylesheet" href="css/motion.css?v=20261108c">
-  <link rel="preload" href="css/guestbook.css?v=20261108c" as="style">
-  <link rel="stylesheet" href="css/guestbook.css?v=20261108c" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/guestbook.css?v=20261108c"></noscript>
+  <link rel="stylesheet" href="css/type.css?v=20261112a">
+  <link rel="stylesheet" href="css/motion.css?v=20261112a">
+  <link rel="preload" href="css/guestbook.css?v=20261112a" as="style">
+  <link rel="stylesheet" href="css/guestbook.css?v=20261112a" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/guestbook.css?v=20261112a"></noscript>
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <!-- 项目卡片、全部项目折叠页和复制按钮由 js/main.js 驱动 -->
-  <script src="js/sfx.js?v=20261108c" defer></script>
-  <script src="js/theme.js?v=20261108c" defer></script>
-  <script src="js/theme-icon.js?v=20261108c" defer></script>
-  <script src="js/members.js?v=20261108c" defer></script>
-  <script src="js/main.js?v=20261108c" defer></script>
-  <script src="js/repo-sync.js?v=20261108c" defer></script>
-  <script src="js/pet.js?v=20261108c" defer></script>
-  <script src="js/avatar-pet.js?v=20261108c" defer></script>
-  <script src="js/personal.js?v=20261108c" defer></script>
-  <script src="js/click-fx.js?v=20261108c" defer></script>
-  <script src="js/term-tui.js?v=20261108c" defer></script>
-  <script src="js/skins.js?v=20261108c" defer></script>
-  <script src="js/fullscreen.js?v=20261108c" defer></script>
-  <script src="js/lite.js?v=20261108c" defer></script>
-  <script src="js/copy.js?v=20261108c" defer></script>
-  <script src="js/pwa.js?v=20261108c" defer></script>
-  <script src="js/guestbook.js?v=20261108c" defer></script>
+  <script src="js/sfx.js?v=20261112a" defer></script>
+  <script src="js/theme.js?v=20261112a" defer></script>
+  <script src="js/theme-icon.js?v=20261112a" defer></script>
+  <script src="js/members.js?v=20261112a" defer></script>
+  <script src="js/main.js?v=20261112a" defer></script>
+  <script src="js/repo-sync.js?v=20261112a" defer></script>
+  <script src="js/pet.js?v=20261112a" defer></script>
+  <script src="js/avatar-pet.js?v=20261112a" defer></script>
+  <script src="js/personal.js?v=20261112a" defer></script>
+  <script src="js/click-fx.js?v=20261112a" defer></script>
+  <script src="js/term-tui.js?v=20261112a" defer></script>
+  <script src="js/skins.js?v=20261112a" defer></script>
+  <script src="js/fullscreen.js?v=20261112a" defer></script>
+  <script src="js/lite.js?v=20261112a" defer></script>
+  <script src="js/copy.js?v=20261112a" defer></script>
+  <script src="js/pwa.js?v=20261112a" defer></script>
+  <script src="js/guestbook.js?v=20261112a" defer></script>
   <script>
     /* 页脚跑道不参与首屏，也不该为「只看了首屏的人」付钱：
        等它进入视口前 600px 再拉样式和脚本。
@@ -193,7 +203,7 @@
         if (document.querySelector("link[data-dino-css]")) return;
         var link = document.createElement("link");
         link.rel = "stylesheet";
-        link.href = "css/dino.css?v=20261108c";
+        link.href = "css/dino.css?v=20261112a";
         link.setAttribute("data-dino-css", "");
         document.head.appendChild(link);
       }
@@ -204,7 +214,7 @@
         if (document.documentElement.dataset.lite === "2") return;
         loadCss();
         var script = document.createElement("script");
-        script.src = "js/dino.js?v=20261108c";
+        script.src = "js/dino.js?v=20261112a";
         script.async = true;
         document.body.appendChild(script);
       }
@@ -941,7 +951,7 @@
           </div>
         </div>
         <div class="dino-run__stage" data-dino-stage tabindex="-1">
-          <canvas class="dino-run__canvas" data-dino-canvas aria-hidden="true"></canvas>
+          <canvas class="dino-run__canvas" data-dino-canvas aria-hidden="true" style="max-width:100%"></canvas>
           <p class="dino-run__hint" data-dino-hint>自动躲避 · 开</p>
           <p class="dino-run__pop" data-dino-pop aria-live="polite"></p>
           <p class="dino-run__toast" data-dino-toast hidden>信号中断 · 重新开始</p>
