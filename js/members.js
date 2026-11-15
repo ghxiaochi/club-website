@@ -108,12 +108,12 @@ window.HNYZ_MEMBER_EXTRAS = {
   ghxiaochi: [
     {
       owner: "fargoyu",
-      repo: "fargoyu.github.io",
-      coverImg: "images/project-fargo.svg",
-      title: "fargoyu 的个人主页",
-      desc: "同学的个人主页：单页作品集，浅色卡片、没有框架，手写 HTML / CSS。",
-      language: "HTML",
-      link: "https://fargoyu.github.io"
+      repo: "warma-music-room",
+      coverImg: "images/project-warma.webp",
+      title: "Warma 音乐放映室",
+      desc: "同学做的音乐放映室：竖屏播放器配手绘线稿分镜，点进去就能听。",
+      language: "JavaScript",
+      link: "https://fargoyu.github.io/warma-music-room/"
     }
   ]
 };

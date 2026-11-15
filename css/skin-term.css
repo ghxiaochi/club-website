@@ -229,7 +229,11 @@ html[data-style="term"] .nav-cta:hover {
 
 html[data-style="term"] .theme-toggle,
 html[data-style="term"] .style-toggle,
-html[data-style="term"] .sound-toggle {
+html[data-style="term"] .sound-toggle,
+html[data-style="term"] .fullscreen-toggle,
+html[data-style="term"] .sync-toggle,
+html[data-style="term"] .lite-toggle,
+html[data-style="term"] .nav-toggle {
   border-radius: 0;
   border: 1px solid var(--border);
   background: transparent;

@@ -123,18 +123,19 @@
 
 **只在成员页出现的作品**
 
-有些项目不是自己的仓库（同学的主页、别人的作品），又不该跑到首页和「全部项目」里。这类写在 `js/members.js` 的 `HNYZ_MEMBER_EXTRAS` 里，`member.js` 会把它们追加到对应成员的仓库卡片后面：
+有些项目不是自己的仓库（同学的作品），又不该跑到首页和「全部项目」里，也不该出现在别人的成员页上。这类写在 `js/members.js` 的 `HNYZ_MEMBER_EXTRAS` 里，`member.js` 会把它们追加到对应成员的仓库卡片后面：
 
 ```js
 window.HNYZ_MEMBER_EXTRAS = {
   ghxiaochi: [
     {
-      owner: "fargoyu",              // 卡片上显示的 @作者
-      repo: "fargoyu.github.io",     // 仅作标识
-      title: "fargoyu 的个人主页",
+      owner: "fargoyu",                          // 卡片上显示的 @作者
+      repo: "warma-music-room",                  // 仅作标识
+      title: "Warma 音乐放映室",
+      coverImg: "images/project-warma.webp",
       desc: "一句话介绍",
-      language: "HTML",
-      link: "https://fargoyu.github.io"  // 有 link 就不请求 API，按钮写「打开网站」
+      language: "JavaScript",
+      link: "https://fargoyu.github.io/warma-music-room/"  // 有 link 就不请求 API，按钮写「打开网站」
     }
   ]
 };

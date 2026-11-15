@@ -107,7 +107,9 @@ html[data-style="halo"] .header-actions {
 }
 
 html[data-style="halo"] .site-header .style-toggle,
-html[data-style="halo"] .site-header .fullscreen-toggle {
+html[data-style="halo"] .site-header .fullscreen-toggle,
+html[data-style="halo"] .site-header .sync-toggle,
+html[data-style="halo"] .site-header .lite-toggle {
   width: 32px;
   height: 32px;
   min-width: 32px;
@@ -136,7 +138,9 @@ html[data-style="halo"].is-style-deck-open .halo-frame {
   }
 
   html[data-style="halo"] .site-header .style-toggle,
-  html[data-style="halo"] .site-header .fullscreen-toggle {
+  html[data-style="halo"] .site-header .fullscreen-toggle,
+  html[data-style="halo"] .site-header .sync-toggle,
+  html[data-style="halo"] .site-header .lite-toggle {
     width: 28px;
     height: 28px;
     min-width: 28px;

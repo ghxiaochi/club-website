@@ -10,15 +10,22 @@
 /* ---------------------------------------------------------
    1. 顶栏风格方块
    --------------------------------------------------------- */
+/* 顶栏七个按钮：一个尺寸、一个圆角。
+   以前这套形状散在四个地方 —— 风格/全屏/刷新/轻量在 skins.css，
+   音效和主题在 personal.css 且写着 50%（圆），导航键又是 4px ——
+   桌面上排出来就是「圆、圆角方、圆角方、圆、圆角方、圆角方」，
+   看着像有两个键没画完。这里合成一处，皮肤只改配色，不再各改一半。 */
 .style-toggle,
 .fullscreen-toggle,
 .sync-toggle,
-.lite-toggle {
+.lite-toggle,
+.sound-toggle,
+.theme-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   margin: 0;
   padding: 0;
   border: 1px solid var(--border);
@@ -556,9 +563,19 @@ html[data-style="hacker"] .nav-cta:hover {
 }
 
 
+/* 黑客风整排都是 2px 直角，别只改一半 */
+html[data-style="hacker"] .theme-toggle,
+html[data-style="hacker"] .sound-toggle,
+html[data-style="hacker"] .style-toggle,
+html[data-style="hacker"] .fullscreen-toggle,
+html[data-style="hacker"] .sync-toggle,
+html[data-style="hacker"] .lite-toggle,
+html[data-style="hacker"] .nav-toggle {
+  border-radius: 2px;
+}
+
 html[data-style="hacker"] .theme-toggle,
 html[data-style="hacker"] .sound-toggle {
-  border-radius: 2px;
   border-color: rgba(57, 255, 136, 0.28);
   background: #061009;
   color: #7dffab;
@@ -576,7 +593,6 @@ html[data-style="hacker"] .sound-toggle:hover {
 
 
 html[data-style="hacker"] .nav-toggle {
-  border-radius: 2px;
   border-color: rgba(57, 255, 136, 0.28);
   background: #061009;
 }
@@ -1347,12 +1363,7 @@ html[data-style] .style-deck.is-handoff {
    7. 小屏 / 减弱动效
    --------------------------------------------------------- */
 @media (max-width: 900px) {
-  .style-toggle {
-    width: 32px;
-    height: 32px;
-    border-radius: 9px;
-  }
-
+  /* 风格键的尺寸和圆角交给上面那条统一规则，这里只处理面板 */
   .style-deck__shell {
     width: 100%;
   }

@@ -140,12 +140,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   margin: 0;
   padding: 0;
   border: 1px solid var(--border);
-  border-radius: 50%;
+  border-radius: 10px; /* 和顶栏其它按钮同一个形状，圆形会显得像没画完 */
   background: var(--panel);
   color: var(--muted);
   cursor: pointer;
@@ -1531,12 +1531,12 @@ body.is-lightbox-open {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   margin: 0;
   padding: 0;
   border: 1px solid var(--border);
-  border-radius: 50%;
+  border-radius: 10px; /* 同上：整排按钮统一圆角 */
   background: var(--panel);
   color: var(--muted);
   cursor: pointer;
@@ -1581,11 +1581,7 @@ body.is-lightbox-open {
 }
 
 @media (max-width: 900px) {
-  .sound-toggle {
-    width: 32px;
-    height: 32px;
-  }
-
+  /* 尺寸统一交给 style.css 的断点管，这里只管图标略小一点 */
   .sound-toggle__icon {
     width: 17px;
     height: 17px;

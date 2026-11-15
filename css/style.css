@@ -393,11 +393,12 @@ body.nav-locked {
   flex-direction: column;
   justify-content: center;
   gap: 6px;
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   padding: 0 10px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  /* 和顶栏其它按钮同一档圆角：这一排只允许一种形状 */
+  border-radius: 10px;
   background: var(--panel);
   cursor: pointer;
 }
