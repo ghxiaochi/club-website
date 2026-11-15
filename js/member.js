@@ -11,6 +11,7 @@
 
   const members = Array.isArray(window.HNYZ_MEMBERS) ? window.HNYZ_MEMBERS : [];
   const profiles = window.HNYZ_PROFILES || {};
+  const extras = window.HNYZ_MEMBER_EXTRAS || {};
 
   const root = document.querySelector("[data-member-root]");
   const heroEl = document.querySelector("#member-hero");
@@ -21,7 +22,9 @@
   const param = new URLSearchParams(window.location.search).get("u");
   const firstUser = members.length ? members[0].user : "";
   const user = members.some((m) => m.user === param) ? param : firstUser;
-  const list = members.filter((m) => m.user === user);
+  /* 成员页专属的外链作品追加在仓库卡片后面 */
+  const ownExtras = Array.isArray(extras[user]) ? extras[user] : [];
+  const list = members.filter((m) => m.user === user).concat(ownExtras);
   const profile = profiles[user] || {};
 
   /* 个性色：优先用 profile.accent，缺省蓝 */
@@ -174,11 +177,11 @@
       img.decoding = "async";
       img.addEventListener("error", () => {
         img.remove();
-        wrap.appendChild(coverPlaceholder(member.title, member.user));
+        wrap.appendChild(coverPlaceholder(member.title, member.owner || member.user));
       }, { once: true });
       wrap.appendChild(img);
     } else {
-      wrap.appendChild(coverPlaceholder(member.title, member.user));
+      wrap.appendChild(coverPlaceholder(member.title, member.owner || member.user));
     }
 
     return wrap;
@@ -200,7 +203,8 @@
 
     const owner = document.createElement("p");
     owner.className = "project-owner";
-    owner.textContent = `@${member.user}`;
+    /* 友邻作品挂在本人页面上，作者名要用 owner，不能用页面归属的 user */
+    owner.textContent = `@${member.owner || member.user}`;
 
     heading.append(title, owner);
 
@@ -248,16 +252,21 @@
     fValue.textContent = number(data.forks);
     forks.append(fLabel, fValue);
 
-    stats.append(lang, stars, forks);
+    /* 站点类条目没有仓库，星标 / fork 数是空的，一排「—」不如不显示 */
+    if (member.link) {
+      stats.append(lang);
+    } else {
+      stats.append(lang, stars, forks);
+    }
 
     const source = document.createElement("a");
     source.className = "project-source";
-    source.href = data.url || `https://github.com/${member.user}/${member.repo}`;
+    source.href = member.link || data.url || `https://github.com/${member.user}/${member.repo}`;
     source.target = "_blank";
     source.rel = "noopener noreferrer";
 
     const sourceText = document.createElement("span");
-    sourceText.textContent = member.external ? "下载 / 仓库" : "查看源码";
+    sourceText.textContent = member.link ? "打开网站" : member.external ? "下载 / 仓库" : "查看源码";
     const arrow = document.createElement("span");
     arrow.className = "source-arrow";
     arrow.setAttribute("aria-hidden", "true");
@@ -271,6 +280,19 @@
   }
 
   async function fetchRepo(member) {
+    /* 站点类条目：链接是现成的，不进 GitHub API。
+       仓库本来就没有公开简介，问一次必然是 404，还要等 8 秒超时。 */
+    if (member.link) {
+      return {
+        name: member.repo,
+        description: member.desc || "",
+        language: member.language || "HTML",
+        stars: null,
+        forks: null,
+        url: member.link
+      };
+    }
+
     const api = `https://api.github.com/repos/${encodeURIComponent(member.user)}/${encodeURIComponent(member.repo)}`;
     const controller = new AbortController();
     const timer = window.setTimeout(() => controller.abort(), 8000);
@@ -307,6 +329,10 @@
   async function renderProjects() {
     grid.replaceChildren();
     grid.setAttribute("aria-busy", "true");
+    /* 卡数写进属性，桌面端按 3 张 / 4 张分别排版。
+       属性名不能叫 data-count：personal.js 会把所有 [data-count] 当数字
+       增长动画处理，直接改写 textContent，卡片会被拍成一个数字。 */
+    grid.dataset.cards = String(list.length);
 
     const hint = document.createElement("p");
     hint.className = "member-hint";

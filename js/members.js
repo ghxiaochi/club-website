@@ -94,3 +94,27 @@ window.HNYZ_PROFILES = {
   }
 };
 
+/* =========================================================
+   只在成员页出现的额外作品
+   ---------------------------------------------------------
+   有些东西不是自己的仓库，也不该出现在首页和「全部项目」里
+   （那两页只认 HNYZ_MEMBERS），就写在这里。
+   key 是成员页的 ?u= 用户名，数组里是同一种卡片字段，另外：
+   owner  真正的作者，卡片上显示 @owner
+   link   网站地址；有这个字段就不去问 GitHub API，按钮写「打开网站」
+   ========================================================= */
+
+window.HNYZ_MEMBER_EXTRAS = {
+  ghxiaochi: [
+    {
+      owner: "fargoyu",
+      repo: "fargoyu.github.io",
+      coverImg: "images/project-fargo.svg",
+      title: "fargoyu 的个人主页",
+      desc: "同学的个人主页：单页作品集，浅色卡片、没有框架，手写 HTML / CSS。",
+      language: "HTML",
+      link: "https://fargoyu.github.io"
+    }
+  ]
+};
+

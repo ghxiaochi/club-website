@@ -121,6 +121,27 @@
 
 首页取前 6 个；`projects.html` 按 `user` 分组，展开某位成员时才请求他的仓库。
 
+**只在成员页出现的作品**
+
+有些项目不是自己的仓库（同学的主页、别人的作品），又不该跑到首页和「全部项目」里。这类写在 `js/members.js` 的 `HNYZ_MEMBER_EXTRAS` 里，`member.js` 会把它们追加到对应成员的仓库卡片后面：
+
+```js
+window.HNYZ_MEMBER_EXTRAS = {
+  ghxiaochi: [
+    {
+      owner: "fargoyu",              // 卡片上显示的 @作者
+      repo: "fargoyu.github.io",     // 仅作标识
+      title: "fargoyu 的个人主页",
+      desc: "一句话介绍",
+      language: "HTML",
+      link: "https://fargoyu.github.io"  // 有 link 就不请求 API，按钮写「打开网站」
+    }
+  ]
+};
+```
+
+`link` 存在时会跳过 GitHub API，卡片底部只保留语言，不显示空着的星标 / fork 数。
+
 **一键刷新**
 
 `js/repo-sync.js` 监听顶栏的圆形箭头按钮：跳过快照与 10 分钟缓存，直接向 GitHub 拉全部仓库，写回同一个缓存键。

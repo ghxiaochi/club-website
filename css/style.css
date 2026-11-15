@@ -3169,6 +3169,41 @@ body.nav-locked {
   min-height: 446px;
 }
 
+/* 四张作品卡：宽屏排成一行，1200 以下两列两行。
+   3 列排 4 张会剩一张孤零零占半行，两列两行反而整齐。
+   卡数由 member.js 写进 data-cards，只有 4 张时才改列数。
+   （别用 data-count：personal.js 会把它当数字动画，把内容改成一个数字。） */
+@media (min-width: 1200px) {
+  #member-projects[data-cards="4"] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    min-height: 456px; /* 一行四张，注入前先占住高度 */
+  }
+
+  /* 四列时卡片只有 280px 宽，「统计 + 按钮」横排会挤成两行。
+     改成统计在上、按钮占满一行，四张卡的底边才对得齐。 */
+  #member-projects[data-cards="4"] .project-footer {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  #member-projects[data-cards="4"] .project-source {
+    width: 100%;
+    justify-content: center;
+  }
+
+  #member-projects[data-cards="4"] .project-desc {
+    -webkit-line-clamp: 4;
+    min-height: 6.8em;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1199px) {
+  #member-projects[data-cards="4"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-height: 1010px; /* 两行卡片，注入前就占住高度，页脚不再往下跳 */
+  }
+}
+
 @media (max-width: 900px) {
   #member-hero {
     min-height: 456px;
