@@ -172,9 +172,9 @@
 
       alive += 1;
 
-      var a = Math.pow(cell.life, 1.5) * 0.42;
+      var a = Math.pow(cell.life, 1.5) * 0.5;
       /* 色相跟着横坐标走：左边青、中间蓝、右边紫品，再叠一点时间上的呼吸 */
-      var hue = 190 + (cell.gx / t.cols) * 108 + Math.sin(t.time * 0.8 + cell.gy * 0.35) * 8;
+      var hue = 188 + (cell.gx / t.cols) * 104 + (cell.gy / t.rows) * 12 + Math.sin(t.time * 0.8) * 6;
 
       ctx.fillStyle = "hsla(" + hue.toFixed(1) + ", 76%, " + lightness + "%, " + a.toFixed(3) + ")";
       ctx.fillRect(cell.gx * c + pad, cell.gy * c + pad, c - pad * 2, c - pad * 2);
