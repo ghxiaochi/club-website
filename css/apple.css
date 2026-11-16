@@ -153,141 +153,42 @@ html[data-style="default"] .nav-list a {
   letter-spacing: 0;
 }
 
-/* ---------- 3. 图标按钮：去掉描边，hover 才浮出一层灰 ---------- */
-html[data-style="default"] .header-actions > button,
-html[data-style="default"] .theme-toggle,
-html[data-style="default"] .sound-toggle,
-html[data-style="default"] .style-toggle,
-html[data-style="default"] .fullscreen-toggle,
-html[data-style="default"] .sync-toggle,
-html[data-style="default"] .lite-toggle,
-html[data-style="default"] .nav-toggle {
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
-  color: var(--text-soft);
-  transition: background-color 0.24s cubic-bezier(0.28, 0.11, 0.32, 1),
-    color 0.24s cubic-bezier(0.28, 0.11, 0.32, 1);
-}
-
-@media (hover: hover), (pointer: fine) {
-  html[data-style="default"] .header-actions > button:hover,
-  html[data-style="default"] .theme-toggle:hover,
-  html[data-style="default"] .sound-toggle:hover,
-  html[data-style="default"] .style-toggle:hover,
-  html[data-style="default"] .fullscreen-toggle:hover,
-  html[data-style="default"] .sync-toggle:hover,
-  html[data-style="default"] .lite-toggle:hover,
-  html[data-style="default"] .nav-toggle:hover {
-    background: rgba(0, 0, 0, 0.05);
-    color: var(--text);
-  }
-}
-
-html[data-style="default"][data-theme="dark"] .header-actions > button:hover,
-html[data-style="default"][data-theme="dark"] .theme-toggle:hover,
-html[data-style="default"][data-theme="dark"] .sound-toggle:hover,
-html[data-style="default"][data-theme="dark"] .style-toggle:hover,
-html[data-style="default"][data-theme="dark"] .fullscreen-toggle:hover,
-html[data-style="default"][data-theme="dark"] .sync-toggle:hover,
-html[data-style="default"][data-theme="dark"] .lite-toggle:hover,
-html[data-style="default"][data-theme="dark"] .nav-toggle:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-/* ---------- 4. 按钮：一律胶囊，文案不再用等宽 ---------- */
-html[data-style="default"] .button {
-  min-height: 46px;
-  padding: 12px 26px;
-  border-radius: 999px;
-  font-family: var(--sans);
-  font-size: 1rem;
-  font-weight: 500;
-  letter-spacing: 0;
-  transition: background-color 0.28s cubic-bezier(0.28, 0.11, 0.32, 1),
-    color 0.28s cubic-bezier(0.28, 0.11, 0.32, 1),
-    box-shadow 0.28s cubic-bezier(0.28, 0.11, 0.32, 1),
-    transform 0.28s cubic-bezier(0.28, 0.11, 0.32, 1);
-}
-
-html[data-style="default"] .button--primary {
-  border-color: transparent;
-  background: var(--blue);
-  color: #ffffff;
-  box-shadow: none;
-}
-
-/* 深色下用亮蓝 + 白字：苹果的深色按钮就是这样，
-   黑字压在亮蓝上会显得像禁用 */
-html[data-style="default"][data-theme="dark"] .button--primary {
-  background: #0a84ff;
-  color: #ffffff;
-}
-
-@media (hover: hover), (pointer: fine) {
-  html[data-style="default"] .button--primary:hover {
-    border-color: transparent;
-    background: var(--blue-bright);
-    color: #ffffff;
-    box-shadow: 0 6px 22px rgba(0, 113, 227, 0.28);
-    transform: none;
-  }
-
-  html[data-style="default"][data-theme="dark"] .button--primary:hover {
-    background: #409cff;
-    color: #ffffff;
-  }
-}
-
-html[data-style="default"] .button--secondary {
-  border-color: transparent;
-  background: var(--panel-2);
-  color: var(--text);
-}
-
-@media (hover: hover), (pointer: fine) {
-  html[data-style="default"] .button--secondary:hover {
-    border-color: transparent;
-    background: var(--panel-3);
-    color: var(--text);
-    box-shadow: none;
-    transform: none;
-  }
-}
-
-/* 顶栏「加入我们」：苹果官网右上角那种小胶囊 */
+/* ---------- 3. 按钮：整块换回蓝白风 ---------- */
+/* 按钮不跟着苹果走。style.css 里的形制（描边 + 4px 方角 + 等宽字）
+   原样保留，这里只是把按钮自己吃到的那几个变量在按钮范围内
+   改回蓝白风的值——页面其它区域仍是苹果的配色。 */
+html[data-style="default"] .button,
 html[data-style="default"] .nav-cta {
-  padding: 7px 15px;
-  border: 0;
-  border-radius: 999px;
-  background: var(--blue);
-  color: #ffffff;
-  font-family: var(--sans);
-  font-size: 0.875rem;
-  font-weight: 500;
-  letter-spacing: 0;
-  transition: background-color 0.28s cubic-bezier(0.28, 0.11, 0.32, 1);
+  --radius-sm: 4px;
+  --blue: #2563eb;
+  --blue-bright: #1d4ed8;
+  --blue-soft: rgba(37, 99, 235, 0.08);
+  --glow-blue: 0 4px 20px rgba(37, 99, 235, 0.22);
+  --green: #0369a1;
+  --green-bright: #075985;
+  --glow-green: 0 4px 20px rgba(3, 105, 161, 0.2);
 }
 
+html[data-style="default"][data-theme="dark"] .button,
 html[data-style="default"][data-theme="dark"] .nav-cta {
-  background: #0a84ff;
+  --blue: #5b93ff;
+  --blue-bright: #8ab4ff;
+  --blue-soft: rgba(91, 147, 255, 0.16);
+  --glow-blue: 0 10px 30px rgba(91, 147, 255, 0.22);
+  --green: #38bdf8;
+  --green-bright: #7dd3fc;
+  --glow-green: 0 10px 26px rgba(56, 189, 248, 0.18);
+}
+
+/* 深色下主按钮是深蓝渐变底，style.css 那条「深色用深字」是为
+   亮蓝底写的，压在这块渐变上几乎看不见。这里只把字改回白色。 */
+html[data-style="default"][data-theme="dark"] .button--primary,
+html[data-style="default"][data-theme="dark"] .button--primary:hover,
+html[data-style="default"][data-theme="dark"] .button--primary:active {
   color: #ffffff;
 }
 
-@media (hover: hover), (pointer: fine) {
-  html[data-style="default"] .nav-cta:hover {
-    background: var(--blue-bright);
-    color: #ffffff;
-    box-shadow: none;
-  }
-
-  html[data-style="default"][data-theme="dark"] .nav-cta:hover {
-    background: #409cff;
-    color: #ffffff;
-  }
-}
-
-/* ---------- 5. 标题与导语 ---------- */
+/* ---------- 4. 标题与导语 ---------- */
 html[data-style="default"] .hero h1,
 html[data-style="default"] .section-head h2,
 html[data-style="default"] .section-title {
@@ -340,7 +241,7 @@ html[data-style="default"] .hero-lead {
   line-height: 1.72;
 }
 
-/* ---------- 6. 卡片：去边框，靠阴影分层 ---------- */
+/* ---------- 5. 卡片：去边框，靠阴影分层 ---------- */
 html[data-style="default"] .project-card {
   border: 1px solid transparent;
   border-radius: var(--radius-lg);
@@ -377,20 +278,7 @@ html[data-style="default"] .project-stats {
   letter-spacing: 0;
 }
 
-/* ---------- 7. 背景：把三颗气泡压淡 ---------- */
-/* 苹果的底色是干净的。气泡留着（是社团自己的味道），
-   但降到 45% 并且去饱和，不能再和正文抢注意力 */
-html[data-style="default"] .bg-orbs {
-  opacity: 0.3;
-  filter: saturate(0.8);
-}
-
-html[data-style="default"][data-theme="dark"] .bg-orbs {
-  opacity: 0.4;
-  filter: saturate(0.9);
-}
-
-/* ---------- 8. 细节 ---------- */
+/* ---------- 6. 细节 ---------- */
 html[data-style="default"] .tag,
 html[data-style="default"] .chip {
   border-radius: 999px;
@@ -409,7 +297,7 @@ html[data-style="default"] :focus-visible {
   outline-offset: 3px;
 }
 
-/* ---------- 9. 硬编码的深蓝底 ---------- */
+/* ---------- 7. 硬编码的深蓝底 ---------- */
 /* personal.css 里这批卡片在深色下写死了 #10203c → #0b172c 的蓝渐变，
    那是蓝白风的底。苹果的深色卡片是中性灰，跟着 --panel 走。 */
 html[data-style="default"][data-theme="dark"] .quick-card,
@@ -516,7 +404,7 @@ html[data-style="default"] .hnyz-ticker::after {
   display: none;
 }
 
-/* ---------- 10. 两块「方格纸」底板 ---------- */
+/* ---------- 8. 两块「方格纸」底板 ---------- */
 /* 成员页的个人卡和画廊底板，原本是蓝渐变 + 24px 网格（手账 / 蓝图感）。
    苹果这里不要网格，就一张干净的卡：白底、22px 圆角、一层柔影。 */
 html[data-style="default"] .member-profile {
@@ -558,7 +446,7 @@ html[data-style="default"] .gallery-card {
   overflow: hidden;
 }
 
-/* ---------- 11. 渐变字再收一点 ---------- */
+/* ---------- 9. 渐变字再收一点 ---------- */
 /* 蓝占得更多、紫只落在末尾，比原来蓝→靛→青更接近苹果官网那种
    「一段彩色过渡压在黑字后面」的感觉 */
 @supports ((-webkit-background-clip: text) or (background-clip: text)) {
@@ -603,7 +491,7 @@ html[data-style="default"] .member-hero__desc {
   line-height: 1.7;
 }
 
-/* ---------- 12. 剩下的虚线框 ---------- */
+/* ---------- 10. 剩下的虚线框 ---------- */
 /* 「更多项目」那张空卡、页尾的图集入口都用虚线边，手账味很重。
    苹果这里一律实线极淡，或者干脆靠一层浅底把它和内容分开。 */
 html[data-style="default"] .project-card--more,
