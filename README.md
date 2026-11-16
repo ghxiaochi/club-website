@@ -264,8 +264,8 @@ window.HNYZ_MEMBER_EMBEDS = {
 | 深浅色 | `js/theme.js`，`hnyz:theme`，黑客风强制深色 |
 | 音效开关 | `js/sfx.js` + `audio/`，状态存 `hnyz:sound` |
 | 全屏 | `js/fullscreen.js`，`requestFullscreen` |
-| 桌宠与校徽 | `js/pet.js`、`js/avatar-pet.js`；常驻的左下角头像在 ≤560px 收起，但首页那颗「召唤」出来的照常显示。台词库 80 句（点一下换一句，按点击数轮换），第 100 下触发暴走 → 墓碑彩蛋 |
-| 鼠标轨迹 | `js/cursor-trail.js`：终端风与默认皮肤下，指针划过的位置亮起 16px 彩色方块再渐隐（仿 GitHub 首页那层网格，20px 一格，色相横向从青蓝走到品红、逐格再错开 0–60°）。浅色底直接叠色、深色底用加色混合，轻量档与 `prefers-reduced-motion` 不建 |
+| 桌宠与校徽 | `js/pet.js`、`js/avatar-pet.js`；常驻的左下角头像在 ≤560px 收起，但首页那颗「召唤」出来的照常显示。台词库 120 句，按板块分五套（首页 / 关于 / 项目 / 资源 / 成员），切页面或带 `#about` 进来就换一套，第 100 下触发暴走 → 墓碑彩蛋 |
+| 鼠标轨迹 | `js/cursor-trail.js`：终端风与默认皮肤下，沿指针走过的路撒 15px 方块。每 42ms 落一个，手越快两块间距越大（实测 560px/s → 18px，2100px/s → 68px），一次只落一个、不插值不补光；每块活 1 秒，最后 45% 生命里淡出；颜色从 6 个高饱和色里顺序取，相邻两块必然不同色。轻量档与 `prefers-reduced-motion` 不建 |
 | 点击特效 | `js/click-fx.js`，换肤期间关闭 |
 | 404 | 自包含页面，按 `data-style` 适配蓝白 / 黑客 / 终端 |
 | 一键复制 | `js/main.js` 的 `[data-copy]` 按钮，QQ 群与邮箱 |
