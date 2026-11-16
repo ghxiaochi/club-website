@@ -97,6 +97,276 @@
   height: 96px;
 }
 
+/* ---------- 内嵌作品：把朋友的网页装进本页 ---------- */
+.member-embed {
+  margin: 40px 0 6px;
+}
+
+.member-embed__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px 24px;
+  margin-bottom: 16px;
+}
+
+.member-embed__copy {
+  min-width: 0;
+}
+
+.member-embed__title {
+  margin: 10px 0 8px;
+  color: var(--text);
+  font-size: 29.4px; /* fallback: 旧内核 */
+  font-size: clamp(1.35rem, 2.6vw, 1.84rem);
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  line-height: 1.24;
+}
+
+.member-embed__desc {
+  max-width: 660px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.8;
+}
+
+.member-embed__open {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  padding: 7px 11px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--blue);
+  font-family: var(--mono);
+  font-size: var(--fs-meta);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+@media (hover: hover), (pointer: fine) {
+
+
+.member-embed__open:hover {
+  border-color: var(--blue);
+  background: var(--blue-soft);
+  color: var(--blue-bright);
+  box-shadow: var(--glow-blue);
+}
+}
+
+
+/* 外框当成一块屏幕：上面一条地址栏，下面才是网页本身 */
+.member-embed__frame {
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--panel);
+  box-shadow: var(--shadow-card);
+}
+
+.member-embed__bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 38px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel-2);
+}
+
+.member-embed__dots {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 6px;
+}
+
+.member-embed__dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+
+.member-embed__dots i:first-child {
+  background: var(--red);
+  background: color-mix(in srgb, var(--red) 55%, var(--border-strong));
+}
+
+.member-embed__addr {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.member-embed__live {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  color: var(--green-bright);
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+}
+
+.member-embed__live::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 22%, transparent); /* fallback: 旧内核 */
+}
+
+.member-embed__viewport {
+  position: relative;
+  /* 播放器自己是一屏 app（100vh 起步），视窗太矮会把它压成一堆内部滚动条：
+     桌面按 84vh 给，最矮 600、最高 840，够它把分栏和手绘分镜都摊开 */
+  height: 84vh;
+  min-height: 600px;
+  max-height: 840px;
+  background: var(--panel-2);
+}
+
+.member-embed__iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #f5f1ed; /* 播放器自己的底色，加载完不会先闪一块白 */
+}
+
+/* 轻量模式：先盖一层封面，点了才去下载那个 iframe */
+.member-embed__gate {
+  position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 24px;
+  overflow: hidden;
+  border: 0;
+  background: var(--panel-2);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.member-embed__gate-cover {
+  position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.38;
+  filter: saturate(0.6);
+}
+
+/* 封面中间压一层柔光，标题才不会陷进图的浅色大字里 */
+.member-embed__gate::after {
+  content: "";
+  position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
+  inset: 0;
+  /* 旧内核不认 color-mix 就少这层柔光；标题自带面板底，仍然看得清 */
+  background: radial-gradient(58% 52% at 50% 50%, color-mix(in srgb, var(--panel) 82%, transparent), transparent 72%);
+  pointer-events: none;
+}
+
+.member-embed__gate-title,
+.member-embed__gate-hint {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.member-embed__gate-title {
+  padding: 10px 20px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  box-shadow: var(--shadow-card);
+  font-size: 0.98rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.member-embed__gate-title::before {
+  content: "▶";
+  margin-right: 9px;
+  color: var(--blue);
+  font-size: 0.82em;
+}
+
+.member-embed__gate-hint {
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--panel) 74%, transparent);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+}
+
+.member-embed__gate.is-loading {
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .member-embed__viewport {
+    height: 68vh;
+    min-height: 460px;
+  }
+}
+
+@media (max-width: 560px) {
+  .member-embed__head {
+    align-items: flex-start;
+  }
+
+  .member-embed__open {
+    order: 3;
+  }
+
+  .member-embed__viewport {
+    height: 640px;
+    min-height: 0;
+  }
+
+  .member-embed__bar {
+    height: 34px;
+    padding: 0 12px;
+  }
+
+  .member-embed__addr {
+    font-size: 0.62rem;
+  }
+}
+
 .member-projects-head {
   margin: 40px 0 18px;
 }

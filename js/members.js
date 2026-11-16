@@ -104,16 +104,31 @@ window.HNYZ_PROFILES = {
    link   网站地址；有这个字段就不去问 GitHub API，按钮写「打开网站」
    ========================================================= */
 
-window.HNYZ_MEMBER_EXTRAS = {
+window.HNYZ_MEMBER_EXTRAS = {};
+
+/* =========================================================
+   成员页里「直接打开」的作品（iframe 内嵌）
+   ---------------------------------------------------------
+   和 EXTRAS 的区别：EXTRAS 是一张卡片，点了跳出去；
+   EMBEDS 是把网页本身装进成员页，在本页就能听、能看。
+
+   字段：
+   title    区块标题
+   desc     一句话说明
+   src      要内嵌的地址（必须允许被 iframe 引用）
+   label    外框地址栏里显示的文字，缺省取 src 的域名
+   coverImg 轻量模式下盖在播放器上的封面
+   height   视窗高度（CSS 长度），缺省按桌面 74vh、手机 68vh
+   ========================================================= */
+
+window.HNYZ_MEMBER_EMBEDS = {
   ghxiaochi: [
     {
-      owner: "fargoyu",
-      repo: "warma-music-room",
-      coverImg: "images/project-warma.webp",
       title: "Warma 音乐放映室",
-      desc: "同学做的音乐放映室：竖屏播放器配手绘线稿分镜，点进去就能听。",
-      language: "JavaScript",
-      link: "https://fargoyu.github.io/warma-music-room/"
+      desc: "同班同学做的小礼物：十二首歌，每首配一幅手绘线稿动画。就在下面，按下播放就能听，不用跳走。",
+      src: "https://fargoyu.github.io/warma-music-room/",
+      label: "fargoyu.github.io/warma-music-room",
+      coverImg: "images/project-warma.webp"
     }
   ]
 };

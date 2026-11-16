@@ -12,10 +12,12 @@
   const members = Array.isArray(window.HNYZ_MEMBERS) ? window.HNYZ_MEMBERS : [];
   const profiles = window.HNYZ_PROFILES || {};
   const extras = window.HNYZ_MEMBER_EXTRAS || {};
+  const embeds = window.HNYZ_MEMBER_EMBEDS || {};
 
   const root = document.querySelector("[data-member-root]");
   const heroEl = document.querySelector("#member-hero");
   const grid = document.querySelector("#member-projects");
+  const projectsHead = document.querySelector(".member-projects-head");
   if (!root || !heroEl || !grid) return;
 
   /* 找到目标成员 */
@@ -24,6 +26,8 @@
   const user = members.some((m) => m.user === param) ? param : firstUser;
   /* 成员页专属的外链作品追加在仓库卡片后面 */
   const ownExtras = Array.isArray(extras[user]) ? extras[user] : [];
+  /* 内嵌作品单独成块，不进卡片网格 */
+  const ownEmbeds = Array.isArray(embeds[user]) ? embeds[user] : [];
   const list = members.filter((m) => m.user === user).concat(ownExtras);
   const profile = profiles[user] || {};
 
@@ -134,7 +138,161 @@
   }
 
   /* =======================================================
-     二、项目卡片（复用 style.css 的卡片类）
+     二、内嵌作品（iframe 直接装进本页）
+     -------------------------------------------------------
+     朋友的作品不再是「一张卡片点了跳走」，而是把网页本身
+     放进成员页：外框做成一块屏幕，边框、地址栏都跟着皮肤走。
+     轻量模式下不自动下载这个 iframe（里面是十二首曲子加
+     一堆动画数据），先盖一层封面，点一下才真正加载。
+     ======================================================= */
+  function isLiteTier() {
+    const tier = document.documentElement.dataset.lite;
+    return tier === "1" || tier === "2";
+  }
+
+  function buildEmbed(item, index) {
+    const section = document.createElement("section");
+    section.className = "member-embed";
+    section.id = index === 0 ? "member-embed" : `member-embed-${index}`;
+    section.setAttribute("aria-labelledby", `${section.id}-title`);
+
+    const head = document.createElement("div");
+    head.className = "member-embed__head";
+
+    const copy = document.createElement("div");
+    copy.className = "member-embed__copy";
+
+    const eyebrow = document.createElement("p");
+    eyebrow.className = "eyebrow";
+    const dot = document.createElement("span");
+    dot.className = "eyebrow-dot";
+    dot.setAttribute("aria-hidden", "true");
+    const eyebrowText = document.createElement("span");
+    eyebrowText.textContent = "在这里就能用";
+    eyebrow.append(dot, eyebrowText);
+
+    const title = document.createElement("h2");
+    title.className = "member-embed__title";
+    title.id = `${section.id}-title`;
+    title.textContent = item.title || "内嵌作品";
+
+    copy.append(eyebrow, title);
+
+    if (item.desc) {
+      const desc = document.createElement("p");
+      desc.className = "member-embed__desc";
+      desc.textContent = item.desc;
+      copy.appendChild(desc);
+    }
+
+    const open = document.createElement("a");
+    open.className = "member-embed__open";
+    open.href = item.src;
+    open.target = "_blank";
+    open.rel = "noopener noreferrer";
+    const openText = document.createElement("span");
+    openText.textContent = "新窗口打开";
+    const openArrow = document.createElement("span");
+    openArrow.className = "source-arrow";
+    openArrow.setAttribute("aria-hidden", "true");
+    openArrow.textContent = "↗";
+    open.append(openText, openArrow);
+
+    head.append(copy, open);
+
+    const frame = document.createElement("div");
+    frame.className = "member-embed__frame";
+
+    const bar = document.createElement("div");
+    bar.className = "member-embed__bar";
+    bar.setAttribute("aria-hidden", "true");
+
+    const dots = document.createElement("span");
+    dots.className = "member-embed__dots";
+    for (let i = 0; i < 3; i += 1) dots.appendChild(document.createElement("i"));
+
+    const addr = document.createElement("span");
+    addr.className = "member-embed__addr";
+    addr.textContent = item.label || item.src.replace(/^https?:\/\//, "").replace(/\/$/, "");
+
+    const live = document.createElement("span");
+    live.className = "member-embed__live";
+    live.textContent = "LIVE";
+
+    bar.append(dots, addr, live);
+
+    const viewport = document.createElement("div");
+    viewport.className = "member-embed__viewport";
+    if (item.height) viewport.style.height = String(item.height);
+
+    const iframe = document.createElement("iframe");
+    iframe.className = "member-embed__iframe";
+    iframe.title = item.title || "内嵌作品";
+    iframe.loading = "lazy";
+    iframe.setAttribute("allow", "autoplay; fullscreen; encrypted-media; picture-in-picture");
+    iframe.setAttribute("allowfullscreen", "");
+    iframe.setAttribute("referrerpolicy", "no-referrer");
+
+    if (isLiteTier()) {
+      /* 轻量模式：封面 + 一颗按钮，点了才给 iframe 接上地址 */
+      const gate = document.createElement("button");
+      gate.type = "button";
+      gate.className = "member-embed__gate";
+      if (item.coverImg) {
+        const cover = document.createElement("img");
+        cover.className = "member-embed__gate-cover";
+        cover.src = item.coverImg;
+        cover.alt = "";
+        cover.loading = "lazy";
+        cover.decoding = "async";
+        gate.appendChild(cover);
+      }
+
+      const gateTitle = document.createElement("span");
+      gateTitle.className = "member-embed__gate-title";
+      gateTitle.textContent = "点一下加载放映室";
+
+      const gateHint = document.createElement("span");
+      gateHint.className = "member-embed__gate-hint";
+      gateHint.textContent = "轻量模式不自动下载播放器";
+
+      gate.append(gateTitle, gateHint);
+
+      gate.addEventListener("click", () => {
+        gate.classList.add("is-loading");
+        gateTitle.textContent = "正在加载…";
+        gateHint.textContent = "画面和第一首歌准备好就出现";
+        iframe.src = item.src;
+        const drop = () => gate.remove();
+        iframe.addEventListener("load", drop, { once: true });
+        /* 播放器加载慢（十二段动画数据）时也别把人锁在按钮上 */
+        window.setTimeout(drop, 12000);
+      }, { once: true });
+
+      viewport.appendChild(gate);
+    } else {
+      iframe.src = item.src;
+    }
+
+    viewport.appendChild(iframe);
+    frame.append(bar, viewport);
+    section.append(head, frame);
+
+    return section;
+  }
+
+  function renderEmbeds() {
+    if (!ownEmbeds.length) return;
+    /* 插在「这个成员的作品」标题之前：先能听，再看仓库 */
+    const anchor = projectsHead || grid;
+    ownEmbeds.forEach((item, index) => {
+      if (!item || !item.src) return;
+      anchor.parentNode.insertBefore(buildEmbed(item, index), anchor);
+    });
+  }
+
+  /* =======================================================
+     三、项目卡片（复用 style.css 的卡片类）
      ======================================================= */
   function number(value) {
     const n = Number(value);
@@ -358,5 +516,6 @@
   }
 
   buildHero();
+  renderEmbeds();
   renderProjects();
 })();

@@ -127,21 +127,45 @@
 
 ```js
 window.HNYZ_MEMBER_EXTRAS = {
-  ghxiaochi: [
+  vveyin: [                                      // key 是成员页的 ?u=
     {
-      owner: "fargoyu",                          // 卡片上显示的 @作者
-      repo: "warma-music-room",                  // 仅作标识
-      title: "Warma 音乐放映室",
-      coverImg: "images/project-warma.webp",
+      owner: "someone",                          // 卡片上显示的 @作者
+      repo: "some-project",                      // 仅作标识
+      title: "同学的某个作品",
+      coverImg: "images/project-something.webp",
       desc: "一句话介绍",
       language: "JavaScript",
-      link: "https://fargoyu.github.io/warma-music-room/"  // 有 link 就不请求 API，按钮写「打开网站」
+      link: "https://example.github.io/some-project/"  // 有 link 就不请求 API，按钮写「打开网站」
     }
   ]
 };
 ```
 
 `link` 存在时会跳过 GitHub API，卡片底部只保留语言，不显示空着的星标 / fork 数。
+
+**在成员页里直接打开（iframe 内嵌）**
+
+有些作品更适合直接放在页面里听、直接玩，而不是让人点走。这类写在 `HNYZ_MEMBER_EMBEDS`，`member.js` 会在「这个成员的作品」之前单独排一块，外框是一条地址栏加一块视窗：
+
+```js
+window.HNYZ_MEMBER_EMBEDS = {
+  ghxiaochi: [
+    {
+      title: "Warma 音乐放映室",
+      desc: "一句话说明，会显示在区块标题下面",
+      src: "https://fargoyu.github.io/warma-music-room/",   // 被内嵌的地址
+      label: "fargoyu.github.io/warma-music-room",          // 地址栏文字，缺省取 src 的域名
+      coverImg: "images/project-warma.webp",                // 轻量模式下盖在视窗上的封面
+      height: "74vh"                                        // 可选，视窗高度；缺省桌面 84vh、手机 640px
+    }
+  ]
+};
+```
+
+- 区块右上角留一个「新窗口打开 ↗」，想全屏看的人有出口。
+- 外框的边框、圆角、底色全用站点的设计变量，四套皮肤、深浅色自动跟着变。
+- `iframe` 带 `loading="lazy"`；**轻量模式**（`html[data-lite]`）下不自动下载，先盖一层封面，点一下才真正加载——播放器里是十二首歌加一堆动画数据，不该让 2G 的人替它付钱。
+- 被内嵌的站点不能带 `X-Frame-Options: DENY` 或 `CSP frame-ancestors`，否则浏览器会直接拒绝显示。
 
 **一键刷新**
 

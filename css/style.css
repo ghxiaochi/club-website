@@ -254,7 +254,8 @@ code {
 .header-inner {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  /* 导航与按钮组挤在右侧同一簇：品牌在最左，中间留白全归它 */
+  justify-content: flex-start;
   gap: 24px;
   min-height: 72px;
   /* 顶栏是「品牌 + 按钮组」两截。品牌这一截必须可压缩，
@@ -331,6 +332,8 @@ code {
   display: flex;
   align-items: center;
   gap: 30px;
+  /* 把品牌与导航之间的空白全吃掉，导航整体贴到右边 */
+  margin-left: auto;
 }
 
 /* 抽屉打开时锁住页面：不然手指一滑，底下的 hero 和表格跟着跑，
@@ -2224,6 +2227,12 @@ body.nav-locked {
     display: inline-flex;
   }
 
+  /* 导航收进抽屉后，撑开左空白的那份 auto 边距跟着它一起没了，
+     按钮组得自己接过这一棒，否则会挤在品牌右边、右侧空一大块 */
+  .header-actions {
+    margin-left: auto;
+  }
+
   /* 抽屉打开时，从顶栏下沿盖一层遮罩。
      放在 header 的伪元素上：header 本身 z-index:50 且是层叠上下文，
      伪元素用 z-index:-1 就正好压在页面内容之上、顶栏之下，
@@ -2256,6 +2265,9 @@ body.nav-locked {
     top: calc(100% + 1px);
     left: 20px;
     right: 20px;
+    /* 抽屉是绝对定位、左右都定死了：桌面端那个 margin-left:auto
+       在这里会把宽度算成 0，必须显式归零 */
+    margin-left: 0;
     display: none;
     flex-direction: column;
     align-items: stretch;
