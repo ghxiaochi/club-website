@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-15T01:05:26Z",
+  "generatedAt": "2026-11-16T01:05:30Z",
   "generator": "scripts/fetch-repos.mjs",
   "count": 5,
   "repos": {
@@ -28,11 +28,11 @@
       "html_url": "https://github.com/Anuken/animdustry",
       "homepage": "",
       "language": "Nim",
-      "stargazers_count": 285,
+      "stargazers_count": 286,
       "forks_count": 17,
       "open_issues_count": 7,
       "pushed_at": "2026-03-26T00:35:07Z",
-      "updated_at": "2026-10-26T19:32:12Z",
+      "updated_at": "2026-11-15T15:15:26Z",
       "archived": false,
       "topics": [],
       "owner": {
@@ -85,7 +85,7 @@
       "stargazers_count": 0,
       "forks_count": 0,
       "open_issues_count": 0,
-      "pushed_at": "2026-11-14T01:28:26Z",
+      "pushed_at": "2026-11-15T23:00:42Z",
       "updated_at": "2026-11-12T03:18:12Z",
       "archived": false,
       "topics": [],
