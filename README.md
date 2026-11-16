@@ -22,6 +22,12 @@
 
 所有页面共用 `css/style.css`（基础层）、`css/type.css`（排版）、`css/skins.css`（皮肤层）与 `js/skins.js`（切换器）。
 
+`css/apple.css` 是默认皮肤的覆写层，排在所有样式之后加载。每一条规则都带
+`html[data-style="default"]` 前缀（特异性 0,2,1），所以它只改苹果风，碰不到
+终端 / 黑客 / 光环 / 黑白四条皮肤——那些皮肤自己的规则特异性更高，照旧压过它。
+想退回蓝白风：把四个页面里的那行 `<link rel="stylesheet" href="css/apple.css">`
+删掉即可，其余文件一个字都不用动。
+
 ---
 
 ### 2. 五套风格（首页默认终端）
@@ -29,7 +35,7 @@
 | 值 | 名称 | 实现 |
 | --- | --- | --- |
 | `term` | 终端（主页） | `css/skin-term.css` + `css/term-tui.css`；没存过选择的访客默认落在这一套 |
-| `default` | 蓝白科技 | `style.css` + `skins.css` |
+| `default` | 苹果风（原蓝白） | `style.css` + `css/apple.css` |
 | `hacker` | 黑客终端 | `skins.css` + `js/matrix.js`（代码雨） |
 | `halo` | 光场 | `css/skin-halo.css` + `halo.html` iframe |
 | `bare` | 棍木 | `skins.css` 末尾，整页只留风格按钮 |

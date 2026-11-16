@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="HNYZ · 衡南一中编程社面向全校学生，以 Arduino 硬件为主线。每周两次、每次一小时，从点亮第一颗 LED 到组队做出一个小装置。零基础可以加入。">
-  <meta name="theme-color" content="#f5f9ff">
+  <meta name="theme-color" content="#fbfbfd">
   <script>
     /* 禁用浏览器的滚动位置恢复：否则刷新或再次打开会停在上一处（常常是页面底部） */
     (function () {
@@ -35,9 +35,13 @@
         if (!style) style = "term";
         /* 主页改成终端之前存过蓝白的人，第一次也落到终端 */
         if (style === "default" && !localStorage.getItem("hnyz:home-term")) style = "term";
-        if (style === "hacker" || style === "term" || style === "halo") {
-          document.documentElement.dataset.style = style;
-        }
+        /* 默认皮肤也写上去：苹果风的样式都挂在
+           html[data-style="default"] 下面，首帧前不写就来不及，
+           会先按基座渲染一遍再跳一下 */
+        document.documentElement.dataset.style =
+          style === "hacker" || style === "term" || style === "halo" || style === "bare"
+            ? style
+            : "default";
       } catch (error) { /* 隐私模式下忽略 */ }
     })();
   </script>
@@ -122,13 +126,21 @@
       mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20.9 13.7A8.8 8.8 0 1 1 10.3 3.1a6.9 6.9 0 0 0 10.6 10.6z' fill='%23000'/%3E%3C/svg%3E");
     }
   </style>
-  <link rel="stylesheet" href="css/style.css?v=20261116e">
-  <link rel="stylesheet" href="css/pet.css?v=20261116e">
-  <link rel="stylesheet" href="css/personal.css?v=20261116e">
-  <link rel="stylesheet" href="css/avatar-pet.css?v=20261116e">
-  <link rel="stylesheet" href="css/skins.css?v=20261116e">
-  <link rel="stylesheet" href="css/lite.css?v=20261116e">
-  <script src="js/skin-boot.js?v=20261116e"></script>
+  <!-- 苹果风的底色先内联一份：apple.css 排在最后，
+       它没到之前页面会先按蓝白风画一遍，底色从蓝跳灰。
+       这里只放几个变量，正式样式一到就接上，重复定义无害。
+       带 html[data-style="default"] 前缀，其它皮肤不受影响。 -->
+  <style>
+    html[data-style="default"]{--bg:#fbfbfd;--bg-deep:#f5f5f7;--panel:#fff;--panel-2:#f5f5f7;--text:#1d1d1f;--border:rgba(0,0,0,.08);--blue:#0071e3}
+    html[data-style="default"][data-theme="dark"]{--bg:#000;--bg-deep:#0a0a0a;--panel:#1c1c1e;--panel-2:#2c2c2e;--text:#f5f5f7;--border:rgba(255,255,255,.1);--blue:#0a84ff}
+  </style>
+  <link rel="stylesheet" href="css/style.css?v=20261116f">
+  <link rel="stylesheet" href="css/pet.css?v=20261116f">
+  <link rel="stylesheet" href="css/personal.css?v=20261116f">
+  <link rel="stylesheet" href="css/avatar-pet.css?v=20261116f">
+  <link rel="stylesheet" href="css/skins.css?v=20261116f">
+  <link rel="stylesheet" href="css/lite.css?v=20261116f">
+  <script src="js/skin-boot.js?v=20261116f"></script>
   <script>
     /* 轻量 / 极致预置：弱设备（2G、内存 ≤2G、核心 ≤2）首帧就走低配，
        避免先跑一遍动画再关。手动开过的以 localStorage 为准（1 轻量 / 2 极致）。
@@ -164,31 +176,33 @@
       }
     })();
   </script>
-  <link rel="stylesheet" href="css/type.css?v=20261116e">
-  <link rel="stylesheet" href="css/motion.css?v=20261116e">
-  <link rel="preload" href="css/guestbook.css?v=20261116e" as="style">
-  <link rel="stylesheet" href="css/guestbook.css?v=20261116e" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/guestbook.css?v=20261116e"></noscript>
+  <link rel="stylesheet" href="css/type.css?v=20261116f">
+  <link rel="stylesheet" href="css/motion.css?v=20261116f">
+  <link rel="preload" href="css/guestbook.css?v=20261116f" as="style">
+  <link rel="stylesheet" href="css/guestbook.css?v=20261116f" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/guestbook.css?v=20261116f"></noscript>
+  <!-- 苹果风覆写层：只作用于默认皮肤，放最后才压得住各页自己的样式 -->
+  <link rel="stylesheet" href="css/apple.css?v=20261116f">
   <noscript><style>.loading-state { display: none; }</style></noscript>
 
   <!-- 项目卡片、全部项目折叠页和复制按钮由 js/main.js 驱动 -->
-  <script src="js/sfx.js?v=20261116e" defer></script>
-  <script src="js/theme.js?v=20261116e" defer></script>
-  <script src="js/theme-icon.js?v=20261116e" defer></script>
-  <script src="js/members.js?v=20261116e" defer></script>
-  <script src="js/main.js?v=20261116e" defer></script>
-  <script src="js/repo-sync.js?v=20261116e" defer></script>
-  <script src="js/pet.js?v=20261116e" defer></script>
-  <script src="js/avatar-pet.js?v=20261116e" defer></script>
-  <script src="js/personal.js?v=20261116e" defer></script>
-  <script src="js/click-fx.js?v=20261116e" defer></script>
-  <script src="js/term-tui.js?v=20261116e" defer></script>
-  <script src="js/skins.js?v=20261116e" defer></script>
-  <script src="js/fullscreen.js?v=20261116e" defer></script>
-  <script src="js/lite.js?v=20261116e" defer></script>
-  <script src="js/copy.js?v=20261116e" defer></script>
-  <script src="js/pwa.js?v=20261116e" defer></script>
-  <script src="js/guestbook.js?v=20261116e" defer></script>
+  <script src="js/sfx.js?v=20261116f" defer></script>
+  <script src="js/theme.js?v=20261116f" defer></script>
+  <script src="js/theme-icon.js?v=20261116f" defer></script>
+  <script src="js/members.js?v=20261116f" defer></script>
+  <script src="js/main.js?v=20261116f" defer></script>
+  <script src="js/repo-sync.js?v=20261116f" defer></script>
+  <script src="js/pet.js?v=20261116f" defer></script>
+  <script src="js/avatar-pet.js?v=20261116f" defer></script>
+  <script src="js/personal.js?v=20261116f" defer></script>
+  <script src="js/click-fx.js?v=20261116f" defer></script>
+  <script src="js/term-tui.js?v=20261116f" defer></script>
+  <script src="js/skins.js?v=20261116f" defer></script>
+  <script src="js/fullscreen.js?v=20261116f" defer></script>
+  <script src="js/lite.js?v=20261116f" defer></script>
+  <script src="js/copy.js?v=20261116f" defer></script>
+  <script src="js/pwa.js?v=20261116f" defer></script>
+  <script src="js/guestbook.js?v=20261116f" defer></script>
   <script>
     /* 页脚跑道不参与首屏，也不该为「只看了首屏的人」付钱：
        等它进入视口前 600px 再拉样式和脚本。
@@ -204,7 +218,7 @@
         if (document.querySelector("link[data-dino-css]")) return;
         var link = document.createElement("link");
         link.rel = "stylesheet";
-        link.href = "css/dino.css?v=20261116e";
+        link.href = "css/dino.css?v=20261116f";
         link.setAttribute("data-dino-css", "");
         document.head.appendChild(link);
       }
@@ -215,7 +229,7 @@
         if (document.documentElement.dataset.lite === "2") return;
         loadCss();
         var script = document.createElement("script");
-        script.src = "js/dino.js?v=20261116e";
+        script.src = "js/dino.js?v=20261116f";
         script.async = true;
         document.body.appendChild(script);
       }
