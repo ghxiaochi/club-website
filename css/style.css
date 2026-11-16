@@ -3447,3 +3447,37 @@ html[data-style="default"][data-theme="dark"] .cover-tag {
     font-size: 2.62rem;
   }
 }
+
+
+/* ---------------------------------------------------------
+   鼠标轨迹：一层彩色像素方块
+   ---------------------------------------------------------
+   画布由 js/cursor-trail.js 建（终端风与默认皮肤才有），盖在所有
+   内容之上，靠混合模式染色：浅色底用 multiply 把方块压深、深夜
+   主题用 screen 提亮。字和面板本身不变色，只有指针扫过的那几格
+   浮出来。pointer-events: none —— 它只是一层光，不挡点击。
+   --------------------------------------------------------- */
+.tty-trail {
+  position: fixed;
+  top: 0; /* fallback: 旧内核 */
+  right: 0;
+  bottom: 0;
+  left: 0;
+  inset: 0;
+  z-index: 520;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+html[data-theme="dark"] .tty-trail {
+  mix-blend-mode: screen;
+}
+
+html[data-style="default"] .tty-trail,
+html[data-style="term"] .tty-trail {
+  opacity: 1;
+}
