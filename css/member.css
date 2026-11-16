@@ -99,68 +99,17 @@
 
 /* ---------- 内嵌作品：把朋友的网页装进本页 ---------- */
 .member-embed {
+  display: grid;
+  /* 左边一块竖屏播放器，右边是说明。
+     播放器本身是一整块 1111:1932 的画布（没有侧栏、没有进度条），
+     外框按这个比例收，画面才不会被两边黑边夹住 */
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: center;
+  gap: 26px clamp(24px, 4vw, 56px);
   margin: 40px 0 6px;
 }
 
-.member-embed__head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 14px 24px;
-  margin-bottom: 16px;
-}
-
-.member-embed__copy {
-  min-width: 0;
-}
-
-.member-embed__title {
-  margin: 10px 0 8px;
-  color: var(--text);
-  font-size: 29.4px; /* fallback: 旧内核 */
-  font-size: clamp(1.35rem, 2.6vw, 1.84rem);
-  font-weight: 800;
-  letter-spacing: -0.015em;
-  line-height: 1.24;
-}
-
-.member-embed__desc {
-  max-width: 660px;
-  color: var(--muted);
-  font-size: 0.86rem;
-  line-height: 1.8;
-}
-
-.member-embed__open {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  flex: 0 0 auto;
-  padding: 7px 11px;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  color: var(--blue);
-  font-family: var(--mono);
-  font-size: var(--fs-meta);
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-@media (hover: hover), (pointer: fine) {
-
-
-.member-embed__open:hover {
-  border-color: var(--blue);
-  background: var(--blue-soft);
-  color: var(--blue-bright);
-  box-shadow: var(--glow-blue);
-}
-}
-
-
-/* 外框当成一块屏幕：上面一条地址栏，下面才是网页本身 */
+/* 外框当成一台竖着的屏幕：上面一条地址栏，下面才是网页本身 */
 .member-embed__frame {
   overflow: hidden;
   border: 1px solid var(--border-strong);
@@ -172,9 +121,9 @@
 .member-embed__bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  height: 38px;
-  padding: 0 14px;
+  gap: 10px;
+  height: 34px;
+  padding: 0 12px;
   border-bottom: 1px solid var(--border);
   background: var(--panel-2);
 }
@@ -182,12 +131,12 @@
 .member-embed__dots {
   display: flex;
   flex: 0 0 auto;
-  gap: 6px;
+  gap: 5px;
 }
 
 .member-embed__dots i {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: var(--border-strong);
 }
@@ -203,8 +152,8 @@
   overflow: hidden;
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.02em;
+  font-size: 0.62rem;
+  letter-spacing: 0.01em;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -212,31 +161,31 @@
 .member-embed__live {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   flex: 0 0 auto;
   color: var(--green-bright);
   font-family: var(--mono);
-  font-size: 0.6rem;
-  letter-spacing: 0.18em;
+  font-size: 0.56rem;
+  letter-spacing: 0.16em;
 }
 
 .member-embed__live::before {
   content: "";
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: currentColor;
-  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 22%, transparent); /* fallback: 旧内核 */
+  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 22%, transparent);
 }
 
 .member-embed__viewport {
   position: relative;
-  /* 播放器自己是一屏 app（100vh 起步），视窗太矮会把它压成一堆内部滚动条：
-     桌面按 84vh 给，最矮 600、最高 840，够它把分栏和手绘分镜都摊开 */
-  height: 84vh;
-  min-height: 600px;
-  max-height: 840px;
-  background: var(--panel-2);
+  /* 高度定死、宽度由画布比例算出来：视窗和播放器的画布一样宽，
+     画面正好铺满，两侧不会留两条黑边 */
+  height: clamp(520px, 78vh, 760px);
+  width: auto;
+  aspect-ratio: 1111 / 1932;
+  background: #171313; /* 播放器自己的底色，加载前后不闪白 */
 }
 
 .member-embed__iframe {
@@ -244,7 +193,7 @@
   width: 100%;
   height: 100%;
   border: 0;
-  background: #f5f1ed; /* 播放器自己的底色，加载完不会先闪一块白 */
+  background: #171313;
 }
 
 /* 轻量模式：先盖一层封面，点了才去下载那个 iframe */
@@ -259,8 +208,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 9px;
-  padding: 24px;
+  gap: 8px;
+  padding: 18px;
   overflow: hidden;
   border: 0;
   background: var(--panel-2);
@@ -279,8 +228,8 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.38;
-  filter: saturate(0.6);
+  opacity: 0.3;
+  filter: saturate(0.55) blur(1.5px);
 }
 
 /* 封面中间压一层柔光，标题才不会陷进图的浅色大字里 */
@@ -305,65 +254,157 @@
 }
 
 .member-embed__gate-title {
-  padding: 10px 20px;
+  padding: 9px 16px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   background: var(--panel);
   box-shadow: var(--shadow-card);
-  font-size: 0.98rem;
+  font-size: 0.88rem;
   font-weight: 700;
   letter-spacing: 0.02em;
 }
 
 .member-embed__gate-title::before {
   content: "▶";
-  margin-right: 9px;
+  margin-right: 8px;
   color: var(--blue);
   font-size: 0.82em;
 }
 
 .member-embed__gate-hint {
-  padding: 4px 12px;
+  padding: 3px 10px;
   border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--panel) 74%, transparent);
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 0.7rem;
+  font-size: 0.62rem;
   letter-spacing: 0.04em;
+  line-height: 1.6;
 }
 
 .member-embed__gate.is-loading {
   pointer-events: none;
 }
 
-@media (max-width: 900px) {
-  .member-embed__viewport {
-    height: 68vh;
-    min-height: 460px;
-  }
+/* ---------- 右边那栏说明 ---------- */
+.member-embed__side {
+  min-width: 0;
 }
 
-@media (max-width: 560px) {
-  .member-embed__head {
-    align-items: flex-start;
+.member-embed__copy {
+  min-width: 0;
+}
+
+.member-embed__title {
+  margin: 10px 0 10px;
+  color: var(--text);
+  font-size: 30.7px; /* fallback: 旧内核 */
+  font-size: clamp(1.5rem, 2.7vw, 2.05rem);
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  line-height: 1.24;
+}
+
+.member-embed__desc {
+  max-width: 620px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.9;
+}
+
+/* 播放器只有一块画布，操作全靠点画面：这一行是说明书 */
+.member-embed__tip {
+  margin-top: 16px;
+  padding-left: 12px;
+  border-left: 2px solid var(--border-strong);
+  color: var(--text-soft);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  line-height: 1.8;
+  letter-spacing: 0.01em;
+}
+
+.member-embed__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 32px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.member-embed__meta div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.member-embed__meta dt {
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+}
+
+.member-embed__meta dd {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.82rem;
+  letter-spacing: 0.01em;
+}
+
+.member-embed__open {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 18px;
+  padding: 7px 11px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--blue);
+  font-family: var(--mono);
+  font-size: var(--fs-meta);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+@media (hover: hover), (pointer: fine) {
+
+
+.member-embed__open:hover {
+  border-color: var(--blue);
+  background: var(--blue-soft);
+  color: var(--blue-bright);
+  box-shadow: var(--glow-blue);
+}
+}
+
+
+@media (max-width: 900px) {
+  /* 单栏：播放器居中，说明落在下面，读起来跟「图 + 图注」一样 */
+  .member-embed {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 20px;
   }
 
-  .member-embed__open {
-    order: 3;
+  .member-embed__frame {
+    width: min(100%, 430px);
+    margin-inline: auto;
   }
 
+  .member-embed__side {
+    width: 100%;
+    max-width: 430px;
+  }
+
+  /* 窄屏不再按视口高度收：外框多宽，视窗就多宽，高度交给画布比例。
+     否则 900–480 这一段会出现「地址栏比画面宽」的一圈边。 */
   .member-embed__viewport {
-    height: 640px;
-    min-height: 0;
-  }
-
-  .member-embed__bar {
-    height: 34px;
-    padding: 0 12px;
-  }
-
-  .member-embed__addr {
-    font-size: 0.62rem;
+    height: auto;
+    width: 100%;
   }
 }
 

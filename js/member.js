@@ -156,8 +156,10 @@
     section.id = index === 0 ? "member-embed" : `member-embed-${index}`;
     section.setAttribute("aria-labelledby", `${section.id}-title`);
 
-    const head = document.createElement("div");
-    head.className = "member-embed__head";
+    /* 右边这一栏是说明：播放器本身只有一张画布，
+       没有进度条也没有歌单按钮，得先告诉人怎么用 */
+    const side = document.createElement("div");
+    side.className = "member-embed__side";
 
     const copy = document.createElement("div");
     copy.className = "member-embed__copy";
@@ -198,7 +200,35 @@
     openArrow.textContent = "↗";
     open.append(openText, openArrow);
 
-    head.append(copy, open);
+    const tip = document.createElement("p");
+    tip.className = "member-embed__tip";
+    tip.textContent = item.tip || "画面就是播放器：点画面下方的 ▶ 开始，点 ♥ 收藏，左右滑动换一首。";
+
+    side.append(copy, tip);
+
+    /* 作者 / 曲目 / 类型：右侧光有几句介绍太单薄，补一排小字 */
+    const facts = [
+      ["作者", item.by],
+      ["曲目", item.tracks],
+      ["类型", item.kind]
+    ].filter((row) => typeof row[1] === "string" && row[1].trim());
+
+    if (facts.length) {
+      const meta = document.createElement("dl");
+      meta.className = "member-embed__meta";
+      facts.forEach(([label, value]) => {
+        const cell = document.createElement("div");
+        const dt = document.createElement("dt");
+        dt.textContent = label;
+        const dd = document.createElement("dd");
+        dd.textContent = value.trim();
+        cell.append(dt, dd);
+        meta.appendChild(cell);
+      });
+      side.appendChild(meta);
+    }
+
+    side.appendChild(open);
 
     const frame = document.createElement("div");
     frame.className = "member-embed__frame";
@@ -276,7 +306,7 @@
 
     viewport.appendChild(iframe);
     frame.append(bar, viewport);
-    section.append(head, frame);
+    section.append(frame, side);
 
     return section;
   }
