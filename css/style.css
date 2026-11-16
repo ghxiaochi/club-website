@@ -3468,13 +3468,11 @@ html[data-style="default"][data-theme="dark"] .cover-tag {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  mix-blend-mode: multiply;
+  /* 不给混合模式：multiply / screen 会把颜色和底色相乘，彩色会被
+     压成一片灰蓝。方块直接以半透明彩色叠上去，色才是色 */
+  mix-blend-mode: normal;
   opacity: 0;
   transition: opacity 0.5s ease;
-}
-
-html[data-theme="dark"] .tty-trail {
-  mix-blend-mode: screen;
 }
 
 html[data-style="default"] .tty-trail,

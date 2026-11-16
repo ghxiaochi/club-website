@@ -5,11 +5,10 @@
    方块，停手后慢慢退掉，留下的就是一条轨迹。
 
    几条原则：
-     · 只有终端风（html[data-style="term"]）才建画布，别的皮肤
-       连 canvas 都没有，一个像素都不付；
-     · 画布挂在 body 上、z-index 高于 TUI（500），靠混合模式染色：
-       终端桌面是米白底，用 multiply 把方块压深；内页纸带是深底，
-       用 screen 提亮。字和面板本身不变色；
+     · 只有终端风（html[data-style="term"]）与默认皮肤才建画布，
+       别的皮肤连 canvas 都没有，一个像素都不付；
+     · 画布挂在 body 上、z-index 高于 TUI（500），半透明彩色直接
+       叠上去（不用混合模式，否则颜色会被底色吃掉）；
      · 轻量档、极致档、prefers-reduced-motion 一律不建；
      · 没有方块可退时立刻停 rAF，鼠标停下不烧电。
    ========================================================= */
@@ -55,7 +54,7 @@
       cells: new Map(),
       w: 0,
       h: 0,
-      cell: 46,
+      cell: 20,
       cols: 1,
       rows: 1,
       raf: 0,
@@ -75,7 +74,7 @@
     var dpr = Math.min(2, window.devicePixelRatio || 1);
     var w = window.innerWidth;
     var h = window.innerHeight;
-    var cell = w < 720 ? 34 : 46;
+    var cell = w < 720 ? 15 : 20;
 
     trail.w = w;
     trail.h = h;
@@ -118,7 +117,7 @@
     var dx = x - px;
     var dy = y - py;
     var dist = Math.sqrt(dx * dx + dy * dy);
-    var steps = Math.min(28, Math.max(1, Math.round(dist / (c * 0.45))));
+    var steps = Math.min(72, Math.max(1, Math.round(dist / (c * 0.5))));
 
     for (var i = 1; i <= steps; i += 1) {
       var sx = px + (dx * i) / steps;
@@ -129,10 +128,10 @@
 
       light(gx, gy, near);
       /* 四邻给一点余晖：只有一条细线太薄，一格宽的轨迹更有块感 */
-      light(gx - 1, gy, near * 0.34);
-      light(gx + 1, gy, near * 0.34);
-      light(gx, gy - 1, near * 0.34);
-      light(gx, gy + 1, near * 0.34);
+      light(gx - 1, gy, near * 0.26);
+      light(gx + 1, gy, near * 0.26);
+      light(gx, gy - 1, near * 0.26);
+      light(gx, gy + 1, near * 0.26);
     }
 
     t.ghostX = x;
@@ -156,15 +155,22 @@
     var ctx = t.ctx;
     var c = t.cell;
     var pad = 2;
-    /* 浅色主题是米白底（multiply，方块要深），深夜主题是深底（screen，方块要亮） */
     var dark = document.documentElement.dataset.theme === "dark";
-    var lightness = dark ? 66 : 50;
+    /* 深色底要更亮一点才浮得出来，浅色底压低一档免得盖字 */
+    var lightness = dark ? 62 : 52;
+    var sat = dark ? 92 : 90;
+    /* 刚点亮的那几格几乎实色，才看得出"彩"；靠生命曲线淡出 */
+    var alpha = 0.95;
     var alive = 0;
 
     ctx.clearRect(0, 0, t.w, t.h);
+    /* 深色底用加色：source-over 叠半透明色会因为底色是黑，
+       淡出过程中直接暗成一块黑斑。lighter 是加光，暗底上
+       越淡越是余晖，和 GitHub 深色 hero 那层一样 */
+    ctx.globalCompositeOperation = dark ? "lighter" : "source-over";
 
     t.cells.forEach(function (cell, key) {
-      cell.life -= dt * 1.05;
+      cell.life -= dt * 0.55;
       if (cell.life <= 0.02) {
         t.cells.delete(key);
         return;
@@ -172,11 +178,18 @@
 
       alive += 1;
 
-      var a = Math.pow(cell.life, 1.5) * 0.5;
-      /* 色相跟着横坐标走：左边青、中间蓝、右边紫品，再叠一点时间上的呼吸 */
-      var hue = 188 + (cell.gx / t.cols) * 104 + (cell.gy / t.rows) * 12 + Math.sin(t.time * 0.8) * 6;
+      var a = Math.pow(cell.life, 1.1) * alpha;
+      /* 色相按屏幕横向铺：青蓝 → 蓝 → 靛 → 紫 → 品红，
+         再按格子坐标错开一点。每格自己的色，才是 GitHub 首页
+         那种彩色小马赛克，而不是一条单色渐变 */
+      /* 两段：横向从青蓝走到紫（192°→290°），每格再按坐标抬一档
+         （0/20/40/60°），相邻格之间就有 20~60° 的色差。
+         只有横向渐变的话整片是同一个色系，看着不"彩" */
+      var base = 172 + (cell.gx / t.cols) * 118;
+      var tier = (cell.gx * 7 + cell.gy * 13) % 4;
+      var hue = ((base + tier * 20 + Math.sin(t.time * 0.7 + cell.gy * 0.4) * 3) % 360 + 360) % 360;
 
-      ctx.fillStyle = "hsla(" + hue.toFixed(1) + ", 76%, " + lightness + "%, " + a.toFixed(3) + ")";
+      ctx.fillStyle = "hsla(" + hue.toFixed(1) + ", " + sat + "%, " + lightness + "%, " + a.toFixed(3) + ")";
       ctx.fillRect(cell.gx * c + pad, cell.gy * c + pad, c - pad * 2, c - pad * 2);
     });
 
