@@ -125,7 +125,7 @@ window.HNYZ_MEMBER_EMBEDS = {
   ghxiaochi: [
     {
       title: "Warma 音乐放映室",
-      desc: "同班同学做的小礼物：十二首歌，每首配一幅手绘线稿动画。就在下面，按下播放就能听，不用跳走。第一次进去要等一会儿，它得先把画面下完。",
+      desc: "挺有意思的不是吗？",
       src: "https://fargoyu.github.io/warma-music-room/",
       label: "fargoyu.github.io/warma-music-room",
       coverImg: "images/project-warma.webp",

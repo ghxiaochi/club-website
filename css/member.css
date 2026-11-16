@@ -312,18 +312,6 @@
   line-height: 1.9;
 }
 
-/* 播放器只有一块画布，操作全靠点画面：这一行是说明书 */
-.member-embed__tip {
-  margin-top: 16px;
-  padding-left: 12px;
-  border-left: 2px solid var(--border-strong);
-  color: var(--text-soft);
-  font-family: var(--mono);
-  font-size: 0.68rem;
-  line-height: 1.8;
-  letter-spacing: 0.01em;
-}
-
 .member-embed__meta {
   display: flex;
   flex-wrap: wrap;

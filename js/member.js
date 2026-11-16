@@ -200,11 +200,7 @@
     openArrow.textContent = "↗";
     open.append(openText, openArrow);
 
-    const tip = document.createElement("p");
-    tip.className = "member-embed__tip";
-    tip.textContent = item.tip || "画面就是播放器：点画面下方的 ▶ 开始，点 ♥ 收藏，左右滑动换一首。";
-
-    side.append(copy, tip);
+    side.append(copy);
 
     /* 作者 / 曲目 / 类型：右侧光有几句介绍太单薄，补一排小字 */
     const facts = [
