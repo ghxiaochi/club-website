@@ -1,6 +1,6 @@
 # HNYZ · 衡南一中编程社
 
-一个没有后端、没有构建步骤的社团官网。纯Ai写 HTML / CSS / JavaScript，部署在 GitHub Pages。
+一个没有后端、没有构建步骤的社团官网。纯AI写 HTML / CSS / JavaScript，部署在 GitHub Pages。
 
 <https://hnyzbcs.de5.net/>
 
