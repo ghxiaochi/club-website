@@ -12,16 +12,20 @@
 
    移动端不显示这条槽（没有 hover，贴着右边缘还容易跟系统
    的返回手势打架），直接给满墨 —— 手指划过去就有轨迹。
+   手指停下来、没有划也没有点的时候，计时一并停住：墨水是
+   用来画画的，不该在没人用的时候自己流干。
    ========================================================= */
 (function () {
   "use strict";
 
   var INK_MS = 12000;      /* 一槽墨能烧 12 秒 */
+  var IDLE_MS = 260;       /* 触屏上停手这么久就暂停计时 */
   var STORE = "hnyz:ink";  /* sessionStorage：换页时把剩下的墨带过去 */
   var COLORS = ["#4493f8", "#a371f7", "#db61a2", "#3fb950", "#f0883e", "#39c5cf"];
 
   var left = 0;            /* 剩余毫秒 */
-  var freeInk = false;     /* 手机：没有墨槽可蘸，就不烧墨，一直满 */
+  var touchMode = false;   /* 触屏：手指没碰屏幕时不计时 */
+  var lastAct = 0;         /* 上一次触摸/点击/滚动的时刻 */
   var el = null;
   var tipEl = null;
   var wells = [];
@@ -35,7 +39,12 @@
   function now() { return Date.now(); }
 
   function isHandset() {
-    return window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
+    var mq = window.matchMedia;
+    if (!mq) return false;
+    /* 触屏一律按手机算：横过来的手机、平板都可能宽过 720，
+       只按宽度判会让墨槽贴到右侧、墨水还自己往下烧 */
+    if (mq("(hover: none) and (pointer: coarse)").matches) return true;
+    return mq("(max-width: 720px)").matches;
   }
 
   function readStore() {
@@ -80,11 +89,17 @@
       if (gaugeFill) gaugeFill.style.transform = "scaleY(" + ratio.toFixed(3) + ")";
     }
 
-    /* 悬停时的提示：没墨时教怎么用，有墨时直接报还剩几秒 */
+    /* 悬停时的提示：没墨时教怎么用，有墨时直接报还剩几秒。
+       窄一点的屏幕上牌子是竖排的，字数要省 */
     var sec = ratio > 0 ? Math.ceil(left / 1000) : 0;
     if (sec !== shownSec && tipEl) {
       shownSec = sec;
-      tipEl.textContent = sec > 0 ? "墨水 " + sec + " 秒" : "划过蘸墨";
+      if (sec > 0) {
+        tipEl.textContent = "墨水 " + sec + " 秒";
+      } else {
+        /* 跟 CSS 的断点对齐（clientWidth 不含滚动条，正好是媒体查询那份宽） */
+        tipEl.textContent = document.documentElement.clientWidth < 1180 ? "蘸墨" : "划过蘸墨";
+      }
     }
   }
 
@@ -99,7 +114,10 @@
     var dt = Math.min(120, ts - lastTs);
     lastTs = ts;
 
-    if (!freeInk && left > 0) {
+    /* 触屏上手一停就待机：不扣墨、也不再逐帧跑 */
+    var idle = touchMode && (now() - lastAct) > IDLE_MS;
+
+    if (left > 0 && !idle) {
       left = Math.max(0, left - dt);
       render();
       if (left === 0) {
@@ -107,7 +125,7 @@
         notify();
       }
     }
-    raf = left > 0 && !freeInk ? window.requestAnimationFrame(loop) : 0;
+    raf = left > 0 && !idle ? window.requestAnimationFrame(loop) : 0;
   }
 
   function burn() {
@@ -121,6 +139,7 @@
     /* 划过、点击、聚焦都算蘸墨；还没蘸满就一直补 */
     var was = left;
     left = INK_MS;
+    lastAct = now();
     shownPct = -1;
     shownSec = -1;
     render();
@@ -194,12 +213,11 @@
     el.addEventListener("pointerdown", charge);
     el.addEventListener("focus", charge);
 
-    if (isHandset()) {
-      freeInk = true;
-      left = INK_MS;
-    } else {
-      left = readStore();
-    }
+    /* 手机上没地方蘸墨：一进来就是满的，但先处于待机 ——
+       页面上没有人动手的时候，一滴墨都不该流走 */
+    touchMode = isHandset();
+    lastAct = now() - IDLE_MS;
+    left = touchMode ? INK_MS : readStore();
 
     shownPct = -1;
     render();
@@ -207,19 +225,18 @@
     return el;
   }
 
-  /* 横竖屏切换时重新判一次：转到手机上就不烧墨，
-     转回桌面就按剩下的墨继续烧 */
+  /* 横竖屏或窗口变化时重新判一次：切到触屏先给满，
+     切回桌面按剩下的墨继续烧。没换设备就什么都不动 ——
+     手机上地址栏一收也会发 resize，不能借这个把计时接上 */
   function sync() {
     var handset = isHandset();
-    if (handset === freeInk) return;
-    freeInk = handset;
-    if (freeInk) {
-      left = INK_MS;
-      shownPct = -1;
-      render();
-    } else if (left > 0) {
-      burn();
-    }
+    if (handset === touchMode) return;
+    touchMode = handset;
+    if (handset) left = INK_MS;
+    lastAct = now() - IDLE_MS;
+    shownPct = -1;
+    render();
+    if (left > 0) burn();
   }
 
   function active() {
@@ -246,6 +263,51 @@
   }
 
   window.addEventListener("resize", sync, { passive: true });
+  window.addEventListener("resize", function () {
+    /* 断点两侧牌子会换文案（横排四个字 / 竖排两个字） */
+    shownSec = -1;
+    render();
+  }, { passive: true });
+  window.addEventListener("orientationchange", sync, { passive: true });
+
+  /* 只有触屏才走这条：手指落下、拖动、页面滚动都算「人在用」，
+     一停手就暂停；桌面鼠标不参与，桌面的墨还是按真实时间流走 */
+  function markAct(e) {
+    if (!touchMode) return;
+
+    /* 手指抬起来就立刻待机：不等那点收尾余量，
+       松手之后一滴都不再扣 */
+    if (e && (e.type === "pointerup" || e.type === "pointercancel" || e.type === "touchend" || e.type === "touchcancel")) {
+      lastAct = now() - IDLE_MS;
+      return;
+    }
+
+    lastAct = now();
+
+    /* 手机上没地方蘸墨：手指一落下就当重新蘸满，滑两下不会把墨用光；
+       一次手势拖得极久真把墨走干了，也悄悄续上 —— 手指还在屏幕上，
+       不该突然断线 */
+    var tap = e && (e.type === "pointerdown" || e.type === "touchstart") && left < INK_MS;
+    var dry = e && e.type === "touchmove" && left <= 0;
+    if (tap || dry) {
+      left = INK_MS;
+      shownPct = -1;
+      shownSec = -1;
+      render();
+      writeStore();
+      notify();
+    }
+    if (left > 0 && !raf) burn();
+  }
+  window.addEventListener("pointerdown", markAct, { passive: true });
+  window.addEventListener("pointermove", markAct, { passive: true });
+  window.addEventListener("touchstart", markAct, { passive: true });
+  window.addEventListener("touchmove", markAct, { passive: true });
+  window.addEventListener("touchend", markAct, { passive: true });
+  window.addEventListener("touchcancel", markAct, { passive: true });
+  window.addEventListener("pointerup", markAct, { passive: true });
+  window.addEventListener("pointercancel", markAct, { passive: true });
+  window.addEventListener("scroll", markAct, { passive: true });
 
   window.HNYZINK = {
     active: active,

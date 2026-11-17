@@ -8,24 +8,25 @@
 
 .ink-slot {
   --ink-left: 0;
+  --ink-halo: 37, 99, 235;   /* 呼吸边光的颜色，深色主题会换 */
   display: none;          /* 只有默认皮肤与终端风才露出来，见文件末尾 */
   position: fixed;
-  right: 0;
+  right: 10px;            /* 离边缘留一道缝：贴死了会被当成滚动条 */
   top: 50%;
   z-index: 560;
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  width: 34px;
+  width: 36px;
   margin: 0;
   padding: 12px 0 10px;
   border: 1px solid rgba(15, 23, 42, 0.1);
-  border-right: 0;
-  border-radius: 15px 0 0 15px;
-  background: rgba(255, 255, 255, 0.84);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.88);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  box-shadow: -8px 0 26px rgba(15, 23, 42, 0.07);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1),
+              0 2px 6px rgba(15, 23, 42, 0.06);
   color: #0f172a;
   cursor: pointer;
   transform: translateY(-50%);
@@ -37,17 +38,19 @@
 
 .ink-slot:hover,
 .ink-slot:focus-visible {
-  width: 40px;
+  width: 42px;
   background: #fff;
   border-color: rgba(37, 99, 235, 0.28);
-  box-shadow: -10px 0 30px rgba(37, 99, 235, 0.14);
+  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.18),
+              0 2px 8px rgba(15, 23, 42, 0.08),
+              0 0 0 3px rgba(37, 99, 235, 0.06);
   outline: none;
 }
 
 /* 蘸满的状态：边框与光晕都染上色，表示「现在能画」 */
 .ink-slot.is-armed {
   border-color: rgba(37, 99, 235, 0.42);
-  box-shadow: -8px 0 26px rgba(37, 99, 235, 0.16),
+  box-shadow: 0 8px 26px rgba(37, 99, 235, 0.18),
               inset 0 0 0 1px rgba(37, 99, 235, 0.06);
 }
 
@@ -66,7 +69,7 @@
   border: 1px solid rgba(15, 23, 42, 0.16);
   border-radius: 4px;
   background: transparent;
-  transition: background 0.2s ease, border-color 0.2s ease,
+  transition: background 0.2s ease, border-color 0.2s ease, opacity 0.24s ease,
               transform 0.2s cubic-bezier(0.3, 1.5, 0.5, 1);
 }
 
@@ -74,6 +77,33 @@
   background: var(--c);
   border-color: transparent;
   transform: scale(1.04);
+}
+
+/* 空着的时候，六格也留着六种颜色的淡影：
+   一眼能看出「这里有六管彩色的墨」，而不是六个灰格子 */
+.ink-slot:not(.is-armed) .ink-slot__wells i {
+  border-color: transparent;
+  background: var(--c);
+  opacity: 0.3;
+  animation: inkWell 6s ease-in-out infinite;
+}
+
+/* 六个格子依次轻轻一亮：比整块呼吸更像「这里有东西在动」 */
+.ink-slot:not(.is-armed) .ink-slot__wells i:nth-child(2) { animation-delay: 0.16s; }
+.ink-slot:not(.is-armed) .ink-slot__wells i:nth-child(3) { animation-delay: 0.32s; }
+.ink-slot:not(.is-armed) .ink-slot__wells i:nth-child(4) { animation-delay: 0.48s; }
+.ink-slot:not(.is-armed) .ink-slot__wells i:nth-child(5) { animation-delay: 0.64s; }
+.ink-slot:not(.is-armed) .ink-slot__wells i:nth-child(6) { animation-delay: 0.8s; }
+
+@keyframes inkWell {
+  0%, 76%, 100% { opacity: var(--ink-rest, 0.3); transform: scale(1); }
+  84% { opacity: 1; transform: scale(1.13); }
+}
+
+/* 手放上去就停，别跟人抢注意力 */
+.ink-slot:hover .ink-slot__wells i,
+.ink-slot:focus-visible .ink-slot__wells i {
+  animation: none;
 }
 
 /* 竖排的 INK 字样 */
@@ -91,6 +121,15 @@
 
 .ink-slot.is-armed .ink-slot__label {
   color: #2563eb;
+}
+
+/* 空着时 INK 三个字母走六色渐变，蘸满后回到纯蓝 */
+.ink-slot:not(.is-armed) .ink-slot__label {
+  background: linear-gradient(180deg, #4493f8, #a371f7 55%, #db61a2);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
 /* 余量条：从下往上收，比数字更直观 */
@@ -137,22 +176,44 @@
   position: absolute;
   left: 100%;
   top: 50%;
-  width: 0;
-  height: 0;
-  margin-top: -4px;
-  border: 4px solid transparent;
-  border-left-color: #0f172a;
+  width: 8px;
+  height: 1px;
+  background: rgba(var(--ink-halo), 0.5);
+}
+
+/* 没蘸墨的时候这枚牌子一直挂着，轻轻呼吸：
+   光靠悬停才出现的提示，等于没人看得见 */
+.ink-slot:not(.is-armed) .ink-slot__tip {
+  opacity: 1;
+  transform: translate(0, -50%);
+  padding: 6px 10px 6px 11px;
+  border: 1px solid rgba(var(--ink-halo), 0.34);
+  background: rgba(239, 246, 255, 0.96);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  color: #1d4ed8;
+  font-weight: 600;
+  box-shadow: 0 6px 18px rgba(var(--ink-halo), 0.16),
+              inset 3px 0 0 rgba(var(--ink-halo), 0.9);
+  animation: inkTipBreath 3s ease-in-out infinite;
 }
 
 .ink-slot:hover .ink-slot__tip,
 .ink-slot:focus-visible .ink-slot__tip {
   opacity: 1;
   transform: translate(0, -50%);
+  animation: none;
+  background: #0f172a;
+  color: #fff;
+  border-color: transparent;
+  box-shadow: none;
 }
 
-/* 一直没人蘸，就自己轻轻晃两下：不然这块东西太安静，没人知道能碰 */
+/* 一直没人蘸，就自己轻轻晃两下、再慢慢呼吸：
+   不然这块东西太安静，没人知道能碰 */
 .ink-slot:not(.is-armed) {
-  animation: inkNudge 1.5s cubic-bezier(0.3, 0.7, 0.3, 1) 3.4s 2;
+  animation: inkNudge 1.5s cubic-bezier(0.3, 0.7, 0.3, 1) 3.4s 2,
+             inkBreathe 3s ease-in-out 5.2s infinite;
 }
 
 @keyframes inkNudge {
@@ -161,12 +222,38 @@
   65% { transform: translateY(-50%) translateX(0); }
 }
 
+/* 呼吸只动边光与描边：一动 transform 就跟上面的晃动作打架 */
+@keyframes inkBreathe {
+  0%, 100% {
+    border-color: rgba(var(--ink-halo), 0.18);
+    box-shadow: 0 6px 16px rgba(var(--ink-halo), 0.06),
+                0 2px 6px rgba(15, 23, 42, 0.05);
+  }
+  50% {
+    border-color: rgba(var(--ink-halo), 0.62);
+    box-shadow: 0 12px 32px rgba(var(--ink-halo), 0.3),
+                0 0 0 4px rgba(var(--ink-halo), 0.07);
+  }
+}
+
+/* 牌子跟着一起轻轻往里靠，像在招手 */
+@keyframes inkTipBreath {
+  0%, 100% { opacity: 0.76; transform: translate(-4px, -50%); }
+  50% { opacity: 1; transform: translate(0, -50%); }
+}
+
+/* 手一放上去就交给 CSS 静态高亮，别让动画盖住 hover 的样式 */
+.ink-slot:hover,
+.ink-slot:focus-visible {
+  animation: none;
+}
+
 /* 蘸下去那一下：一圈由内向外散开的色环 */
 .ink-slot.is-dip::after {
   content: "";
   position: absolute;
   inset: -4px -4px -4px -4px;
-  border-radius: 18px 0 0 18px;
+  border-radius: 18px;
   border: 1px solid rgba(37, 99, 235, 0.5);
   opacity: 0;
   pointer-events: none;
@@ -188,7 +275,7 @@ html[data-style="term"] .ink-slot {
   border-radius: 0;
   border-color: #abc2ec;
   background: #fff;
-  box-shadow: -4px 0 14px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
 }
 
 html[data-style="term"] .ink-slot__wells i {
@@ -205,11 +292,17 @@ html[data-style="term"] .ink-slot.is-dip::after {
   border-radius: 0;
 }
 
+html[data-style="term"] .ink-slot__tip {
+  border-radius: 0;
+}
+
 /* ---------------- 深色主题 ---------------- */
 html[data-theme="dark"] .ink-slot {
-  border-color: rgba(148, 163, 184, 0.22);
-  background: rgba(15, 23, 42, 0.78);
-  box-shadow: -8px 0 26px rgba(0, 0, 0, 0.4);
+  --ink-halo: 96, 165, 250;
+  border-color: rgba(148, 163, 184, 0.3);
+  background: rgba(30, 41, 59, 0.86);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.45),
+              0 2px 6px rgba(0, 0, 0, 0.3);
   color: #e2e8f0;
 }
 
@@ -240,14 +333,36 @@ html[data-theme="dark"] .ink-slot__tip {
   color: #0f172a;
 }
 
-html[data-theme="dark"] .ink-slot__tip::after {
-  border-left-color: #e2e8f0;
+html[data-theme="dark"] .ink-slot:not(.is-armed) .ink-slot__label {
+  background-image: linear-gradient(180deg, #60a5fa, #c084fc 55%, #f472b6);
+}
+
+/* 深色下那枚常驻牌子：深底浅蓝字，别在夜里摆一块白 */
+html[data-theme="dark"] .ink-slot:not(.is-armed) .ink-slot__tip {
+  background: rgba(23, 29, 38, 0.96);
+  border-color: rgba(96, 165, 250, 0.46);
+  color: #93c5fd;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5),
+              inset 3px 0 0 rgba(96, 165, 250, 0.9);
+}
+
+/* 深底上淡彩色太闷，提一档才看得出六种颜色 */
+html[data-theme="dark"] .ink-slot:not(.is-armed) .ink-slot__wells i {
+  --ink-rest: 0.44;
+  opacity: 0.44;
+}
+
+html[data-theme="dark"] .ink-slot:hover .ink-slot__tip,
+html[data-theme="dark"] .ink-slot:focus-visible .ink-slot__tip {
+  background: #e2e8f0;
+  border-color: transparent;
+  color: #0f172a;
 }
 
 /* 终端风的深色：跟着 TUI 的深底走，别在白夜里留一条白条 */
 html[data-theme="dark"][data-style="term"] .ink-slot {
   border-color: #33445f;
-  background: #171d26;
+  background: #1b2433;
 }
 
 html[data-theme="dark"][data-style="term"] .ink-slot:hover,
@@ -277,8 +392,43 @@ html[data-lite] .ink-slot {
   }
 }
 
+/* 窄一点的桌面：槽收窄一号，牌子改成竖排小签，别横着伸进正文 */
+@media (max-width: 1180px) {
+  .ink-slot {
+    right: 6px;
+    width: 32px;
+  }
+  .ink-slot:hover,
+  .ink-slot:focus-visible {
+    width: 38px;
+  }
+  .ink-slot__wells i {
+    width: 11px;
+    height: 11px;
+  }
+  .ink-slot:not(.is-armed):not(:hover):not(:focus-visible) .ink-slot__tip {
+    writing-mode: vertical-rl;
+    padding: 8px 5px 8px 6px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    line-height: 1;
+    text-indent: 0.12em;
+  }
+  .ink-slot:not(.is-armed):not(:hover):not(:focus-visible) .ink-slot__tip::after {
+    display: none;
+  }
+}
+
 /* ---------------- 手机：没有 hover，也不该跟返回手势抢边缘 ---------------- */
 @media (max-width: 720px) {
+  .ink-slot {
+    display: none !important;
+  }
+}
+
+/* 平板、横屏手机也一并收掉：宽过 720 但同样没有 hover，
+   留着只会让人点了没反应 */
+@media (hover: none) {
   .ink-slot {
     display: none !important;
   }

@@ -331,6 +331,8 @@
 
     function track(e) {
       var now = performance.now();
+      /* 合成的 pointerdown 可能不带坐标，别让 NaN 漏进命中测试 */
+      if (!isFinite(e.clientX) || !isFinite(e.clientY)) return;
       px = e.clientX;
       py = e.clientY;
       onPage = true;
