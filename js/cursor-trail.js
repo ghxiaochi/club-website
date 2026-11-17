@@ -7,24 +7,26 @@
        向外的漂移，所以看起来是"一把彩色纸屑撒出去"；
      · 移动中只给垂直方向的小抖动，轨迹是一条有宽度的彩带；
      · 一次只落一个，不插值、不给邻居补光，方块就是干净的方块；
-     · 屏幕上同时最多 MAX 个，超出的把最老的推入快消段；
-     · 每块的尺寸和寿命都带随机，不会整排一起消失；
-     · 颜色从 6 个高饱和色里顺序取，相邻两块必然不同色；
+     · 屏幕上同时最多 MAX（8）个，到顶先挤掉最老的再放新的，
+       数组长度永远 ≤ MAX，画出来就是严格的 8 块；
+     · 每块活 0.8 秒，尺寸与寿命都带随机，不会整排一起消失；
+     · 颜色从 6 个高饱和色里随机取，只保证不与上一块撞色；
      · 终端风与默认皮肤才建画布，轻量档与 reduced-motion 不建。
    ========================================================= */
 (function () {
   "use strict";
 
-  var STEP_MS = 15;      /* 落块间隔：间距 = 速度 × 这个值。60Hz 下约等于每帧一块 */
-  var LIFE = 1.0;        /* 每块最多活 1 秒（没被顶掉的话） */
-  var LIFE_JITTER = 0.22;/* 寿命随机浮动：别让 15 块整齐地一起消失 */
+  var STEP_MS = 92;      /* 落块间隔：间距 = 速度 × 这个值。8 块 × 92ms ≈ 0.74s，正好铺满一整个生命周期 */
+  var STEP_JITTER = 0.3; /* 间隔也带随机，别像节拍器一样一下一下 */
+  var LIFE = 0.8;        /* 每块活 0.8 秒 */
+  var LIFE_JITTER = 0.16;/* 寿命随机浮动：8 块不会整齐地一起消失 */
   var FADE = 0.45;       /* 生命最后这一段开始淡出 */
-  var MAX = 15;          /* 屏幕上同时存在的上限 */
-  var KILL_FADE = 0.06;  /* 被顶掉时的剩余寿命：60ms 淡完，几乎看不出多出来的 */
-  var JITTER = 78;       /* 停住时的落点散布半径：方块像一把撒开的彩纸，不是一坨 */
-  var MOVE_JITTER = 15;  /* 移动中的横向抖动：轨迹是一条有宽度的带，不是一条线 */
+  var MAX = 8;           /* 屏幕上同时存在的上限 */
+  var JITTER = 74;       /* 停住时的落点散布半径：方块像一把撒开的彩纸，不是一坨 */
+  var MOVE_JITTER = 16;  /* 移动中的基础抖动，会随速度再加，最快到 36 */
+  var MOVE_MAX = 20;     /* 速度加成上限：快滑时抖得更开，像手甩出去的 */
   var SPREAD = 42;       /* 停住时落点的外扩速度（px/s），云团会慢慢胀开 */
-  var STILL_MS = 90;     /* 这么久没有新的指针事件就算"停住" */
+  var STILL_MS = 120;    /* 这么久没有新的指针事件就算"停住"（要大于落块间隔，否则慢移也会被当成停住） */
   var SIZE = 15;         /* 方块边长（桌面） */
   var SIZE_SM = 13;      /* 手机屏窄，方块按比例收一点，不然一格占了 4% 宽 */
   var SIZE_JITTER = 0.42;/* 单块尺寸浮动比例：有大有小，云才有层次 */
@@ -46,6 +48,14 @@
   var py = 0;
   var onPage = false;
   var lastMoveAt = 0;
+
+  /* 指针速度：移动中的抖动幅度跟着它走（快滑时甩得更开），
+     也用它算"垂直于运动方向"那根轴 */
+  var mvx = 0;
+  var mvy = 0;
+  var lastTx = 0;
+  var lastTy = 0;
+  var lastTt = 0;
 
   /* 终端风与默认皮肤都开：这两套页面本身就是浅色纸带，方块压得住。
      黑客（代码雨）与光场（iframe 舞台）自己有更强的动效，不叠加 */
@@ -86,7 +96,7 @@
       jitter: JITTER,
       raf: 0,
       last: 0,
-      stampAt: 0
+      nextAt: 0
     };
 
     resize();
@@ -111,19 +121,6 @@
     trail.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     trail.cells.length = 0;
     trail.ctx.clearRect(0, 0, w, h);
-  }
-
-  /* 超出上限就把最老的推入快消段，而不是硬删 —— 硬删会出现
-     "方块啪一下没了"，推入淡出段则是 60ms 内收干净。
-     被推的方块几乎立刻消失，实色块的数量始终是 MAX 个 */
-  function trim(t) {
-    var over = t.cells.length - MAX;
-    if (over <= 0) return;
-    for (var i = 0; i < over; i += 1) {
-      var c = t.cells[i];
-      var cut = c.life - KILL_FADE;
-      if (c.age < cut) c.age = cut;
-    }
   }
 
   /* 指针压在 iframe（成员页那个播放器）上时，父页面收不到
@@ -153,11 +150,26 @@
       vx = Math.cos(ang) * push;
       vy = Math.sin(ang) * push;
     } else {
-      /* 移动中：只给垂直方向的小抖动，轨迹才是一条有宽度的彩带，
-         而不是一根用尺子画出来的直线。抖动幅度也随速度走一点，
-         快滑时块散得开，慢移时贴着线走 */
-      x += (Math.random() - 0.5) * MOVE_JITTER * 2;
-      y += (Math.random() - 0.5) * MOVE_JITTER * 2;
+      /* 移动中：沿垂直于运动方向抖动，轨迹才有宽度、才不是一条用尺子
+         画出来的直线。幅度 = 基础值 + 速度加成，快滑时甩得更开；再沿
+         运动方向给一点点随机，间距也不会死板 */
+      var sp = Math.sqrt(mvx * mvx + mvy * mvy);
+      var amp = MOVE_JITTER + Math.min(MOVE_MAX, sp / 110);
+
+      if (sp > 8) {
+        var nx = -mvy / sp;
+        var ny = mvx / sp;
+        var off = (Math.random() - 0.5) * 2 * amp;
+        x += nx * off;
+        y += ny * off;
+        /* 切向也散一点：否则每块都严格落在路径的法线上，连起来像个梯形 */
+        var along = (Math.random() - 0.5) * 14;
+        x += (mvx / sp) * along;
+        y += (mvy / sp) * along;
+      } else {
+        x += (Math.random() - 0.5) * amp * 2;
+        y += (Math.random() - 0.5) * amp * 2;
+      }
     }
 
     /* 落在屏幕外半个方块很丑（手机贴边停住时尤其明显），
@@ -174,6 +186,11 @@
     if (ci === lastCi) ci = (ci + 1 + Math.floor(Math.random() * (PALETTE.length - 1))) % PALETTE.length;
     lastCi = ci;
 
+    /* 到顶了先挤掉最老的再放新的：数组长度永远 ≤ MAX，
+       画到屏幕上就是严格的 8 块。被挤的那块已经活到 0.74s，
+       alpha 只剩 0.16，直接拿掉看不出来（推入快消反而会多画一帧第 9 块） */
+    if (t.cells.length >= MAX) t.cells.shift();
+
     t.cells.push({
       x: x,
       y: y,
@@ -184,8 +201,6 @@
       size: t.size * (1 - SIZE_JITTER / 2 + Math.random() * SIZE_JITTER),
       ci: ci
     });
-
-    trim(t);
   }
 
   function frame(now) {
@@ -197,12 +212,13 @@
 
     /* 生成放在这里而不是 pointermove 里：鼠标停住时浏览器一个事件
        都不发，挂事件的写法等不到下一块 */
-    if (onPage && now - t.stampAt >= STEP_MS) {
+    if (onPage && now >= t.nextAt) {
       if (overFrame()) {
         onPage = false;
       } else {
-        t.stampAt = now;
         spawn(t);
+        /* 间隔本身也抖一下：严格 92ms 一块听着像节拍器 */
+        t.nextAt = now + STEP_MS * (1 - STEP_JITTER / 2 + Math.random() * STEP_JITTER);
       }
     }
 
@@ -285,11 +301,30 @@
     if (bound) return;
     bound = true;
 
+    /* 平滑后的指针速度，移动中的抖动幅度要用它 */
+    function measure(x, y, now) {
+      if (lastTt) {
+        var dt = (now - lastTt) / 1000;
+        if (dt > 0.001 && dt < 0.25) {
+          mvx += ((x - lastTx) / dt - mvx) * 0.4;
+          mvy += ((y - lastTy) / dt - mvy) * 0.4;
+        } else {
+          mvx = 0;
+          mvy = 0;
+        }
+      }
+      lastTx = x;
+      lastTy = y;
+      lastTt = now;
+    }
+
     function track(e) {
+      var now = performance.now();
       px = e.clientX;
       py = e.clientY;
       onPage = true;
-      lastMoveAt = performance.now();
+      lastMoveAt = now;
+      measure(px, py, now);
       wake();
     }
 
@@ -302,10 +337,12 @@
     function trackTouch(e) {
       var t = e.touches && e.touches[0];
       if (!t) return;
+      var now = performance.now();
       px = t.clientX;
       py = t.clientY;
       onPage = true;
-      lastMoveAt = performance.now();
+      lastMoveAt = now;
+      measure(px, py, now);
       wake();
     }
 
