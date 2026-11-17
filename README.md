@@ -95,7 +95,7 @@
 
 - **布局**：左栏四个板块（概览 / 关于 / 作品 / 加入），中区 12 列方块矩阵，右栏当前板块的方块索引，底部命令行与状态条。
 - **方块**：`tile(编号, 标题, 列数, 角标, 内容)`，每块用 `--c` 指定占几列（7+5、5+4+3、8+4、4+4+4），行高 `minmax(min-content, 1fr)`。
-- **切换板块（路径动画）**：`js/term-tui.js` 在 `.tty` 上量一条带 7px 圆角的折线 —— 从旧板块的小方点出发，斜进中区标题条，贴着下沿横走，末端向下扎进内容区。三层叠画：7px 淡光晕、1.5px 主线、3px 彗尾；8px 方块光标用 `getPointAtLength` 沿路径跑，到终点炸开一个 16px 方框。旧矩阵 0.14s 淡出，新方块按 12ms 错峰从下方 10px 浮起，整段 360–640ms。手机横排标签条时折线改走「旧标签 → 栏底 → 标题条」，内容区支持左右滑翻板块。`prefers-reduced-motion` 与轻量模式直接切，不画线。
+- **切换板块（路径动画）**：`js/term-tui.js` 在 `.tty` 上量**两段**带 7px 圆角的折线，分先后走。第一段是「旧编号 → 新编号」：竖排时沿栏外缘竖直滑过去，横排时下到栏底横向绕过去再回到新标签；走到新编号后停 110ms（缓出收尾），让「选中」被看见。第二段从新编号出发，拐进中区标题条、贴着下沿横走，末端向下扎进内容区。三层叠画：7px 淡光晕、1.5px 主线、3px 彗尾；8px 方块光标用 `getPointAtLength` 沿整条路径跑，到终点炸开一个 16px 方框。两段时长分别按各自长度算（150–280ms / 300–520ms），`stroke-dashoffset` 由 rAF 逐帧推进而不是 CSS transition——CSS 没法在中间停一下。旧矩阵 0.14s 淡出，新方块按 12ms 错峰从下方 10px 浮起。手机横排标签条时同样走两段，内容区支持左右滑翻板块。`prefers-reduced-motion` 与轻量模式直接切，不画线。
 - **命令行**：`overview` / `about` / `work` / `join`、`0-3`、`[` `]`、`h` `l`、方向键；别名 `main` `build` `git` `man` `sched` `faq` `msg` `ssh`；还有 `ls` `whoami` `clear` `help`。
 - **Deepy 鲸鱼**：`data/deepy.json` 存 42×30 的七组帧，离屏 canvas 预渲染 + `drawImage` 播放；静态首帧 `images/deepy/idle.webp` 兜底，待机随机插播。
 - **点鲸鱼巡游**：正常档点一下，鲸鱼从方块里游出去 —— 一条 Catmull-Rom 曲线带它绕到右上、掠过标题条、从左上回到原位，约 1.5–2.6s。整屏一张 `.tty-whale` canvas，身后拖 160px 渐隐尾迹和几颗上浮气泡；被它从头顶蹭过的方块会沉一下再弹回（`is-kicked`）。轻量 / 极致 / 减弱动效下不游，只换个表情。
@@ -265,7 +265,8 @@ window.HNYZ_MEMBER_EMBEDS = {
 | 音效开关 | `js/sfx.js` + `audio/`，状态存 `hnyz:sound` |
 | 全屏 | `js/fullscreen.js`，`requestFullscreen` |
 | 桌宠与校徽 | `js/pet.js`、`js/avatar-pet.js`；常驻的左下角头像在 ≤560px 收起，但首页那颗「召唤」出来的照常显示。台词库 120 句，按板块分五套（首页 / 关于 / 项目 / 资源 / 成员），切页面或带 `#about` 进来就换一套，第 100 下触发暴走 → 墓碑彩蛋 |
-| 鼠标轨迹 | `js/cursor-trail.js`：终端风与默认皮肤下，指针走过的地方撒彩色方块（桌面 12px / 手机 10px，不透明度 0.82）。生成挂在帧循环里，分两档节奏：**移动中每 45ms 一块**（间距 = 速度 × 0.045s，1200px/s 时约 54px，点多才连得成轨迹），**停住后每 190ms 一块**；间隔本身带 ±30% 随机，不像节拍器。**移动中只沿轨迹法线起伏 ±4px 起、最快到 ±9px**，切向不加偏移，所以方块严格落在路径上，轨迹看得清、只有轻微上下波动；**停住时不扩散、不漂移**，只让落点在光标处 ±12px 内抖动，方块一个个从原地冒出来。上限分两档：**移动中同时 10 块、停住后收到 6 块**；到顶时最老的块标记为淡出，90ms 内从当前透明度收到 0，不硬删、不会啪一下消失。每块最长活 0.8 秒 ±16%，**消失只有一种方式——原地淡出，不缩小**；颜色取 GitHub Primer 的六个亮色（蓝紫粉绿橙青），随机取、只保证不与上一块撞色。**触摸滑动同样有**：手机上浏览器一接管滚动就发 `pointercancel`、`pointermove` 全停，另挂了一条 `touchmove` 通道。轻量档与 `prefers-reduced-motion` 不建 |
+| 染色区 | `js/ink-slot.js` + `css/ink-slot.css`：视口右侧一条 34px 宽的竖槽（六格墨 + 竖排 `INK` + 余量条），**默认整站没有轨迹**，指针划过（或点一下、键盘聚焦）才算蘸上墨，六格依次亮成六种颜色；墨水按秒烧，**约 12 秒**，格子一格一格灭，烧完自动回到无轨迹状态，回来再蘸一次。换页时剩余墨水写进 `sessionStorage`，翻页不会白蘸。手机上没有 hover、贴右边缘还会跟系统返回手势打架，所以**不显示墨槽、也不烧墨**，手指划过去一直有轨迹。`lite` 与 reduced-motion 下墨槽不动画 |
+| 鼠标轨迹 | `js/cursor-trail.js`：终端风与默认皮肤下，指针走过的地方撒彩色方块（桌面 12px / 手机 10px，不透明度 0.82），**前提是墨槽里还有墨**（`window.HNYZINK.active()`），没墨时画布空转一帧就停。生成挂在帧循环里，分两档节奏：**移动中每 45ms 一块**（间距 = 速度 × 0.045s，1200px/s 时约 54px，点多才连得成轨迹），**停住后每 190ms 一块**；间隔本身带 ±30% 随机，不像节拍器。**移动中只沿轨迹法线起伏 ±4px 起、最快到 ±9px**，切向不加偏移，所以方块严格落在路径上，轨迹看得清、只有轻微上下波动；**停住时不扩散、不漂移**，只让落点在光标处 ±12px 内抖动，方块一个个从原地冒出来。上限分两档：**移动中同时 10 块、停住后收到 6 块**；到顶时最老的块标记为淡出，90ms 内从当前透明度收到 0，不硬删、不会啪一下消失。每块最长活 0.8 秒 ±16%，**消失只有一种方式——原地淡出，不缩小**；颜色取 GitHub Primer 的六个亮色（蓝紫粉绿橙青），随机取、只保证不与上一块撞色。**触摸滑动同样有**：手机上浏览器一接管滚动就发 `pointercancel`、`pointermove` 全停，另挂了一条 `touchmove` 通道 |
 | 点击特效 | `js/click-fx.js`，换肤期间关闭 |
 | 404 | 自包含页面，按 `data-style` 适配蓝白 / 黑客 / 终端 |
 | 一键复制 | `js/main.js` 的 `[data-copy]` 按钮，QQ 群与邮箱 |
@@ -314,7 +315,7 @@ python3 -m http.server 8080
 .
 ├─ index.html / projects.html / member.html / gallery.html / dino.html / 404.html / halo.html
 ├─ css/        style · type · skins · lite · skin-term · skin-halo · term-tui · 各页面样式
-├─ js/         main · skins · lite · skin-boot · term-tui · repo-sync · gallery · member · dino …
+├─ js/         main · skins · lite · skin-boot · term-tui · cursor-trail · ink-slot · repo-sync …
 ├─ data/       repos.json（仓库快照）· ladder.json（天梯）· deepy.json（鲸鱼帧）
 ├─ images/     项目封面、角色、图集、图标、Deepy 首帧
 ├─ fonts/      Animdustry 像素字体

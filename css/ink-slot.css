@@ -1,0 +1,292 @@
+/* =========================================================
+   染色区（墨槽）：贴在视口右边的一条竖槽
+   ---------------------------------------------------------
+   默认是空的（六个灰槽），指针划过就蘸满墨、六个槽依次
+   亮成六种颜色；之后墨水按秒往下走，槽一个一个灭，灭完
+   就回到「没有轨迹」的状态。
+   ========================================================= */
+
+.ink-slot {
+  --ink-left: 0;
+  display: none;          /* 只有默认皮肤与终端风才露出来，见文件末尾 */
+  position: fixed;
+  right: 0;
+  top: 50%;
+  z-index: 560;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 34px;
+  margin: 0;
+  padding: 12px 0 10px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-right: 0;
+  border-radius: 15px 0 0 15px;
+  background: rgba(255, 255, 255, 0.84);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: -8px 0 26px rgba(15, 23, 42, 0.07);
+  color: #0f172a;
+  cursor: pointer;
+  transform: translateY(-50%);
+  -webkit-tap-highlight-color: transparent;
+  transition: width 0.26s cubic-bezier(0.22, 0.8, 0.3, 1),
+              background 0.26s ease, border-color 0.26s ease,
+              box-shadow 0.26s ease;
+}
+
+.ink-slot:hover,
+.ink-slot:focus-visible {
+  width: 40px;
+  background: #fff;
+  border-color: rgba(37, 99, 235, 0.28);
+  box-shadow: -10px 0 30px rgba(37, 99, 235, 0.14);
+  outline: none;
+}
+
+/* 蘸满的状态：边框与光晕都染上色，表示「现在能画」 */
+.ink-slot.is-armed {
+  border-color: rgba(37, 99, 235, 0.42);
+  box-shadow: -8px 0 26px rgba(37, 99, 235, 0.16),
+              inset 0 0 0 1px rgba(37, 99, 235, 0.06);
+}
+
+/* 六个墨槽 */
+.ink-slot__wells {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.ink-slot__wells i {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.16);
+  border-radius: 4px;
+  background: transparent;
+  transition: background 0.2s ease, border-color 0.2s ease,
+              transform 0.2s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+
+.ink-slot__wells i.is-lit {
+  background: var(--c);
+  border-color: transparent;
+  transform: scale(1.04);
+}
+
+/* 竖排的 INK 字样 */
+.ink-slot__label {
+  writing-mode: vertical-rl;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.22em;
+  color: #94a3b8;
+  pointer-events: none;
+  transition: color 0.26s ease;
+}
+
+.ink-slot.is-armed .ink-slot__label {
+  color: #2563eb;
+}
+
+/* 余量条：从下往上收，比数字更直观 */
+.ink-slot__gauge {
+  display: block;
+  width: 3px;
+  height: 26px;
+  border-radius: 2px;
+  background: rgba(15, 23, 42, 0.1);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ink-slot__gauge b {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #4493f8, #a371f7);
+  transform: scaleY(0);
+  transform-origin: 50% 100%;
+}
+
+/* 提示气泡：从槽左边浮出来 */
+.ink-slot__tip {
+  position: absolute;
+  right: calc(100% + 10px);
+  top: 50%;
+  padding: 7px 11px;
+  border-radius: 9px;
+  background: #0f172a;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(6px, -50%);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.ink-slot__tip::after {
+  content: "";
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  margin-top: -4px;
+  border: 4px solid transparent;
+  border-left-color: #0f172a;
+}
+
+.ink-slot:hover .ink-slot__tip,
+.ink-slot:focus-visible .ink-slot__tip {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+
+/* 一直没人蘸，就自己轻轻晃两下：不然这块东西太安静，没人知道能碰 */
+.ink-slot:not(.is-armed) {
+  animation: inkNudge 1.5s cubic-bezier(0.3, 0.7, 0.3, 1) 3.4s 2;
+}
+
+@keyframes inkNudge {
+  0%, 100% { transform: translateY(-50%) translateX(0); }
+  35% { transform: translateY(-50%) translateX(-5px); }
+  65% { transform: translateY(-50%) translateX(0); }
+}
+
+/* 蘸下去那一下：一圈由内向外散开的色环 */
+.ink-slot.is-dip::after {
+  content: "";
+  position: absolute;
+  inset: -4px -4px -4px -4px;
+  border-radius: 18px 0 0 18px;
+  border: 1px solid rgba(37, 99, 235, 0.5);
+  opacity: 0;
+  pointer-events: none;
+  animation: inkDip 0.6s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+@keyframes inkDip {
+  0% { opacity: 0.7; transform: scale(0.92); }
+  100% { opacity: 0; transform: scale(1.14); }
+}
+
+/* 墨水用完：整条槽退回灰白，别在地图边缘留一块亮色 */
+.ink-slot:not(.is-armed) .ink-slot__gauge b {
+  opacity: 0;
+}
+
+/* ---------------- 终端风：方角、等宽、描边 ---------------- */
+html[data-style="term"] .ink-slot {
+  border-radius: 0;
+  border-color: #abc2ec;
+  background: #fff;
+  box-shadow: -4px 0 14px rgba(15, 23, 42, 0.08);
+}
+
+html[data-style="term"] .ink-slot__wells i {
+  border-radius: 0;
+  width: 13px;
+  height: 13px;
+}
+
+html[data-style="term"] .ink-slot__label {
+  letter-spacing: 0.16em;
+}
+
+html[data-style="term"] .ink-slot.is-dip::after {
+  border-radius: 0;
+}
+
+/* ---------------- 深色主题 ---------------- */
+html[data-theme="dark"] .ink-slot {
+  border-color: rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.78);
+  box-shadow: -8px 0 26px rgba(0, 0, 0, 0.4);
+  color: #e2e8f0;
+}
+
+html[data-theme="dark"] .ink-slot:hover,
+html[data-theme="dark"] .ink-slot:focus-visible {
+  background: rgba(15, 23, 42, 0.94);
+  border-color: rgba(96, 165, 250, 0.4);
+}
+
+html[data-theme="dark"] .ink-slot__wells i {
+  border-color: rgba(148, 163, 184, 0.34);
+}
+
+html[data-theme="dark"] .ink-slot__label {
+  color: #64748b;
+}
+
+html[data-theme="dark"] .ink-slot.is-armed .ink-slot__label {
+  color: #60a5fa;
+}
+
+html[data-theme="dark"] .ink-slot__gauge {
+  background: rgba(148, 163, 184, 0.2);
+}
+
+html[data-theme="dark"] .ink-slot__tip {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+html[data-theme="dark"] .ink-slot__tip::after {
+  border-left-color: #e2e8f0;
+}
+
+/* 终端风的深色：跟着 TUI 的深底走，别在白夜里留一条白条 */
+html[data-theme="dark"][data-style="term"] .ink-slot {
+  border-color: #33445f;
+  background: #171d26;
+}
+
+html[data-theme="dark"][data-style="term"] .ink-slot:hover,
+html[data-theme="dark"][data-style="term"] .ink-slot:focus-visible {
+  background: #171d26;
+  border-color: #3f6cc4;
+}
+
+/* ---------------- 只在这两套皮肤下露出来 ----------------
+   黑客风与光场自己有更强的动效，轨迹本来就不开，墨槽也跟着收起来，
+   免得「有墨槽却没有轨迹」 */
+html[data-style="default"] .ink-slot,
+html[data-style="term"] .ink-slot,
+html:not([data-style]) .ink-slot {
+  display: flex;
+}
+
+/* 轻量档连轨迹都不建，留个墨槽只会让人以为坏了 */
+html[data-lite] .ink-slot {
+  display: none !important;
+}
+
+/* 打印时不该出现这块东西 */
+@media print {
+  .ink-slot {
+    display: none !important;
+  }
+}
+
+/* ---------------- 手机：没有 hover，也不该跟返回手势抢边缘 ---------------- */
+@media (max-width: 720px) {
+  .ink-slot {
+    display: none !important;
+  }
+}
+
+/* 关掉动效的机器上轨迹本来就不建，墨槽也别留 */
+@media (prefers-reduced-motion: reduce) {
+  .ink-slot {
+    display: none !important;
+  }
+}

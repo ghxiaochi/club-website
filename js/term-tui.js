@@ -170,7 +170,7 @@
   function loadDeepy() {
     if (deepyData || deepyLoading || !window.fetch) return;
     deepyLoading = true;
-    window.fetch("data/deepy.json?v=20261117e")
+    window.fetch("data/deepy.json?v=20261117f")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         deepyData = d;
@@ -954,7 +954,7 @@
     var cached = readCachedRepos();
     if (cached) renderRepos(box, { repos: cached.repos });
 
-    window.fetch("data/repos.json?v=20261117e")
+    window.fetch("data/repos.json?v=20261117f")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (store) {
         if (!store || !store.repos) {
@@ -1221,70 +1221,81 @@
     return d + "L" + last[0] + " " + last[1];
   }
 
-  /* 量栏位，生成一条「旧编号 → 新编号 → 标题条 → 内容区」的折线，
-     把线画出来、让光标跑一遍，返回时长 */
+  /* 量栏位，生成两段折线：旧编号 → 新编号、新编号 → 新内容区。
+     先在导航里走过去（告诉眼睛「换到这一栏了」），停一瞬，
+     再从新编号拐进标题条、扎进内容区。
+     返回 { lead, total }：lead 是第一段 + 停顿，调用方用它推迟内容切换，
+     这样「线到了新导航」和「新内容开始打印」是同一个瞬间 */
   function playPath(fromIndex, toIndex, token) {
-    if (!railEl || !stageEl || !root) return 0;
+    if (!railEl || !stageEl || !root) return null;
     var a = railEl.children[fromIndex];
     var b = railEl.children[toIndex];
-    if (!a || !b) return 0;
+    if (!a || !b) return null;
 
     ensurePathLayer();
-    if (!pathSvg) return 0;
+    if (!pathSvg) return null;
 
     /* 以 SVG 自身左上角为原点：.tty 有安全区 padding 时，
        border box 和 SVG 的定位起点会差一截 */
     var pr = pathSvg.getBoundingClientRect();
-    if (!pr.width || !pr.height) return 0;
+    if (!pr.width || !pr.height) return null;
 
     var ar = a.getBoundingClientRect();
+    var br = b.getBoundingClientRect();
     var sr = stageEl.getBoundingClientRect();
     var hdr = stageEl.querySelector(".tty-stage__hdr");
     var hr = hdr ? hdr.getBoundingClientRect() : null;
     var railBox = railEl.getBoundingClientRect();
     var verticalRail = railBox.height >= railBox.width;
 
-    /* 标题条下沿：线贴在这条边上走，不会压住标题文字 */
     /* 走在标题条下沿往上 4px：压着边框线会看不出是「线」，
        再往上又会蹭到标题文字 */
     var hdrBottom = (hr ? hr.bottom - 4 : sr.top + 30) - pr.top;
     var stageLeft = sr.left - pr.left;
     var stageRight = sr.right - pr.left;
+    var gateX = Math.round(stageLeft + 14);
     var endX = Math.round(Math.min(stageRight - 32, stageLeft + sr.width * 0.5));
     var endY = Math.round(hdrBottom + 22);
-    var pts;
+    var ptsA, ptsB;
 
     if (verticalRail) {
-      /* 从原来那个板块的小方点出发，斜进标题条左端。
-         起点用旧项：线从「你刚才在看的地方」滑到新内容，
-         方向和信息流向一致 */
+      /* 竖栏：两个编号在栏外缘的右侧点之间竖直走一段，
+         这一段就是「选中」本身，起点终点都贴着导航 */
       var sx = Math.round(ar.right - pr.left - 6);
       var sy = Math.round(ar.top + ar.height / 2 - pr.top);
-      var gateX = Math.round(stageLeft + 14);
-      pts = [
-        [sx, sy],
+      var vx = Math.round(br.right - pr.left - 6);
+      var vy = Math.round(br.top + br.height / 2 - pr.top);
+      ptsA = [[sx, sy], [vx, vy]];
+      ptsB = [
+        [vx, vy],
+        [gateX, vy],
         [gateX, Math.round(hdrBottom)],
         [endX, Math.round(hdrBottom)],
         [endX, endY]
       ];
     } else {
-      /* 横排标签条：从旧标签底部垂直落下，沿栏底横到中区左端，
-         再贴着标题条走 —— 全程不穿过其他标签的文字 */
-      var ox = Math.round(ar.left + ar.width / 2 - pr.left);
+      /* 横栏：先从旧标签下到栏底、横过去、再回到新标签内部；
+         第二段从新标签重新下到栏底，往右拐进内容区 */
+      var ax = Math.round(ar.left + ar.width / 2 - pr.left);
+      var nx = Math.round(br.left + br.width / 2 - pr.left);
       var railBottom = Math.round(railBox.bottom - pr.top + 2);
-      pts = [
-        /* 从旧标签内部下方拉出来，能看出线是从「刚才看的那一栏」出发 */
-        [ox, Math.round(ar.bottom - pr.top - 12)],
-        [ox, railBottom],
-        [Math.round(stageLeft + 14), railBottom],
-        [Math.round(stageLeft + 14), Math.round(hdrBottom)],
+      var aLow = Math.round(ar.bottom - pr.top - 8);
+      var nLow = Math.round(br.bottom - pr.top - 8);
+      ptsA = [[ax, aLow], [ax, railBottom], [nx, railBottom], [nx, nLow]];
+      ptsB = [
+        [nx, nLow],
+        [nx, railBottom],
+        [gateX, railBottom],
+        [gateX, Math.round(hdrBottom)],
         [endX, Math.round(hdrBottom)],
         [endX, endY]
       ];
     }
 
-    var d = roundedPath(pts, 7);
-    if (!d) return 0;
+    var dA = roundedPath(ptsA, 7);
+    var dB = roundedPath(ptsB, 7);
+    if (!dA || !dB) return null;
+    var d = dA + dB;
 
     if (pathGlow) pathGlow.setAttribute("d", d);
     pathLine.setAttribute("d", d);
@@ -1292,17 +1303,27 @@
     pathSvg.classList.add("is-on");
     pathMark.classList.remove("is-hit");
 
+    /* 两段分别计时，得先单独量出第一段的长度 */
+    pathLine.setAttribute("d", dA);
+    var len1 = 0;
+    try { len1 = pathLine.getTotalLength(); } catch (e) { len1 = 0; }
+    pathLine.setAttribute("d", d);
     var len = 0;
     try { len = pathLine.getTotalLength(); } catch (e) { len = 0; }
-    if (!len) return 0;
+    if (!len || !len1) return null;
 
-    var dur = Math.max(420, Math.min(640, Math.round(len * 0.7)));
+    var dur1 = Math.max(150, Math.min(280, Math.round(len1 * 2.6)));
+    var dur2 = Math.max(300, Math.min(520, Math.round((len - len1) * 0.62)));
+    var pause = 110;   /* 停在新编号上的那一瞬：让「选中」被看见 */
+    var total = dur1 + pause + dur2;
+
     var dash = len + " " + len;
 
     [pathGlow, pathLine].forEach(function (el) {
+      if (!el) return;
       el.style.transition = "none";
       el.style.strokeDasharray = dash;
-      el.style.strokeDashoffset = len;
+      el.style.strokeDashoffset = String(len);
     });
     /* 彗尾：20px 一段，跟着光标走；9999 的第二段保证只剩这一段可见 */
     pathTail.style.transition = "none";
@@ -1324,34 +1345,41 @@
     pathMark.setAttribute("transform", "translate(" + (endX - 8) + "," + (endY - 8) + ")");
     void pathLine.getBoundingClientRect();
 
-    var ease = "cubic-bezier(0.24, 0.76, 0.2, 1)";
-    [pathGlow, pathLine].forEach(function (el) {
-      el.style.transition = "stroke-dashoffset " + dur + "ms " + ease;
-      el.style.strokeDashoffset = "0";
-    });
+    /* 收尾快、起步慢，和终端里敲完命令光标跳到下一行的节奏一致 */
+    function ease(t) {
+      return 1 - Math.pow(1 - t, 3);
+    }
+
+    /* 某一刻已经走过的长度：第一段走完在原地停 pause，再开始第二段 */
+    function lenAt(t) {
+      if (t <= dur1) return len1 * ease(Math.min(1, t / dur1));
+      if (t <= dur1 + pause) return len1;
+      var p = Math.min(1, (t - dur1 - pause) / dur2);
+      return len1 + (len - len1) * ease(p);
+    }
 
     var t0 = 0;
     function follow(now) {
       if (token !== swapToken) { pathRaf = 0; return; }
       if (!t0) t0 = now;
-      var p = Math.min(1, (now - t0) / dur);
-      /* 和 CSS 那条 cubic-bezier 近似：慢起、快走、轻收 */
-      var e = p < 0.5
-        ? 4 * p * p * p
-        : 1 - Math.pow(-2 * p + 2, 3) / 2;
-      var at = len * e;
-      var pt = pathLine.getPointAtLength(at);
-      pathDot.setAttribute("transform", "translate(" + (pt.x - 4) + "," + (pt.y - 4) + ")");
+      var t = now - t0;
+      var at = lenAt(t);
+
+      pathLine.style.strokeDashoffset = String(len - at);
+      if (pathGlow) pathGlow.style.strokeDashoffset = String(len - at);
       pathTail.style.strokeDashoffset = String(20 - at);
 
-      /* 中后段才亮，起手那截在栏里没什么可照的 */
+      var pt = pathLine.getPointAtLength(at);
+      pathDot.setAttribute("transform", "translate(" + (pt.x - 4) + "," + (pt.y - 4) + ")");
+
+      /* 光带只在第二段亮：第一段还在导航栏里，没什么可照的 */
       if (pathBeam) {
-        var beamOn = e > 0.28 && e < 0.94;
+        var beamOn = at > len1 + 1 && t < total - 24;
         pathBeam.style.opacity = beamOn ? "1" : "0";
         if (beamOn) pathBeam.setAttribute("x", String(Math.round(pt.x - 28)));
       }
 
-      if (p < 1) {
+      if (t < total) {
         pathRaf = window.requestAnimationFrame(follow);
       } else {
         pathRaf = 0;
@@ -1372,7 +1400,7 @@
       }
     }
     pathRaf = window.requestAnimationFrame(follow);
-    return dur;
+    return { lead: dur1 + pause, total: total };
   }
 
   function goto(i, opts) {
@@ -1435,10 +1463,12 @@
       window.setTimeout(function () { railItem.classList.remove("is-flash"); }, 700);
     }
 
-    var dur = playPath(fromIndex, next, token);
+    playPath(fromIndex, next, token);
 
     /* 旧的先退（0.14s 淡出），新方块紧跟着逐块浮起。
-       不做整块裁切：擦除边界会把两套卡片并排摆出来 */
+       不做整块裁切：擦除边界会把两套卡片并排摆出来。
+       路径的第一段（旧编号 → 新编号）比这还快，所以「选中」和
+       「内容换掉」看着是先后脚，而不是同时抢眼 */
     from.classList.add("is-out");
     to.hidden = false;
     stampDepth();

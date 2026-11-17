@@ -34,7 +34,7 @@
    发版时改 VERSION，更老的缓存在 activate 里被清掉。
    ========================================================= */
 
-const VERSION = "20261117e";
+const VERSION = "20261117f";
 const CACHE = `hnyz-v${VERSION}`;
 
 /* 站内根路径：用 "./" 就地解析，
@@ -78,6 +78,7 @@ const CORE = [
   "./data/repos.json",
   "./data/ladder.json",
   `./css/style.css${V}`,
+  `./css/ink-slot.css${V}`,
   `./css/apple.css${V}`,
   `./css/type.css${V}`,
   `./css/motion.css${V}`,
@@ -114,6 +115,7 @@ const CORE = [
   `./js/member.js${V}`,
   `./js/guestbook.js${V}`,
   `./js/ladder.js${V}`,
+  `./js/ink-slot.js${V}`,
   `./js/cursor-trail.js${V}`,
   /* 光场是整页 iframe，地址里带同一个版本号；预缓存要连 ?v= 一起写 */
   `./halo.html${V}`,
@@ -202,7 +204,7 @@ function isCacheName(name) {
   return name.startsWith("hnyz-v");
 }
 
-/* 从缓存名里取版本号：hnyz-v20261117e → 20261117e */
+/* 从缓存名里取版本号：hnyz-v20261117f → 20261117f */
 function versionOf(name) {
   return name.replace(/^hnyz-v/, "");
 }

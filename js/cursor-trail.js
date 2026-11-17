@@ -1,7 +1,9 @@
 /* =========================================================
    鼠标轨迹：指针走到哪，方块就撒到哪
    ---------------------------------------------------------
-   学 GitHub 首页那一层，但按时间而不是按网格：
+   默认**一个方块都不落**：要先去右边那条「染色区」墨槽上蘸一次墨
+   （见 js/ink-slot.js），墨水大约烧 12 秒，用完自动回到无轨迹状态。
+   蘸上之后按时间而不是按网格落块：
      · 帧循环里按节奏落方块：移动中 45ms 一块，间距 = 速度 × 0.045s，
        指针越快两块隔得越远；停住后换成 190ms 一块的慢节拍；
      · 移动中只沿轨迹法线做几像素的起伏，整条轨迹看得清；
@@ -11,7 +13,8 @@
        淡出，90ms 内从当前透明度收到 0，不硬删；
      · 每块最长活 0.8 秒，消失只有一种方式——原地淡出，尺寸始终不变；
      · 颜色取 GitHub Primer 的那六个亮色，随机取、不与上一块撞色；
-     · 终端风与默认皮肤才建画布，轻量档与 reduced-motion 不建。
+     · 终端风与默认皮肤才建画布，轻量档与 reduced-motion 不建；
+     · 没有墨水时不生成，画布空转一帧就停。
    ========================================================= */
 (function () {
   "use strict";
@@ -64,6 +67,12 @@
   function styleOn() {
     var style = document.documentElement.dataset.style || "default";
     return style === "term" || style === "default";
+  }
+
+  /* 墨水：只有蘸过墨（墨槽还没烧完）才落块。
+     没装 ink-slot.js 的页面等于永远没墨，保持默认无轨迹 */
+  function inkOn() {
+    return !!(window.HNYZINK && window.HNYZINK.active());
   }
 
   function allowed() {
@@ -206,6 +215,9 @@
     if (onPage && now >= t.nextAt) {
       if (overFrame()) {
         onPage = false;
+      } else if (!inkOn()) {
+        /* 没墨：什么都不落。等用户去右边蘸一口，下一次指针事件会把它叫醒 */
+        t.nextAt = now + 400;
       } else {
         spawn(t);
         /* 移动中按速度节奏落块，停住就换慢节拍；间隔本身也抖一下，别像节拍器 */
@@ -260,8 +272,8 @@
 
     ctx.globalAlpha = 1;
 
-    /* 指针还在页面上就一直转：停住时也要持续冒方块 */
-    if (alive || onPage) {
+    /* 指针还在页面上、而且还有墨，就一直转：停住时也要持续冒方块 */
+    if (alive || (onPage && inkOn())) {
       t.raf = window.requestAnimationFrame(frame);
     } else {
       t.raf = 0;
