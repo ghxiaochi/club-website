@@ -265,7 +265,7 @@ window.HNYZ_MEMBER_EMBEDS = {
 | 音效开关 | `js/sfx.js` + `audio/`，状态存 `hnyz:sound` |
 | 全屏 | `js/fullscreen.js`，`requestFullscreen` |
 | 桌宠与校徽 | `js/pet.js`、`js/avatar-pet.js`；常驻的左下角头像在 ≤560px 收起，但首页那颗「召唤」出来的照常显示。台词库 120 句，按板块分五套（首页 / 关于 / 项目 / 资源 / 成员），切页面或带 `#about` 进来就换一套，第 100 下触发暴走 → 墓碑彩蛋 |
-| 鼠标轨迹 | `js/cursor-trail.js`：终端风与默认皮肤下，沿指针走过的路撒方块（桌面 15px / 手机 13px）。每 42ms 落一个，手越快两块间距越大（实测桌面 560px/s → 18px、2100px/s → 68px；手机 122px/s → 16px、1709px/s → 90px），一次只落一个、不插值不补光；每块活 1 秒，最后 45% 生命里淡出；颜色从 6 个高饱和色里顺序取，相邻两块必然不同色。**触摸滑动同样有**：手机上浏览器一接管滚动就发 `pointercancel`、`pointermove` 全停，所以另挂了一条 `touchmove` 通道。轻量档与 `prefers-reduced-motion` 不建 |
+| 鼠标轨迹 | `js/cursor-trail.js`：终端风与默认皮肤下，指针走过的地方撒彩色方块（桌面 15px / 手机 13px）。生成挂在帧循环里、每 15ms 一块，所以**指针停住也照样往外冒**（落点带 ±13px 随机散布，不然全叠在一个像素上）；指针越快两块间距越大，间距 = 速度 × 15ms。屏幕上同时最多 15 个，超出的把最老的推入 60ms 快消段（实测每帧绘制 18 块 = 15 个实色 + 3 个正在收尾）。每块自然寿命 1 秒，最后 45% 淡出；颜色从 6 个高饱和色顺序取，相邻两块必然不同色。**触摸滑动同样有**：手机上浏览器一接管滚动就发 `pointercancel`、`pointermove` 全停，另挂了一条 `touchmove` 通道。轻量档与 `prefers-reduced-motion` 不建 |
 | 点击特效 | `js/click-fx.js`，换肤期间关闭 |
 | 404 | 自包含页面，按 `data-style` 适配蓝白 / 黑客 / 终端 |
 | 一键复制 | `js/main.js` 的 `[data-copy]` 按钮，QQ 群与邮箱 |
