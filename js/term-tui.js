@@ -170,7 +170,7 @@
   function loadDeepy() {
     if (deepyData || deepyLoading || !window.fetch) return;
     deepyLoading = true;
-    window.fetch("data/deepy.json?v=20261117h")
+    window.fetch("data/deepy.json?v=20261117i")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         deepyData = d;
@@ -356,27 +356,61 @@
     var stageR = sr.right - box.left;
     var stageT = sr.top - box.top;
     var stageB = sr.bottom - box.top;
-    var spanY = stageB - stageT;
-    var hdr = stageEl.querySelector(".tty-stage__hdr");
-    var hr = hdr ? hdr.getBoundingClientRect() : null;
-    var hdrMid = (hr ? (hr.top + hr.bottom) / 2 : sr.top + 30) - box.top;
     /* 别盖上顶栏：时钟和那排按钮被鲸鱼压住会像画错了，
        所以整条路径的上限压在顶栏下沿再往下半个身子 */
     var topEl = root.querySelector(".tty__top");
     var tr = topEl ? topEl.getBoundingClientRect() : null;
     var topSafe = Math.max((tr ? tr.bottom - box.top : 0) + wh * 0.52, stageT + wh * 0.46);
 
-    /* 出格 → 撑到右上 → 沿标题条横穿 → 左下 → 回格。
-       y 都收在画布内，鲸鱼不会半截被切掉 */
-    var pts = [
-      [sx, sy],
-      [Math.min(stageR - ww * 0.55, sx + ww * 1.5), Math.max(topSafe, sy - wh * 0.95)],
-      [stageR - ww * 0.62, stageT + spanY * 0.32],
-      [stageR - ww * 0.95, Math.max(topSafe, hdrMid)],
-      [stageL + (stageR - stageL) * 0.42, Math.max(topSafe, hdrMid - wh * 0.12)],
-      [stageL + ww * 0.78, stageT + spanY * 0.17],
-      [sx, sy]
-    ];
+    /* 每次点击都重新掷一条路线：走法、环心、绕行方向、拐点数量、
+       绕多少度、每个拐点的远近都重新随机 —— 同一只鲸鱼不该两次
+       走同一条线。所有点都夹在内容区的可用框里，鲸鱼不会出画布，
+       也不会被顶栏切掉半截 */
+    var x0 = stageL + ww * 0.72;
+    var x1 = stageR - ww * 0.72;
+    var y0 = Math.max(topSafe, stageT + wh * 0.58);
+    var y1 = stageB - wh * 0.58;
+    if (x1 - x0 < ww * 1.4 || y1 - y0 < wh * 1.4) return false;
+
+    function clampX(v) { return Math.max(x0, Math.min(x1, v)); }
+    function clampY(v) { return Math.max(y0, Math.min(y1, v)); }
+    function rand(a, b) { return a + Math.random() * (b - a); }
+
+    var pts = [[sx, sy]];
+    var mode = Math.random();
+
+    if (mode < 0.62) {
+      /* 一、兜圈子：环心不固定在正中（每回偏一点），从鲸鱼所在方位
+         起算，2~6 个拐点，只绕 0.55~1.15 圈 —— 所以有时是半个 C，
+         有时会绕过头再多兜一段；顺逆时针都可能 */
+      var cx = (x0 + x1) / 2 + (Math.random() - 0.5) * (x1 - x0) * 0.24;
+      var cy = (y0 + y1) / 2 + (Math.random() - 0.5) * (y1 - y0) * 0.2;
+      var rx = (x1 - x0) / 2;
+      var ry = (y1 - y0) / 2;
+      var n = 2 + Math.floor(Math.random() * 5);
+      var spin = Math.random() < 0.5 ? 1 : -1;
+      var sweep = rand(0.55, 1.15) * Math.PI * 2 * spin;
+      var a0 = Math.atan2((sy - cy) / (ry || 1), (sx - cx) / (rx || 1)) + rand(-0.7, 0.7);
+      for (var k = 1; k <= n; k += 1) {
+        var a = a0 + (sweep / n) * k + rand(-0.18, 0.18);
+        var rr = rand(0.55, 1);
+        pts.push([clampX(cx + Math.cos(a) * rx * rr),
+                  clampY(cy + Math.sin(a) * ry * rr)]);
+      }
+    } else {
+      /* 二、贴着一条水线横穿：先兜到右上，沿随机高度横过去，
+         再落到左下绕回格子；横穿高度与两端落点都随机 */
+      var band = y0 + (y1 - y0) * rand(0.02, 0.34);
+      pts.push([clampX(sx + ww * rand(1.1, 2)),
+                clampY(sy - wh * rand(0.55, 1.3))]);
+      pts.push([clampX(x1 - (x1 - x0) * rand(0, 0.14)), clampY(band)]);
+      pts.push([clampX(x0 + (x1 - x0) * rand(0.2, 0.55)),
+                clampY(band + (y1 - y0) * rand(-0.08, 0.08))]);
+      pts.push([clampX(x0 + (x1 - x0) * rand(0.02, 0.18)),
+                clampY(y1 - (y1 - y0) * rand(0.3, 0.7))]);
+    }
+
+    pts.push([sx, sy]);
 
     var d = whaleCurve(pts);
     if (!d) return false;
@@ -403,7 +437,9 @@
       });
     }
 
-    var dur = Math.max(1500, Math.min(2600, Math.round(len * 1.55)));
+    /* 路线长短每次都不一样，时长按总长给：短线不至于一闪而过，
+       绕大圈也别拖成十几秒 */
+    var dur = Math.max(1600, Math.min(3400, Math.round(len * 1.5)));
     var bubbleGap = 150;
     var t0 = 0;
     var lastPaint = -1;
@@ -954,7 +990,7 @@
     var cached = readCachedRepos();
     if (cached) renderRepos(box, { repos: cached.repos });
 
-    window.fetch("data/repos.json?v=20261117h")
+    window.fetch("data/repos.json?v=20261117i")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (store) {
         if (!store || !store.repos) {

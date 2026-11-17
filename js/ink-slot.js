@@ -12,9 +12,11 @@
 
    触屏（手机、平板、触摸本）同样显示这条槽，也默认没有墨：
    手指点一下、或者从槽上划过去，才算蘸上，跟桌面一个规则。
-   触屏上没有 hover，所以槽本身会常挂一枚小牌子教怎么用。
    计时只在手指真的在屏幕上动的时候走；手指一抬就停住 ——
    墨水是用来画画的，不该在没人用的时候自己流干。
+
+   整块东西不带文字提示：空着的时候六格留着六色的淡影、
+   每 6 秒依次轻轻亮一下，边光慢慢呼吸，用状态本身说话。
    ========================================================= */
 (function () {
   "use strict";
@@ -28,15 +30,12 @@
   var touchMode = false;   /* 触屏：手指没碰屏幕时不计时 */
   var lastAct = 0;         /* 上一次触摸/点击/滚动的时刻 */
   var el = null;
-  var tipEl = null;
   var wells = [];
   var gaugeFill = null;
   var raf = 0;
   var lastTs = 0;
   var shownPct = -1;
-  var shownSec = -1;
   var listening = [];
-  var peekTimer = 0;
 
   function now() { return Date.now(); }
 
@@ -91,27 +90,11 @@
       wells[i].classList.toggle("is-lit", i < lit);
     }
 
+    /* 余量条只在百分比真的变了才写，避免每帧都动一次 DOM */
     var pct = Math.round(ratio * 100);
     if (pct !== shownPct) {
       shownPct = pct;
-      el.style.setProperty("--ink-left", String(ratio.toFixed(3)));
       if (gaugeFill) gaugeFill.style.transform = "scaleY(" + ratio.toFixed(3) + ")";
-    }
-
-    /* 悬停时的提示：没墨时教怎么用，有墨时直接报还剩几秒。
-       窄一点的屏幕上牌子是竖排的，字数要省 */
-    var sec = ratio > 0 ? Math.ceil(left / 1000) : 0;
-    if (sec !== shownSec && tipEl) {
-      shownSec = sec;
-      if (sec > 0) {
-        tipEl.textContent = "墨水 " + sec + " 秒";
-      } else if (touchMode) {
-        /* 触屏没有 hover，牌子一直挂着，得直接说怎么蘸 */
-        tipEl.textContent = document.documentElement.clientWidth < 1180 ? "蘸墨" : "点一下蘸墨";
-      } else {
-        /* 跟 CSS 的断点对齐（clientWidth 不含滚动条，正好是媒体查询那份宽） */
-        tipEl.textContent = document.documentElement.clientWidth < 1180 ? "蘸墨" : "划过蘸墨";
-      }
     }
   }
 
@@ -153,7 +136,6 @@
     left = INK_MS;
     lastAct = now();
     shownPct = -1;
-    shownSec = -1;
     render();
     writeStore();
     burn();
@@ -165,15 +147,6 @@
       window.setTimeout(function () { el.classList.remove("is-dip"); }, 620);
     }
 
-    /* 触屏没有 hover，蘸完把剩余秒数亮两秒，让人知道还剩多少 */
-    if (touchMode) {
-      el.classList.add("is-peek");
-      window.clearTimeout(peekTimer);
-      peekTimer = window.setTimeout(function () {
-        el.classList.remove("is-peek");
-        peekTimer = 0;
-      }, 2200);
-    }
     if (e && e.type === "pointerdown") {
       /* 点一下只是蘸墨，别把页面滚走 */
       if (e.preventDefault) e.preventDefault();
@@ -198,12 +171,7 @@
     el.type = "button";
     el.className = "ink-slot";
     el.setAttribute("data-ink-slot", "");
-    el.setAttribute("aria-label", "染色区：鼠标划过或手指点一下蘸墨，之后指针会留下彩色方块，墨水约 12 秒用完");
-
-    tipEl = document.createElement("span");
-    tipEl.className = "ink-slot__tip";
-    tipEl.textContent = "划过蘸墨";
-    el.appendChild(tipEl);
+    el.setAttribute("aria-label", "染色区：划过或点一下蘸墨，之后指针会留下彩色方块，墨水约 12 秒用完");
 
     var wellBox = document.createElement("span");
     wellBox.className = "ink-slot__wells";
@@ -258,7 +226,6 @@
     document.documentElement.classList.toggle("is-touch", touchMode);
     lastAct = now() - IDLE_MS;
     shownPct = -1;
-    shownSec = -1;
     render();
     if (left > 0) burn();
   }
@@ -289,11 +256,6 @@
   }
 
   window.addEventListener("resize", sync, { passive: true });
-  window.addEventListener("resize", function () {
-    /* 断点两侧牌子会换文案（横排四个字 / 竖排两个字） */
-    shownSec = -1;
-    render();
-  }, { passive: true });
   window.addEventListener("orientationchange", sync, { passive: true });
 
   /* 只有触屏才走这条：手指落下、拖动、页面滚动都算「人在用」，
