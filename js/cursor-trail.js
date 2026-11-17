@@ -16,11 +16,15 @@
   var MIN_MOVE = 16;  /* 位移不到这个数不落：比方块边长再留一点缝，慢速时不会叠成一条 */
   var LIFE = 1.0;     /* 每块活 1 秒 */
   var FADE = 0.45;    /* 生命最后这一段开始淡出 */
-  var SIZE = 15;      /* 方块边长 */
+  var SIZE = 15;      /* 方块边长（桌面） */
+  var SIZE_SM = 13;   /* 手机屏窄，方块按比例收一点，不然一格占了 4% 宽 */
   var ALPHA = 0.95;
 
-  /* 6 个色相彼此拉得开，按序取色，相邻两块不会同色 */
+  /* 6 个色相彼此拉得开，按序取色，相邻两块不会同色。
+     深色主题另备一套亮一档的变体：深底上要更亮才浮得出来，
+     而页面里同时有白卡片，不能靠加色混合解决 */
   var PALETTE = ["#3b82f6", "#8b5cf6", "#ec4899", "#06b6d4", "#f59e0b", "#22c55e"];
+  var PALETTE_DARK = ["#60a5fa", "#a78bfa", "#f472b6", "#22d3ee", "#fbbf24", "#4ade80"];
 
   var trail = null;
   var bound = false;
@@ -64,6 +68,7 @@
       cells: [],
       w: 0,
       h: 0,
+      size: SIZE,
       raf: 0,
       last: 0
     };
@@ -80,6 +85,7 @@
 
     trail.w = w;
     trail.h = h;
+    trail.size = w < 720 ? SIZE_SM : SIZE;
     trail.cv.width = Math.round(w * dpr);
     trail.cv.height = Math.round(h * dpr);
     trail.cv.style.width = w + "px";
@@ -110,7 +116,7 @@
       x: x,
       y: y,
       age: 0,
-      color: PALETTE[colorAt % PALETTE.length]
+      ci: colorAt % PALETTE.length
     });
     colorAt += 1;
 
@@ -129,11 +135,12 @@
 
     var ctx = t.ctx;
     var dark = document.documentElement.dataset.theme === "dark";
+    var palette = dark ? PALETTE_DARK : PALETTE;
 
     ctx.clearRect(0, 0, t.w, t.h);
-    /* 深色底用加色：source-over 叠半透明色时，淡出过程会直接暗成黑斑。
-       lighter 是加光，暗底上越淡越像余晖 */
-    ctx.globalCompositeOperation = dark ? "lighter" : "source-over";
+    /* 一律普通叠加。加色（lighter）只要底下是白卡片就等于没画——
+       深色主题的页面里白卡片正是主体，所以不能用它 */
+    ctx.globalCompositeOperation = "source-over";
 
     var alive = 0;
     for (var i = t.cells.length - 1; i >= 0; i -= 1) {
@@ -152,8 +159,8 @@
       var a = (left >= FADE ? 1 : left / FADE) * ALPHA;
 
       ctx.globalAlpha = a;
-      ctx.fillStyle = cell.color;
-      ctx.fillRect(cell.x - SIZE / 2, cell.y - SIZE / 2, SIZE, SIZE);
+      ctx.fillStyle = palette[cell.ci];
+      ctx.fillRect(cell.x - t.size / 2, cell.y - t.size / 2, t.size, t.size);
     }
 
     ctx.globalAlpha = 1;
@@ -197,6 +204,20 @@
       if (!trail) return;
       stamp(e.clientX, e.clientY);
     }, { passive: true });
+
+    /* 触摸滑动的第二条通道。手机上浏览器一接管滚动手势就发
+       pointercancel，此后 pointermove 全停（实测一次 0.6 秒的滑动
+       只来 2 次 pointermove、1 次 pointercancel，而 touchmove 来 31 次），
+       所以只挂 pointermove 的话移动端等于没有轨迹。
+       两条路都走 stamp，STEP_MS 的时间闸会把重复的挡掉，不会叠块 */
+    function onTouch(e) {
+      if (!trail) return;
+      var t = e.touches && e.touches[0];
+      if (t) stamp(t.clientX, t.clientY);
+    }
+
+    window.addEventListener("touchstart", onTouch, { passive: true });
+    window.addEventListener("touchmove", onTouch, { passive: true });
 
     window.addEventListener("resize", resize);
 
