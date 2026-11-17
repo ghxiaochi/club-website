@@ -2,27 +2,29 @@
    鼠标轨迹：指针走到哪，方块就撒到哪
    ---------------------------------------------------------
    学 GitHub 首页那一层，但按时间而不是按网格：
-     · 帧循环里按节奏落方块：移动中 70ms 一块，间距 = 速度 × 0.07s，
+     · 帧循环里按节奏落方块：移动中 45ms 一块，间距 = 速度 × 0.045s，
        指针越快两块隔得越远；停住后换成 190ms 一块的慢节拍；
      · 移动中只沿轨迹法线做几像素的起伏，整条轨迹看得清；
        停住时只在原地小幅抖动，不扩散、不漂移；
      · 一次只落一个，不插值、不给邻居补光，方块就是干净的方块；
-     · 屏幕上同时最多 MAX（6）个，到顶先挤掉最老的再放新的，
-       数组长度永远 ≤ MAX，画出来就是严格的 6 块；
-     · 每块活 0.8 秒，尺寸与寿命都带随机，不会整排一起消失；
+     · 上限分两档：移动中 10 块、停住后 6 块；到顶时最老的块标记为
+       淡出，90ms 内从当前透明度收到 0，不硬删；
+     · 每块最长活 0.8 秒，消失只有一种方式——原地淡出，尺寸始终不变；
      · 颜色取 GitHub Primer 的那六个亮色，随机取、不与上一块撞色；
      · 终端风与默认皮肤才建画布，轻量档与 reduced-motion 不建。
    ========================================================= */
 (function () {
   "use strict";
 
-  var STEP_MOVE = 70;    /* 移动中的落块间隔：间距 = 速度 × 这个值，0.07s 时 1200px/s 大约 84px 一块 */
+  var STEP_MOVE = 45;    /* 移动中的落块间隔：间距 = 速度 × 这个值，1200px/s 时约 54px 一块 */
   var STEP_STILL = 190;  /* 停住时的落块间隔：慢半拍，不然一堆方块在原地不停闪 */
   var STEP_JITTER = 0.3; /* 间隔也带随机，别像节拍器一样一下一下 */
   var LIFE = 0.8;        /* 每块活 0.8 秒 */
   var LIFE_JITTER = 0.16;/* 寿命随机浮动：6 块不会整齐地一起消失 */
   var FADE = 0.45;       /* 生命最后这一段开始淡出 */
-  var MAX = 6;           /* 屏幕上同时存在的上限 */
+  var MAX_MOVE = 10;     /* 移动时的上限：点多一点，轨迹才连得起来 */
+  var MAX_STILL = 6;     /* 停住时的上限：原地不堆 */
+  var KILL_FADE = 0.09;  /* 被顶掉时的淡出时长：不硬删，90ms 内从当前透明度收到 0 */
   var JITTER = 12;       /* 停住时的原地抖动半径：让 6 块略微错开，不至于严丝合缝叠成一块 */
   var MOVE_JITTER = 4;   /* 移动中的基础起伏，只够让轨迹有呼吸感 */
   var MOVE_MAX = 5;      /* 速度加成上限：再快也只到 ±9px，轨迹始终清晰 */
@@ -168,15 +170,24 @@
     if (ci === lastCi) ci = (ci + 1 + Math.floor(Math.random() * (PALETTE.length - 1))) % PALETTE.length;
     lastCi = ci;
 
-    /* 到顶了先挤掉最老的再放新的：数组长度永远 ≤ MAX，
-       画到屏幕上就是严格的 6 块。被挤的那块已经活到 0.74s，
-       alpha 只剩 0.16，直接拿掉看不出来（推入快消反而会多画一帧第 9 块） */
-    if (t.cells.length >= MAX) t.cells.shift();
+    /* 到顶了就把最老的标记为"正在淡出"，90ms 内从它当前的透明度收到 0，
+       而不是硬删。移动时上限高一些，轨迹才连得起来；停住后收到 6 个 */
+    var cap = still ? MAX_STILL : MAX_MOVE;
+    if (t.cells.length >= cap) {
+      /* 只标记最老的"还活着"的那块；已经在淡出的跳过，否则会重复标记 */
+      for (var k = 0; k < t.cells.length; k += 1) {
+        if (t.cells[k].dying < 0) {
+          t.cells[k].dying = KILL_FADE;
+          break;
+        }
+      }
+    }
 
     t.cells.push({
       x: x,
       y: y,
       age: 0,
+      dying: -1,
       life: life,
       size: t.size * (1 - SIZE_JITTER / 2 + Math.random() * SIZE_JITTER),
       ci: ci
@@ -222,15 +233,25 @@
         continue;
       }
 
+      /* 被顶掉的块：从当前透明度平滑收到 0，不做硬切的"啪一下" */
+      if (cell.dying >= 0) {
+        cell.dying -= dt;
+        if (cell.dying <= 0) {
+          t.cells.splice(i, 1);
+          continue;
+        }
+      }
+
       alive += 1;
 
       /* 前 55% 生命保持实色，剩下的快速淡掉 */
       var left = 1 - cell.age / cell.life;
       var a = (left >= FADE ? 1 : left / FADE) * ALPHA;
+      if (cell.dying >= 0) a *= cell.dying / KILL_FADE;
 
-      /* 方块不漂移：落点就是它这一辈子的位置，只在原地消失 */
-      /* 消散时连尺寸一起收，比只降透明度更像"散掉" */
-      var s = cell.size * (0.68 + 0.32 * left);
+      /* 方块不漂移、不缩放：落点就是它这一辈子的位置，
+         消失只有一种方式——原地淡出 */
+      var s = cell.size;
 
       ctx.globalAlpha = a;
       ctx.fillStyle = palette[cell.ci];

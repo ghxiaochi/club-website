@@ -34,7 +34,7 @@
    发版时改 VERSION，更老的缓存在 activate 里被清掉。
    ========================================================= */
 
-const VERSION = "20261117d";
+const VERSION = "20261117e";
 const CACHE = `hnyz-v${VERSION}`;
 
 /* 站内根路径：用 "./" 就地解析，
@@ -202,7 +202,7 @@ function isCacheName(name) {
   return name.startsWith("hnyz-v");
 }
 
-/* 从缓存名里取版本号：hnyz-v20261117d → 20261117d */
+/* 从缓存名里取版本号：hnyz-v20261117e → 20261117e */
 function versionOf(name) {
   return name.replace(/^hnyz-v/, "");
 }
