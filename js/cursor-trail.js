@@ -2,10 +2,10 @@
    鼠标轨迹：指针走到哪，方块就撒到哪
    ---------------------------------------------------------
    学 GitHub 首页那一层，但按时间而不是按网格：
-     · 帧循环里每 STEP_MS 落一个方块：指针越快，两块间距越大；
-       指针停住也照样落，落点在一圈半径里均匀撒开，还带一点
-       向外的漂移，所以看起来是"一把彩色纸屑撒出去"；
-     · 移动中只给垂直方向的小抖动，轨迹是一条有宽度的彩带；
+     · 帧循环里按节奏落方块：移动中 70ms 一块，间距 = 速度 × 0.07s，
+       指针越快两块隔得越远；停住后换成 190ms 一块的慢节拍；
+     · 移动中只沿轨迹法线做几像素的起伏，整条轨迹看得清；
+       停住时只在原地小幅抖动，不扩散、不漂移；
      · 一次只落一个，不插值、不给邻居补光，方块就是干净的方块；
      · 屏幕上同时最多 MAX（6）个，到顶先挤掉最老的再放新的，
        数组长度永远 ≤ MAX，画出来就是严格的 6 块；
@@ -23,14 +23,13 @@
   var LIFE_JITTER = 0.16;/* 寿命随机浮动：6 块不会整齐地一起消失 */
   var FADE = 0.45;       /* 生命最后这一段开始淡出 */
   var MAX = 6;           /* 屏幕上同时存在的上限 */
-  var JITTER = 46;       /* 停住时的落点散布半径：块少了，撒太开会显得零碎 */
-  var MOVE_JITTER = 12;  /* 移动中的基础抖动，会随速度再加，最快到 26 */
-  var MOVE_MAX = 14;     /* 速度加成上限：快滑时抖得更开，像手甩出去的 */
-  var SPREAD = 42;       /* 停住时落点的外扩速度（px/s），云团会慢慢胀开 */
+  var JITTER = 12;       /* 停住时的原地抖动半径：让 6 块略微错开，不至于严丝合缝叠成一块 */
+  var MOVE_JITTER = 4;   /* 移动中的基础起伏，只够让轨迹有呼吸感 */
+  var MOVE_MAX = 5;      /* 速度加成上限：再快也只到 ±9px，轨迹始终清晰 */
   var STILL_MS = 120;    /* 这么久没有新的指针事件就算"停住"（要大于落块间隔，否则慢移也会被当成停住） */
   var SIZE = 12;         /* 方块边长（桌面） */
   var SIZE_SM = 10;      /* 手机屏窄，方块按比例收一点，不然一格占了 3% 宽 */
-  var SIZE_JITTER = 0.42;/* 单块尺寸浮动比例：有大有小，云才有层次 */
+  var SIZE_JITTER = 0.42;/* 单块尺寸浮动比例：有大有小，看起来才不是复制粘贴 */
   var ALPHA = 0.82;
 
   /* GitHub Primer 的六个亮色：蓝紫粉绿橙青，色相彼此拉得开。
@@ -94,7 +93,6 @@
       w: 0,
       h: 0,
       size: SIZE,
-      jitter: JITTER,
       raf: 0,
       last: 0,
       nextAt: 0
@@ -113,8 +111,6 @@
     trail.w = w;
     trail.h = h;
     trail.size = w < 720 ? SIZE_SM : SIZE;
-    /* 手机屏窄，撒开的半径也收一档，不然一朵云占了三分之一屏宽 */
-    trail.jitter = w < 720 ? JITTER * 0.62 : JITTER;
     trail.cv.width = Math.round(w * dpr);
     trail.cv.height = Math.round(h * dpr);
     trail.cv.style.width = w + "px";
@@ -136,40 +132,25 @@
     var still = performance.now() - lastMoveAt > STILL_MS;
     var x = px;
     var y = py;
-    var vx = 0;
-    var vy = 0;
 
     if (still) {
-      /* 停住：按极坐标均匀撒开（半径取开方，圆面上才均布，
-         否则全挤在圆心附近）。同时给一点向外的速度，
-         方块会从落点继续往外飘几十像素，云团是活的 */
-      var ang = Math.random() * Math.PI * 2;
-      var rad = Math.sqrt(Math.random()) * t.jitter;
-      x += Math.cos(ang) * rad;
-      y += Math.sin(ang) * rad;
-      var push = SPREAD * (0.35 + Math.random() * 0.9);
-      vx = Math.cos(ang) * push;
-      vy = Math.sin(ang) * push;
+      /* 停住就只在原地小幅抖一下：不扩散、不往外飘，
+         方块就是一个个从光标底下冒出来，位置基本不变 */
+      x += (Math.random() - 0.5) * JITTER * 2;
+      y += (Math.random() - 0.5) * JITTER * 2;
     } else {
-      /* 移动中：沿垂直于运动方向抖动，轨迹才有宽度、才不是一条用尺子
-         画出来的直线。幅度 = 基础值 + 速度加成，快滑时甩得更开；再沿
-         运动方向给一点点随机，间距也不会死板 */
+      /* 移动中只沿垂直于运动方向起伏：轨迹有轻微的上下波动，
+         但每一块都严格落在路径的那条线上（切向不加偏移），
+         所以整条轨迹看得清、不会散成一团 */
       var sp = Math.sqrt(mvx * mvx + mvy * mvy);
-      var amp = MOVE_JITTER + Math.min(MOVE_MAX, sp / 110);
+      var amp = MOVE_JITTER + Math.min(MOVE_MAX, sp / 140);
+      var off = (Math.random() - 0.5) * 2 * amp;
 
       if (sp > 8) {
-        var nx = -mvy / sp;
-        var ny = mvx / sp;
-        var off = (Math.random() - 0.5) * 2 * amp;
-        x += nx * off;
-        y += ny * off;
-        /* 切向也散一点：否则每块都严格落在路径的法线上，连起来像个梯形 */
-        var along = (Math.random() - 0.5) * 14;
-        x += (mvx / sp) * along;
-        y += (mvy / sp) * along;
+        x += (-mvy / sp) * off;
+        y += (mvx / sp) * off;
       } else {
-        x += (Math.random() - 0.5) * amp * 2;
-        y += (Math.random() - 0.5) * amp * 2;
+        y += off;   /* 方向还没测出来就先只上下抖 */
       }
     }
 
@@ -195,8 +176,6 @@
     t.cells.push({
       x: x,
       y: y,
-      vx: vx,
-      vy: vy,
       age: 0,
       life: life,
       size: t.size * (1 - SIZE_JITTER / 2 + Math.random() * SIZE_JITTER),
@@ -249,16 +228,13 @@
       var left = 1 - cell.age / cell.life;
       var a = (left >= FADE ? 1 : left / FADE) * ALPHA;
 
-      /* 带一点漂移：停住时方块从落点继续往外走，
-         看起来是"撒出去"而不是"钉在格子上" */
-      var cx = cell.x + cell.vx * cell.age;
-      var cy = cell.y + cell.vy * cell.age;
+      /* 方块不漂移：落点就是它这一辈子的位置，只在原地消失 */
       /* 消散时连尺寸一起收，比只降透明度更像"散掉" */
       var s = cell.size * (0.68 + 0.32 * left);
 
       ctx.globalAlpha = a;
       ctx.fillStyle = palette[cell.ci];
-      ctx.fillRect(cx - s / 2, cy - s / 2, s, s);
+      ctx.fillRect(cell.x - s / 2, cell.y - s / 2, s, s);
     }
 
     ctx.globalAlpha = 1;
