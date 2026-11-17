@@ -170,7 +170,7 @@
   function loadDeepy() {
     if (deepyData || deepyLoading || !window.fetch) return;
     deepyLoading = true;
-    window.fetch("data/deepy.json?v=20261117g")
+    window.fetch("data/deepy.json?v=20261117h")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         deepyData = d;
@@ -954,7 +954,7 @@
     var cached = readCachedRepos();
     if (cached) renderRepos(box, { repos: cached.repos });
 
-    window.fetch("data/repos.json?v=20261117g")
+    window.fetch("data/repos.json?v=20261117h")
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (store) {
         if (!store || !store.repos) {
@@ -1314,8 +1314,7 @@
 
     var dur1 = Math.max(150, Math.min(280, Math.round(len1 * 2.6)));
     var dur2 = Math.max(300, Math.min(520, Math.round((len - len1) * 0.62)));
-    var pause = 110;   /* 停在新编号上的那一瞬：让「选中」被看见 */
-    var total = dur1 + pause + dur2;
+    var total = dur1 + dur2;   /* 一条曲线走完，中间不留停顿 */
 
     var dash = len + " " + len;
 
@@ -1350,12 +1349,18 @@
       return 1 - Math.pow(1 - t, 3);
     }
 
-    /* 某一刻已经走过的长度：第一段走完在原地停 pause，再开始第二段 */
+    /* 某一刻已经走过的长度：整条路径一条 ease 走完，
+       从旧编号到新编号、再到内容区都不落地 —— 原先在新编号上
+       停 110ms 的那一瞬去掉了，光标一路滑过去 */
     function lenAt(t) {
-      if (t <= dur1) return len1 * ease(Math.min(1, t / dur1));
-      if (t <= dur1 + pause) return len1;
-      var p = Math.min(1, (t - dur1 - pause) / dur2);
-      return len1 + (len - len1) * ease(p);
+      var p = Math.min(1, Math.max(0, t / total));
+      return len * ease(p);
+    }
+
+    /* 光标走到新编号的时刻：用它决定内容什么时候换，
+       正好接上「线到哪儿、页面换到哪儿」 */
+    function easeInv(y) {
+      return 1 - Math.pow(1 - Math.max(0, Math.min(1, y)), 1 / 3);
     }
 
     var t0 = 0;
@@ -1400,7 +1405,7 @@
       }
     }
     pathRaf = window.requestAnimationFrame(follow);
-    return { lead: dur1 + pause, total: total };
+    return { lead: Math.round(total * easeInv(len1 / len)), total: total };
   }
 
   function goto(i, opts) {

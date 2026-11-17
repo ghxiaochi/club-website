@@ -7,13 +7,14 @@
    回来再蘸一次。
 
    为什么挂在右边：左下角是桌宠、右下角是校徽，四个角都
-   占着；一条 34px 宽的竖槽贴着右边缘，不压正文，任何页面
+   占着；一条竖槽离右边缘留 10px 缝浮着，不压正文，任何页面
    任何皮肤都在同一个位置。
 
-   移动端不显示这条槽（没有 hover，贴着右边缘还容易跟系统
-   的返回手势打架），直接给满墨 —— 手指划过去就有轨迹。
-   手指停下来、没有划也没有点的时候，计时一并停住：墨水是
-   用来画画的，不该在没人用的时候自己流干。
+   触屏（手机、平板、触摸本）同样显示这条槽，也默认没有墨：
+   手指点一下、或者从槽上划过去，才算蘸上，跟桌面一个规则。
+   触屏上没有 hover，所以槽本身会常挂一枚小牌子教怎么用。
+   计时只在手指真的在屏幕上动的时候走；手指一抬就停住 ——
+   墨水是用来画画的，不该在没人用的时候自己流干。
    ========================================================= */
 (function () {
   "use strict";
@@ -35,16 +36,24 @@
   var shownPct = -1;
   var shownSec = -1;
   var listening = [];
+  var peekTimer = 0;
 
   function now() { return Date.now(); }
 
-  function isHandset() {
+  /* 手指有没有落在槽上（含 10px 热区，触摸本来就没那么准） */
+  function inSlot(x, y) {
+    if (!el || !isFinite(x) || !isFinite(y)) return false;
+    var r = el.getBoundingClientRect();
+    return x >= r.left - 10 && x <= r.right + 10 &&
+           y >= r.top - 10 && y <= r.bottom + 10;
+  }
+
+  function isTouch() {
     var mq = window.matchMedia;
     if (!mq) return false;
-    /* 触屏一律按手机算：横过来的手机、平板都可能宽过 720，
-       只按宽度判会让墨槽贴到右侧、墨水还自己往下烧 */
-    if (mq("(hover: none) and (pointer: coarse)").matches) return true;
-    return mq("(max-width: 720px)").matches;
+    /* 只看输入方式，不看宽度：横过来的手机、平板、
+       触摸本都可能宽过 720，也不该让墨自己往下烧 */
+    return mq("(hover: none) and (pointer: coarse)").matches;
   }
 
   function readStore() {
@@ -96,6 +105,9 @@
       shownSec = sec;
       if (sec > 0) {
         tipEl.textContent = "墨水 " + sec + " 秒";
+      } else if (touchMode) {
+        /* 触屏没有 hover，牌子一直挂着，得直接说怎么蘸 */
+        tipEl.textContent = document.documentElement.clientWidth < 1180 ? "蘸墨" : "点一下蘸墨";
       } else {
         /* 跟 CSS 的断点对齐（clientWidth 不含滚动条，正好是媒体查询那份宽） */
         tipEl.textContent = document.documentElement.clientWidth < 1180 ? "蘸墨" : "划过蘸墨";
@@ -152,6 +164,16 @@
       el.classList.add("is-dip");
       window.setTimeout(function () { el.classList.remove("is-dip"); }, 620);
     }
+
+    /* 触屏没有 hover，蘸完把剩余秒数亮两秒，让人知道还剩多少 */
+    if (touchMode) {
+      el.classList.add("is-peek");
+      window.clearTimeout(peekTimer);
+      peekTimer = window.setTimeout(function () {
+        el.classList.remove("is-peek");
+        peekTimer = 0;
+      }, 2200);
+    }
     if (e && e.type === "pointerdown") {
       /* 点一下只是蘸墨，别把页面滚走 */
       if (e.preventDefault) e.preventDefault();
@@ -176,7 +198,7 @@
     el.type = "button";
     el.className = "ink-slot";
     el.setAttribute("data-ink-slot", "");
-    el.setAttribute("aria-label", "染色区：鼠标划过或点一下蘸墨，之后指针会留下彩色方块，墨水约 12 秒用完");
+    el.setAttribute("aria-label", "染色区：鼠标划过或手指点一下蘸墨，之后指针会留下彩色方块，墨水约 12 秒用完");
 
     tipEl = document.createElement("span");
     tipEl.className = "ink-slot__tip";
@@ -213,11 +235,12 @@
     el.addEventListener("pointerdown", charge);
     el.addEventListener("focus", charge);
 
-    /* 手机上没地方蘸墨：一进来就是满的，但先处于待机 ——
-       页面上没有人动手的时候，一滴墨都不该流走 */
-    touchMode = isHandset();
+    /* 不管鼠标还是手指，进来都是「没有墨」；
+       手机上没地方悬停，但槽就在那儿，点一下就能蘸 */
+    touchMode = isTouch();
+    document.documentElement.classList.toggle("is-touch", touchMode);
     lastAct = now() - IDLE_MS;
-    left = touchMode ? INK_MS : readStore();
+    left = readStore();
 
     shownPct = -1;
     render();
@@ -225,16 +248,17 @@
     return el;
   }
 
-  /* 横竖屏或窗口变化时重新判一次：切到触屏先给满，
-     切回桌面按剩下的墨继续烧。没换设备就什么都不动 ——
-     手机上地址栏一收也会发 resize，不能借这个把计时接上 */
+  /* 输入方式变了（接上鼠标 / 拔掉键盘）就重新判一次；
+     没变就什么都不动 —— 手机上地址栏一收也会发 resize，
+     不能借这个把计时接上 */
   function sync() {
-    var handset = isHandset();
-    if (handset === touchMode) return;
-    touchMode = handset;
-    if (handset) left = INK_MS;
+    var touch = isTouch();
+    if (touch === touchMode) return;
+    touchMode = touch;
+    document.documentElement.classList.toggle("is-touch", touchMode);
     lastAct = now() - IDLE_MS;
     shownPct = -1;
+    shownSec = -1;
     render();
     if (left > 0) burn();
   }
@@ -252,6 +276,8 @@
   }
 
   function boot() {
+    /* 触屏标记挂在 <html> 上，方便别处按输入方式调整（样式里用 .is-touch） */
+    document.documentElement.classList.toggle("is-touch", isTouch());
     build();
     sync();
   }
@@ -284,18 +310,14 @@
 
     lastAct = now();
 
-    /* 手机上没地方蘸墨：手指一落下就当重新蘸满，滑两下不会把墨用光；
-       一次手势拖得极久真把墨走干了，也悄悄续上 —— 手指还在屏幕上，
-       不该突然断线 */
-    var tap = e && (e.type === "pointerdown" || e.type === "touchstart") && left < INK_MS;
-    var dry = e && e.type === "touchmove" && left <= 0;
-    if (tap || dry) {
-      left = INK_MS;
-      shownPct = -1;
-      shownSec = -1;
-      render();
-      writeStore();
-      notify();
+    /* 手指从槽上划过去也算蘸墨。触摸不会给外来的 pointerenter，
+       只能自己拿坐标问一句 —— 没墨的时候才问，平时零开销 */
+    if (e && e.type === "touchmove" && left < INK_MS) {
+      var t = e.touches && e.touches[0];
+      if (t && inSlot(t.clientX, t.clientY)) {
+        charge();
+        return;
+      }
     }
     if (left > 0 && !raf) burn();
   }

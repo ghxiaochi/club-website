@@ -1,0 +1,73 @@
+/* =========================================================
+   触屏手感：只改粗指针设备，桌面一根像素都不动
+   ---------------------------------------------------------
+   桌面靠 hover 能表达的东西（悬停高亮、抬起、浮层），手指
+   都没有。这里只补最要紧的两件：
+
+   1. 可点目标。审计过 390 / 810 / 844 / 1080 四种触屏尺寸，
+      真正按不准的是三处 —— 卡片里的「复制」只有 23px 高、
+      画廊筛选 32px、首屏「天梯 →」33px。其余按钮高度都在
+      44px，宽度 38px 也够手指落点，不再放大，免得挤坏顶栏。
+   2. 触摸反馈。按下时轻微下沉 + 压暗一档，替代桌面 hover。
+
+   触摸滚动、惯性、双击缩放交给系统；`touch-action: manipulation`
+   只去掉 300ms 的二次点击判定，不拦滚动。
+   ========================================================= */
+
+@media (hover: none), (pointer: coarse) {
+  /* 卡片里的「复制 QQ / 邮箱」：38 × 23 */
+  .mini-button {
+    min-height: 36px;
+    padding: 7px 12px;
+  }
+
+  /* 画廊的分类筛选：50 × 32 */
+  .gallery-filter {
+    min-height: 38px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  /* 首屏的「天梯 →」入口：56 × 33 */
+  .dino-run__ladder {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 12px;
+  }
+
+  /* 成员卡里的「个人主页 ↗」：65 × 28 */
+  .member-home {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  /* 简介里那句被涂掉的话：168 × 30 */
+  .member-secret {
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  /* 手指点上去不用等 300ms 的二次点击判定 */
+  button,
+  a,
+  [role="button"],
+  .gallery-filter {
+    touch-action: manipulation;
+  }
+
+  /* 没有 hover，就用按下这一下给反馈 */
+  .mini-button:active,
+  .gallery-filter:active {
+    filter: brightness(0.94);
+  }
+}
+
+/* 关掉动效的机器上连按下位移都省掉，只留压暗 */
+@media (hover: none) and (prefers-reduced-motion: reduce) {
+  .mini-button:active,
+  .gallery-filter:active {
+    filter: brightness(0.94);
+    transform: none;
+  }
+}

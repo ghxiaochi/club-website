@@ -36,7 +36,7 @@
               box-shadow 0.26s ease;
 }
 
-.ink-slot:hover,
+html:not(.is-touch) .ink-slot:hover,
 .ink-slot:focus-visible {
   width: 42px;
   background: #fff;
@@ -101,7 +101,7 @@
 }
 
 /* 手放上去就停，别跟人抢注意力 */
-.ink-slot:hover .ink-slot__wells i,
+html:not(.is-touch) .ink-slot:hover .ink-slot__wells i,
 .ink-slot:focus-visible .ink-slot__wells i {
   animation: none;
 }
@@ -198,7 +198,7 @@
   animation: inkTipBreath 3s ease-in-out infinite;
 }
 
-.ink-slot:hover .ink-slot__tip,
+html:not(.is-touch) .ink-slot:hover .ink-slot__tip,
 .ink-slot:focus-visible .ink-slot__tip {
   opacity: 1;
   transform: translate(0, -50%);
@@ -243,7 +243,7 @@
 }
 
 /* 手一放上去就交给 CSS 静态高亮，别让动画盖住 hover 的样式 */
-.ink-slot:hover,
+html:not(.is-touch) .ink-slot:hover,
 .ink-slot:focus-visible {
   animation: none;
 }
@@ -306,7 +306,7 @@ html[data-theme="dark"] .ink-slot {
   color: #e2e8f0;
 }
 
-html[data-theme="dark"] .ink-slot:hover,
+html[data-theme="dark"]:not(.is-touch) .ink-slot:hover,
 html[data-theme="dark"] .ink-slot:focus-visible {
   background: rgba(15, 23, 42, 0.94);
   border-color: rgba(96, 165, 250, 0.4);
@@ -352,7 +352,7 @@ html[data-theme="dark"] .ink-slot:not(.is-armed) .ink-slot__wells i {
   opacity: 0.44;
 }
 
-html[data-theme="dark"] .ink-slot:hover .ink-slot__tip,
+html[data-theme="dark"]:not(.is-touch) .ink-slot:hover .ink-slot__tip,
 html[data-theme="dark"] .ink-slot:focus-visible .ink-slot__tip {
   background: #e2e8f0;
   border-color: transparent;
@@ -365,7 +365,7 @@ html[data-theme="dark"][data-style="term"] .ink-slot {
   background: #1b2433;
 }
 
-html[data-theme="dark"][data-style="term"] .ink-slot:hover,
+html[data-theme="dark"][data-style="term"]:not(.is-touch) .ink-slot:hover,
 html[data-theme="dark"][data-style="term"] .ink-slot:focus-visible {
   background: #171d26;
   border-color: #3f6cc4;
@@ -398,7 +398,7 @@ html[data-lite] .ink-slot {
     right: 6px;
     width: 32px;
   }
-  .ink-slot:hover,
+  html:not(.is-touch) .ink-slot:hover,
   .ink-slot:focus-visible {
     width: 38px;
   }
@@ -408,30 +408,62 @@ html[data-lite] .ink-slot {
   }
   .ink-slot:not(.is-armed):not(:hover):not(:focus-visible) .ink-slot__tip {
     writing-mode: vertical-rl;
-    padding: 8px 5px 8px 6px;
-    font-size: 11px;
-    letter-spacing: 0.12em;
+    padding: 7px 3px 7px 5px;
+    font-size: 10px;
+    letter-spacing: 0.1em;
     line-height: 1;
-    text-indent: 0.12em;
+    text-indent: 0.1em;
   }
   .ink-slot:not(.is-armed):not(:hover):not(:focus-visible) .ink-slot__tip::after {
     display: none;
   }
 }
 
-/* ---------------- 手机：没有 hover，也不该跟返回手势抢边缘 ---------------- */
-@media (max-width: 720px) {
+/* ---------------- 触屏：没有 hover，槽也留着 ----------------
+   手指点一下、或者从槽上划过去都能蘸墨，跟桌面一个规则；
+   可点区域给足 38px，离右边留 6px，不跟系统返回手势抢 */
+@media (hover: none) {
   .ink-slot {
-    display: none !important;
+    right: 6px;
+    width: 38px;
+    padding: 11px 0 10px;
+  }
+  .ink-slot__wells i {
+    width: 12px;
+    height: 12px;
   }
 }
 
-/* 平板、横屏手机也一并收掉：宽过 720 但同样没有 hover，
-   留着只会让人点了没反应 */
-@media (hover: none) {
-  .ink-slot {
-    display: none !important;
-  }
+/* 按下去给一下明暗：触屏没有 hover，不能一点反馈都没有 */
+.ink-slot:active {
+  background: #fff;
+  border-color: rgba(37, 99, 235, 0.42);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.2);
+}
+
+html[data-theme="dark"] .ink-slot:active {
+  background: rgba(30, 41, 59, 0.96);
+  border-color: rgba(96, 165, 250, 0.5);
+}
+
+/* 触屏蘸完那两秒：把剩余秒数亮出来，手指一抬也能看见 */
+.ink-slot.is-peek .ink-slot__tip {
+  opacity: 1;
+  transform: translate(0, -50%);
+  animation: none;
+  background: #0f172a;
+  color: #fff;
+  border-color: transparent;
+  box-shadow: none;
+  writing-mode: horizontal-tb;
+  padding: 6px 10px;
+  font-size: 12px;
+  letter-spacing: 0;
+}
+
+html[data-theme="dark"] .ink-slot.is-peek .ink-slot__tip {
+  background: #e2e8f0;
+  color: #0f172a;
 }
 
 /* 关掉动效的机器上轨迹本来就不建，墨槽也别留 */
