@@ -3,9 +3,12 @@
    ---------------------------------------------------------
    学 GitHub 首页那一层，但按时间而不是按网格：
      · 帧循环里每 STEP_MS 落一个方块：指针越快，两块间距越大；
-       指针停住也照样落，在原地冒出来（落点带一点随机散布）；
+       指针停住也照样落，落点在一圈半径里均匀撒开，还带一点
+       向外的漂移，所以看起来是"一把彩色纸屑撒出去"；
+     · 移动中只给垂直方向的小抖动，轨迹是一条有宽度的彩带；
      · 一次只落一个，不插值、不给邻居补光，方块就是干净的方块；
      · 屏幕上同时最多 MAX 个，超出的把最老的推入快消段；
+     · 每块的尺寸和寿命都带随机，不会整排一起消失；
      · 颜色从 6 个高饱和色里顺序取，相邻两块必然不同色；
      · 终端风与默认皮肤才建画布，轻量档与 reduced-motion 不建。
    ========================================================= */
@@ -14,13 +17,17 @@
 
   var STEP_MS = 15;      /* 落块间隔：间距 = 速度 × 这个值。60Hz 下约等于每帧一块 */
   var LIFE = 1.0;        /* 每块最多活 1 秒（没被顶掉的话） */
+  var LIFE_JITTER = 0.22;/* 寿命随机浮动：别让 15 块整齐地一起消失 */
   var FADE = 0.45;       /* 生命最后这一段开始淡出 */
   var MAX = 15;          /* 屏幕上同时存在的上限 */
   var KILL_FADE = 0.06;  /* 被顶掉时的剩余寿命：60ms 淡完，几乎看不出多出来的 */
-  var JITTER = 13;        /* 原地不动时的落点散布半径，免得全叠在同一个像素 */
+  var JITTER = 78;       /* 停住时的落点散布半径：方块像一把撒开的彩纸，不是一坨 */
+  var MOVE_JITTER = 15;  /* 移动中的横向抖动：轨迹是一条有宽度的带，不是一条线 */
+  var SPREAD = 42;       /* 停住时落点的外扩速度（px/s），云团会慢慢胀开 */
   var STILL_MS = 90;     /* 这么久没有新的指针事件就算"停住" */
   var SIZE = 15;         /* 方块边长（桌面） */
   var SIZE_SM = 13;      /* 手机屏窄，方块按比例收一点，不然一格占了 4% 宽 */
+  var SIZE_JITTER = 0.42;/* 单块尺寸浮动比例：有大有小，云才有层次 */
   var ALPHA = 0.95;
 
   /* 6 个色相彼此拉得开，按序取色，相邻两块不会同色。
@@ -31,7 +38,7 @@
 
   var trail = null;
   var bound = false;
-  var colorAt = 0;
+  var lastCi = -1;
 
   /* 指针的最后位置与「在不在页面上」。鼠标静止时浏览器不再发
      pointermove，所以生成不能挂在事件上，只能挂在帧循环里读这两个值 */
@@ -76,6 +83,7 @@
       w: 0,
       h: 0,
       size: SIZE,
+      jitter: JITTER,
       raf: 0,
       last: 0,
       stampAt: 0
@@ -94,6 +102,8 @@
     trail.w = w;
     trail.h = h;
     trail.size = w < 720 ? SIZE_SM : SIZE;
+    /* 手机屏窄，撒开的半径也收一档，不然一朵云占了三分之一屏宽 */
+    trail.jitter = w < 720 ? JITTER * 0.62 : JITTER;
     trail.cv.width = Math.round(w * dpr);
     trail.cv.height = Math.round(h * dpr);
     trail.cv.style.width = w + "px";
@@ -109,9 +119,10 @@
   function trim(t) {
     var over = t.cells.length - MAX;
     if (over <= 0) return;
-    var cut = LIFE - KILL_FADE;
     for (var i = 0; i < over; i += 1) {
-      if (t.cells[i].age < cut) t.cells[i].age = cut;
+      var c = t.cells[i];
+      var cut = c.life - KILL_FADE;
+      if (c.age < cut) c.age = cut;
     }
   }
 
@@ -124,22 +135,55 @@
   }
 
   function spawn(t) {
+    var still = performance.now() - lastMoveAt > STILL_MS;
     var x = px;
     var y = py;
-    /* 移动中落点就是指针本身，轨迹才准；停住了才散开，
-       否则 15 块全压在同一个像素上，只看到一块在闪色 */
-    if (performance.now() - lastMoveAt > STILL_MS) {
-      x += (Math.random() - 0.5) * JITTER * 2;
-      y += (Math.random() - 0.5) * JITTER * 2;
+    var vx = 0;
+    var vy = 0;
+
+    if (still) {
+      /* 停住：按极坐标均匀撒开（半径取开方，圆面上才均布，
+         否则全挤在圆心附近）。同时给一点向外的速度，
+         方块会从落点继续往外飘几十像素，云团是活的 */
+      var ang = Math.random() * Math.PI * 2;
+      var rad = Math.sqrt(Math.random()) * t.jitter;
+      x += Math.cos(ang) * rad;
+      y += Math.sin(ang) * rad;
+      var push = SPREAD * (0.35 + Math.random() * 0.9);
+      vx = Math.cos(ang) * push;
+      vy = Math.sin(ang) * push;
+    } else {
+      /* 移动中：只给垂直方向的小抖动，轨迹才是一条有宽度的彩带，
+         而不是一根用尺子画出来的直线。抖动幅度也随速度走一点，
+         快滑时块散得开，慢移时贴着线走 */
+      x += (Math.random() - 0.5) * MOVE_JITTER * 2;
+      y += (Math.random() - 0.5) * MOVE_JITTER * 2;
     }
+
+    /* 落在屏幕外半个方块很丑（手机贴边停住时尤其明显），
+       落点先夹回可视区，留一点边距 */
+    var pad = t.size;
+    if (x < pad) x = pad; else if (x > t.w - pad) x = t.w - pad;
+    if (y < pad) y = pad; else if (y > t.h - pad) y = t.h - pad;
+
+    var life = LIFE * (1 - LIFE_JITTER / 2 + Math.random() * LIFE_JITTER);
+
+    /* 取色不再严格轮换：轮换出来是一条规整的彩虹，太有规律。
+       随机取，只保证不跟上一块撞色，跳色才像撒纸屑 */
+    var ci = Math.floor(Math.random() * PALETTE.length);
+    if (ci === lastCi) ci = (ci + 1 + Math.floor(Math.random() * (PALETTE.length - 1))) % PALETTE.length;
+    lastCi = ci;
 
     t.cells.push({
       x: x,
       y: y,
+      vx: vx,
+      vy: vy,
       age: 0,
-      ci: colorAt % PALETTE.length
+      life: life,
+      size: t.size * (1 - SIZE_JITTER / 2 + Math.random() * SIZE_JITTER),
+      ci: ci
     });
-    colorAt += 1;
 
     trim(t);
   }
@@ -176,7 +220,7 @@
       var cell = t.cells[i];
       cell.age += dt;
 
-      if (cell.age >= LIFE) {
+      if (cell.age >= cell.life) {
         t.cells.splice(i, 1);
         continue;
       }
@@ -184,12 +228,19 @@
       alive += 1;
 
       /* 前 55% 生命保持实色，剩下的快速淡掉 */
-      var left = 1 - cell.age / LIFE;
+      var left = 1 - cell.age / cell.life;
       var a = (left >= FADE ? 1 : left / FADE) * ALPHA;
+
+      /* 带一点漂移：停住时方块从落点继续往外走，
+         看起来是"撒出去"而不是"钉在格子上" */
+      var cx = cell.x + cell.vx * cell.age;
+      var cy = cell.y + cell.vy * cell.age;
+      /* 消散时连尺寸一起收，比只降透明度更像"散掉" */
+      var s = cell.size * (0.68 + 0.32 * left);
 
       ctx.globalAlpha = a;
       ctx.fillStyle = palette[cell.ci];
-      ctx.fillRect(cell.x - t.size / 2, cell.y - t.size / 2, t.size, t.size);
+      ctx.fillRect(cx - s / 2, cy - s / 2, s, s);
     }
 
     ctx.globalAlpha = 1;
