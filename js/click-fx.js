@@ -108,7 +108,8 @@
     "pointerdown",
     (event) => {
       if (event.pointerType === "mouse" && event.button !== 0) return;
-      if (event.target && event.target.closest && event.target.closest("[data-theme-toggle]")) return;
+      /* 主题按钮和墨槽自己有反馈，别再叠一层水波 */
+      if (event.target && event.target.closest && event.target.closest("[data-theme-toggle], .ink-slot")) return;
       /* 切到轻量模式之后，模块已经建好 canvas 了，在这里挡一下 */
       if (liteOn()) return;
       add(event.clientX, event.clientY);

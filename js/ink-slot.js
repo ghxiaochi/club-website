@@ -15,8 +15,9 @@
    计时只在手指真的在屏幕上动的时候走；手指一抬就停住 ——
    墨水是用来画画的，不该在没人用的时候自己流干。
 
-   整块东西不带文字提示：空着的时候六格留着六色的淡影、
-   每 6 秒依次轻轻亮一下，边光慢慢呼吸，用状态本身说话。
+   整块东西不带文字提示，也不自己晃、不自己呼吸：空着的时候
+   六格留着六色的淡影，每 6 秒从第一格到第六格依次亮一遍再退回去，
+   全满后静止三秒多，用状态本身说话。
    ========================================================= */
 (function () {
   "use strict";
@@ -35,6 +36,8 @@
   var raf = 0;
   var lastTs = 0;
   var shownPct = -1;
+  var shownLit = -1;     /* 上一帧亮着几格：只在格数变化时动 DOM */
+  var shownArmed = null; /* 上一帧是否蘸着墨 */
   var listening = [];
 
   function now() { return Date.now(); }
@@ -81,13 +84,21 @@
     if (!el) return;
     var ratio = left > 0 ? Math.max(0, Math.min(1, left / INK_MS)) : 0;
 
-    el.classList.toggle("is-armed", ratio > 0);
+    var armed = ratio > 0;
+    if (armed !== shownArmed) {
+      shownArmed = armed;
+      el.classList.toggle("is-armed", armed);
+    }
 
     /* 六个槽对应六种颜色：亮着的槽数 = 还剩几成墨，
-       一眼就能看出「快没了」而不是只靠一条细进度 */
+       一眼就能看出「快没了」而不是只靠一条细进度。
+       一帧一帧地改 class 很浪费，格数没变就整段跳过 */
     var lit = Math.ceil(ratio * wells.length - 0.001);
-    for (var i = 0; i < wells.length; i += 1) {
-      wells[i].classList.toggle("is-lit", i < lit);
+    if (lit !== shownLit) {
+      shownLit = lit;
+      for (var i = 0; i < wells.length; i += 1) {
+        wells[i].classList.toggle("is-lit", i < lit);
+      }
     }
 
     /* 余量条只在百分比真的变了才写，避免每帧都动一次 DOM */
@@ -136,6 +147,7 @@
     left = INK_MS;
     lastAct = now();
     shownPct = -1;
+    shownLit = -1;
     render();
     writeStore();
     burn();
@@ -211,6 +223,7 @@
     left = readStore();
 
     shownPct = -1;
+    shownLit = -1;
     render();
     if (left > 0) burn();
     return el;
@@ -226,6 +239,7 @@
     document.documentElement.classList.toggle("is-touch", touchMode);
     lastAct = now() - IDLE_MS;
     shownPct = -1;
+    shownLit = -1;
     render();
     if (left > 0) burn();
   }

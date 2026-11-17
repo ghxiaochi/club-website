@@ -7,7 +7,7 @@
    ========================================================= */
 
 .ink-slot {
-  --ink-halo: 37, 99, 235;   /* 呼吸边光的颜色，深色主题会换 */
+  --ink-halo: 37, 99, 235;   /* 选中态边光的颜色，深色主题会换 */
   display: none;          /* 只有默认皮肤与终端风才露出来，见文件末尾 */
   position: fixed;
   right: 10px;            /* 离边缘留一道缝：贴死了会被当成滚动条 */
@@ -19,57 +19,62 @@
   width: 36px;
   margin: 0;
   padding: 12px 0 10px;
-  border: 1px solid rgba(15, 23, 42, 0.1);
+  /* 空态是一道很淡的蓝边：替代原来那圈呼吸光，静止也有轮廓 */
+  border: 1px solid rgba(var(--ink-halo), 0.22);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.88);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1),
-              0 2px 6px rgba(15, 23, 42, 0.06);
+  /* 不用 backdrop-filter：fixed 元素每滚一帧都要重新模糊背后的内容，
+     这是这条槽最贵的一笔；换成近不透明的纯色底，肉眼几乎看不出差别 */
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.07);
   color: #0f172a;
   cursor: pointer;
   transform: translateY(-50%);
   -webkit-tap-highlight-color: transparent;
-  transition: width 0.26s cubic-bezier(0.22, 0.8, 0.3, 1),
-              background 0.26s ease, border-color 0.26s ease,
-              box-shadow 0.26s ease;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: manipulation;   /* 去掉移动端那 300ms 的双击判定 */
+  contain: layout style;        /* 槽里的变化不外溢，也不让外面影响它 */
+  /* 只过渡合成属性：宽高变化会重排，抬起来用 scale 就够，且不吃布局 */
+  transition: transform 0.22s cubic-bezier(0.22, 0.8, 0.3, 1),
+              background 0.2s ease, border-color 0.2s ease,
+              box-shadow 0.22s ease;
 }
 
 html:not(.is-touch) .ink-slot:hover,
 .ink-slot:focus-visible {
-  width: 42px;
   background: #fff;
-  border-color: rgba(37, 99, 235, 0.28);
-  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.18),
-              0 2px 8px rgba(15, 23, 42, 0.08),
-              0 0 0 3px rgba(37, 99, 235, 0.06);
+  border-color: rgba(var(--ink-halo), 0.4);
+  box-shadow: 0 10px 26px rgba(var(--ink-halo), 0.16);
+  transform: translateY(-50%) scale(1.045);
   outline: none;
 }
 
 /* 蘸满的状态：边框与光晕都染上色，表示「现在能画」 */
 .ink-slot.is-armed {
-  border-color: rgba(37, 99, 235, 0.42);
-  box-shadow: 0 8px 26px rgba(37, 99, 235, 0.18),
-              inset 0 0 0 1px rgba(37, 99, 235, 0.06);
+  border-color: rgba(var(--ink-halo), 0.46);
+  box-shadow: 0 6px 20px rgba(var(--ink-halo), 0.15),
+              inset 0 0 0 1px rgba(var(--ink-halo), 0.05);
 }
 
 /* 六个墨槽 */
 .ink-slot__wells {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
   pointer-events: none;
 }
 
 .ink-slot__wells i {
   display: block;
-  width: 12px;
-  height: 12px;
-  border: 1px solid rgba(15, 23, 42, 0.16);
+  width: 13px;
+  height: 13px;
+  border: 1px solid rgba(15, 23, 42, 0.14);
   border-radius: 4px;
   background: transparent;
-  transition: background 0.2s ease, border-color 0.2s ease, opacity 0.24s ease,
-              transform 0.2s cubic-bezier(0.3, 1.5, 0.5, 1);
+  transition: background 0.18s ease, border-color 0.18s ease, opacity 0.2s ease,
+              transform 0.18s cubic-bezier(0.3, 1.4, 0.5, 1);
 }
 
 .ink-slot__wells i.is-lit {
@@ -78,38 +83,52 @@ html:not(.is-touch) .ink-slot:hover,
   transform: scale(1.04);
 }
 
-/* 空着的时候，六格也留着六种颜色的淡影：
-   一眼能看出「这里有六管彩色的墨」，而不是六个灰格子 */
+/* 用掉的那几格不是白框，是同色的淡影：
+   整条始终是六色，深浅就是余量 */
+.ink-slot.is-armed .ink-slot__wells i:not(.is-lit) {
+  background: var(--c);
+  border-color: transparent;
+  opacity: 0.2;
+}
+
+/* 空着的时候，六格留着六种颜色的淡影：一眼能看出
+   「这里有六管彩色的墨」，而不是六个灰格子 */
 .ink-slot:not(.is-armed) .ink-slot__wells i {
   border-color: transparent;
   background: var(--c);
-  opacity: 0.3;
-  animation: inkWell 6s ease-in-out infinite;
+  opacity: 0.34;
 }
 
-/* 六个格子依次轻轻一亮：比整块呼吸更像「这里有东西在动」 */
-.ink-slot:not(.is-armed) .ink-slot__wells i:nth-child(2) { animation-delay: 0.16s; }
-.ink-slot:not(.is-armed) .ink-slot__wells i:nth-child(3) { animation-delay: 0.32s; }
-.ink-slot:not(.is-armed) .ink-slot__wells i:nth-child(4) { animation-delay: 0.48s; }
-.ink-slot:not(.is-armed) .ink-slot__wells i:nth-child(5) { animation-delay: 0.64s; }
-.ink-slot:not(.is-armed) .ink-slot__wells i:nth-child(6) { animation-delay: 0.8s; }
+/* 每 6 秒走一趟「依次注满、再依次排空」：
+   一格接一格亮起来，全满后从第一格开始退回去，
+   方向明确、没有单格原地闪，剩下 3.7 秒完全静止 */
+.ink-slot:not(.is-armed) .ink-slot__wells i { animation: inkRun 6s linear infinite; }
+.ink-slot:not(.is-armed) .ink-slot__wells i:nth-child(2) { animation-delay: 0.14s; }
+.ink-slot:not(.is-armed) .ink-slot__wells i:nth-child(3) { animation-delay: 0.28s; }
+.ink-slot:not(.is-armed) .ink-slot__wells i:nth-child(4) { animation-delay: 0.42s; }
+.ink-slot:not(.is-armed) .ink-slot__wells i:nth-child(5) { animation-delay: 0.56s; }
+.ink-slot:not(.is-armed) .ink-slot__wells i:nth-child(6) { animation-delay: 0.7s; }
 
-@keyframes inkWell {
-  0%, 76%, 100% { opacity: var(--ink-rest, 0.3); transform: scale(1); }
-  84% { opacity: 1; transform: scale(1.13); }
+@keyframes inkRun {
+  0%   { opacity: var(--ink-rest, 0.3); }
+  3%   { opacity: 1; }
+  26%  { opacity: 1; }
+  30%  { opacity: var(--ink-rest, 0.3); }
+  100% { opacity: var(--ink-rest, 0.3); }
 }
 
-/* 手放上去就停，别跟人抢注意力 */
+/* 手放上去就按住：paused 保留当前相位，
+   移开接着走，不会从第一格重新闪一遍 */
 html:not(.is-touch) .ink-slot:hover .ink-slot__wells i,
 .ink-slot:focus-visible .ink-slot__wells i {
-  animation: none;
+  animation-play-state: paused;
 }
 
 /* 竖排的 INK 字样 */
 .ink-slot__label {
   writing-mode: vertical-rl;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
   line-height: 1;
   letter-spacing: 0.22em;
@@ -134,12 +153,22 @@ html:not(.is-touch) .ink-slot:hover .ink-slot__wells i,
 /* 余量条：从下往上收，比数字更直观 */
 .ink-slot__gauge {
   display: block;
-  width: 3px;
-  height: 26px;
+  width: 4px;
+  height: 0;
   border-radius: 2px;
-  background: rgba(15, 23, 42, 0.1);
+  /* 空态整根藏起来：免得空槽底下悬着一条灰线。
+     高度不动，所以蘸满时不会跳一下 */
+  background: rgba(15, 23, 42, 0.13);
   overflow: hidden;
   pointer-events: none;
+  opacity: 0;
+  transition: height 0.26s cubic-bezier(0.22, 0.8, 0.3, 1),
+              opacity 0.2s ease;
+}
+
+.ink-slot.is-armed .ink-slot__gauge {
+  height: 30px;
+  opacity: 1;
 }
 
 .ink-slot__gauge b {
@@ -152,54 +181,21 @@ html:not(.is-touch) .ink-slot:hover .ink-slot__wells i,
   transform-origin: 50% 100%;
 }
 
-/* 一直没人蘸，就自己轻轻晃两下、再慢慢呼吸：
-   不然这块东西太安静，没人知道能碰 */
-.ink-slot:not(.is-armed) {
-  animation: inkNudge 1.5s cubic-bezier(0.3, 0.7, 0.3, 1) 3.4s 2,
-             inkBreathe 3s ease-in-out 5.2s infinite;
-}
-
-@keyframes inkNudge {
-  0%, 100% { transform: translateY(-50%) translateX(0); }
-  35% { transform: translateY(-50%) translateX(-5px); }
-  65% { transform: translateY(-50%) translateX(0); }
-}
-
-/* 呼吸只动边光与描边：一动 transform 就跟上面的晃动作打架 */
-@keyframes inkBreathe {
-  0%, 100% {
-    border-color: rgba(var(--ink-halo), 0.18);
-    box-shadow: 0 6px 16px rgba(var(--ink-halo), 0.06),
-                0 2px 6px rgba(15, 23, 42, 0.05);
-  }
-  50% {
-    border-color: rgba(var(--ink-halo), 0.62);
-    box-shadow: 0 12px 32px rgba(var(--ink-halo), 0.3),
-                0 0 0 4px rgba(var(--ink-halo), 0.07);
-  }
-}
-
-/* 手一放上去就交给 CSS 静态高亮，别让动画盖住 hover 的样式 */
-html:not(.is-touch) .ink-slot:hover,
-.ink-slot:focus-visible {
-  animation: none;
-}
-
-/* 蘸下去那一下：一圈由内向外散开的色环 */
+/* 蘸下去那一下：贴着轮廓轻轻一胀，不甩出一圈大圆环 */
 .ink-slot.is-dip::after {
   content: "";
   position: absolute;
-  inset: -4px -4px -4px -4px;
-  border-radius: 18px;
-  border: 1px solid rgba(37, 99, 235, 0.5);
+  inset: -1px;
+  border-radius: 15px;
+  border: 1px solid rgba(var(--ink-halo), 0.5);
   opacity: 0;
   pointer-events: none;
-  animation: inkDip 0.6s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  animation: inkDip 0.55s cubic-bezier(0.2, 0.8, 0.3, 1) both;
 }
 
 @keyframes inkDip {
-  0% { opacity: 0.7; transform: scale(0.92); }
-  100% { opacity: 0; transform: scale(1.14); }
+  0% { opacity: 0.55; transform: scale(0.985); }
+  100% { opacity: 0; transform: scale(1.06); }
 }
 
 /* 墨水用完：整条槽退回灰白，别在地图边缘留一块亮色 */
@@ -209,6 +205,8 @@ html:not(.is-touch) .ink-slot:hover,
 
 /* ---------------- 终端风：方角、等宽、描边 ---------------- */
 html[data-style="term"] .ink-slot {
+  right: 6px;
+  width: 30px;
   border-radius: 0;
   border-color: #abc2ec;
   background: #fff;
@@ -217,8 +215,12 @@ html[data-style="term"] .ink-slot {
 
 html[data-style="term"] .ink-slot__wells i {
   border-radius: 0;
-  width: 13px;
-  height: 13px;
+  width: 11px;
+  height: 11px;
+}
+
+html[data-style="term"] .ink-slot__label {
+  font-size: 9px;
 }
 
 html[data-style="term"] .ink-slot__label {
@@ -232,17 +234,16 @@ html[data-style="term"] .ink-slot.is-dip::after {
 /* ---------------- 深色主题 ---------------- */
 html[data-theme="dark"] .ink-slot {
   --ink-halo: 96, 165, 250;
-  border-color: rgba(148, 163, 184, 0.3);
-  background: rgba(30, 41, 59, 0.86);
-  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.45),
-              0 2px 6px rgba(0, 0, 0, 0.3);
+  border-color: rgba(var(--ink-halo), 0.26);
+  background: rgba(30, 41, 59, 0.95);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.42);
   color: #e2e8f0;
 }
 
 html[data-theme="dark"]:not(.is-touch) .ink-slot:hover,
 html[data-theme="dark"] .ink-slot:focus-visible {
-  background: rgba(15, 23, 42, 0.94);
-  border-color: rgba(96, 165, 250, 0.4);
+  background: rgba(15, 23, 42, 0.97);
+  border-color: rgba(var(--ink-halo), 0.5);
 }
 
 html[data-theme="dark"] .ink-slot__wells i {
@@ -258,7 +259,11 @@ html[data-theme="dark"] .ink-slot.is-armed .ink-slot__label {
 }
 
 html[data-theme="dark"] .ink-slot__gauge {
-  background: rgba(148, 163, 184, 0.2);
+  background: rgba(148, 163, 184, 0.24);
+}
+
+html[data-theme="dark"] .ink-slot.is-armed .ink-slot__wells i:not(.is-lit) {
+  opacity: 0.26;
 }
 
 html[data-theme="dark"] .ink-slot:not(.is-armed) .ink-slot__label {
@@ -310,10 +315,6 @@ html[data-lite] .ink-slot {
     right: 6px;
     width: 32px;
   }
-  html:not(.is-touch) .ink-slot:hover,
-  .ink-slot:focus-visible {
-    width: 38px;
-  }
   .ink-slot__wells i {
     width: 11px;
     height: 11px;
@@ -324,27 +325,75 @@ html[data-lite] .ink-slot {
    手指点一下、或者从槽上划过去都能蘸墨，跟桌面一个规则；
    可点区域给足 38px，离右边留 6px，不跟系统返回手势抢 */
 @media (hover: none) {
-  .ink-slot {
-    right: 6px;
-    width: 38px;
-    padding: 11px 0 10px;
+  .ink-slot,
+  html[data-style="term"] .ink-slot {
+    right: 8px;
+    width: 36px;
+  }
+  /* 手指没那么准：真正能点的范围往外扩到 44px，
+     视觉宽度不动，也就不多占正文一条 */
+  .ink-slot::before {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    border-radius: inherit;
   }
   .ink-slot__wells i {
     width: 12px;
     height: 12px;
   }
+  /* 触屏没有 hover，按下去这一段就是全部反馈，给足一点 */
+  .ink-slot:active {
+    background: #fff;
+    border-color: rgba(var(--ink-halo), 0.46);
+    box-shadow: 0 6px 18px rgba(var(--ink-halo), 0.18);
+    transform: translateY(-50%) scale(0.965);
+  }
 }
 
-/* 按下去给一下明暗：触屏没有 hover，不能一点反馈都没有 */
-.ink-slot:active {
+/* 按下去给一下明暗 + 轻微内缩：触屏没有 hover，
+   不能一点反馈都没有 */
+.ink-slot:active,
+.ink-slot:hover:active {
   background: #fff;
-  border-color: rgba(37, 99, 235, 0.42);
-  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.2);
+  border-color: rgba(var(--ink-halo), 0.5);
+  box-shadow: 0 4px 14px rgba(var(--ink-halo), 0.16);
+  transform: translateY(-50%) scale(0.97);
 }
 
 html[data-theme="dark"] .ink-slot:active {
-  background: rgba(30, 41, 59, 0.96);
-  border-color: rgba(96, 165, 250, 0.5);
+  background: rgba(30, 41, 59, 0.98);
+  border-color: rgba(var(--ink-halo), 0.56);
+}
+
+/* 触屏窄屏：槽再收一档，390 的屏上少压住一行字；
+   可点范围仍由上面的 ::before 撑着，不会变难点 */
+@media (hover: none) and (max-width: 480px) {
+  .ink-slot,
+  html[data-style="term"] .ink-slot {
+    right: 8px;
+    width: 30px;
+    padding: 10px 0 9px;
+    gap: 7px;
+  }
+  /* 视觉收到 30px，可点范围往外补到 44px：
+     手指落点偏一点也能中，槽本身不用变胖 */
+  .ink-slot::before {
+    inset: -8px -9px;
+  }
+  .ink-slot__wells {
+    gap: 4px;
+  }
+  .ink-slot__wells i {
+    width: 11px;
+    height: 11px;
+  }
+  .ink-slot__label {
+    font-size: 9px;
+  }
+  .ink-slot.is-armed .ink-slot__gauge {
+    height: 24px;
+  }
 }
 
 /* 关掉动效的机器上轨迹本来就不建，墨槽也别留 */
