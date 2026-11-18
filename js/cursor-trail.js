@@ -53,6 +53,7 @@
   var py = 0;
   var onPage = false;
   var lastMoveAt = 0;
+  var lastTouchAt = 0;   /* 最近一次真手指事件：用来挡住滚动时的合成鼠标事件 */
 
   /* 指针速度：移动中的抖动幅度跟着它走（快滑时甩得更开），
      也用它算"垂直于运动方向"那根轴 */
@@ -113,7 +114,9 @@
     return trail;
   }
 
-  function resize() {
+  /* 真正按当前视口重设内部分辨率。改 width/height 会把画布擦干净，
+     但 cells 一个都不丢 —— 它们按视口坐标存着，下一帧照原样画回来 */
+  function applySize() {
     if (!trail) return;
     var dpr = Math.min(2, window.devicePixelRatio || 1);
     var w = window.innerWidth;
@@ -127,8 +130,31 @@
     trail.cv.style.width = w + "px";
     trail.cv.style.height = h + "px";
     trail.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    trail.cells.length = 0;
-    trail.ctx.clearRect(0, 0, w, h);
+    /* 尺寸一变画布就被擦干净了，立刻按原坐标补画一帧，
+       别让屏幕空一帧再等下一次 rAF */
+    paint();
+    if (trail.cells.length) wake();
+  }
+
+  var resizeTimer = 0;
+
+  function resize() {
+    if (!trail) return;
+    /* 第一次建画布：立刻量 */
+    if (!trail.w || !trail.h) { applySize(); return; }
+
+    /* 手机上一边滑一边滚，地址栏收起/展开会连着发 resize。
+       当场重设的话每一发都会擦一次画布，整屏墨迹跟着一闪一闪 ——
+       就是用户说的「断触」。压 180ms 防抖，等尺寸稳下来再重设一次；
+       这期间旧画布被 CSS 按 100% 拉一下，肉眼看不出来。
+       重设时也不清空 cells，所以哪怕真重设了，墨迹也在下一帧回来 */
+    if (resizeTimer) window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(function () {
+      resizeTimer = 0;
+      if (!trail) return;
+      if (Math.abs(window.innerWidth - trail.w) < 1 && Math.abs(window.innerHeight - trail.h) < 1) return;
+      applySize();
+    }, 180);
   }
 
   /* 指针压在 iframe（成员页那个播放器）上时，父页面收不到
@@ -226,15 +252,6 @@
       }
     }
 
-    var ctx = t.ctx;
-    var dark = document.documentElement.dataset.theme === "dark";
-    var palette = dark ? PALETTE_DARK : PALETTE;
-
-    ctx.clearRect(0, 0, t.w, t.h);
-    /* 一律普通叠加。加色（lighter）只要底下是白卡片就等于没画——
-       深色主题的页面里白卡片正是主体，所以不能用它 */
-    ctx.globalCompositeOperation = "source-over";
-
     var alive = 0;
     for (var i = t.cells.length - 1; i >= 0; i -= 1) {
       var cell = t.cells[i];
@@ -255,22 +272,9 @@
       }
 
       alive += 1;
-
-      /* 前 55% 生命保持实色，剩下的快速淡掉 */
-      var left = 1 - cell.age / cell.life;
-      var a = (left >= FADE ? 1 : left / FADE) * ALPHA;
-      if (cell.dying >= 0) a *= cell.dying / KILL_FADE;
-
-      /* 方块不漂移、不缩放：落点就是它这一辈子的位置，
-         消失只有一种方式——原地淡出 */
-      var s = cell.size;
-
-      ctx.globalAlpha = a;
-      ctx.fillStyle = palette[cell.ci];
-      ctx.fillRect(cell.x - s / 2, cell.y - s / 2, s, s);
     }
 
-    ctx.globalAlpha = 1;
+    paint();
 
     /* 指针还在页面上、而且还有墨，就一直转：停住时也要持续冒方块 */
     if (alive || (onPage && inkOn())) {
@@ -278,8 +282,42 @@
     } else {
       t.raf = 0;
       t.last = 0;
-      ctx.clearRect(0, 0, t.w, t.h);
+      t.ctx.clearRect(0, 0, t.w, t.h);
     }
+  }
+
+  /* 把当前这批方块照原样画一遍。抽出来是为了在重设画布尺寸
+     （canvas.width 一赋值就会擦干净）之后立刻补画，少一帧空白 */
+  function paint() {
+    var t = trail;
+    if (!t) return;
+    var ctx = t.ctx;
+    var dark = document.documentElement.dataset.theme === "dark";
+    var palette = dark ? PALETTE_DARK : PALETTE;
+
+    ctx.clearRect(0, 0, t.w, t.h);
+    /* 一律普通叠加。加色（lighter）只要底下是白卡片就等于没画——
+       深色主题的页面里白卡片正是主体，所以不能用它 */
+    ctx.globalCompositeOperation = "source-over";
+
+    for (var i = 0; i < t.cells.length; i += 1) {
+      var cell = t.cells[i];
+
+      /* 前 55% 生命保持实色，剩下的快速淡掉 */
+      var left = 1 - cell.age / cell.life;
+      var a = (left >= FADE ? 1 : left / FADE) * ALPHA;
+      if (cell.dying >= 0) a *= cell.dying / KILL_FADE;
+      if (a <= 0) continue;
+
+      /* 方块不漂移、不缩放：落点就是它这一辈子的位置，
+         消失只有一种方式——原地淡出 */
+      var s = cell.size;
+      ctx.globalAlpha = a;
+      ctx.fillStyle = palette[cell.ci];
+      ctx.fillRect(cell.x - s / 2, cell.y - s / 2, s, s);
+    }
+
+    ctx.globalAlpha = 1;
   }
 
   function wake() {
@@ -311,6 +349,9 @@
   function bind() {
     if (bound) return;
     bound = true;
+
+    /* touchcancel 的延迟收手定时器（滚动刚被接管时会误报 cancel） */
+    var cancelTimer = 0;
 
     /* 平滑后的指针速度，移动中的抖动幅度要用它 */
     function measure(x, y, now) {
@@ -355,6 +396,8 @@
       py = t.clientY;
       onPage = true;
       lastMoveAt = now;
+      lastTouchAt = now;
+      if (cancelTimer) { window.clearTimeout(cancelTimer); cancelTimer = 0; }
       measure(px, py, now);
       wake();
     }
@@ -362,15 +405,30 @@
     window.addEventListener("touchstart", trackTouch, { passive: true });
     window.addEventListener("touchmove", trackTouch, { passive: true });
 
-    /* 手指抬起、指针移出窗口：停手。方块按自己的寿命淡完，不再补新块 */
+    /* 手指抬起：停手。方块按自己的寿命淡完，不再补新块 */
     window.addEventListener("touchend", function (e) {
+      lastTouchAt = performance.now();
       if (!e.touches || !e.touches.length) onPage = false;
     }, { passive: true });
+
+    /* 有些机型在浏览器刚接管滚动手势时会补一个 touchcancel。
+       当场收手的话，边滑边滚的这段路就没有墨了（用户说的「断触」）。
+       等 180ms：这期间只要还有 touchmove 进来（说明手指还在滑），就照旧画 */
     window.addEventListener("touchcancel", function () {
-      onPage = false;
+      lastTouchAt = performance.now();
+      if (cancelTimer) window.clearTimeout(cancelTimer);
+      cancelTimer = window.setTimeout(function () {
+        cancelTimer = 0;
+        onPage = false;
+      }, 180);
     }, { passive: true });
 
-    document.addEventListener("mouseleave", function () {
+    document.addEventListener("mouseleave", function (e) {
+      /* 触屏滚动时浏览器会补发一串合成鼠标事件（mouseover/mouseout/mouseleave），
+         不能把它当成「指针离开页面」，否则滚动中轨迹会一阵一阵地断 */
+      var sc = e && e.sourceCapabilities;
+      if (sc && sc.firesTouchEvents) return;
+      if (performance.now() - lastTouchAt < 900) return;
       onPage = false;
     });
 

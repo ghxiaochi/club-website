@@ -1134,9 +1134,10 @@
   /* ---------------------------------------------------------
      板块切换：沿一条走线推进
      ---------------------------------------------------------
-     旧矩阵先退半步淡出，一条线从旧板块的小方点出发：沿栏边
-     走到新编号、拐进标题条、贴着标题条下沿横走，最后向下扎进
-     内容区；线走到三成时新矩阵从左往右被「打印」出来。
+     一条线直接从**新编号**上出发：跨出导航栏、拐进标题条、
+     贴着标题条下沿横走，最后向下扎进内容区；线跨出导航栏那一刻，
+     新矩阵开始从左往右被「打印」出来。旧编号不参与这条线，
+     换板块的落点始终是新标签本身。
      线条分三层叠着画 —— 9px 淡光晕、1.8px 主线、3px 彗尾 ——
      光标是 8px 方块，到终点会炸开一个小方框。
      --------------------------------------------------------- */
@@ -1257,16 +1258,16 @@
     return d + "L" + last[0] + " " + last[1];
   }
 
-  /* 量栏位，生成两段折线：旧编号 → 新编号、新编号 → 新内容区。
-     先在导航里走过去（告诉眼睛「换到这一栏了」），停一瞬，
-     再从新编号拐进标题条、扎进内容区。
-     返回 { lead, total }：lead 是第一段 + 停顿，调用方用它推迟内容切换，
-     这样「线到了新导航」和「新内容开始打印」是同一个瞬间 */
-  function playPath(fromIndex, toIndex, token) {
+  /* 量栏位，从**新编号本身**出发走一条线进新板块的内容区。
+     线不再从旧编号绕过来：换板块的落点一直是新标签，
+     所以起点直接放在新标签上（竖栏取右缘中点、横栏取底边中点），
+     一拍之内就跨出导航、拐进标题条、扎进内容区。
+     返回 { lead, total }：lead 是线跨出导航栏那一刻，
+     调用方用它安排新内容开始落位 —— 先看见「选中」，再看见「换页」 */
+  function playPath(toIndex, token) {
     if (!railEl || !stageEl || !root) return null;
-    var a = railEl.children[fromIndex];
     var b = railEl.children[toIndex];
-    if (!a || !b) return null;
+    if (!b) return null;
 
     ensurePathLayer();
     if (!pathSvg) return null;
@@ -1276,7 +1277,6 @@
     var pr = pathSvg.getBoundingClientRect();
     if (!pr.width || !pr.height) return null;
 
-    var ar = a.getBoundingClientRect();
     var br = b.getBoundingClientRect();
     var sr = stageEl.getBoundingClientRect();
     var hdr = stageEl.querySelector(".tty-stage__hdr");
@@ -1292,33 +1292,27 @@
     var gateX = Math.round(stageLeft + 14);
     var endX = Math.round(Math.min(stageRight - 32, stageLeft + sr.width * 0.5));
     var endY = Math.round(hdrBottom + 22);
-    var ptsA, ptsB;
+    var pts;
 
     if (verticalRail) {
-      /* 竖栏：两个编号在栏外缘的右侧点之间竖直走一段，
-         这一段就是「选中」本身，起点终点都贴着导航 */
-      var sx = Math.round(ar.right - pr.left - 6);
-      var sy = Math.round(ar.top + ar.height / 2 - pr.top);
-      var vx = Math.round(br.right - pr.left - 6);
-      var vy = Math.round(br.top + br.height / 2 - pr.top);
-      ptsA = [[sx, sy], [vx, vy]];
-      ptsB = [
-        [vx, vy],
-        [gateX, vy],
+      /* 竖栏：从新标签右缘中点出发 —— 这一点就贴在「选中的那一格」上，
+         往内容区左边缘走、沿边缘下到标题条、再横进去落到内容第一行 */
+      var sx = Math.round(br.right - pr.left - 6);
+      var sy = Math.round(br.top + br.height / 2 - pr.top);
+      pts = [
+        [sx, sy],
+        [gateX, sy],
         [gateX, Math.round(hdrBottom)],
         [endX, Math.round(hdrBottom)],
         [endX, endY]
       ];
     } else {
-      /* 横栏：先从旧标签下到栏底、横过去、再回到新标签内部；
-         第二段从新标签重新下到栏底，往右拐进内容区 */
-      var ax = Math.round(ar.left + ar.width / 2 - pr.left);
+      /* 横栏：线从新标签底边中点垂下去、贴着栏底横进内容区左边，
+         再下到标题条、横走一小段、最后落进内容第一行 */
       var nx = Math.round(br.left + br.width / 2 - pr.left);
       var railBottom = Math.round(railBox.bottom - pr.top + 2);
-      var aLow = Math.round(ar.bottom - pr.top - 8);
       var nLow = Math.round(br.bottom - pr.top - 8);
-      ptsA = [[ax, aLow], [ax, railBottom], [nx, railBottom], [nx, nLow]];
-      ptsB = [
+      pts = [
         [nx, nLow],
         [nx, railBottom],
         [gateX, railBottom],
@@ -1328,10 +1322,8 @@
       ];
     }
 
-    var dA = roundedPath(ptsA, 7);
-    var dB = roundedPath(ptsB, 7);
-    if (!dA || !dB) return null;
-    var d = dA + dB;
+    var d = roundedPath(pts, 7);
+    if (!d) return null;
 
     if (pathGlow) pathGlow.setAttribute("d", d);
     pathLine.setAttribute("d", d);
@@ -1339,18 +1331,24 @@
     pathSvg.classList.add("is-on");
     pathMark.classList.remove("is-hit");
 
-    /* 两段分别计时，得先单独量出第一段的长度 */
-    pathLine.setAttribute("d", dA);
-    var len1 = 0;
-    try { len1 = pathLine.getTotalLength(); } catch (e) { len1 = 0; }
-    pathLine.setAttribute("d", d);
     var len = 0;
     try { len = pathLine.getTotalLength(); } catch (e) { len = 0; }
-    if (!len || !len1) return null;
+    if (!len) return null;
 
-    var dur1 = Math.max(150, Math.min(280, Math.round(len1 * 2.6)));
-    var dur2 = Math.max(300, Math.min(520, Math.round((len - len1) * 0.62)));
-    var total = dur1 + dur2;   /* 一条曲线走完，中间不留停顿 */
+    /* 一条线走完，中途不落地：起步稍慢、收尾稍快 */
+    var total = Math.max(320, Math.min(540, Math.round(len * 0.62)));
+
+    /* 导航段有多长：从新标签出发、拐进内容区左边那一小截。
+       它决定「线什么时候算跨出导航、进到内容里」 */
+    var gateAt = verticalRail ? 1 : 2;
+    var dNav = roundedPath(pts.slice(0, gateAt + 1), 7);
+    var lenNav = 0;
+    if (dNav) {
+      pathLine.setAttribute("d", dNav);
+      try { lenNav = pathLine.getTotalLength(); } catch (e) { lenNav = 0; }
+      pathLine.setAttribute("d", d);
+    }
+    var leadLen = Math.min(len * 0.6, Math.max(26, lenNav || len * 0.28));
 
     var dash = len + " " + len;
 
@@ -1385,15 +1383,13 @@
       return 1 - Math.pow(1 - t, 3);
     }
 
-    /* 某一刻已经走过的长度：整条路径一条 ease 走完，
-       从旧编号到新编号、再到内容区都不落地 —— 原先在新编号上
-       停 110ms 的那一瞬去掉了，光标一路滑过去 */
+    /* 某一刻已经走过的长度：从新编号到内容区，一条 ease 走完不落地 */
     function lenAt(t) {
       var p = Math.min(1, Math.max(0, t / total));
       return len * ease(p);
     }
 
-    /* 光标走到新编号的时刻：用它决定内容什么时候换，
+    /* 线跨出导航栏的时刻：用它决定内容什么时候换，
        正好接上「线到哪儿、页面换到哪儿」 */
     function easeInv(y) {
       return 1 - Math.pow(1 - Math.max(0, Math.min(1, y)), 1 / 3);
@@ -1413,9 +1409,9 @@
       var pt = pathLine.getPointAtLength(at);
       pathDot.setAttribute("transform", "translate(" + (pt.x - 4) + "," + (pt.y - 4) + ")");
 
-      /* 光带只在第二段亮：第一段还在导航栏里，没什么可照的 */
+      /* 光带只在进了内容区才亮：还在导航栏那几像素里，没什么可照的 */
       if (pathBeam) {
-        var beamOn = at > len1 + 1 && t < total - 24;
+        var beamOn = at > leadLen + 1 && t < total - 24;
         pathBeam.style.opacity = beamOn ? "1" : "0";
         if (beamOn) pathBeam.setAttribute("x", String(Math.round(pt.x - 28)));
       }
@@ -1441,7 +1437,10 @@
       }
     }
     pathRaf = window.requestAnimationFrame(follow);
-    return { lead: Math.round(total * easeInv(len1 / len)), total: total };
+    /* lead 夹在 60–190ms：太短看不出「先选中」，太长又像卡了一下 */
+    var lead = Math.round(total * easeInv(leadLen / len));
+    lead = Math.max(60, Math.min(190, lead));
+    return { lead: lead, total: total };
   }
 
   function goto(i, opts) {
@@ -1460,7 +1459,6 @@
       return;
     }
 
-    var fromIndex = active;
     var from = grids[active];
     var to = grids[next];
 
@@ -1504,29 +1502,39 @@
       window.setTimeout(function () { railItem.classList.remove("is-flash"); }, 700);
     }
 
-    playPath(fromIndex, next, token);
+    var geo = playPath(next, token);
 
-    /* 旧的先退（0.14s 淡出），新方块紧跟着逐块浮起。
-       不做整块裁切：擦除边界会把两套卡片并排摆出来。
-       路径的第一段（旧编号 → 新编号）比这还快，所以「选中」和
-       「内容换掉」看着是先后脚，而不是同时抢眼 */
-    from.classList.add("is-out");
-    to.hidden = false;
-    stampDepth();
-    to.classList.add("is-fresh");
-    void to.offsetWidth;
+    /* 线先从新标签出发（这几十毫秒里旧内容还在），
+       等它跨出导航栏、进到内容区，新的方块再逐块打印出来 ——
+       「选中」和「换页」分成先后两拍，不会一起抢眼 */
+    var lead = geo ? geo.lead : 0;
 
-    swapTimer = window.setTimeout(function () {
+    function swapIn() {
       if (token !== swapToken) return;
-      from.hidden = true;
-      from.classList.remove("is-out");
-      to.classList.remove("is-fresh");
-      markSide(nearestTile(to));
-      updateOverflow();
-      swapTimer = 0;
-    }, 360);
+      from.classList.add("is-out");
+      to.hidden = false;
+      stampDepth();
+      to.classList.add("is-fresh");
+      void to.offsetWidth;
 
-    try { to.focus({ preventScroll: true }); } catch (e) { /* 忽略 */ }
+      swapTimer = window.setTimeout(function () {
+        if (token !== swapToken) return;
+        from.hidden = true;
+        from.classList.remove("is-out");
+        to.classList.remove("is-fresh");
+        markSide(nearestTile(to));
+        updateOverflow();
+        swapTimer = 0;
+      }, 360);
+
+      try { to.focus({ preventScroll: true }); } catch (e) { /* 忽略 */ }
+    }
+
+    if (lead) {
+      swapTimer = window.setTimeout(swapIn, lead);
+    } else {
+      swapIn();
+    }
   }
 
   function step(dir) {
