@@ -460,6 +460,48 @@
   }
 }
 
+/* ---------- 给墨槽让位 ----------
+   右边缘竖着排三样东西：墨槽（top: 50% 居中，高 156–168）、召唤按钮、
+   右下角校徽。召唤按钮原来的 top: 44% 正好整块压在墨槽身上，
+   墨槽 z-index 560 压过按钮的 36，看上去就是按钮右边被啃掉一截。
+   往下让一档：从墨槽下沿（半高 78–84）再留 12px 起，落在
+   墨槽与校徽之间。只改桌面，手机上它本来就在底部、不在这条线上 */
+@media (min-width: 901px) {
+  html[data-style="default"] .pet-summon,
+  html[data-style="term"] .pet-summon {
+    top: calc(50% + 96px);
+  }
+}
+
+/* 窗口压到 600 高以下，墨槽下沿离校徽只剩 80 来像素：
+   按钮收成图标（46×43）才塞得下，文字标签让位给墨槽 */
+@media (min-width: 901px) and (max-height: 600px) {
+  html[data-style="default"] .pet-summon,
+  html[data-style="term"] .pet-summon {
+    top: calc(50% + 92px);
+    min-width: 44px;
+    padding: 8px 9px;
+  }
+
+  html[data-style="default"] .pet-summon .pet-summon__label,
+  html[data-style="term"] .pet-summon .pet-summon__label {
+    display: none;
+  }
+}
+
+/* 横屏手机（高 500 以内）：墨槽居中就占掉 160 多，右侧一列塞不下三样。
+   装饰性的校徽先让位，按钮改到墨槽下方，不跟它抢那 40 来像素 */
+@media (max-width: 900px) and (max-height: 500px) {
+  .hnyz-pet {
+    display: none;
+  }
+
+  .pet-summon {
+    top: calc(50% + 100px);
+    bottom: auto;
+  }
+}
+
 /* 手机：桌面那颗校徽在 560 以下已经收掉了，按钮直接贴到底边，
    不然它会悬在正文中间，滚动时一直压着一行字 */
 @media (max-width: 560px) {
