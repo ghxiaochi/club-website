@@ -54,6 +54,9 @@
   var onPage = false;
   var lastMoveAt = 0;
   var lastTouchAt = 0;   /* 最近一次真手指事件：用来挡住滚动时的合成鼠标事件 */
+  var touchLive = false; /* 手指还在屏幕上（touchstart → touchend） */
+  var scrolled = false;  /* 这一次手势把页面滚动了 */
+  var lastTouchMoveAt = 0;
 
   /* 指针速度：移动中的抖动幅度跟着它走（快滑时甩得更开），
      也用它算"垂直于运动方向"那根轴 */
@@ -236,6 +239,10 @@
     var dt = t.last ? Math.min(0.05, (now - t.last) / 1000) : 0.016;
     t.last = now;
 
+    /* 竖划滚到尽头、或者滚动停了，手指还按着但位置已经推不出来：
+       这时不再补块，免得在边上堆成一坨 */
+    if (onPage && touchLive && scrolled && now - lastMoveAt > 220) onPage = false;
+
     /* 生成放在这里而不是 pointermove 里：鼠标停住时浏览器一个事件
        都不发，挂事件的写法等不到下一块 */
     if (onPage && now >= t.nextAt) {
@@ -343,6 +350,8 @@
     }
     trail.cells.length = 0;
     trail.last = 0;
+    touchLive = false;
+    scrolled = false;
     trail.ctx.clearRect(0, 0, trail.w, trail.h);
   }
 
@@ -388,6 +397,68 @@
     /* 触摸的独立通道：手机上浏览器一接管滚动手势就发 pointercancel，
        此后 pointermove 全停（实测一次 0.6 秒的滑动：pointermove 2 次、
        touchmove 31 次），只挂 pointermove 的话移动端等于没有轨迹 */
+    /* 每个滚动容器一个锚点：{ top: 记锚时的 scrollTop, py: 记锚时的手指 y }。
+       手指真给了坐标就以它为准；收不到坐标时，靠 scroll 增量从这个锚点推 */
+    var scrollSeen = new Map();
+
+    function topOf(el) {
+      if (!el || el === document || el === document.documentElement || el === document.body) {
+        return window.pageYOffset || 0;
+      }
+      return el.scrollTop || 0;
+    }
+
+    /* 手指按下的地方往上找：哪几个容器能滚，就给它们各记一个锚点 */
+    function rememberScroll(startEl) {
+      scrollSeen.clear();
+      scrollSeen.set(document.documentElement, { top: topOf(null), py: py });
+      var el = startEl;
+      while (el && el !== document.documentElement) {
+        if (el.scrollHeight > el.clientHeight + 1) {
+          scrollSeen.set(el, { top: el.scrollTop, py: py });
+        }
+        el = el.parentElement;
+      }
+    }
+
+    function anchorAt(pyNow) {
+      scrollSeen.forEach(function (rec, el) {
+        rec.top = topOf(el);
+        rec.py = pyNow;
+      });
+    }
+
+    /* 竖着划时页面跟着滚，iOS 会**停止派发 touchmove** ——
+       手指还在屏幕上走，我们却收不到新坐标，轨迹就只剩零星几块
+       （横着划不触发滚动，所以一直是好好的）。
+       滚动量和手指位移是 1:1 的：手指上滑 40px，内容也上移 40px。
+       收不到坐标时用「当前 scrollTop − 锚点 scrollTop」把 py 反推出来，
+       轨迹就能继续连成线；touchmove 正常时它永远是权威，这条只是替补 */
+    function onScroll(e) {
+      var el = (e.target === document) ? document.documentElement : e.target;
+      if (!el) return;
+      var rec = scrollSeen.get(el);
+      if (!rec) return;                       /* 没碰过的容器不管 */
+      var now = topOf(el);
+      if (now === rec.top) return;
+      var t = performance.now();
+
+      if (!touchLive || t - lastTouchMoveAt < 70) {
+        /* 坐标是新鲜的（或者手已抬起）：以 touchmove 为准，只把锚点挪过去 */
+        rec.top = now;
+        rec.py = py;
+        return;
+      }
+
+      /* 内容上移多少，手指就在屏幕上往下走了多少 */
+      py = rec.py - (now - rec.top);
+      scrolled = true;
+      lastMoveAt = t;
+      lastTouchAt = t;
+      onPage = true;
+      wake();
+    }
+
     function trackTouch(e) {
       var t = e.touches && e.touches[0];
       if (!t) return;
@@ -395,27 +466,41 @@
       px = t.clientX;
       py = t.clientY;
       onPage = true;
+      touchLive = true;
       lastMoveAt = now;
       lastTouchAt = now;
+      lastTouchMoveAt = now;
       if (cancelTimer) { window.clearTimeout(cancelTimer); cancelTimer = 0; }
+      if (e.type === "touchstart") {
+        scrolled = false;
+        rememberScroll(document.elementFromPoint(px, py));
+      } else {
+        /* 手指真给了新坐标，就以它为准，顺便把滚动锚点对齐 */
+        anchorAt(py);
+      }
       measure(px, py, now);
       wake();
     }
 
     window.addEventListener("touchstart", trackTouch, { passive: true });
     window.addEventListener("touchmove", trackTouch, { passive: true });
+    document.addEventListener("scroll", onScroll, { passive: true, capture: true });
 
     /* 手指抬起：停手。方块按自己的寿命淡完，不再补新块 */
     window.addEventListener("touchend", function (e) {
       lastTouchAt = performance.now();
-      if (!e.touches || !e.touches.length) onPage = false;
+      if (!e.touches || !e.touches.length) {
+        touchLive = false;
+        onPage = false;
+      }
     }, { passive: true });
 
     /* 有些机型在浏览器刚接管滚动手势时会补一个 touchcancel。
-       当场收手的话，边滑边滚的这段路就没有墨了（用户说的「断触」）。
-       等 180ms：这期间只要还有 touchmove 进来（说明手指还在滑），就照旧画 */
+       不当场收手：等 180ms，这期间只要还有 touchmove 进来（说明手指还在滑），
+       就照旧画 */
     window.addEventListener("touchcancel", function () {
       lastTouchAt = performance.now();
+      touchLive = false;
       if (cancelTimer) window.clearTimeout(cancelTimer);
       cancelTimer = window.setTimeout(function () {
         cancelTimer = 0;
