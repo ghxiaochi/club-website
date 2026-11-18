@@ -35,7 +35,7 @@ html[data-style="default"] {
   --text: #1d1d1f;
   --text-soft: #3a3a3c;
   --muted: #6e6e73;
-  --dim: #86868b;
+  --dim: #6b6b70;
 
   /* 系统蓝。深浅两档就是 Apple 按钮的常态 / 按下态 */
   --blue: #0071e3;
@@ -51,9 +51,9 @@ html[data-style="default"] {
   --orange: #bf4800;
   --red: #d70015;
 
-  --cyan: #0a84ff;
+  --cyan: #0a6fd8;
   --cyan-bright: #409cff;
-  --indigo: #5e5ce6;
+  --indigo: #4f4ddb;
   --violet: #af52de;
   --purple: #5e5ce6;
   --mint: #00a99d;

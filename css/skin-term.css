@@ -30,11 +30,11 @@ html[data-style="term"] {
   --t-text: #343945;
   --t-soft: #4d535f;
   --t-mut: #626978;
-  --t-dim: #6f7a8b;
+  --t-dim: #5d687a;
 
   --t-accent: #3f6cc4;
   --t-accent-2: #5e88cc;
-  --t-green: #4e9675;
+  --t-green: #3a7a5c;
   --t-green-2: #3f7f63;
   --t-yellow: #c08a3e;
   --t-mag: #9b86b8;
@@ -42,7 +42,7 @@ html[data-style="term"] {
 
   --t-rgb: 63, 108, 196;
   --t-accent-rgb: 63, 108, 196;
-  --t-green-rgb: 78, 150, 117;
+  --t-green-rgb: 58, 122, 92;
   --t-bg-rgb: 246, 243, 237;
   --t-panel2-rgb: 251, 250, 246;
 

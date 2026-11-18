@@ -150,6 +150,19 @@
     return tier === "1" || tier === "2";
   }
 
+  /* 省流量 / 2G 边缘网：这个播放器自己就要十兆，不该偷偷替人下。
+     这类设备直接走「点一下才加载」的那条路。 */
+  function isFrugalNet() {
+    const c = navigator.connection;
+    if (!c) return false;
+    if (c.saveData) return true;
+    return /(^|-)2g$/.test(c.effectiveType || "");
+  }
+
+  function gateEmbed() {
+    return isLiteTier() || isFrugalNet();
+  }
+
   function buildEmbed(item, index) {
     const section = document.createElement("section");
     section.className = "member-embed";
@@ -259,7 +272,7 @@
     iframe.setAttribute("allowfullscreen", "");
     iframe.setAttribute("referrerpolicy", "no-referrer");
 
-    if (isLiteTier()) {
+    if (gateEmbed()) {
       /* 轻量模式：封面 + 一颗按钮，点了才给 iframe 接上地址 */
       const gate = document.createElement("button");
       gate.type = "button";
@@ -280,7 +293,9 @@
 
       const gateHint = document.createElement("span");
       gateHint.className = "member-embed__gate-hint";
-      gateHint.textContent = "轻量模式不自动下载播放器";
+      gateHint.textContent = isLiteTier()
+        ? "轻量模式不自动下载播放器"
+        : "播放器有十兆，按需加载";
 
       gate.append(gateTitle, gateHint);
 
@@ -297,7 +312,49 @@
 
       viewport.appendChild(gate);
     } else {
-      iframe.src = item.src;
+      /* 正常档也不立刻挂 src。
+         这个 iframe 里是十二首歌和一堆手绘动画，光是它自己就要拉
+         两兆多的图，实测把 load 从 0.5s 拖到 3.6s，首屏的标题、
+         正文全在等它。改成先立一层封面，等页面自己 load 完、主线程
+         空下来再去下载；期间点封面可以催它。
+         轻量/极致档仍然走上面的 gate，点一下才下。 */
+      const boot = document.createElement("div");
+      boot.className = "member-embed__boot";
+
+      const bootDot = document.createElement("i");
+      bootDot.className = "member-embed__boot-dot";
+      bootDot.setAttribute("aria-hidden", "true");
+
+      const bootText = document.createElement("span");
+      bootText.className = "member-embed__boot-text";
+      bootText.textContent = "正在准备放映室…";
+      boot.append(bootDot, bootText);
+      viewport.appendChild(boot);
+
+      let armed = false;
+      const drop = () => {
+        /* iframe 的 load 只代表文档到了，播放器自己还要画一帧。
+           直接摘掉会先露一块浅色底再跳成画面，所以淡出一下再摘。 */
+        if (!boot.isConnected) return;
+        boot.classList.add("is-out");
+        window.setTimeout(() => boot.remove(), 320);
+      };
+      const fire = () => {
+        if (armed) return;
+        armed = true;
+        iframe.src = item.src;
+        iframe.addEventListener("load", () => window.setTimeout(drop, 160), { once: true });
+        /* 播放器自己很慢（十二段动画数据）时，别让人一直盯着"准备中" */
+        window.setTimeout(drop, 15000);
+      };
+
+      boot.addEventListener("click", fire, { once: true });
+
+      /* 页面 load 之后再等空闲：别和首屏的字体、脚本抢带宽 */
+      const idle = window.requestIdleCallback || ((fn) => window.setTimeout(fn, 240));
+      const afterLoad = () => idle(fire, { timeout: 1800 });
+      if (document.readyState === "complete") afterLoad();
+      else window.addEventListener("load", afterLoad, { once: true });
     }
 
     viewport.appendChild(iframe);

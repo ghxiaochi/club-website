@@ -23,19 +23,19 @@
   --tty-ink: #343945;
   --tty-soft: #4d535f;
   --tty-mut: #626978;
-  --tty-dim: #6f7a8b;
+  --tty-dim: #5d687a;
   --tty-line: #e2e6ee;
   --tty-line-2: #abc2ec;
   --tty-accent: #3f6cc4;
   --tty-accent-2: #5e88cc;
-  --tty-green: #4e9675;
+  --tty-green: #3a7a5c;
   --tty-yellow: #c08a3e;
   --tty-mag: #9b86b8;
   --tty-red: #c65d6b;
   --tty-sel: #d5def2;
   --tty-bar: #e9effb;
   --tty-rgb: 63, 108, 196;
-  --tty-green-rgb: 78, 150, 117;
+  --tty-green-rgb: 58, 122, 92;
 
   /* 三期栏的宽度：左栏放板块，右栏放方块索引 */
   --rail-w: 176px;
@@ -1929,5 +1929,25 @@ html[data-theme="dark"] .tty-deepy {
   .tty.is-on .tty-stack li,
   .tty.is-on .tty-repos .tty-ln {
     animation: none;
+  }
+}
+
+/* ---------------------------------------------------------
+   右缘墨槽让位（和 style.css 里 .container 的规则同一个理由）
+   ---------------------------------------------------------
+   终端风不用 .container，整页就是一张满铺的 .tty-grid，
+   窄屏时最后那一列方块会顶到视口右缘，正好被 fixed 的墨槽压住字。
+   放在文件末尾：上面的响应式规则都写的是 padding 简写，
+   顺序靠后这一条才能把它们重置过的右内边距再撑回来。
+   --------------------------------------------------------- */
+@media (max-width: 1340px) {
+  .tty-grid {
+    padding-right: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tty-grid {
+    padding-right: 34px;
   }
 }

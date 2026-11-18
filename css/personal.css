@@ -1295,6 +1295,12 @@ body.is-lightbox-open {
 }
 }
 
+/* 浅色主题里那行小字压在米白底上只有 4.18:1，差 0.3 才到 AA。
+   只把苹果风浅色的这一处压深半档，别的皮肤有各自的配色。 */
+html[data-style="default"][data-theme="light"] .gallery-filter {
+  color: #63636a;
+}
+
 
 .gallery-filter.is-active {
   border-color: var(--blue);
@@ -1658,4 +1664,11 @@ body.is-lightbox-open {
   border-left: 1px solid rgba(147, 197, 253, 0.28);
   color: rgba(219, 234, 254, 0.62);
   font-variant-numeric: tabular-nums;
+}
+
+/* 画廊入口的那两个小角标（11px）在米白底上 4.31:1，差 0.2 到 AA。
+   浅色主题用深一档的蓝，深色仍是原来的亮蓝。 */
+html[data-style="default"][data-theme="light"] .gallery-entry__index,
+html[data-style="default"][data-theme="light"] .gallery-entry__arrow {
+  color: #0066cc;
 }

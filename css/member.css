@@ -196,6 +196,63 @@
   background: #171313;
 }
 
+/* 正常档的等待层：深色底 + 一粒呼吸的点。点一下可以催它立刻加载。
+   它盖在 iframe 上面（z-index 2），load 完就摘掉。 */
+.member-embed__boot {
+  position: absolute;
+  top: 0; /* fallback: 旧内核 */
+  right: 0; /* fallback: 旧内核 */
+  bottom: 0; /* fallback: 旧内核 */
+  left: 0; /* fallback: 旧内核 */
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* 播放器比一屏还高（19.5:9 的画布），居中会落到折叠线以下，
+     人只看见一块黑。把提示放在容器上部三分之一处，首屏就能读到。 */
+  justify-content: flex-start;
+  padding-top: clamp(48px, 10vh, 140px);
+  gap: 14px;
+  background:
+    radial-gradient(120% 80% at 50% 0%, #241c1a 0%, #171313 62%);
+  cursor: pointer;
+}
+
+.member-embed__boot-dot {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #e7c66a;
+  box-shadow: 0 0 0 0 rgba(231, 198, 106, 0.5);
+  animation: memberBoot 1.6s ease-in-out infinite;
+}
+
+@keyframes memberBoot {
+  0%, 100% { opacity: 0.35; transform: scale(0.8); box-shadow: 0 0 0 0 rgba(231, 198, 106, 0.35); }
+  50% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 7px rgba(231, 198, 106, 0); }
+}
+
+.member-embed__boot.is-out {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.member-embed__boot-text {
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f4efe9;
+  font-size: 0.84rem;
+  letter-spacing: 0.02em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .member-embed__boot-dot { animation: none; opacity: 0.8; }
+}
+
 /* 轻量模式：先盖一层封面，点了才去下载那个 iframe */
 .member-embed__gate {
   position: absolute;
@@ -596,4 +653,10 @@
   .member-secret.is-open .member-secret__text {
     animation: none;
   }
+}
+
+/* 浅色主题里 "LIVE" 只有 3.97:1（9px 小字），压深半档到 AA 以上；
+   深色的亮绿本来够用，不动。 */
+html[data-style="default"][data-theme="light"] .member-embed__live {
+  color: #1f7a52;
 }

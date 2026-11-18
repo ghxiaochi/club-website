@@ -222,6 +222,22 @@ code {
   margin-inline: auto;
 }
 
+/* 右缘那支墨槽是 fixed 的 36px 竖条（手机 30px），视口一窄就正压在
+   正文最后几个字上：768 会把「把想法，写成代码。」压掉一截，1024 / 1280
+   会盖住列表项的尾巴。超过 1340 之后容器两侧空得出来，不用让。
+   只让右侧，左侧不动，视觉中心偏 7px，肉眼看不出来。 */
+@media (max-width: 1340px) {
+  .container {
+    padding-right: 20px;
+  }
+}
+
+@media (hover: none) and (max-width: 480px) {
+  .container {
+    padding-right: 28px;
+  }
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
