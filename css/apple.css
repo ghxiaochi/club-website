@@ -143,14 +143,35 @@ html[data-style="default"] .header-inner {
   min-height: 56px;
 }
 
-/* 导航文字：间距收一点，字重 400，hover 只变色不下划线 */
+/* 导航文字：间距收一点，字重 500，hover 只变色不下划线 */
 html[data-style="default"] .nav-list {
-  gap: 26px;
+  gap: 24px;
 }
 
-html[data-style="default"] .nav-list a {
-  font-size: 0.9375rem;
-  letter-spacing: 0;
+/* 原先这一行只改了字号（15px），字体还继承基座的 --mono：
+   等宽中文每个字被撑到同一宽度、笔画又细又硬，摆在苹果风的
+   圆角顶栏里像标签机打出来的。这里把字体一并换成正文同族的
+   系统无衬线，字号回落到基座的 13px 一档 —— 顶栏只有 56px 高，
+   导航不该比品牌副标题（12px）和按钮（13px）更抢眼 */
+html[data-style="default"] .nav-list a,
+html[data-style="default"] .nav-cta {
+  font-family: var(--sans);
+  font-size: var(--fs-caption);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* 抽屉里是竖排列表，13px 摆在大块留白里会显得又小又空，
+   手指按下去一行也只有 44px。这里单独回 15px，行高撑到 53 */
+@media (max-width: 900px) {
+  html[data-style="default"] .nav-list a {
+    font-size: var(--fs-small);
+    padding: 13px 0;
+  }
+
+  html[data-style="default"] .nav-cta {
+    font-size: var(--fs-small);
+  }
 }
 
 /* ---------- 3. 按钮：整块换回蓝白风 ---------- */
