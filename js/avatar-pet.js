@@ -306,6 +306,16 @@
     }
   }
 
+  /* 图片自带 HTML5 拖拽：按住头像一拖，浏览器先派发 dragstart，
+     接着把正在进行的 pointer 取消掉（pointercancel）。我们这边
+     endDrag 一跑就收手，桌宠只挪了最开始那十几像素，剩下的路
+     由浏览器拖着的「幽灵图」代替 —— 看上去就是「拖出来一个图标，
+     它自己原地不动」，而拖下面的铭牌（不是图片）反而正常。
+     这里把原生拖拽按掉，鼠标和手指都只走下面的 pointer 流程 */
+  trigger.addEventListener("dragstart", (event) => {
+    event.preventDefault();
+  });
+
   trigger.addEventListener("pointerdown", (event) => {
     if (state.rampage || state.dead) return;
     if (event.pointerType === "mouse" && event.button !== 0) return;
