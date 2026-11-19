@@ -359,6 +359,128 @@
       .caret { animation: none; }
       .cmd { transition: none; }
     }
+
+    /* ---------- GitHub 风 ----------
+       这一页不加载皮肤表，只靠这里的变量组切换；
+       终端窗口保留结构，但换成 GitHub 的灰底卡片与 6px 圆角。 */
+    html[data-style="github"] {
+      --bg: #ffffff;
+      --panel: #ffffff;
+      --shell: #f6f8fa;
+      --shell-edge: #d0d7de;
+      --shell-text: #1f2328;
+      --shell-dim: #656d76;
+      --accent: #0969da;
+      --ok: #1a7f37;
+      --warn: #9a6700;
+      --err: #cf222e;
+      --line: #d0d7de;
+      --ink: #1f2328;
+      --ink-soft: #656d76;
+      --shadow: 0 8px 24px rgba(140, 149, 159, 0.18);
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans",
+        "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Helvetica, Arial,
+        sans-serif;
+    }
+
+    html[data-style="github"][data-theme="dark"] {
+      --bg: #0d1117;
+      --panel: #0d1117;
+      --shell: #161b22;
+      --shell-edge: #30363d;
+      --shell-text: #e6edf3;
+      --shell-dim: #848d97;
+      --accent: #2f81f7;
+      --ok: #3fb950;
+      --warn: #d29922;
+      --err: #f85149;
+      --line: #30363d;
+      --ink: #e6edf3;
+      --ink-soft: #848d97;
+      --shadow: 0 8px 24px rgba(1, 4, 9, 0.5);
+    }
+
+    html[data-style="github"] body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+    }
+
+    html[data-style="github"] .term {
+      border-radius: 6px;
+      border-color: var(--line);
+    }
+
+    html[data-style="github"] .term__bar {
+      background: #f6f8fa;
+      border-bottom: 1px solid var(--line);
+    }
+
+    html[data-theme="dark"][data-style="github"] .term__bar {
+      background: #0d1117;
+    }
+
+    html[data-style="github"] .term__dot {
+      background: #d0d7de;
+    }
+
+    html[data-style="github"] .term__dot:nth-child(2),
+    html[data-style="github"] .term__dot:nth-child(3) {
+      background: #d0d7de;
+    }
+
+    html[data-style="github"] .term__title {
+      color: var(--shell-dim);
+    }
+
+    html[data-style="github"] .cmd {
+      border-radius: 6px;
+      border-color: rgba(31, 35, 40, 0.15);
+      background: #f6f8fa;
+      color: var(--ink);
+      font-family: var(--sans);
+      font-weight: 500;
+      box-shadow: 0 1px 0 rgba(31, 35, 40, 0.04);
+    }
+
+    html[data-style="github"] .cmd:hover,
+    html[data-style="github"] .cmd:focus-visible {
+      transform: none;
+      border-color: var(--line);
+      background: #ffffff;
+      box-shadow: 0 3px 6px rgba(140, 149, 159, 0.15);
+    }
+
+    html[data-theme="dark"][data-style="github"] .cmd,
+    html[data-theme="dark"][data-style="github"] .cmd:hover {
+      background: #21262d;
+      border-color: rgba(240, 246, 252, 0.1);
+      color: #e6edf3;
+    }
+
+    html[data-style="github"] .cmd.cmd--primary {
+      background: #1f883d;
+      border-color: rgba(31, 35, 40, 0.15);
+      color: #ffffff;
+    }
+
+    html[data-style="github"] .cmd.cmd--primary .sigil {
+      color: #ffffff;
+      opacity: 0.7;
+    }
+
+    html[data-style="github"] .cmd.cmd--primary:hover {
+      background: #1a7f37;
+    }
+
+    html[data-style="github"] .foot {
+      font-family: var(--sans);
+      color: var(--ink-soft);
+    }
+
+    html[data-style="github"] .foot a {
+      border-bottom: 1px solid currentColor;
+    }
   </style>
 </head>
 <body>
