@@ -4,15 +4,17 @@
    默认**一个方块都不落**：要先去右边那条「染色区」墨槽上蘸一次墨
    （见 js/ink-slot.js），墨水大约烧 12 秒，用完自动回到无轨迹状态。
    蘸上之后按「走够多远」落块，不按固定节拍：
-     · 移动中每走 14–22px 落一块（每块落定后重抽，节拍就散了）。
-       间距恒定大于方块边长，慢速时也不会两块叠成一对；
-       一帧最多落一块，不插值补点，跳得再快也不会连成一串；
+     · 移动中每走 7–13px 落一块（每块落定后重抽，节拍就散了）。
+       方块 12px 宽，相邻两块最多叠进去四成，轨迹是一串压着边的方块，
+       不是两点一组的「一对」——只要不是几乎完全重合，叠着反而更连贯；
+       一帧最多落一块，不插值补点，跳得再快也不会瞬移成对；
      · 移动中只沿轨迹法线做几像素的起伏，整条轨迹看得清；
        停住时换成 190ms 一块的慢节拍，只在原地小幅抖动，不扩散、不漂移；
      · 一次只落一个，不给邻居补光，方块就是干净的方块；
-     · 上限分两档：移动中 10 块、停住后 6 块；到顶时最老的块标记为
-       淡出，90ms 内从当前透明度收到 0，不硬删；
-     · 每块最长活 0.8 秒，消失只有一种方式——原地淡出，尺寸始终不变；
+     · 上限分两档：移动中 24 块、停住后 6 块。间距收紧后 10 块只够铺
+       一百多像素，中速就会断成几截，所以按「够铺满 0.8 秒的行程」重新定；
+       到顶时最老的块标记为淡出，90ms 内从当前透明度收到 0，不硬删；
+     · 每块最长活 1 秒，消失只有一种方式——原地淡出，尺寸始终不变；
      · 颜色取 GitHub Primer 的那六个亮色，随机取、不与上一块撞色；
      · 终端风与默认皮肤才建画布，轻量档与 reduced-motion 不建；
      · 没有墨水时不生成，画布空转一帧就停。
@@ -22,14 +24,16 @@
 
   var STEP_STILL = 190;  /* 停住时的落块间隔：慢半拍，不然一堆方块在原地不停闪 */
   var STEP_JITTER = 0.3; /* 间隔也带随机，别像节拍器一样一下一下 */
-  /* 移动中的落块间距（px）：上一版是固定 45ms 一块，慢速时 45ms 才走 5px，
-     方块 12px 宽，两块必然叠成一对。改成走够距离才落，间距永远比方块宽 */
-  var GAP_MIN = 14;
-  var GAP_MAX = 22;
-  var LIFE = 0.8;        /* 每块活 0.8 秒 */
-  var LIFE_JITTER = 0.16;/* 寿命随机浮动：6 块不会整齐地一起消失 */
+  /* 移动中的落块间距（px）：方块 12px 宽，7–13px 的间距让相邻两块
+     叠进去 0–5px（最多四成边长），轨迹是一串压着边的方块。
+     上一版是固定 45ms 一块，慢速时 45ms 才走 5px，两块几乎完全重合，
+     才成了「一对」；这里叠是叠，但不叠到认不出是两块 */
+  var GAP_MIN = 7;
+  var GAP_MAX = 13;
+  var LIFE = 1;          /* 每块活 1 秒：慢速时轨迹才有两三个方块长，不然只剩一个点 */
+  var LIFE_JITTER = 0.16;/* 寿命随机浮动：几块不会整齐地一起消失 */
   var FADE = 0.45;       /* 生命最后这一段开始淡出 */
-  var MAX_MOVE = 10;     /* 移动时的上限：点多一点，轨迹才连得起来 */
+  var MAX_MOVE = 60;     /* 移动时的上限：7.5px 一块，60 块刚好铺满 450px，与上一版的拖尾长度相当 */
   var MAX_STILL = 6;     /* 停住时的上限：原地不堆 */
   var KILL_FADE = 0.09;  /* 被顶掉时的淡出时长：不硬删，90ms 内从当前透明度收到 0 */
   var JITTER = 12;       /* 停住时的原地抖动半径：让 6 块略微错开，不至于严丝合缝叠成一块 */
@@ -175,10 +179,12 @@
     return !!el && el.tagName === "IFRAME";
   }
 
-  function spawn(t) {
-    var still = performance.now() - lastMoveAt > STILL_MS;
-    var x = px;
-    var y = py;
+  /* atX / atY：这一块落哪儿。移动中一帧可能要补两三块，就把这一帧的
+     位移均分给他们，各落一分点；不传就用指针当前位置（停住的慢节拍） */
+  function spawn(t, atX, atY) {
+    var still = atX === undefined && performance.now() - lastMoveAt > STILL_MS;
+    var x = atX === undefined ? px : atX;
+    var y = atY === undefined ? py : atY;
 
     if (still) {
       /* 停住就只在原地小幅抖一下：不扩散、不往外飘，
@@ -206,6 +212,22 @@
     var pad = t.size;
     if (x < pad) x = pad; else if (x > t.w - pad) x = t.w - pad;
     if (y < pad) y = pad; else if (y > t.h - pad) y = t.h - pad;
+
+    /* 移动中补点：若这一分点正好压在上一块身上（起步时前一帧是停手状态，
+       那块抖到了指针旁边），就跳过不落，锚点照样往前推，下一帧接着走 */
+    if (!still) {
+      var near = t.cells[t.cells.length - 1];
+      if (near) {
+        var nx = x - near.x;
+        var ny = y - near.y;
+        var md = t.size * 0.58;
+        if (nx * nx + ny * ny < md * md) {
+          t.lastX = atX;
+          t.lastY = atY;
+          return;
+        }
+      }
+    }
 
     var life = LIFE * (1 - LIFE_JITTER / 2 + Math.random() * LIFE_JITTER);
 
@@ -239,8 +261,8 @@
     });
 
     /* 记下这一块的位置，下一块得从这儿再走出去 nextGap 才落 */
-    t.lastX = px;
-    t.lastY = py;
+    t.lastX = atX === undefined ? px : atX;
+    t.lastY = atY === undefined ? py : atY;
     t.nextGap = GAP_MIN + Math.random() * (GAP_MAX - GAP_MIN);
   }
 
@@ -248,7 +270,19 @@
   function farEnough(t) {
     var dx = px - t.lastX;
     var dy = py - t.lastY;
-    return dx * dx + dy * dy >= t.nextGap * t.nextGap;
+    if (dx * dx + dy * dy < t.nextGap * t.nextGap) return false;
+
+    /* 再躲开最近落下的那一块：停手时那块是在指针附近抖出来的，
+       起步第一块正好压在它身上就又成了一对。重叠允许，但中心距至少
+       留 0.58 个边长，最多叠进去四成 */
+    var last = t.cells[t.cells.length - 1];
+    if (last) {
+      var ex = px - last.x;
+      var ey = py - last.y;
+      var min = t.size * 0.58;
+      if (ex * ex + ey * ey < min * min) return false;
+    }
+    return true;
   }
 
   function frame(now) {
@@ -275,10 +309,24 @@
         } else if (!inkOn()) {
           /* 没墨：什么都不落。等用户去右边蘸一口，下一次指针事件会把它叫醒 */
           t.nextAt = now + 400;
-        } else {
+        } else if (still) {
           spawn(t);
-          /* 停住才排下一拍；移动中不排，走够距离下一帧就落 */
-          t.nextAt = still ? now + STEP_STILL * (1 - STEP_JITTER / 2 + Math.random() * STEP_JITTER) : now;
+          t.nextAt = now + STEP_STILL * (1 - STEP_JITTER / 2 + Math.random() * STEP_JITTER);
+        } else {
+          /* 移动中：这一帧走了多远，就按 7.5px 一块均分补上，
+             最多三块。只落一块的话间距被帧位移锁死（900px/s 时每帧 15px），
+             方块之间永远留缝，也就谈不上连成一条带 */
+          var x0 = t.lastX;
+          var y0 = t.lastY;
+          var dx = px - x0;
+          var dy = py - y0;
+          var d = Math.sqrt(dx * dx + dy * dy);
+          var n = d > 12 ? Math.min(3, Math.round(d / 7.5)) : 1;
+
+          for (var j = 1; j <= n; j += 1) {
+            spawn(t, x0 + dx * j / n, y0 + dy * j / n);
+          }
+          t.nextAt = now;
         }
       }
     }
