@@ -14,12 +14,11 @@
 (function () {
   "use strict";
 
-  var V = "?v=20261120a";
+  var V = "?v=20261119a";
 
   var SKINS = {
     term: ["css/skin-term.css", "css/term-tui.css"],
-    halo: ["css/skin-halo.css"],
-    github: ["css/skin-github.css"]
+    halo: ["css/skin-halo.css"]
   };
 
   function loadedOf(href) {
@@ -77,7 +76,6 @@
       if (document.documentElement.dataset.lite === "2" || lite === "2") return "term";
       var v = window.localStorage.getItem("hnyz:style");
       if (v === "halo") return "halo";
-      if (v === "github") return "github";
       if (v === "term") return "term";
       if (!v) return "term";
       if (v === "default" && !window.localStorage.getItem("hnyz:home-term")) return "term";

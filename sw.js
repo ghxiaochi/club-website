@@ -34,7 +34,7 @@
    发版时改 VERSION，更老的缓存在 activate 里被清掉。
    ========================================================= */
 
-const VERSION = "20261120a";
+const VERSION = "20261119a";
 const CACHE = `hnyz-v${VERSION}`;
 
 /* 站内根路径：用 "./" 就地解析，
@@ -137,7 +137,6 @@ const CORE = [
 const EXTRA = [
   /* 皮肤与按需脚本：不切这套皮肤就不下载 */
   `./css/skin-halo.css${V}`,
-  `./css/skin-github.css${V}`,
   `./css/skin-term.css${V}`,
   `./css/term-tui.css${V}`,
   `./js/term-tui.js${V}`,
@@ -206,7 +205,7 @@ function isCacheName(name) {
   return name.startsWith("hnyz-v");
 }
 
-/* 从缓存名里取版本号：hnyz-v20261120a → 20261120a */
+/* 从缓存名里取版本号：hnyz-v20261119a → 20261119a */
 function versionOf(name) {
   return name.replace(/^hnyz-v/, "");
 }

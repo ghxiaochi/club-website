@@ -20,13 +20,12 @@
   /* 主页改成终端前存过 "default" 的人，第一次进来跟新访客一样落到终端；
      落过一次就不再管，之后主动选蓝白会正常记住。 */
   const HOME_KEY = "hnyz:home-term";
-  const STYLES = ["term", "default", "hacker", "halo", "github", "bare"];
+  const STYLES = ["term", "default", "hacker", "halo", "bare"];
   const LABELS = {
     term: "TERM",
     default: "DEFAULT",
     hacker: "HACKER",
     halo: "HALO",
-    github: "GITHUB",
     bare: "BARE"
   };
   const NAMES = {
@@ -34,7 +33,6 @@
     default: "蓝白科技",
     hacker: "黑客终端",
     halo: "光场",
-    github: "GitHub 风",
     bare: "棍木"
   };
 
@@ -207,27 +205,8 @@
           <button class="style-card__apply" type="button" data-style-pick="halo">应用此风格</button>
         </article>
 
-        <article class="style-card" data-style-option="github">
-          <div class="style-card__top"><span>05 / GITHUB</span><span class="style-card__current">当前风格</span></div>
-          <div class="style-card__glyph style-card__glyph--github" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
-              <circle cx="7" cy="6" r="2.2"></circle>
-              <circle cx="7" cy="18" r="2.2"></circle>
-              <circle cx="17" cy="9" r="2.2"></circle>
-              <path d="M7 8.2v7.6M7 15.4c0-3 2.6-4.5 7.4-6.4"></path>
-            </svg>
-          </div>
-          <p class="style-card__kicker">PRIMER // CODE_HOST</p>
-          <h3 class="style-card__title">GitHub 风</h3>
-          <p class="style-card__desc">按 GitHub 自己的界面重做的一套：浅灰顶栏、1px 边框、6px 圆角、仓库卡与话题标签，深色是 GitHub 的深夜灰。</p>
-          <div class="style-card__swatches" aria-hidden="true">
-            <i style="--c:#ffffff"></i><i style="--c:#0969da"></i><i style="--c:#1f883d"></i>
-          </div>
-          <button class="style-card__apply" type="button" data-style-pick="github">应用此风格</button>
-        </article>
-
         <article class="style-card" data-style-option="bare">
-          <div class="style-card__top"><span>06 / BARE</span><span class="style-card__current">当前风格</span></div>
+          <div class="style-card__top"><span>05 / BARE</span><span class="style-card__current">当前风格</span></div>
           <div class="style-card__glyph style-card__glyph--bare" aria-hidden="true"><span></span></div>
           <p class="style-card__kicker">NOTHING_HERE</p>
           <h3 class="style-card__title">棍木</h3>
@@ -243,8 +222,7 @@
         <button class="style-deck__dot" type="button" data-style-dot="1" aria-label="第 2 个：蓝白科技"></button>
         <button class="style-deck__dot" type="button" data-style-dot="2" aria-label="第 3 个：黑客终端"></button>
         <button class="style-deck__dot" type="button" data-style-dot="3" aria-label="第 4 个：光场"></button>
-        <button class="style-deck__dot" type="button" data-style-dot="4" aria-label="第 5 个：GitHub 风"></button>
-        <button class="style-deck__dot" type="button" data-style-dot="5" aria-label="第 6 个：棍木"></button>
+        <button class="style-deck__dot" type="button" data-style-dot="4" aria-label="第 5 个：棍木"></button>
       </div>
 
       <p class="style-deck__hint">上下滑动 / ↑ ↓ 切换 · Esc 关闭</p>
